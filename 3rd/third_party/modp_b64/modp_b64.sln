@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "modp_b64", "modp_b64.vcproj", "{7100F41F-868D-4E99-80A2-AF8E6574749D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|x64 = Release|x64
+		Purify|Win32 = Purify|Win32
+		Purify|x64 = Purify|x64
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Debug|Win32.Build.0 = Debug|Win32
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Release|x64.ActiveCfg = Release|x64
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Release|x64.Build.0 = Release|x64
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Purify|Win32.ActiveCfg = Purify|Win32
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Purify|Win32.Build.0 = Purify|Win32
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Purify|x64.ActiveCfg = Purify|x64
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Purify|x64.Build.0 = Purify|x64
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Debug|x64.ActiveCfg = Debug|x64
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Debug|x64.Build.0 = Debug|x64
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Release|Win32.ActiveCfg = Release|Win32
+		{7100F41F-868D-4E99-80A2-AF8E6574749D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,224 @@
+#include "mem_storage_impl.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "linuxlist.h"
+
+#define mcached_is_allocated(__object) ((__object)->options.is_allocated)
+MemStorageEngineImpl::MemStorageEngineImpl(){
+
+}
+
+MemStorageEngineImpl::~MemStorageEngineImpl(){
+
+}
+
+bool MemStorageEngineImpl::Connections(std::list<ConnAddr>& addrlist){
+	
+    memcached_server_st *servers = NULL;
+    memcached_return rc;
+    struct list_head *node;
+    ConnAddr addr;
+    cache_ = memcached_create(NULL);
+    
+    if(cache_==NULL||!mcached_is_allocated(cache_))
+        return false;
+
+    memcached_behavior_set(cache_,MEMCACHED_BEHAVIOR_BINARY_PROTOCOL,1);
+   
+    std::list<ConnAddr>::iterator it = addrlist.begin();
+    while(it!=addrlist.end()){
+    	addr = (*it);
+    	servers = memcached_server_list_append(servers,addr.host().c_str(),addr.port(),&rc);
+    	++it;
+    }
+    /*list_for_each(node,addrlist) {
+        addr = list_entry(node,const connaddr_t,link);
+         servers = memcached_server_list_append(servers,addr->ip.c_str(),
+                      addr->port,&rc);
+    }*/ 
+
+    rc = memcached_server_push(cache_,servers);
+    if(memcached_failed(rc)){
+        memcached_server_free(servers);
+        return false;
+    }
+
+    memcached_server_free(servers);
+     return true;
+}
+
+bool MemStorageEngineImpl::Release(){
+    memcached_reset((memcached_st*)cache_);
+    memcached_free((memcached_st*)cache_);
+}
+
+bool MemStorageEngineImpl::SetValue(const char* key,const size_t key_len,
+				const char* val,const size_t val_len,struct BaseStorage* base){
+
+    memcached_return_t rc;
+    rc = memcached_set((memcached_st*)cache_,key,key_len,val,val_len,0,0);
+    if(memcached_success(rc))
+        return true;
+    return false;
+}
+
+bool MemStorageEngineImpl::AddValue(const char* key,const size_t key_len,
+				const char* val,const size_t val_len,struct BaseStorage* base){
+
+    memcached_return_t rc;
+    rc = memcached_add((memcached_st*)cache_,key,key_len,val,val_len,0,0);
+    if(memcached_success(rc))
+    	return true;
+    return false;
+}
+
+bool MemStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,
+					const char* val,const size_t val_len,struct BaseStorage* base){
+    memcached_return_t rc;
+    rc = memcached_replace((memcached_st*)cache_,key,key_len,
+				val,val_len,0,0);
+    if(memcached_success(rc))
+	return true;
+    return false;
+}
+
+bool MemStorageEngineImpl::GetValue(const char* key,const size_t key_len,
+				     char**val,size_t* val_len,struct BaseStorage** base){
+    memcached_return_t rc;
+    uint32_t flags = 0;
+    char* val_ = NULL;
+    val_ = memcached_get((memcached_st*) cache_, key, key_len, val_len, &flags, &rc);
+    if(rc==MEMCACHED_END)
+	return false;
+    else if(memcached_failed(rc))
+        return rc;
+   *val = val_;
+    return true;
+}
+
+bool MemStorageEngineImpl::DelValue(const char* key,const size_t key_len){
+
+    memcached_return_t rc;
+    rc = memcached_delete ((memcached_st*)cache_,key,key_len,0);
+    if(memcached_success(rc))
+        return true;
+    return false;
+}
+
+bool MemStorageEngineImpl::MGetValue(const char* const * key_array,
+		const size_t* key_len_array,size_t element_count){
+
+    memcached_return_t rc;
+    rc = memcached_mget((memcached_st*)cache_,key_array,key_len_array,
+			element_count);
+    if(rc==MEMCACHED_END)
+	return false;
+    else if(memcached_failed(rc))
+	return false;
+    return true;
+}
+
+bool MemStorageEngineImpl::FetchValue(const char* key,size_t *key_len,char** value,size_t *val_len){
+   
+    char* value_;
+    uint32_t flags = 0;
+    memcached_return_t rc;
+    value_ = memcached_fetch((memcached_st*)cache_,const_cast<char*>(key),key_len,val_len,&flags,
+                              &rc);
+    if(rc==MEMCACHED_END)
+	return false;
+    else if(memcached_failed(rc))
+	return false;
+   return true;
+}
+
+/*
+int main(int argc, char *argv[]) 
+{
+    memcached_st *memc;
+    memcached_return rc;
+    memcached_server_st *servers;
+    char value[8191];
+
+    //connect multi server
+    memc = memcached_create(NULL);
+    servers = memcached_server_list_append(NULL, "localhost", 11211, &rc);
+    servers = memcached_server_list_append(servers, "localhost", 11212, &rc);
+    rc = memcached_server_push(memc, servers);
+    memcached_server_free(servers);
+
+    //Save multi data
+    size_t i;
+    char *keys[]= {"key1", "key2", "key3"};
+    size_t key_length[]= {4, 4, 4};
+    char *values[] = {"This is c first value", "This is c second value", "This is c third value"};
+    size_t val_length[]= {21, 22, 21};
+    for (i=0; i <3; i++) {
+    rc = memcached_set(memc, keys[i], key_length[i], values[i], val_length[i], (time_t)180,(uint32_t)0);
+    if (rc == MEMCACHED_SUCCESS) {
+        printf("Save key:%s data:/"%s/" success./n", keys[i], values[i]);
+    }
+    }
+
+    //Fetch multi data
+    char return_key[MEMCACHED_MAX_KEY];
+    size_t return_key_length;
+    char *return_value;
+    size_t return_value_length;
+    uint32_t flags;
+    rc = memcached_mget(memc, keys, key_length, 3);
+    while ((return_value = memcached_fetch(memc, return_key, &return_key_length, &return_value_length, &flags, &rc))) {
+    if (rc == MEMCACHED_SUCCESS) {
+        printf("Fetch key:%s data:%s/n", return_key, return_value);
+    }
+    }
+    
+    //Delete multi data
+    for (i=0; i <3; i++) {
+    rc = memcached_set(memc, keys[i], key_length[i], values[i], val_length[i], (time_t)180, (uint32_t)0);
+    rc = memcached_delete(memc, keys[i], key_length[i], (time_t)0);
+    if (rc == MEMCACHED_SUCCESS) {
+        printf("Delete %s success/n", keys[i], values[i]);
+    }
+    }
+    //free
+    memcached_free(memc);
+    return 0;
+} 
+±àÒëÔ´´úÂë£º
+[root@localhost html]# gcc -o cmultmem cmultmem.c -lmemcached 
+[root@localhost html]# ./cmultmem //Ö´ÐÐ
+Save key:key1 data:"This is c first value" success.
+Save key:key2 data:"This is c second value" success.
+Save key:key3 data:"This is c third value" success.
+Fetch key:key2 data:This is c second value
+Fetch key:key3 data:This is c third value
+Fetch key:key1 data:This is c first value
+Delete key1 success
+Delete key2 success
+Delete key3 success 
+*/
+
+
+bool MemStorageEngineImpl::AddListElement(const char* key,const size_t key_len,
+										const char* val,const size_t val_len){
+	return true;
+}
+
+bool MemStorageEngineImpl::GetListElement (const char* key,const size_t key_len,
+										const int index,char** val,size_t *val_len){
+	return true;								
+}
+
+bool MemStorageEngineImpl::DelListElement(const char* key,const size_t key_len,const int index){
+	return true;
+}
+
+bool MemStorageEngineImpl::SetListElement(const int index,const char* key,const size_t key_len,
+										const char* val,const size_t val_len){
+	return true;
+}
+
+bool MemStorageEngineImpl::GetListAll(const char* key,const size_t key_len,std::list<std::string>& list){
+	return true;
+}

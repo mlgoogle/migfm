@@ -1,0 +1,202 @@
+Index: mozilla/nsprpub/pr/include/prtypes.h
+===================================================================
+RCS file: /cvsroot/mozilla/nsprpub/pr/include/prtypes.h,v
+retrieving revision 3.41
+diff -p -u -8 -r3.41 prtypes.h
+--- mozilla/nsprpub/pr/include/prtypes.h	6 May 2009 05:40:35 -0000	3.41
++++ mozilla/nsprpub/pr/include/prtypes.h	15 Jan 2010 01:23:40 -0000
+@@ -75,17 +75,33 @@
+ ** Example:
+ **   in dowhim.h
+ **     PR_EXTERN( void ) DoWhatIMean( void );
+ **   in dowhim.c
+ **     PR_IMPLEMENT( void ) DoWhatIMean( void ) { return; }
+ **
+ **
+ ***********************************************************************/
+-#if defined(WIN32)
++#if 1  /* STATIC LIBRARIES */
++
++#define PR_EXPORT(__type) extern __type
++#define PR_EXPORT_DATA(__type) extern __type
++#define PR_IMPORT(__type) extern __type
++#define PR_IMPORT_DATA(__type) extern __type
++
++#define PR_EXTERN(__type) extern __type
++#define PR_IMPLEMENT(__type) __type
++#define PR_EXTERN_DATA(__type) extern __type
++#define PR_IMPLEMENT_DATA(__type) __type
++
++#define PR_CALLBACK
++#define PR_CALLBACK_DECL
++#define PR_STATIC_CALLBACK(__x) static __x
++
++#elif defined(WIN32)
+ 
+ #define PR_EXPORT(__type) extern __declspec(dllexport) __type
+ #define PR_EXPORT_DATA(__type) extern __declspec(dllexport) __type
+ #define PR_IMPORT(__type) __declspec(dllimport) __type
+ #define PR_IMPORT_DATA(__type) __declspec(dllimport) __type
+ 
+ #define PR_EXTERN(__type) extern __declspec(dllexport) __type
+ #define PR_IMPLEMENT(__type) __declspec(dllexport) __type
+Index: mozilla/nsprpub/pr/src/md/windows/w95dllmain.c
+===================================================================
+RCS file: /cvsroot/mozilla/nsprpub/pr/src/md/windows/w95dllmain.c,v
+retrieving revision 3.8
+diff -p -u -8 -r3.8 w95dllmain.c
+--- mozilla/nsprpub/pr/src/md/windows/w95dllmain.c	25 Apr 2004 15:01:00 -0000	3.8
++++ mozilla/nsprpub/pr/src/md/windows/w95dllmain.c	15 Jan 2010 01:23:40 -0000
+@@ -30,16 +30,18 @@
+  * use your version of this file under the terms of the MPL, indicate your
+  * decision by deleting the provisions above and replace them with the notice
+  * and other provisions required by the GPL or the LGPL. If you do not delete
+  * the provisions above, a recipient may use your version of this file under
+  * the terms of any one of the MPL, the GPL or the LGPL.
+  *
+  * ***** END LICENSE BLOCK ***** */
+ 
++#if 0  /* STATIC LIBRARIES.  See the end of w95thred.c. */
++
+ /*
+  * The DLL entry point (DllMain) for NSPR.
+  *
+  * This is used to detach threads that were automatically attached by
+  * nspr.
+  */
+ 
+ #include <windows.h>
+@@ -64,8 +66,10 @@ PRThread *me;
+                     _PRI_DetachThread();
+             }
+             break;
+         case DLL_PROCESS_DETACH:
+             break;
+     }
+     return TRUE;
+ }
++
++#endif
+Index: mozilla/nsprpub/pr/src/md/windows/w95thred.c
+===================================================================
+RCS file: /cvsroot/mozilla/nsprpub/pr/src/md/windows/w95thred.c,v
+retrieving revision 3.18
+diff -p -u -8 -r3.18 w95thred.c
+--- mozilla/nsprpub/pr/src/md/windows/w95thred.c	4 Feb 2009 23:44:01 -0000	3.18
++++ mozilla/nsprpub/pr/src/md/windows/w95thred.c	15 Jan 2010 01:23:40 -0000
+@@ -309,8 +309,115 @@ PRThread *thread;
+ 
+    	if (NULL == thread) {
+ 		thread = _PRI_AttachThread(
+             PR_USER_THREAD, PR_PRIORITY_NORMAL, NULL, 0);
+ 	}
+ 	PR_ASSERT(thread != NULL);
+ 	return thread;
+ }
++
++// The following code is from Chromium src/base/thread_local_storage_win.cc,
++// r11329.
++
++// Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
++//
++// Redistribution and use in source and binary forms, with or without
++// modification, are permitted provided that the following conditions are
++// met:
++//
++//    * Redistributions of source code must retain the above copyright
++// notice, this list of conditions and the following disclaimer.
++//    * Redistributions in binary form must reproduce the above
++// copyright notice, this list of conditions and the following disclaimer
++// in the documentation and/or other materials provided with the
++// distribution.
++//    * Neither the name of Google Inc. nor the names of its
++// contributors may be used to endorse or promote products derived from
++// this software without specific prior written permission.
++//
++// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++
++// Thread Termination Callbacks.
++// Windows doesn't support a per-thread destructor with its
++// TLS primitives.  So, we build it manually by inserting a
++// function to be called on each thread's exit.
++// This magic is from http://www.codeproject.com/threads/tls.asp
++// and it works for VC++ 7.0 and later.
++
++#ifdef _WIN64
++
++// This makes the linker create the TLS directory if it's not already
++// there.  (e.g. if __declspec(thread) is not used).
++#pragma comment(linker, "/INCLUDE:_tls_used")
++
++#else  // _WIN64
++
++// This makes the linker create the TLS directory if it's not already
++// there.  (e.g. if __declspec(thread) is not used).
++#pragma comment(linker, "/INCLUDE:__tls_used")
++
++#endif  // _WIN64
++
++// Static callback function to call with each thread termination.
++static void NTAPI PR_OnThreadExit(PVOID module, DWORD reason, PVOID reserved)
++{
++PRThread *me;
++
++    switch (reason) {
++        case DLL_PROCESS_ATTACH:
++            break;
++        case DLL_THREAD_ATTACH:
++            break;
++        case DLL_THREAD_DETACH:
++            if (_pr_initialized) {
++                me = _MD_GET_ATTACHED_THREAD();
++                if ((me != NULL) && (me->flags & _PR_ATTACHED))
++                    _PRI_DetachThread();
++            }
++            break;
++        case DLL_PROCESS_DETACH:
++            break;
++    }
++}
++
++// .CRT$XLA to .CRT$XLZ is an array of PIMAGE_TLS_CALLBACK pointers that are
++// called automatically by the OS loader code (not the CRT) when the module is
++// loaded and on thread creation. They are NOT called if the module has been
++// loaded by a LoadLibrary() call. It must have implicitly been loaded at
++// process startup.
++// By implicitly loaded, I mean that it is directly referenced by the main EXE
++// or by one of its dependent DLLs. Delay-loaded DLL doesn't count as being
++// implicitly loaded.
++//
++// See VC\crt\src\tlssup.c for reference.
++#ifdef _WIN64
++
++// .CRT section is merged with .rdata on x64 so it must be constant data.
++#pragma const_seg(".CRT$XLB")
++// When defining a const variable, it must have external linkage to be sure the
++// linker doesn't discard it. If this value is discarded, the PR_OnThreadExit
++// function will never be called.
++extern const PIMAGE_TLS_CALLBACK p_thread_callback;
++const PIMAGE_TLS_CALLBACK p_thread_callback = PR_OnThreadExit;
++
++// Reset the default section.
++#pragma const_seg()
++
++#else  // _WIN64
++
++#pragma data_seg(".CRT$XLB")
++PIMAGE_TLS_CALLBACK p_thread_callback = PR_OnThreadExit;
++
++// Reset the default section.
++#pragma data_seg()
++
++#endif  // _WIN64

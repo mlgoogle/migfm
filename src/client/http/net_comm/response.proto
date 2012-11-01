@@ -1,0 +1,22 @@
+package response.type;
+
+import "metadata.proto";
+
+message Inlink{
+	required string from_url = 1;
+	required string anchor = 2; 
+}
+
+message Inlinks{
+	required Inlink inlink = 1;
+}
+
+message ResponseDatum{
+	optional uint64	fetch_time = 1 [default = 0];
+	optional uint32 retries = 2 [default = 0];
+	optional uint32 fetch_interval = 3 [default = 1000];
+	optional float  score = 4[default = 1.0];
+	optional bytes  signature =5[default = ""];
+	optional uint64 modified_time = 6[default = 0];
+	optional net.type.Metadatas metadatas = 7; 
+}

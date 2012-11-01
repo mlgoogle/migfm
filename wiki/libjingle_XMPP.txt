@@ -1,0 +1,10 @@
+采用了接口的方式
+
+将字符串传入
+XmppStanzaParser stanzaParser_对象中的 Parse方法。
+ XmppStanzaParser 中的 Parse   XmlParser parser_ 对象中最原始的Parse方法 即通过XML解析
+
+
+在XmlParser 设置XmlParseHandler（pxph_） 父类的方法，如果是一个完整的XML字节流，则传入 
+XmlParseHandler的子类方法中 即ParseHandler 方法，并将其保存在builder_对象中。等解析为了一个完整的
+XML流时，则调用XmppStanzaParseHandler的子类方法（StanzaParseHandler） 传入逻辑层 做逻辑处理

@@ -1,0 +1,81 @@
+[0530/215631:INFO:net_comm.cpp(65)] http://60.191.220.135/cgi-bin/echo.fcgi
+[0530/215653:INFO:net_comm.cpp(65)] 111111111111111
+[0530/215706:INFO:net_comm.cpp(65)] 111111111111111
+[0530/215721:INFO:net_comm.cpp(65)] 111111111111111
+[0530/215735:INFO:net_comm.cpp(65)] 111111111111111
+[0530/215746:INFO:net_comm.cpp(65)] 111111111111111
+[0530/215805:WARNING:net_comm.cpp(65)] 111111111111111
+[0530/220320:WARNING:net_comm.cpp(65)] 111111111111111
+[0530/220722:WARNING:net_comm.cpp(65)] 111111111111111
+[0530/220739:WARNING:net_comm.cpp(65)] 111111111111111
+[0530/221238:WARNING:net_comm.cpp(71)] 111111111111111
+[0530/221251:ERROR:http_base.cpp(42)] url(http://60.191.220.135/cgi-bin/echo.fcgi) error
+[0530/221350:WARNING:net_comm.cpp(71)] 111111111111111
+[0530/221711:ERROR:net_comm.cpp(75)] 01312DA8
+[0530/221841:ERROR:net_comm.cpp(75)] <title>FastCGI echo</title><h1>FastCGI echo</h1>
+Request number 3,  Process ID: 23298<p>
+No data from standard input.<p>
+Request environment:<br>
+<pre>
+FCGI_ROLE=RESPONDER
+HTTP_HOST=60.191.220.135
+HTTP_ACCEPT=*/*
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+SERVER_SIGNATURE=<address>Apache/2.2.3 (CentOS) Server at 60.191.220.135 Port 80</address>
+
+SERVER_SOFTWARE=Apache/2.2.3 (CentOS)
+SERVER_NAME=60.191.220.135
+SERVER_ADDR=60.191.220.135
+SERVER_PORT=80
+REMOTE_ADDR=183.157.68.196
+DOCUMENT_ROOT=/var/www/html
+SERVER_ADMIN=root@localhost
+SCRIPT_FILENAME=/var/www/cgi-bin/echo.fcgi
+REMOTE_PORT=45627
+GATEWAY_INTERFACE=CGI/1.1
+SERVER_PROTOCOL=HTTP/1.1
+REQUEST_METHOD=GET
+QUERY_STRING=
+REQUEST_URI=/cgi-bin/echo.fcgi
+SCRIPT_NAME=/cgi-bin/echo.fcgi
+</pre><p>
+Initial environment:<br>
+<pre>
+</pre><p>
+
+[0530/233719:INFO:net_comm.cpp(70)] 111111111
+[0530/233754:INFO:net_comm.cpp(70)] 111111111
+[0530/233754:ERROR:net_comm.cpp(71)] 2222222222
+[0530/233819:INFO:net_comm.cpp(70)] 111111111
+[0530/233856:INFO:net_comm.cpp(70)] 111111111
+[0530/233957:INFO:net_comm.cpp(70)] 111111111
+[0530/233958:ERROR:net_comm.cpp(71)] 2222222222
+[0530/234102:INFO:net_comm.cpp(70)] 111111111
+[0530/234536:INFO:net_comm.cpp(70)] 111111111
+[0530/234538:ERROR:net_comm.cpp(71)] 2222222222
+[0530/234549:INFO:net_comm.cpp(70)] 111111111
+[0720/182938:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/183131:ERROR:http_response.cpp(225)] curl_easy_perform failed: HTTP response code said error
+[0720/183151:ERROR:http_response.cpp(225)] curl_easy_perform failed: HTTP response code said error
+[0720/183429:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/184319:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/184858:ERROR:http_response.cpp(225)] curl_easy_perform failed: HTTP response code said error
+[0720/185010:ERROR:http_response.cpp(225)] curl_easy_perform failed: HTTP response code said error
+[0720/185626:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/185750:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/190017:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/190919:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/191209:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/191524:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/191646:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/191657:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/221736:ERROR:http_response.cpp(225)] curl_easy_perform failed: HTTP response code said error
+[0720/222055:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0720/223632:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0721/121502:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0722/230013:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0722/230250:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0722/230357:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0722/230433:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0722/231941:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)
+[0722/232336:ERROR:http_response.cpp(225)] curl_easy_perform failed: Server returned nothing (no headers, no data)

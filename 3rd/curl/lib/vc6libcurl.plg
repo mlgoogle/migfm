@@ -1,0 +1,441 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: libcurl - Win32 LIB Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"LIB-Release/libcurl.res" /d "NDEBUG" "E:\project\miglab\migfm\3rd\curl\lib\libcurl.rc"" 
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP5D82.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /I "." /I "..\include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "BUILDING_LIBCURL" /D "CURL_STATICLIB" /Fo"LIB-Release/" /Fd"LIB-Release/" /FD /c 
+"E:\project\miglab\migfm\3rd\curl\lib\asyn-ares.c"
+"E:\project\miglab\migfm\3rd\curl\lib\asyn-thread.c"
+"E:\project\miglab\migfm\3rd\curl\lib\axtls.c"
+"E:\project\miglab\migfm\3rd\curl\lib\base64.c"
+"E:\project\miglab\migfm\3rd\curl\lib\connect.c"
+"E:\project\miglab\migfm\3rd\curl\lib\content_encoding.c"
+"E:\project\miglab\migfm\3rd\curl\lib\cookie.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_addrinfo.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_fnmatch.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_gethostname.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_gssapi.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_memrchr.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_ntlm.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_ntlm_core.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_ntlm_msgs.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_ntlm_wb.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_rand.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_rtmp.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_sspi.c"
+"E:\project\miglab\migfm\3rd\curl\lib\curl_threads.c"
+"E:\project\miglab\migfm\3rd\curl\lib\cyassl.c"
+"E:\project\miglab\migfm\3rd\curl\lib\dict.c"
+"E:\project\miglab\migfm\3rd\curl\lib\easy.c"
+"E:\project\miglab\migfm\3rd\curl\lib\escape.c"
+"E:\project\miglab\migfm\3rd\curl\lib\file.c"
+"E:\project\miglab\migfm\3rd\curl\lib\fileinfo.c"
+"E:\project\miglab\migfm\3rd\curl\lib\formdata.c"
+"E:\project\miglab\migfm\3rd\curl\lib\ftp.c"
+"E:\project\miglab\migfm\3rd\curl\lib\ftplistparser.c"
+"E:\project\miglab\migfm\3rd\curl\lib\getenv.c"
+"E:\project\miglab\migfm\3rd\curl\lib\getinfo.c"
+"E:\project\miglab\migfm\3rd\curl\lib\gopher.c"
+"E:\project\miglab\migfm\3rd\curl\lib\gtls.c"
+"E:\project\miglab\migfm\3rd\curl\lib\hash.c"
+"E:\project\miglab\migfm\3rd\curl\lib\hmac.c"
+"E:\project\miglab\migfm\3rd\curl\lib\hostasyn.c"
+"E:\project\miglab\migfm\3rd\curl\lib\hostip4.c"
+"E:\project\miglab\migfm\3rd\curl\lib\hostip6.c"
+"E:\project\miglab\migfm\3rd\curl\lib\hostip.c"
+"E:\project\miglab\migfm\3rd\curl\lib\hostsyn.c"
+"E:\project\miglab\migfm\3rd\curl\lib\http.c"
+"E:\project\miglab\migfm\3rd\curl\lib\http_chunks.c"
+"E:\project\miglab\migfm\3rd\curl\lib\http_digest.c"
+"E:\project\miglab\migfm\3rd\curl\lib\http_negotiate.c"
+"E:\project\miglab\migfm\3rd\curl\lib\http_negotiate_sspi.c"
+"E:\project\miglab\migfm\3rd\curl\lib\http_proxy.c"
+"E:\project\miglab\migfm\3rd\curl\lib\idn_win32.c"
+"E:\project\miglab\migfm\3rd\curl\lib\if2ip.c"
+"E:\project\miglab\migfm\3rd\curl\lib\imap.c"
+"E:\project\miglab\migfm\3rd\curl\lib\inet_ntop.c"
+"E:\project\miglab\migfm\3rd\curl\lib\inet_pton.c"
+"E:\project\miglab\migfm\3rd\curl\lib\krb4.c"
+"E:\project\miglab\migfm\3rd\curl\lib\krb5.c"
+"E:\project\miglab\migfm\3rd\curl\lib\ldap.c"
+"E:\project\miglab\migfm\3rd\curl\lib\llist.c"
+"E:\project\miglab\migfm\3rd\curl\lib\md4.c"
+"E:\project\miglab\migfm\3rd\curl\lib\md5.c"
+"E:\project\miglab\migfm\3rd\curl\lib\memdebug.c"
+"E:\project\miglab\migfm\3rd\curl\lib\mprintf.c"
+"E:\project\miglab\migfm\3rd\curl\lib\multi.c"
+"E:\project\miglab\migfm\3rd\curl\lib\netrc.c"
+"E:\project\miglab\migfm\3rd\curl\lib\non-ascii.c"
+"E:\project\miglab\migfm\3rd\curl\lib\nonblock.c"
+"E:\project\miglab\migfm\3rd\curl\lib\nss.c"
+"E:\project\miglab\migfm\3rd\curl\lib\openldap.c"
+"E:\project\miglab\migfm\3rd\curl\lib\parsedate.c"
+"E:\project\miglab\migfm\3rd\curl\lib\pingpong.c"
+"E:\project\miglab\migfm\3rd\curl\lib\polarssl.c"
+"E:\project\miglab\migfm\3rd\curl\lib\pop3.c"
+"E:\project\miglab\migfm\3rd\curl\lib\progress.c"
+"E:\project\miglab\migfm\3rd\curl\lib\qssl.c"
+"E:\project\miglab\migfm\3rd\curl\lib\rawstr.c"
+"E:\project\miglab\migfm\3rd\curl\lib\rtsp.c"
+"E:\project\miglab\migfm\3rd\curl\lib\security.c"
+"E:\project\miglab\migfm\3rd\curl\lib\select.c"
+"E:\project\miglab\migfm\3rd\curl\lib\sendf.c"
+"E:\project\miglab\migfm\3rd\curl\lib\share.c"
+"E:\project\miglab\migfm\3rd\curl\lib\slist.c"
+"E:\project\miglab\migfm\3rd\curl\lib\smtp.c"
+"E:\project\miglab\migfm\3rd\curl\lib\socks.c"
+"E:\project\miglab\migfm\3rd\curl\lib\socks_gssapi.c"
+"E:\project\miglab\migfm\3rd\curl\lib\socks_sspi.c"
+"E:\project\miglab\migfm\3rd\curl\lib\speedcheck.c"
+"E:\project\miglab\migfm\3rd\curl\lib\splay.c"
+"E:\project\miglab\migfm\3rd\curl\lib\ssh.c"
+"E:\project\miglab\migfm\3rd\curl\lib\sslgen.c"
+"E:\project\miglab\migfm\3rd\curl\lib\ssluse.c"
+"E:\project\miglab\migfm\3rd\curl\lib\strdup.c"
+"E:\project\miglab\migfm\3rd\curl\lib\strequal.c"
+"E:\project\miglab\migfm\3rd\curl\lib\strerror.c"
+"E:\project\miglab\migfm\3rd\curl\lib\strtok.c"
+"E:\project\miglab\migfm\3rd\curl\lib\strtoofft.c"
+"E:\project\miglab\migfm\3rd\curl\lib\telnet.c"
+"E:\project\miglab\migfm\3rd\curl\lib\tftp.c"
+"E:\project\miglab\migfm\3rd\curl\lib\timeval.c"
+"E:\project\miglab\migfm\3rd\curl\lib\transfer.c"
+"E:\project\miglab\migfm\3rd\curl\lib\url.c"
+"E:\project\miglab\migfm\3rd\curl\lib\version.c"
+"E:\project\miglab\migfm\3rd\curl\lib\warnless.c"
+"E:\project\miglab\migfm\3rd\curl\lib\wildcard.c"
+]
+Creating command line "cl.exe @C:\Users\ADMINI~1\AppData\Local\Temp\RSP5D82.tmp" 
+Creating temporary file "C:\Users\ADMINI~1\AppData\Local\Temp\RSP5D83.tmp" with contents
+[
+/nologo /out:"LIB-Release/libcurl.lib" /machine:I386 
+".\LIB-Release\asyn-ares.obj"
+".\LIB-Release\asyn-thread.obj"
+".\LIB-Release\axtls.obj"
+".\LIB-Release\base64.obj"
+".\LIB-Release\connect.obj"
+".\LIB-Release\content_encoding.obj"
+".\LIB-Release\cookie.obj"
+".\LIB-Release\curl_addrinfo.obj"
+".\LIB-Release\curl_fnmatch.obj"
+".\LIB-Release\curl_gethostname.obj"
+".\LIB-Release\curl_gssapi.obj"
+".\LIB-Release\curl_memrchr.obj"
+".\LIB-Release\curl_ntlm.obj"
+".\LIB-Release\curl_ntlm_core.obj"
+".\LIB-Release\curl_ntlm_msgs.obj"
+".\LIB-Release\curl_ntlm_wb.obj"
+".\LIB-Release\curl_rand.obj"
+".\LIB-Release\curl_rtmp.obj"
+".\LIB-Release\curl_sspi.obj"
+".\LIB-Release\curl_threads.obj"
+".\LIB-Release\cyassl.obj"
+".\LIB-Release\dict.obj"
+".\LIB-Release\easy.obj"
+".\LIB-Release\escape.obj"
+".\LIB-Release\file.obj"
+".\LIB-Release\fileinfo.obj"
+".\LIB-Release\formdata.obj"
+".\LIB-Release\ftp.obj"
+".\LIB-Release\ftplistparser.obj"
+".\LIB-Release\getenv.obj"
+".\LIB-Release\getinfo.obj"
+".\LIB-Release\gopher.obj"
+".\LIB-Release\gtls.obj"
+".\LIB-Release\hash.obj"
+".\LIB-Release\hmac.obj"
+".\LIB-Release\hostasyn.obj"
+".\LIB-Release\hostip4.obj"
+".\LIB-Release\hostip6.obj"
+".\LIB-Release\hostip.obj"
+".\LIB-Release\hostsyn.obj"
+".\LIB-Release\http.obj"
+".\LIB-Release\http_chunks.obj"
+".\LIB-Release\http_digest.obj"
+".\LIB-Release\http_negotiate.obj"
+".\LIB-Release\http_negotiate_sspi.obj"
+".\LIB-Release\http_proxy.obj"
+".\LIB-Release\idn_win32.obj"
+".\LIB-Release\if2ip.obj"
+".\LIB-Release\imap.obj"
+".\LIB-Release\inet_ntop.obj"
+".\LIB-Release\inet_pton.obj"
+".\LIB-Release\krb4.obj"
+".\LIB-Release\krb5.obj"
+".\LIB-Release\ldap.obj"
+".\LIB-Release\llist.obj"
+".\LIB-Release\md4.obj"
+".\LIB-Release\md5.obj"
+".\LIB-Release\memdebug.obj"
+".\LIB-Release\mprintf.obj"
+".\LIB-Release\multi.obj"
+".\LIB-Release\netrc.obj"
+".\LIB-Release\non-ascii.obj"
+".\LIB-Release\nonblock.obj"
+".\LIB-Release\nss.obj"
+".\LIB-Release\openldap.obj"
+".\LIB-Release\parsedate.obj"
+".\LIB-Release\pingpong.obj"
+".\LIB-Release\polarssl.obj"
+".\LIB-Release\pop3.obj"
+".\LIB-Release\progress.obj"
+".\LIB-Release\qssl.obj"
+".\LIB-Release\rawstr.obj"
+".\LIB-Release\rtsp.obj"
+".\LIB-Release\security.obj"
+".\LIB-Release\select.obj"
+".\LIB-Release\sendf.obj"
+".\LIB-Release\share.obj"
+".\LIB-Release\slist.obj"
+".\LIB-Release\smtp.obj"
+".\LIB-Release\socks.obj"
+".\LIB-Release\socks_gssapi.obj"
+".\LIB-Release\socks_sspi.obj"
+".\LIB-Release\speedcheck.obj"
+".\LIB-Release\splay.obj"
+".\LIB-Release\ssh.obj"
+".\LIB-Release\sslgen.obj"
+".\LIB-Release\ssluse.obj"
+".\LIB-Release\strdup.obj"
+".\LIB-Release\strequal.obj"
+".\LIB-Release\strerror.obj"
+".\LIB-Release\strtok.obj"
+".\LIB-Release\strtoofft.obj"
+".\LIB-Release\telnet.obj"
+".\LIB-Release\tftp.obj"
+".\LIB-Release\timeval.obj"
+".\LIB-Release\transfer.obj"
+".\LIB-Release\url.obj"
+".\LIB-Release\version.obj"
+".\LIB-Release\warnless.obj"
+".\LIB-Release\wildcard.obj"
+".\LIB-Release\libcurl.res"
+]
+Creating command line "link.exe -lib @C:\Users\ADMINI~1\AppData\Local\Temp\RSP5D83.tmp"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+asyn-ares.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+asyn-thread.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+axtls.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+base64.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+connect.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+content_encoding.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+cookie.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_addrinfo.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_fnmatch.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_gethostname.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_gssapi.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_memrchr.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_ntlm.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_ntlm_core.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_ntlm_msgs.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_ntlm_wb.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_rand.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_rtmp.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_sspi.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+curl_threads.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+Generating Code...
+Compiling...
+cyassl.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+dict.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+easy.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+escape.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+file.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+fileinfo.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+formdata.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+ftp.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+ftplistparser.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+getenv.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+getinfo.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+gopher.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+gtls.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+hash.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+hmac.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+hostasyn.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+hostip4.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+hostip6.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+hostip.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+hostsyn.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+Generating Code...
+Compiling...
+http.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+http_chunks.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+http_digest.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+http_negotiate.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+http_negotiate_sspi.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+http_proxy.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+idn_win32.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+if2ip.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+imap.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+inet_ntop.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+inet_pton.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+krb4.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+krb5.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+ldap.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+llist.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+md4.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+md5.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+memdebug.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+mprintf.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+multi.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+Generating Code...
+Compiling...
+netrc.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+non-ascii.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+nonblock.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+nss.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+openldap.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+parsedate.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+pingpong.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+polarssl.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+pop3.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+progress.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+qssl.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+rawstr.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+rtsp.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+security.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+select.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+sendf.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+share.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+slist.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+smtp.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+socks.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+Generating Code...
+Compiling...
+socks_gssapi.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+socks_sspi.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+speedcheck.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+splay.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+ssh.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+sslgen.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+ssluse.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+strdup.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+strequal.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+strerror.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+strtok.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+strtoofft.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+telnet.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+tftp.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+timeval.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+transfer.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+url.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+version.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+warnless.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+wildcard.c
+E:\project\miglab\migfm\3rd\curl\lib\setup.h(538) : fatal error C1189: #error :  MSVC 6.0 requires "February 2003 Platform SDK" a.k.a.              "Windows Server 2003 PSDK"
+Generating Code...
+Error executing cl.exe.
+
+
+
+<h3>Results</h3>
+libcurl.lib - 100 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

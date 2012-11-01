@@ -1,0 +1,14 @@
+package mysql.info;
+
+message UserInfo{
+
+	required int32    operate = 1[default=1001] 
+	required int32    id = 2[default = 0];
+	optional string   usrname = 3;
+	required string   password = 4 [default = ""];
+	required int32    sex = 5[default = 0];
+	optional string   address = 6;
+	required string   name = 7 [default = ""];
+	required string   idcards = 8 [default = ""];   
+	required string   head = 9 [default = ""];
+}

@@ -1,0 +1,19 @@
+package net.type;
+
+import "schema.proto";
+
+message Text {
+    optional int32 version = 1 [ default = 1 ];
+    required string text = 2;
+}
+
+message Metadatas {
+    message Metadata {
+        required string name = 1;
+        optional string value = 2;
+        optional uint32 status_code = 3;
+        optional schema.type.SchemaStatus status = 4;
+    }
+    
+    repeated Metadata values = 1;
+}

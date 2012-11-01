@@ -1,0 +1,62 @@
+package schema.type;
+
+message SchemaStatus{
+enum Status{
+
+    // Content was retrieved without errors.
+    SUCCESS = 1;
+
+    // Content was not retrieved. Any further errors may be indicated in
+    // args.
+    FAILED = 2;
+
+    // This protocol was not found. Application may attemp to retry later.
+    PROTO_NOT_FOUND = 3;
+
+    // Resource is gone.
+    GONE = 4;
+
+    // Resource has moved permanently. New url should be found in args.
+    MOVED = 5;
+
+    // Resource has moved temporarily. New url should be found in args.
+    TEMP_MOVED = 6;
+
+    // Resource was not found.
+    NOTFOUND = 7;
+
+    // Temporary failed. Application may retry immediately.
+    RETRY = 8;
+
+    // Unspecified exception occured. Further information may be provided
+    // in args.
+    EXCEPTION = 9;
+
+    // Access denied - authorization required, but mssing/incorrect.
+    ACCESS_DENIED = 10;
+
+    // Access denied by robots.txt rules.
+    ROBOTS_DENIED = 11;
+
+    // Too many redirects.
+    REDIR_EXCEEDED = 12;
+
+    // Not fetching.
+    NOTFETCHING = 13;
+
+    // Unchanged since the last fetch.
+    NOTMODIFIED = 14;
+
+    // Request was refused by protocol plugins, because it would block.
+    // The expected number of milliseconds to wait before retry may be
+    // provided in args.
+    WOULDBLOCK = 15;
+
+    // Thread was blocked http.max.delays times during fetching.
+    BLOCKED = 16;
+}
+    required Status code = 1;
+    optional uint64 last_modified = 2 [ default = 0 ];
+    repeated string args = 3;
+	
+}

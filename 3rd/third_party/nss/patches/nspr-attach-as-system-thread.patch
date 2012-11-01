@@ -1,0 +1,22 @@
+Index: mozilla/nsprpub/pr/src/md/windows/w95thred.c
+===================================================================
+RCS file: /cvsroot/mozilla/nsprpub/pr/src/md/windows/w95thred.c,v
+retrieving revision 3.18
+diff -u -p -u -8 -r3.18 w95thred.c
+--- mozilla/nsprpub/pr/src/md/windows/w95thred.c	4 Feb 2009 23:44:01 -0000	3.18
++++ mozilla/nsprpub/pr/src/md/windows/w95thred.c	20 Apr 2010 18:06:13 -0000
+@@ -304,13 +304,13 @@ PRThread*
+ _MD_CURRENT_THREAD(void)
+ {
+ PRThread *thread;
+ 
+ 	thread = _MD_GET_ATTACHED_THREAD();
+ 
+    	if (NULL == thread) {
+ 		thread = _PRI_AttachThread(
+-            PR_USER_THREAD, PR_PRIORITY_NORMAL, NULL, 0);
++            PR_SYSTEM_THREAD, PR_PRIORITY_NORMAL, NULL, 0);
+ 	}
+ 	PR_ASSERT(thread != NULL);
+ 	return thread;
+ }
