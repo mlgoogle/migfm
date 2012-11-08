@@ -334,7 +334,7 @@ XmlElement::RemoveChildAfter(XmlChild * pPredecessor) {
 
 void
 XmlElement::AddAttr(const QName & name, const std::string & value) {
-  ASSERT(!HasAttr(name));
+  //ASSERT(!HasAttr(name));
 
   XmlAttr ** pprev = pLastAttr_ ? &(pLastAttr_->pNextAttr_) : &pFirstAttr_;
   pLastAttr_ = (*pprev = new XmlAttr(name, value));

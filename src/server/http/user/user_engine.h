@@ -23,11 +23,8 @@ private:
 		StanzaParseHandler(UserEngine* outer) : outer_(outer){}
 		virtual void StartStream(const base::XmlElement* pelStream)
 			{outer_->IncomingStart(pelStream);}
-		virtual void Stanza(const base::XmlElement* pelStanza){
-			base::QName QN_TYPE(true, STR_EMPTY, "type");
-			std::string type = pelStanza->Attr(QN_TYPE);
-			outer_->IncomingStanza(pelStanza);
-		}
+		virtual void Stanza(const base::XmlElement* pelStanza)
+			{outer_->IncomingStanza(pelStanza);}
 		virtual void EndStream()
 			{outer_->IncomingEnd(false);}
 		virtual void XmlError()

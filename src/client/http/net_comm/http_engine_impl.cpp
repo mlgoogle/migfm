@@ -2,6 +2,8 @@
 #include "net_comm/http_engine.h"
 #include "net_comm/http_constants.h"
 #include "net_comm/httplogintask.h"
+#include "net_comm/xmpp/xmlelement.h"
+#include "net_comm/xmpp/constants.h"
 #include "googleurl/src/gurl.h"
 
 namespace net_comm{
@@ -44,7 +46,16 @@ HttpEngineImpl::EnterExit::~EnterExit(){
 	std::string url = engine_->output_->str();
     if (url.length()>0&&engine_->output_handler_)
 		engine_->output_handler_->WriteOutput(url);
-	/////////////////////////////////test////////////////////////////////////
+	///////////////////////////////test////////////////////////////////////
+ 	std::string head;
+	head = "<stream:stream from=\"gmail.com\" " 
+			"id=\"1F83A90940271513\" " 
+			"version=\"1.0\" " 
+			"xmlns:stream=\"http://etherx.jabber.org/streams\" " 
+			"xmlns=\"jabber:client\">";
+
+ 	engine_->stanzaParser_.Parse(head.c_str(),head.length(),false);
+
 	std::string content;
 	content = "<stream:features>"
 				"<starttls xmlns=\"urn:ietf:params:xml:ns:xmpp-tls\">"
@@ -135,7 +146,8 @@ void HttpEngineImpl::InternalRequestLogin(const std::string& password){
 
 void 
 HttpEngineImpl::IncomingStanza(const base::XmlElement *pelStanza){
-
+	if (pelStanza->Name()==base::QN_STREAM_FEATURES)
+		return ;
 }
 
 void

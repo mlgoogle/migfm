@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <string>
 #include "net_comm/xmpp/qname.h"
-#define STR_EMPTY       base::ConStants::str_empty()
-#define FCGI_HTTP_HEAD  base::ConStants::fcgi_http_head()
+
 #define NS_SESSION      base::ConStants::ns_session()
 #define NS_BIND			base::ConStants::ns_bind()
 #define NS_STREAM       base::ConStants::ns_stream()

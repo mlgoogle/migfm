@@ -25,13 +25,13 @@ XmppStanzaParser::Reset() {
 void
 XmppStanzaParser::IncomingStartElement(
     XmlParseContext * pctx, const char * name, const char ** atts) {
-  if (depth_++ == 0) {
-    XmlElement * pelStream = XmlBuilder::BuildElement(pctx, name, atts);
-    if (pelStream == NULL) {
-      pctx->RaiseError(XML_ERROR_SYNTAX);
-      return;
-    }
-    psph_->StartStream(pelStream);
+	
+	if (depth_++ == 0) {
+		XmlElement * pelStream = XmlBuilder::BuildElement(pctx, name, atts);
+		if (pelStream == NULL) {
+		pctx->RaiseError(XML_ERROR_SYNTAX);
+		return;
+	}
     delete pelStream;
     return;
   }

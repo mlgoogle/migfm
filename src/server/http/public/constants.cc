@@ -14,4 +14,10 @@ void ConStants::fcgi_http_head(){
 	write(STDOUT_FILENO,header,strlen(header));
 }
 
+const std::string & ConStants::ns_stream() {
+	static const std::string ns_stream_("http://etherx.jabber.org/streams");
+	return ns_stream_;
+}
+
+const QName QN_STREAM_FEATURES(true, NS_STREAM, "features");
 }

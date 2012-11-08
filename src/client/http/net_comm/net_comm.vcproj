@@ -71,6 +71,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib dbghelp.lib base.lib base_i18n.lib breakpad_handler.lib dynamic_annotations.lib googleurl.lib icuuc.lib libcurl.lib libprotobuf.lib libprotoc.lib Wldap32.lib libexpat.lib"
 				AdditionalLibraryDirectories="../lib/Debug"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 			/>
 			<Tool
