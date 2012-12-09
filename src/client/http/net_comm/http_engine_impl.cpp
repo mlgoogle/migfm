@@ -47,29 +47,29 @@ HttpEngineImpl::EnterExit::~EnterExit(){
     if (url.length()>0&&engine_->output_handler_)
 		engine_->output_handler_->WriteOutput(url);
 	///////////////////////////////test////////////////////////////////////
- 	std::string head;
-	head = "<stream:stream from=\"gmail.com\" " 
-			"id=\"1F83A90940271513\" " 
-			"version=\"1.0\" " 
-			"xmlns:stream=\"http://etherx.jabber.org/streams\" " 
-			"xmlns=\"jabber:client\">";
-
- 	engine_->stanzaParser_.Parse(head.c_str(),head.length(),false);
-
-	std::string content;
-	content = "<stream:features>"
-				"<starttls xmlns=\"urn:ietf:params:xml:ns:xmpp-tls\">"
-				"<required/>"
-				"</starttls>"
-				"<mechanisms xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">"
-				"<mechanism>X-GOOGLE-TOKEN</mechanism><"
-				"mechanism>X-OAUTH2</mechanism>"
-				"</mechanisms>"
-			"</stream:features>";
-
-	//stanzaParser_.Parse(content.c_str(),content.length(),false);
-	engine_->stanzaParser_.Parse(content.c_str(),content.length(),false);
-	engine_->output_->str("");
+//  	std::string head;
+// 	head = "<stream:stream from=\"gmail.com\" " 
+// 			"id=\"1F83A90940271513\" " 
+// 			"version=\"1.0\" " 
+// 			"xmlns:stream=\"http://etherx.jabber.org/streams\" " 
+// 			"xmlns=\"jabber:client\">";
+// 
+//  	engine_->stanzaParser_.Parse(head.c_str(),head.length(),false);
+// 
+// 	std::string content;
+// 	content = "<stream:features>"
+// 				"<starttls xmlns=\"urn:ietf:params:xml:ns:xmpp-tls\">"
+// 				"<required/>"
+// 				"</starttls>"
+// 				"<mechanisms xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">"
+// 				"<mechanism>X-GOOGLE-TOKEN</mechanism><"
+// 				"mechanism>X-OAUTH2</mechanism>"
+// 				"</mechanisms>"
+// 			"</stream:features>";
+// 
+// 	//stanzaParser_.Parse(content.c_str(),content.length(),false);
+// 	engine_->stanzaParser_.Parse(content.c_str(),content.length(),false);
+// 	engine_->output_->str("");
 	if (closeing){
 		//engine_->output_handler_->CloseConnection();
 		engine_->output_handler_ = NULL;
@@ -135,12 +135,13 @@ HttpEngine::HttpReturnStatus HttpEngineImpl::OnUsrLogin(){
 }
 
 void HttpEngineImpl::InternalRequestLogin(const std::string& password){
-// 	*output_<<hid_.hostname()<<"/fcgin-bin/migfm.cgi?"
-// 		<<"username="<<hid_.username()<<"&"
-// 		<<"password="<<password<<"&"
-// 		<<"entry="<<hid_.resource();/
+//  	*output_<<hid_.hostname()<<"/fcgin-bin/migfm.cgi?"
+//  		<<"username="<<hid_.username()<<"&"
+//  		<<"password="<<password<<"&"
+//  		<<"entry="<<hid_.resource();
 	//*output_<<"http://60.191.220.135/cgi-bin/test.fcgi";
 	*output_<<"http://www.baidu.com";
+	//*output_<<"http://im.9158.com/api/index.php?act=systeminfo&nFansIdx=20348848&text=fuck ´º¸ç£¡";
 
 }
 

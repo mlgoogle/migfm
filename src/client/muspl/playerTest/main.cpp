@@ -22,7 +22,7 @@ int WINAPI WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, 
 	{
 		_myPlayer.SetEventWindow(_hWnd, WM_MIGPLAYER_EVENT);
 		//_myPlayer.OpenMusic(_T("E:\\project\\miglab\\migfm\\src\\client\\muspl\\Debug\\Hello1.mp3"));
-		_myPlayer.OpenMusic(_T("http://60.191.220.135/wu.mp3"));
+		_myPlayer.OpenMusic(_T("http://60.191.220.135/wu.mp3"),FALSE);
 		_myPlayer.Play();
 	}
 

@@ -17,6 +17,8 @@ public:
 	bool AddUserInfo(std::string& usrname,std::string& password,int sex,
 					 int address,std::string& name,std::string& id_cards,
 					 std::string& head);
+	
+	bool GetBasicUserInfo(const int32 usr_id);
 private:
 	scoped_ptr<StorageEngine>   engine_;	
 };

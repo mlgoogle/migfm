@@ -20,13 +20,17 @@ public:
  
     virtual bool Release();
    
-    virtual bool SetValue(const char* key,const size_t key_len,const char* val,const size_t val_len,struct BaseStorage* base=NULL);
+    virtual bool SetValue(const char* key,const size_t key_len,const char* val,
+		                  const size_t val_len);
 
-    virtual bool AddValue(const char* key,const size_t key_len,const char* val,const size_t val_len,struct BaseStorage* base=NULL);
+    virtual bool AddValue(const char* key,const size_t key_len,const char* val,
+		                  const size_t val_len);
   
-    virtual bool ReplaceValue(const char* key,const size_t key_len,const char* val,const size_t val_len,struct BaseStorage* base=NULL);
+    virtual bool ReplaceValue(const char* key,const size_t key_len,const char* val,
+		                      const size_t val_len);
 
-    virtual bool GetValue(const char* key,const size_t key_len,char** val,size_t* val_len,struct BaseStorage** base=NULL);
+    virtual bool GetValue(const char* key,const size_t key_len,
+		                  char** val,size_t* val_len);
 
     virtual bool DelValue(const char* key,const size_t key_len);
   

@@ -20,30 +20,39 @@ public:
  
     virtual bool Release();
    
-    virtual bool SetValue(const char* key,const size_t key_len,const char* val,const size_t val_len,struct BaseStorage* base=NULL);
+    virtual bool SetValue(const char* key,const size_t key_len,
+						  const char* val,const size_t val_len);
 
-    virtual bool AddValue(const char* key,const size_t key_len,const char* val,const size_t val_len,struct BaseStorage* base=NULL);
+    virtual bool AddValue(const char* key,const size_t key_len,
+		                  const char* val,const size_t val_len);
   
-    virtual bool ReplaceValue(const char* key,const size_t key_len,const char* val,const size_t val_len,struct BaseStorage* base=NULL);
+    virtual bool ReplaceValue(const char* key,const size_t key_len,
+		                      const char* val,const size_t val_len);
 
-    virtual bool GetValue(const char* key,const size_t key_len,char** val,size_t* val_len,struct BaseStorage** base=NULL);
+    virtual bool GetValue(const char* key,const size_t key_len,
+		                  char** val,size_t* val_len);
 
     virtual bool DelValue(const char* key,const size_t key_len);
   
-    virtual bool MGetValue(const char* const * key_array,const size_t *key_len_array,size_t element_count);
+    virtual bool MGetValue(const char* const * key_array,
+		                   const size_t *key_len_array,size_t element_count);
 
-    virtual bool FetchValue(const char* key,size_t *key_len,char** value,size_t *val_len);
+    virtual bool FetchValue(const char* key,size_t *key_len,
+		                    char** value,size_t *val_len);
     
     
         //list
         
-    virtual bool AddListElement(const char* key,const size_t key_len,const char* val,const size_t val_len);
+    virtual bool AddListElement(const char* key,const size_t key_len,
+		                        const char* val,const size_t val_len);
     
-    virtual bool GetListElement (const char* key,const size_t key_len,const int index,char** val,size_t *val_len);
+    virtual bool GetListElement (const char* key,const size_t key_len,
+		                         const int index,char** val,size_t *val_len);
     
     virtual bool DelListElement(const char* key,const size_t key_len,const int index);
     
-    virtual bool SetListElement(const int index,const char* key,const size_t key_len,const char* val,const size_t val_len);
+    virtual bool SetListElement(const int index,const char* key,const size_t key_len,
+		                        const char* val,const size_t val_len);
     
     virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list);
 

@@ -15,7 +15,6 @@ static char pass[] = "pass";
 static char source[] = "name";
 static int flag = 0;
 
-
 FileConfig::FileConfig(){
 
 }

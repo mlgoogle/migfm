@@ -37,7 +37,7 @@ bool RedisStorageEngineImpl::Release(){
 }
 
 bool RedisStorageEngineImpl::SetValue(const char* key,const size_t key_len,
-				const char* val,const size_t val_len,struct BaseStorage* base){
+				const char* val,const size_t val_len){
 
     if(PingRedis()!=1)
     	return false;
@@ -45,7 +45,7 @@ bool RedisStorageEngineImpl::SetValue(const char* key,const size_t key_len,
 }
 
 bool RedisStorageEngineImpl::AddValue(const char* key,const size_t key_len,
-				const char* val,const size_t val_len,struct BaseStorage* base){
+				const char* val,const size_t val_len){
 
     int r = 0;
     char* cval;
@@ -63,7 +63,7 @@ bool RedisStorageEngineImpl::AddValue(const char* key,const size_t key_len,
 }
 
 bool RedisStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,
-					const char* val,const size_t val_len,struct BaseStorage* base){
+					const char* val,const size_t val_len){
     
     if(PingRedis()!=1)
     	return false;
@@ -71,7 +71,7 @@ bool RedisStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,
 }
 
 bool RedisStorageEngineImpl::GetValue(const char* key,const size_t key_len,
-				     char**val,size_t* val_len,struct BaseStorage** base){
+				     char**val,size_t* val_len){
 
     if(PingRedis()!=1)
     	return false;
@@ -86,12 +86,14 @@ bool RedisStorageEngineImpl::DelValue(const char* key,const size_t key_len){
 }
 
 bool RedisStorageEngineImpl::MGetValue(const char* const * key_array,
-		const size_t* key_len_array,size_t element_count){
+									   const size_t* key_len_array,
+									   size_t element_count){
 
     return true;
 }
 
-bool RedisStorageEngineImpl::FetchValue(const char* key,size_t *key_len,char** value,size_t *val_len){
+bool RedisStorageEngineImpl::FetchValue(const char* key,size_t *key_len,
+										char** value,size_t *val_len){
    
    return true;
 }
@@ -102,13 +104,15 @@ bool RedisStorageEngineImpl::PingRedis(){
 }
 
 
-bool RedisStorageEngineImpl::AddListElement(const char* key,const size_t key_len,const char* val,const size_t val_len){
+bool RedisStorageEngineImpl::AddListElement(const char* key,const size_t key_len,
+											const char* val,const size_t val_len){
 	if(PingRedis()!=1)
 		return false;
 	return RedisAddListElement(c_,key,key_len,val,val_len)==1?true:false;
 }
 
-bool RedisStorageEngineImpl::GetListElement (const char* key,const size_t key_len,const int index,char** val,size_t *val_len){
+bool RedisStorageEngineImpl::GetListElement (const char* key,const size_t key_len,
+											 const int index,char** val,size_t *val_len){
     if(PingRedis()!=1)
     	return false;
     	
@@ -121,13 +125,16 @@ bool RedisStorageEngineImpl::DelListElement(const char* key,const size_t key_len
 	return RedisDelListElement(c_,index,key,key_len)==1?true:false;
 }
 
-bool RedisStorageEngineImpl::SetListElement(const int index,const char* key,const size_t key_len,const char* val,const size_t val_len){
+bool RedisStorageEngineImpl::SetListElement(const int index,const char* key,
+											const size_t key_len,const char* val,
+											const size_t val_len){
 	 if(PingRedis()!=1)
     	return false;
 	return RedisSetListElement(c_,index,key,key_len,val,val_len)==1?true:false;
 }
 
-bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,std::list<std::string>& list){
+bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
+										std::list<std::string>& list){
 
     int r = 0;
 	if(PingRedis()!=1)

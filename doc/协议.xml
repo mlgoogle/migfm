@@ -1,11 +1,21 @@
-﻿<!--用户信息--> <!--XEP-0077-->
+﻿<!-- 建立连接 发送请求-->
+<stream:stream to="gmail.com" 
+               xmlns="jabber:client" 
+               xmlns:stream="http://etherx.jabber.org/streams" 
+               version="1.0" >
+
+
+  <!--用户信息--> <!--XEP-0077-->
 <!--1,获取用户信息-->
 <!--REQ-->
+
+请求参数?uid=1904178193&access_token=2.00FHmlTC6hjuvC9abbe62152ANWCkC
 <iq from='flaght@gmail.com/miglab' 
   id='v1'
   type='get'>
   <vCard xmlns='vcard-temp'/>
 </iq>
+
 
 <!--ACK-->
 <iq id='v1'

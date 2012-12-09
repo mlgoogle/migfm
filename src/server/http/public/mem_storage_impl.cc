@@ -31,14 +31,10 @@ bool MemStorageEngineImpl::Connections(std::list<ConnAddr>& addrlist){
     std::list<ConnAddr>::iterator it = addrlist.begin();
     while(it!=addrlist.end()){
     	addr = (*it);
-    	servers = memcached_server_list_append(servers,addr.host().c_str(),addr.port(),&rc);
+    	servers = memcached_server_list_append(servers,addr.host().c_str(),
+			                                   addr.port(),&rc);
     	++it;
     }
-    /*list_for_each(node,addrlist) {
-        addr = list_entry(node,const connaddr_t,link);
-         servers = memcached_server_list_append(servers,addr->ip.c_str(),
-                      addr->port,&rc);
-    }*/ 
 
     rc = memcached_server_push(cache_,servers);
     if(memcached_failed(rc)){
@@ -56,7 +52,7 @@ bool MemStorageEngineImpl::Release(){
 }
 
 bool MemStorageEngineImpl::SetValue(const char* key,const size_t key_len,
-				const char* val,const size_t val_len,struct BaseStorage* base){
+				const char* val,const size_t val_len){
 
     memcached_return_t rc;
     rc = memcached_set((memcached_st*)cache_,key,key_len,val,val_len,0,0);
@@ -66,7 +62,7 @@ bool MemStorageEngineImpl::SetValue(const char* key,const size_t key_len,
 }
 
 bool MemStorageEngineImpl::AddValue(const char* key,const size_t key_len,
-				const char* val,const size_t val_len,struct BaseStorage* base){
+				const char* val,const size_t val_len){
 
     memcached_return_t rc;
     rc = memcached_add((memcached_st*)cache_,key,key_len,val,val_len,0,0);
@@ -76,7 +72,7 @@ bool MemStorageEngineImpl::AddValue(const char* key,const size_t key_len,
 }
 
 bool MemStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,
-					const char* val,const size_t val_len,struct BaseStorage* base){
+					const char* val,const size_t val_len){
     memcached_return_t rc;
     rc = memcached_replace((memcached_st*)cache_,key,key_len,
 				val,val_len,0,0);
@@ -86,7 +82,7 @@ bool MemStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,
 }
 
 bool MemStorageEngineImpl::GetValue(const char* key,const size_t key_len,
-				     char**val,size_t* val_len,struct BaseStorage** base){
+				     char**val,size_t* val_len){
     memcached_return_t rc;
     uint32_t flags = 0;
     char* val_ = NULL;
@@ -121,13 +117,14 @@ bool MemStorageEngineImpl::MGetValue(const char* const * key_array,
     return true;
 }
 
-bool MemStorageEngineImpl::FetchValue(const char* key,size_t *key_len,char** value,size_t *val_len){
+bool MemStorageEngineImpl::FetchValue(const char* key,size_t *key_len,
+									  char** value,size_t *val_len){
    
     char* value_;
     uint32_t flags = 0;
     memcached_return_t rc;
-    value_ = memcached_fetch((memcached_st*)cache_,const_cast<char*>(key),key_len,val_len,&flags,
-                              &rc);
+    value_ = memcached_fetch((memcached_st*)cache_,const_cast<char*>(key),
+		                      key_len,val_len,&flags,&rc);
     if(rc==MEMCACHED_END)
 	return false;
     else if(memcached_failed(rc))
@@ -222,7 +219,8 @@ bool MemStorageEngineImpl::SetListElement(const int index,const char* key,const 
 	return true;
 }
 
-bool MemStorageEngineImpl::GetListAll(const char* key,const size_t key_len,std::list<std::string>& list){
+bool MemStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
+									  std::list<std::string>& list){
 	return true;
 }
 
