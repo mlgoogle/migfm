@@ -1,14 +1,14 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = show.fcgi
+OUTPUT_FILE = ../bin/show.fcgi
 ## 编译器
 COMPILER = g++
 COMPILERC = gcc
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD
 ## for release
 ## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG -DROOM_CHECK_COLUMN -DROOM_URANDOM_EXIST
 
@@ -19,7 +19,9 @@ LINK_FLAGS = -g  -fPIC
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I../public -I /usr/local/libmemcached-1.0.7/include/ -I/usr/local/lib -I../../third_party/hiredis/ -I../../third_party/breakpad/src -I/usr/include/mysql 
+INCLUDE_PATHS = -I../public/ -I /usr/local/libmemcached-1.0.7/include\
+		-I/usr/local/lib -I../../third_party/hiredis\
+	        -I../../third_party/breakpad/src -I/usr/include/mysql 
 
 ## 库
 LINK_PATHS =  -L/usr/local/libmemcached-1.0.7/lib/ -L/usr/lib64/mysql
@@ -34,10 +36,10 @@ LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 
-output:	xmppstanzaparser.o userinfo.o usr_engine.o mig_log.o conn_addr.o storage.o constants.o\
-		mysql_storage_impl.o mysql_opertion.o basictypes.o config.o redis_warrper.o\
-		redis_storage_impl.o mem_storage_impl.o qname.o xmlbuilder.o xmlelement.o\
-		xmlnsstack.o xmlparser.o xmlprinter.o user_mgr.o xmlconstants.o 
+output: userinfo.o user_mgr.o usr_engine.o mig_log.o\
+	basic_info.o mem_storage_impl.o redis_storage_impl.o\
+	 storage.o constants.o redis_warrper.o\
+	basictypes.o config.o dic_serialization.o
 	$(LINK)
 
 clean:
@@ -58,58 +60,32 @@ usr_engine.o:
 	$(COMPILE) ./user_engine.cc
 
 mig_log.o:
-	$(COMPILE) ./../public/mig_log.cc
+	$(COMPILE) ./../public/log/mig_log.cc
 
-conn_addr.o:
-	$(COMPILE) ./../public/conn_addr.cc
+dic_serialization.o:
+	$(COMPILE) ./../public/storage/dic_serialization.cc
+
+basic_info.o:
+	$(COMPILE) ./../public/basic/basic_info.cc
 
 mem_storage_impl.o:
-	$(COMPILE) ./../public/mem_storage_impl.cc
-
-mysql_storage_impl.o:
-	$(COMPILE) ./../public/mysql_storage_impl.cc
+	$(COMPILE) ./../public/storage/mem_storage_impl.cc
 
 storage.o:
-	$(COMPILE) ./../public/storage.cc
+	$(COMPILE) ./../public/storage/storage.cc
 
 constants.o:
-	$(COMPILE) ./../public/constants.cc
-
-mysql_opertion.o:
-	$(COMPILE) ./../public/mysql_opertion.cc
+	$(COMPILE) ./../public/basic/constants.cc
 
 redis_warrper.o:
-	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ./../public/redis_warrper.c
+	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ./../public/storage/redis_warrper.c
 
 redis_storage_impl.o:
-	$(COMPILE) ./../public/redis_storage_impl.cc
+	$(COMPILE) ./../public/storage/redis_storage_impl.cc
 
 basictypes.o:
-	$(COMPILE) ./../public/basictypes.cc
+	$(COMPILE) ./../public/basic/basictypes.cc
 
 config.o:
-	$(COMPILE) ./../public/config.cc
+	$(COMPILE) ./../public/config/config.cc
 
-qname.o:
-	$(COMPILE) ./../public/qname.cc
-
-xmlbuilder.o:
-	$(COMPILE) ./../public/xmlbuilder.cc
-
-xmlelement.o:
-	$(COMPILE) ./../public/xmlelement.cc
-
-xmlnsstack.o:
-	$(COMPILE) ./../public/xmlnsstack.cc
-
-xmlparser.o:
-	$(COMPILE) ./../public/xmlparser.cc
-
-xmlprinter.o:
-	$(COMPILE) ./../public/xmlprinter.cc
-
-xmlconstants.o:
-	$(COMPILE) ./../public/xmlconstants.cc
-
-xmppstanzaparser.o:
-	$(COMPILE) ./../public/xmppstanzaparser.cc

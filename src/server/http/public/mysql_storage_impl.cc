@@ -28,18 +28,15 @@ bool MysqlStorageEngineImpl::Release(){
 	return logic_.Release();
 }
 
-bool MysqlStorageEngineImpl::SetValue(const char* key,const size_t key_len,
-									  const char* val,const size_t val_len){
+bool MysqlStorageEngineImpl::SetValue(const char* key,const size_t key_len,const char* val,
+										const size_t val_len,struct BaseStorage* base){
 
     return true;
 }
 
-bool MysqlStorageEngineImpl::AddValue(const char* key,const size_t key_len,
-									  const char* val,const size_t val_len){
-
+bool MysqlStorageEngineImpl::AddValue(const char* key,const size_t key_len,const char* val,const size_t val_len,
+									  struct BaseStorage* base){
 	
-	
-	/*
 	int opcode = base->opcode_;
 	switch(opcode){
 		case ADD_USER_INFO:{
@@ -49,18 +46,17 @@ bool MysqlStorageEngineImpl::AddValue(const char* key,const size_t key_len,
 					 			usrinfo->id_cards_,usrinfo->head_);
 			break;
 		}
-	}*/
+	}
     return true;	 
 }
 
-bool MysqlStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,
-										  const char*val,const size_t val_len){
+bool MysqlStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,const char*val,const size_t val_len,
+											struct BaseStorage* base){
 	return true;
 }
 
-bool MysqlStorageEngineImpl::GetValue(const char* key,const size_t key_len,char** val,size_t* val_len){
+bool MysqlStorageEngineImpl::GetValue(const char* key,const size_t key_len,char** val,size_t* val_len,struct BaseStorage** base){
 	
-	/*
 	int opcode = (*base)->opcode_;
 	switch(opcode){
 		case GET_USER_INFO:
@@ -69,7 +65,7 @@ bool MysqlStorageEngineImpl::GetValue(const char* key,const size_t key_len,char*
 				logic_.GetUserInfo(key,&usrinfo);
 			}
 		break;
-	}*/
+	}
 	return true;
 }
 
@@ -110,7 +106,7 @@ bool MysqlStorageEngineImpl::GetListAll(const char* key,const size_t key_len,std
 
 
 /////////////////////////////////////////////////////////////////////
-/*MysqlDB::MysqlDB(){
+MysqlDB::MysqlDB(){
     Init();
 }
 
@@ -229,7 +225,7 @@ bool MysqlLogic::GetUserInfo(const char* id,struct UserInfo** usrinfo){
 	s = sql.str();
 	mysql_.SqlExec(s);
 	
-}*/
+}
 
 
 }

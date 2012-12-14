@@ -25,6 +25,7 @@ bool MysqlOpertion::Connections(std::list<ConnAddr>& addrlist){
 bool MysqlOpertion::AddUserInfo(std::string& usrname,std::string& password,int sex,
 					 			int address,std::string& name,std::string& id_cards,
 					 			std::string& head){
+	scoped_ptr<UserInfo> usr_ptr;
 	int idx = GetRandomTime();
 	int nowidx = idx>0?idx:(0-idx);
 	std::stringstream sid;
@@ -43,8 +44,5 @@ bool MysqlOpertion::AddUserInfo(std::string& usrname,std::string& password,int s
     return true;
 }
 
-bool MysqlOpertion::GetBasicUserInfo(const int32 usr_id){
-	UserInfo usrinfo;
-	usrinfo.id
-	
+
 }
