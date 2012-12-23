@@ -139,7 +139,9 @@ void HttpEngineImpl::InternalRequestLogin(const std::string& password){
 //  		<<"username="<<hid_.username()<<"&"
 //  		<<"password="<<password<<"&"
 //  		<<"entry="<<hid_.resource();
-	*output_<<"http://wbapi.9158.com/mobile/statuses/update/?uid=163184&status=TTTTTTTTTTTTTTTT";
+	//*output_<<"http://wbapi.9158.com/mobile/statuses/update/?uid=163184&status=TTTTTTTTTTTTTTTT";
+	//*output_<<"http://42.121.112.248/cgi-bin/show.fcgi";
+	*output_<<"http://www.9see.com/ashx/getlist.ashx";
 	//*output_<<"http://60.191.220.135/cgi-bin/brocast.fcgi";
 	//*output_<<"http://www.baidu.com";
 	//*output_<<"http://im.9158.com/api/index.php?act=systeminfo&nFansIdx=20348848&text=fuck ´º¸ç£¡";

@@ -1,18 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <config>
-  <database host ="127.0.0.1" 
+  <database>
+     <mysql host ="127.0.0.1" 
             port ="3306" 
             user = "root" 
-            pass = "123456"  
+            pass = "miglab2012"  
             name = "migfm"/>
 
-  <redis host ="127.0.0.1"
-  		port ="3306"/>
+     <mssql host = "migdb"
+            user = "web_Test"
+            pass = "9158com"
+            name = "WeiShow_new"/>
+  </database>
+  
+  <cached>
+     <redis host ="127.0.0.1"
+  		port ="6379"/>
 
-  <memcache>
-    <config host = "127.0.0.1" port="11211"/>
-    <config host = "127.0.0.1" port="19900"/>
-    <config host = "127.0.0.1" port="19900"/>
-  </memcache>
+     <memcached>
+       <config host = "42.121.112.248" port="11211"/>
+     </memcached>
+  </cached>
   
 </config>

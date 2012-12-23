@@ -1,5 +1,4 @@
 #include "redis_warrper.h"
-
 char* RedisConnections(warrper_redis_context_t** context ,
 				const char* host,const int port){
 	struct timeval timeout = {1,500000};

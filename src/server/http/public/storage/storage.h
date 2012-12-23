@@ -22,7 +22,18 @@ enum DBImplType{
 	IMPL_MSSQL = 1
 };
 
+typedef struct db_conn_t{
+    void *proc;
+}db_conn_t;
 
+
+typedef struct db_res_t{
+    void *proc;
+}db_res_t;
+
+typedef struct db_row_t{
+    void *proc;
+}db_row_t;
 
 class StorageEngine{
 public:
@@ -36,6 +47,22 @@ class DBStorageEngine:public StorageEngine{
 public:
 	static DBStorageEngine* Create(int32 type);
 	virtual ~DBStorageEngine(){}
+
+public:
+	virtual bool Release() = 0;
+	
+	virtual bool SQLExec(const char* sql) = 0;
+	
+	virtual bool Affected(unsigned long& rows) = 0;
+	
+	virtual uint32 RecordCount() = 0;
+	
+    virtual bool FreeRes() = 0;
+    
+	virtual db_row_t* FetchRows(void) = 0;//get Recordset
+	
+	virtual bool CheckConnect(void) =0;
+	
 };
 
 class DictionaryStorageEngine:public StorageEngine{

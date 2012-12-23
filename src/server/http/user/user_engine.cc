@@ -1,59 +1,106 @@
 #include "user_engine.h"
 #include "log/mig_log.h"
-//#include "xmlelement.h"
-
+#include "config/config.h"
+#include "storage/db_serialization.h"
+#include "storage/dic_serialization.h"
+#include "basic/basic_util.h"
+#include <sstream>
 namespace userinfo{
 
-UserEngine::UserEngine()
-/*:stanzaHandler_(this)
-,stanzaParser_(&stanzaHandler_)*/{
+userinfo::UserInfoEngine* UserInfoEngine::engine_ = NULL;
+UserInfoEngine::UserInfoEngine(){
+
+    xml_serialization_.reset(new base::XmlSerialization());
+}
+
+UserInfoEngine::~UserInfoEngine(){
 
 }
 
-UserEngine::~UserEngine(){
-
+UserInfoEngine* UserInfoEngine::GetEngine(){
+    if(engine_==NULL){
+        engine_ = new UserInfoEngine();
+    }
+    return engine_;
 }
 
-bool UserEngine::HandlerInput(const char* data,const int len){
-	std::string head;
-	/*head = "<stream:stream from=\"gmail.com\" " 
-			"id=\"1F83A90940271513\" " 
-			"version=\"1.0\" " 
-			"xmlns:stream=\"http://etherx.jabber.org/streams\" " 
-			"xmlns=\"jabber:client\">";
-
- 	stanzaParser_.Parse(head.c_str(),head.length(),false);
-
-	std::string content;
-	content = "<stream:features>"
-				"<starttls xmlns=\"urn:ietf:params:xml:ns:xmpp-tls\">"
-				"<required/>"
-				"</starttls>"
-				"<mechanisms xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">"
-				"<mechanism>X-GOOGLE-TOKEN</mechanism><"
-				"mechanism>X-OAUTH2</mechanism>"
-				"</mechanisms>"
-			"</stream:features>";
-	stanzaParser_.Parse(content.c_str(),content.length(),false);*/
-	return true;
+void UserInfoEngine::FreeEngine(){
+    if(engine_!=NULL){
+        delete engine_;
+        engine_ = NULL;
+    }
 }
 
-/*
-void UserEngine::IncomingStart(const base::XmlElement* pelStream){
-
+bool UserInfoEngine::InitEngine(std::string& path){
+    bool r = false;
+    config::FileConfig* config = config::FileConfig::GetFileConfig();
+    if(config==NULL){
+        return r;
+    }
+    r = config->LoadConfig(path);
+    if(!r)
+    	return r;
+    r = base_storage::MysqlSerial::Init(config->mysql_db_list_);
+    if(!r)
+        return r;
+    r = base_storage::MemDicSerial::Init(config->mem_list_);
+    if(!r)
+        return r;
+    r = base_storage::RedisDicSerial::Init(config->redis_list_);
+    if(!r)
+        return r;
+    return r;
 }
 
-void UserEngine::IncomingStanza(const base::XmlElement* pelStanza){
-	//if (pelStanza->Name()==base::QN_STREAM_FEATURES)
-		//return ;
-}
 
-void UserEngine::IncomingEnd(bool isError){
-	//if(isError)
-	//	MIG_ERROR(USER_LEVEL,"ERROR_XML");
-	//else
-	//	MIG_ERROR(USER_LEVEL,"ERROR_DOUCMENT_CLOSED");
-		
-}*/
+bool UserInfoEngine::GetUserInfo(const char* query,std::string& result){
+    
+    //std::string result;
+    std::string str_id;
+    int32 usr_id;
+    int32 sex;
+    std::string ext_add;
+    std::string street;
+    std::string locality;
+    std::string regin;
+    int32 pcode;
+    std::string ctry;
+    std::string head;
+    std::string birthday;
+    std::string nickname;
+    std::string username;
+    const char* key="userid";
+    bool r = false;
+    std::stringstream mem_key;
+    char* mem_value = NULL;
+    size_t mem_value_length = 0;
+    //parser    
+    base::BasicUtil::GetHttpParamElement(query,key,str_id);
+    usr_id = atol(str_id.c_str());
+
+    mem_key<<usr_id<<"_userinfo";
+
+    //get memcached
+    r = base_storage::MemDicSerial::GetString(mem_key.str().c_str(),mem_key.str().length(),
+                                              &mem_value,&mem_value_length);
+    if(!r){
+        r = base_storage::MysqlSerial::GetUserInfo(usr_id,username,sex,ext_add,street,
+            locality,regin,pcode,ctry,head,birthday,nickname);
+
+        xml_serialization_->XmlUserInfoSerialization(result,usr_id,username,sex,ext_add,street,
+            locality,regin,pcode,ctry,head,birthday,nickname);
+   
+        //write memcached
+        r = base_storage::MemDicSerial::SetString(mem_key.str().c_str(),mem_key.str().length(),
+                                result.c_str(),result.length());
+        MIG_DEBUG(USER_LEVEL,"write[%d] key[%s] value[%s]",r,mem_key.str().c_str(),
+                  result.c_str());
+    }else{
+         result.assign(mem_value,mem_value_length);
+         r = true;
+    }
+
+    return r;
+}
 
 }

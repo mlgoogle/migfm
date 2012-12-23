@@ -4,40 +4,27 @@
 #include <stdlib.h>
 #include <sstream>
 #include "basic/constants.h"
+#include "log/mig_log.h"
+#include "basic/scoped_ptr.h"
+#include "storage/db_serialization.h"
+#include "storage/dic_serialization.h"
+#include "xmpp/xml_serialization.h"
 namespace userinfo{
-
-//class base::XmlElement;
-
-class UserEngine{
+	
+class UserInfoEngine{
 public:
-	UserEngine();
-	~UserEngine();
-	
-	bool HandlerInput(const char* data,const int len); 
-/*private:
-	class StanzaParseHandler: public base::XmppStanzaParseHandler{
-	public:
-		StanzaParseHandler(UserEngine* outer) : outer_(outer){}
-		virtual void StartStream(const base::XmlElement* pelStream)
-			{outer_->IncomingStart(pelStream);}
-		virtual void Stanza(const base::XmlElement* pelStanza)
-			{outer_->IncomingStanza(pelStanza);}
-		virtual void EndStream()
-			{outer_->IncomingEnd(false);}
-		virtual void XmlError()
-			{outer_->IncomingEnd(true);}
-	private:
-		UserEngine* const outer_;
-	};
-	
-	friend class StanzaParseHandler;
-	void IncomingStart(const base::XmlElement* pelStream);
-	void IncomingStanza(const base::XmlElement* pelStanza);
-	void IncomingEnd(bool isError);
+    UserInfoEngine();
+    ~UserInfoEngine();
+    bool InitEngine(std::string& path);
+    bool GetUserInfo(const char* query,std::string& result);
+public: 
+    static UserInfoEngine* GetEngine();
+    static void  FreeEngine();
 private:
-	base::XmppStanzaParser  stanzaParser_;
-	StanzaParseHandler stanzaHandler_;*/
-	
+    static userinfo::UserInfoEngine* engine_;
+
+private:
+    scoped_ptr<base::XmlSerialization>  xml_serialization_;
 };
 }
 #endif

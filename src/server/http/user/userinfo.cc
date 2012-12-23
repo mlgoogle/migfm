@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include "client/linux/handler/exception_handler.h"
 
 #if defined (FCGI_STD)
@@ -13,7 +14,7 @@
 
 #include "log/mig_log.h"
 #include "config/config.h"
-#include "user_mgr.h"
+#include "user_engine.h"
 
 
 static bool DumpCallBack(const char* dump_path,const char* minidump_id,
@@ -27,15 +28,30 @@ static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 #if defined (FCGI_STD)
 static void GetRequestMethod(const char* query){
     
-    char* header = "Content-type:text/html\r\n\r\n<title>FastCGI echo</title><h1>444444444</h1>\n";
+   // char* header = "Content-type:text/html\r\n\r\n<title>FastCGI echo</title><h1>444444444</h1>\n";
     //printf("%s",header);
-    write(STDOUT_FILENO,header,strlen(header)+1);
+    //write(STDOUT_FILENO,header,strlen(header)+1);
     /*printf("Content-type: text/html\r\n"
            "\r\n"
            "<title>FastCGI echo</title>"*/
            /*"<h1>FastCGI echo</h1>\n"*/
            /*"Process ID: %d %s<p>\n"
            ,getpid(),query);*/
+    std::string result;
+    userinfo::UserInfoEngine::GetEngine()->GetUserInfo(query,result);
+
+
+    printf("Content-type: text/html\r\n"
+           "\r\n"
+           "%s\n"
+           ,result.c_str());
+    /*printf("Content-type: text/html\r\n"
+           "\r\n"
+           "<title>FastCGI echo</title>"
+           "<h1>FastCGI echorrrr</h1>\n"
+           "Process ID: %d %s %s<p>\n"
+           ,getpid(),query,result.c_str());*/
+    
 }
 
 static void PostRequestMethod(std::string& content){
@@ -87,21 +103,24 @@ int main(int agrc,char* argv[]){
     config::FileConfig file_config;
     std::string content;
     const char* query;
-
+    bool r = false;
+    MIG_INFO(USER_LEVEL,"init fastcgi id:%d",getpid());
 #if defined (FCGI_PLUS)
     FCGX_Request request;
     FCGX_Init();
     FCGX_InitRequest(&request,0,0);
 #endif
 
-    if((!file_config.LoadConfig(path))){
-        return 1;
-	}
-
+  //  if((!file_config.LoadConfig(path))){
+       // return 1;
+	//}
+     r = userinfo::UserInfoEngine::GetEngine()->InitEngine(path);
+     if(!r)
+         return r;
 #if defined (FCGI_STD)
     while(FCGI_Accept()==0){
 #elif defined (FCGI_PLUS)
-	while(FCGX_Accept_r(&request)==0){
+    while(FCGX_Accept_r(&request)==0){
 #endif
 
 #if defined (FCGI_PLUS)
@@ -122,14 +141,23 @@ int main(int agrc,char* argv[]){
 #endif
 
 #if defined (FCGI_STD)
+    
+#if defined (TEST)
+    char* request_method = "GET";
+#else
     char *request_method = getenv("REQUEST_METHOD");
+#endif    
     if(strcmp(request_method,"POST")==0){
         std::cin>>content;
         PostRequestMethod(content);
     }
 		
     else if(strcmp(request_method,"GET")==0){
+#if defined (TEST)
+        query = "userid=10001";
+#else
         query = getenv("QUERY_STRING");
+#endif
         GetRequestMethod(query);
     }
 		
@@ -154,14 +182,19 @@ int main(int agrc,char* argv[]){
 	else if(strcmp(request_method,"DELETE")==0)
 		DeleteRequestMethod(&request);
 #endif
-
-    /*printf("Content-type: text/html\r\n"
+    //std::stringstream output;
+    //output<<"<iq id='v1' to='flaght' type='result'>"
+         // <<"<vCard xmlns='vcard-temp'>";
+    /*char* tmp ="<iq id='v1' to='flaght' type='result'><vCard xmlns='vcard-temp'>";
+    printf("Content-type: text/html\r\n"
            "\r\n"
            "<title>FastCGI echo</title>"
-           /*"<h1>FastCGI echo</h1>\n"*/
-          /* "Process ID: %d %s<p>\n"
-           ,getpid(),request_method);*/
+           "<h1>%s</h1>\n"
+           "Process ID: %d [%s]\n"
+           ,tmp,getpid(),request_method);*/
     }
+    
+    MIG_INFO(USER_LEVEL,"deinit fastcgi id:%d",getpid());
     //UserMgr::FreeInstance();
     return 0;
 }

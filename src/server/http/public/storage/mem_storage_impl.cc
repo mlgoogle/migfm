@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "basic/linuxlist.h"
+#include "log/mig_log.h"
 
 #define mcached_is_allocated(__object) ((__object)->options.is_allocated)
 
@@ -32,6 +33,7 @@ bool MemStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
     while(it!=addrlist.end()){
     	addr = (*it);
     	servers = memcached_server_list_append(servers,addr.host().c_str(),addr.port(),&rc);
+        MIG_INFO(USER_LEVEL,"memcached ip[%s] port[%d]",addr.host().c_str(),addr.port());
     	++it;
     }
     /*list_for_each(node,addrlist) {
@@ -47,7 +49,7 @@ bool MemStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
     }
 
     memcached_server_free(servers);
-     return true;
+    return true;
 }
 
 bool MemStorageEngineImpl::Release(){
@@ -95,7 +97,7 @@ bool MemStorageEngineImpl::GetValue(const char* key,const size_t key_len,
     if(rc==MEMCACHED_END)
 	return false;
     else if(memcached_failed(rc))
-        return rc;
+        return false;
    *val = val_;
     return true;
 }

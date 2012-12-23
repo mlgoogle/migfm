@@ -1,7 +1,7 @@
 #include "redis_storage_impl.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "log/mig_log.h"
 namespace base_storage{
 	
 RedisStorageEngineImpl::RedisStorageEngineImpl(){
@@ -23,6 +23,8 @@ bool RedisStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 	while(it!=addrlist.end()){
 		addr = (*it);
 		str = RedisConnections(&c_,addr.host().c_str(),addr.port());
+                MIG_INFO(USER_LEVEL,"redis ip[%s] port[%d]",addr.host().c_str(),
+                         addr.port());
 		if(str!=NULL)
 			MIG_INFO(USER_LEVEL,"Redis Conntions error %s",str);
 		++it;

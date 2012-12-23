@@ -10,9 +10,13 @@ class MemDicSerial{
 public:
     MemDicSerial();
     virtual ~MemDicSerial();
-    static void Init(std::list<base::ConnAddr>& addrlist);
+    static bool Init(std::list<base::ConnAddr>& addrlist);
+    static bool SetString(const char* key,const size_t key_len,
+                          const char* data, size_t len);
+    static bool GetString(const char* key,const size_t key_len,
+                          char** data,size_t* len);
 private:
-	static base_storage::DictionaryStorageEngine*     mem_engine_;
+    static base_storage::DictionaryStorageEngine*     mem_engine_;
 };
 
 
@@ -20,7 +24,7 @@ class RedisDicSerial{
 public:
 	RedisDicSerial();
 	virtual ~RedisDicSerial();
-	static void Init(std::list<base::ConnAddr>& addrlist);
+	static bool Init(std::list<base::ConnAddr>& addrlist);
 private:
 	static base_storage::DictionaryStorageEngine*    redis_engine_;
 	

@@ -13,10 +13,13 @@ class FileConfig{
 public:
 	FileConfig();
 	virtual ~FileConfig();
+	bool LoadConfig(std::string& path);
 public:
-	 bool LoadConfig(std::string& path);
+	static FileConfig* GetFileConfig();
+private:
+	static FileConfig*  config_;
 public:
-	std::list<base::ConnAddr>  db_list_;
+	std::list<base::ConnAddr>  mysql_db_list_;
 	std::list<base::ConnAddr>  mem_list_;
 	std::list<base::ConnAddr>  redis_list_;
 };
