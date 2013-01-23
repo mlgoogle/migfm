@@ -48,9 +48,20 @@ public:
     
     virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list);
 
+#if defined(MEM_POOL)
+private:
+    void MemPoolInit(int32 ini,int32 max);
+    mcache_t* MemGetPool(void);
+    int MemPutPool(mcache_t* conn);
+#endif
+private:
+    mcache_t* GetMemCache();
+    void PutMemCache(mcache_t* conn);
 private:
     mcache_t*             cache_; 
-
+#if defined (MEM_POOL)
+    mcache_pool_t*        cached_pool_;
+#endif
 }; 
 
 }

@@ -4,6 +4,7 @@
 #include "storage/mem_storage_impl.h"
 #include "storage/redis_storage_impl.h"
 #include <assert.h>
+#include <sstream>
 
 namespace base_storage{
 
@@ -30,6 +31,18 @@ bool MemDicSerial::GetString(const char* key,const size_t key_len,
                              char** data,size_t* len){
    return mem_engine_->GetValue(key,key_len,data,len);
 }
+
+#if defined (MIG_SSO)
+bool MemDicSerial::IdpCheckSerial(const char* idp_identity,const char* idp_session,
+				  const char* provider,const char* username){
+    std::stringstream os;
+    os<<idp_identity<<"|"<<idp_session<<"|"
+      <<provider;
+   
+    return mem_engine_->SetValue(username,strlen(username)+1,
+                          os.str().c_str(),os.str().length());
+}
+#endif
 
 //redis
 bool RedisDicSerial::Init(std::list<base::ConnAddr>& addrlist){

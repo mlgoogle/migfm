@@ -25,6 +25,16 @@ HttpEngineImpl::HttpEngineImpl()
 ,error_(ERROR_NONE){
   
 	login_task_.reset(new HttpLoginTask(this));
+	std::string head;
+
+
+	head = "<stream:stream from=\"gmail.com\" " 
+		"id=\"1F83A90940271513\" "  //通过SSO获取 
+		"version=\"1.0\" " 
+		"xmlns:stream=\"http://etherx.jabber.org/streams\" " 
+		"xmlns=\"jabber:client\">";
+
+	stanzaParser_.Parse(head.c_str(),head.length(),false);
 }
 
 HttpEngineImpl::~HttpEngineImpl(){
@@ -43,18 +53,13 @@ HttpEngineImpl::EnterExit::~EnterExit(){
 	HttpEngineImpl* engine = engine_;
 	engine_->engine_entered_-=1;
 	int closeing = 0;
+	std::string content;
+	int32 code;
 	std::string url = engine_->output_->str();
     if (url.length()>0&&engine_->output_handler_)
-		engine_->output_handler_->WriteOutput(url);
+		engine_->output_handler_->WriteOutput(url,content,code);
 	///////////////////////////////test////////////////////////////////////
-//  	std::string head;
-// 	head = "<stream:stream from=\"gmail.com\" " 
-// 			"id=\"1F83A90940271513\" " 
-// 			"version=\"1.0\" " 
-// 			"xmlns:stream=\"http://etherx.jabber.org/streams\" " 
-// 			"xmlns=\"jabber:client\">";
-// 
-//  	engine_->stanzaParser_.Parse(head.c_str(),head.length(),false);
+ 
 // 
 // 	std::string content;
 // 	content = "<stream:features>"
@@ -68,7 +73,7 @@ HttpEngineImpl::EnterExit::~EnterExit(){
 // 			"</stream:features>";
 // 
 // 	//stanzaParser_.Parse(content.c_str(),content.length(),false);
-// 	engine_->stanzaParser_.Parse(content.c_str(),content.length(),false);
+ 	engine_->stanzaParser_.Parse(content.c_str(),content.length(),false);
 // 	engine_->output_->str("");
 	if (closeing){
 		//engine_->output_handler_->CloseConnection();
@@ -134,18 +139,16 @@ HttpEngine::HttpReturnStatus HttpEngineImpl::OnUsrLogin(){
 	return HTTP_RETURN_OK;
 }
 
-void HttpEngineImpl::InternalRequestLogin(const std::string& password){
-//  	*output_<<hid_.hostname()<<"/fcgin-bin/migfm.cgi?"
-//  		<<"username="<<hid_.username()<<"&"
-//  		<<"password="<<password<<"&"
-//  		<<"entry="<<hid_.resource();
-	//*output_<<"http://wbapi.9158.com/mobile/statuses/update/?uid=163184&status=TTTTTTTTTTTTTTTT";
-	//*output_<<"http://42.121.112.248/cgi-bin/show.fcgi";
-	*output_<<"http://www.9see.com/ashx/getlist.ashx";
-	//*output_<<"http://60.191.220.135/cgi-bin/brocast.fcgi";
-	//*output_<<"http://www.baidu.com";
-	//*output_<<"http://im.9158.com/api/index.php?act=systeminfo&nFansIdx=20348848&text=fuck 春哥！";
+void 
+HttpEngineImpl::InternalRequestLogin(const std::string& password){
+	//*output_<<"http://www.9see.com/ashx/getlist.ashx";
+	*output_<<"http://42.121.112.248/cgi-bin/show.fcgi?userid=10001";
+}
 
+
+void 
+HttpEngineImpl::InternalGetUserInfoSelf(const std::string& uid){
+	*output_<<"http://42.121.112.248/cgi-bin/show.fcgi?userid="<<uid<<";";
 }
 
 void 

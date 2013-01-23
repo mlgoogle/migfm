@@ -10,11 +10,19 @@ class MemDicSerial{
 public:
     MemDicSerial();
     virtual ~MemDicSerial();
+    
     static bool Init(std::list<base::ConnAddr>& addrlist);
+    
     static bool SetString(const char* key,const size_t key_len,
                           const char* data, size_t len);
+    
     static bool GetString(const char* key,const size_t key_len,
                           char** data,size_t* len);
+
+#if defined (MIG_SSO)
+    static bool IdpCheckSerial(const char* idp_identity,const char* idp_session,
+			       const char* provider,const char* username);
+#endif
 private:
     static base_storage::DictionaryStorageEngine*     mem_engine_;
 };

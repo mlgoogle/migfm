@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "client/linux/handler/exception_handler.h"
+//#include "client/linux/handler/exception_handler.h"
 
 #if defined (FCGI_STD)
 #include "fcgi_stdio.h"

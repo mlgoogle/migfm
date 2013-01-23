@@ -12,7 +12,8 @@ namespace net_comm{
 
 class HttpOutPutHandler {
 public:
-	virtual void WriteOutput(std::string& request) = 0;
+	virtual void WriteOutput(std::string& request,std::string& output,
+		                     int& code) = 0;
 
 	//virtual void StartTls(const std::string& domain) = 0;
 

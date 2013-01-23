@@ -17,11 +17,20 @@ static char port[] = "port";
 static char user[] = "user";
 static char pass[] = "pass";
 static char source[] = "name";
-
+static char sso[] = "sso";
+static char cert[] = "cert";
+static char path[] = "path";
+static char url[] = "url";
+static char serviceprovider[] = "serviceprovider";
+static char idprovider[] = "idprovider";
+static char cert_path[] = "cert_path";
+static char sp_url[] = "sp_url";
+static char idp_url[] = "idp_url";
 static int32 config_flag = 0;
 static int32 data_flag = 0;
 static int32 cached_flag = 0;
 static int32 memcached_flag = 0;
+static int32 sso_flag = 0;
 
 FileConfig*  FileConfig::config_ = NULL;
 
@@ -101,6 +110,23 @@ static void XMLCALL OnConfigStart(void* usrData,const char* name,const char** at
         	
     }else if(config_flag&&cached_flag&&strcmp(name,memcached)==0)
     	  memcached_flag = 1;
+    else if(strcmp(name,sso)==0)
+          sso_flag = 1;
+    else if((strcmp(name,cert)==0)&sso_flag){
+        for(i=0;atts[i]!=0;i+=2){
+            if(strcmp(atts[i],path)==0)
+                file_config->certificate_path_.assign(atts[i+1]);
+        }
+    }else if((strcmp(name,serviceprovider)==0)&&sso_flag){
+        for(i=0;atts[i]!=0;i+=2){
+            if(strcmp(atts[i],url)==0)
+                file_config->sp_url_.assign(atts[i+1]);
+        }
+    }else if((strcmp(name,idprovider)==0)&&sso_flag){
+        for(i=0;atts[i]!=0;i+=2){
+            file_config->idp_url_.assign(atts[i+1]);
+        }
+    }
 /*	if(strcmp(name,database)==0){//mysql
 		for(i=0;atts[i]!=0;i+=2){
 		    if(strcmp(atts[i],host)==0)

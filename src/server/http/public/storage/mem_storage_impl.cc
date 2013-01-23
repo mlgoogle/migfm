@@ -49,6 +49,9 @@ bool MemStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
     }
 
     memcached_server_free(servers);
+#if defined (MEM_POOL)
+    MemPoolInit(8,64); 
+#endif
     return true;
 }
 
@@ -61,7 +64,10 @@ bool MemStorageEngineImpl::SetValue(const char* key,const size_t key_len,const c
 									const size_t val_len){
 
     memcached_return_t rc;
-    rc = memcached_set((memcached_st*)cache_,key,key_len,val,val_len,0,0);
+    mcache_t* cache;
+    cache = GetMemCache();
+    rc = memcached_set((memcached_st*)cache,key,key_len,val,val_len,0,0);
+    PutMemCache(cache);
     if(memcached_success(rc))
         return true;
     return false;
@@ -71,7 +77,10 @@ bool MemStorageEngineImpl::AddValue(const char* key,const size_t key_len,const c
 									const size_t val_len){
 
     memcached_return_t rc;
-    rc = memcached_add((memcached_st*)cache_,key,key_len,val,val_len,0,0);
+    mcache_t* cache;
+    cache = GetMemCache();
+    rc = memcached_add((memcached_st*)cache,key,key_len,val,val_len,0,0);
+    PutMemCache(cache);
     if(memcached_success(rc))
     	return true;
     return false;
@@ -80,8 +89,11 @@ bool MemStorageEngineImpl::AddValue(const char* key,const size_t key_len,const c
 bool MemStorageEngineImpl::ReplaceValue(const char* key,const size_t key_len,
 										const char* val,const size_t val_len){
     memcached_return_t rc;
-    rc = memcached_replace((memcached_st*)cache_,key,key_len,
+    mcache_t* cache;
+    cache = GetMemCache();
+    rc = memcached_replace((memcached_st*)cache,key,key_len,
 				val,val_len,0,0);
+    PutMemCache(cache);
     if(memcached_success(rc))
 	return true;
     return false;
@@ -92,8 +104,12 @@ bool MemStorageEngineImpl::GetValue(const char* key,const size_t key_len,
     memcached_return_t rc;
     uint32_t flags = 0;
     char* val_ = NULL;
+    mcache_t* cache;
+    cache = GetMemCache();
     val_ = memcached_get((memcached_st*) cache_, key, key_len, val_len,
     					 &flags, &rc);
+    PutMemCache(cache);
+
     if(rc==MEMCACHED_END)
 	return false;
     else if(memcached_failed(rc))
@@ -105,7 +121,10 @@ bool MemStorageEngineImpl::GetValue(const char* key,const size_t key_len,
 bool MemStorageEngineImpl::DelValue(const char* key,const size_t key_len){
 
     memcached_return_t rc;
+    mcache_t* cache;
+    cache = GetMemCache();
     rc = memcached_delete ((memcached_st*)cache_,key,key_len,0);
+    PutMemCache(cache);
     if(memcached_success(rc))
         return true;
     return false;
@@ -230,6 +249,39 @@ bool MemStorageEngineImpl::SetListElement(const int index,const char* key,const 
 bool MemStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 	                                  std::list<std::string>& list){
 	return true;
+}
+
+#if defined (MEM_POOL)
+bool MemStorageEngineImpl::MemPoolInit(int32 init,int32 max){ 
+   cached_pool_ = (mcached_pool_t*)memcached_pool_create((memcached_st*)cache_,ini,max);
+    return true;
+}
+
+
+mcache_t* MemStorageEngineImpl::MemGetPool(void){
+    memcached_return_t rc;
+    return (mcached_t*)memcached_pool_pop((memcached_pool_st*)cached_pool_,false,&rc);
+}
+
+int MemStorageEngineImpl::MemPutPool(mcached_t* conn){
+    return memcached_pool_push((memcached_pool_st*)pool,conn);
+}
+
+#endif
+
+mcache_t* MemStorageEngineImpl::GetMemCache(){
+
+#if defined (MEM_POOL)
+    return MemGetPool();
+#else
+    return cache_;
+#endif
+}
+
+void MemStorageEngineImpl::PutMemCache(mcache_t* conn){
+#if defined(MEM_POOL)
+    MemPutPool(conn);
+#endif
 }
 
 }

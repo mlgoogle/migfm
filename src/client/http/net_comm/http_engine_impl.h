@@ -56,7 +56,7 @@ public:
 private:
 	friend class HttpLoginTask;
 	void InternalRequestLogin(const std::string& password);
-	
+	void InternalGetUserInfoSelf(const std::string& uid);
 	void IncomingStanza(const base::XmlElement* pelStanza);
 	void IncomingStart(const base::XmlElement* pelStanza);
 	void IncomingEnd(bool isError);

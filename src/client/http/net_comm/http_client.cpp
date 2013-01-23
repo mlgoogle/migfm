@@ -36,12 +36,14 @@ public:
 	sigslot::signal0<>               SignalLogin_;
 	sigslot::signal0<>               SignalRequest_;
 
-	void WriteOutput(std::string& request);
+	void WriteOutput(std::string& request,std::string& output,
+					int32& code);
 
 	//Event
 
 	void OnEventLogin();
 	void OnEventRequest();
+	void OnEventGetUserInfo();
 
 };
 
@@ -54,13 +56,18 @@ HttpClient::~HttpClient(){
 }
 
 void 
-HttpClient::Privates::WriteOutput(std::string& request){
+HttpClient::Privates::WriteOutput(std::string& request,std::string& output,
+								  int32& code){
 	scoped_ptr<net_comm::HttpBase>  http_base;
 	net_comm::HttpBase* http = new net_comm::HttpBase;
-	net_comm::SchemaOutPut output;
+	net_comm::SchemaOutPut schema_output;
 	GURL url(request);
 	http_base.reset(http);
-	http_base->GetSchemaOutPut(url.spec(),output);
+	http_base->GetSchemaOutPut(url.spec(),schema_output);
+	//code = schema_output.status();
+	//output.assign(schema_output.content())
+	output.assign(schema_output.content()->content());
+
 }
 
 
@@ -105,4 +112,9 @@ void HttpClient::Privates::OnEventLogin(){
 void HttpClient::Privates::OnEventRequest(){
 
 }
+
+void HttpClient::Privates::OnEventGetUserInfo(){
+
+}
+
 }
