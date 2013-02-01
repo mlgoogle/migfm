@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <lasso/lasso.h>
+#include <glib.h>
 #include "client/linux/handler/exception_handler.h"
 
 #if defined (FCGI_STD)
@@ -13,6 +15,7 @@
 #endif
 
 #include "log/mig_log.h"
+#include "service_provider.h"
 
 static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 			 void* contect,bool succeeded){
@@ -27,11 +30,11 @@ static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 #if defined (FCGI_STD)
 
 static void GetRequestMethod(const char* query){
-
+     
 }
 
 static void PostRequestMethod(std::string& content){
-
+     
 }
 
 static void PutRequestMethod(std::string& content){
@@ -55,6 +58,7 @@ static void PostRequestMethod(FCGX_Request * request){
         char* content = new char[clen];
         std::cin.read(content, clen);
         clen = std::cin.gcount();
+        
         if(content){
             delete content;
             content = NULL;
@@ -75,12 +79,20 @@ static void DeleteRequestMethod(FCGX_Request * request){
 
 int main(int agrc,char* argv[]){
     
-    google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
+    google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true); 
+    lasso_init();
     std::string path = "./sso_config.xml";
-   
+    
     std::string content;
     const char* query;
     bool r = false;
+    
+    r = mig_sso::ServiceProvider::GetInstance()->InitSSO(path);
+    if(!r){
+        MIG_ERROR(USER_LEVEL,"Init SSO Error");
+        return true;
+    }
+    
     MIG_INFO(USER_LEVEL,"init fastcgi id:%d",getpid());
 #if defined (FCGI_PLUS)
     FCGX_Request request;

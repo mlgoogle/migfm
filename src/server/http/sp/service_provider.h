@@ -17,9 +17,9 @@ public:
     bool ServiceProviderRequestInfo(std::string& url,std::string& request_url);
     bool TicketCheck();
 private:
-    LassoLogin*      sp_login_context_;
-    LassoServer*     sp_login_;
-    std::string      path_;
+    static LassoLogin*      sp_login_context_;
+    static LassoServer*     sp_login_;
+    static std::string      path_;
 public:
     static ServiceProvider* GetInstance();
     static void FreeInstance();

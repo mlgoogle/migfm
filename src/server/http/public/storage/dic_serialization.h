@@ -20,8 +20,12 @@ public:
                           char** data,size_t* len);
 
 #if defined (MIG_SSO)
-    static bool IdpCheckSerial(const char* idp_identity,const char* idp_session,
-			       const char* provider,const char* username);
+    static bool IdpCheckSerial(const char* ticket,const char* idp_identity,
+                               const char* idp_session,const char* provider);
+    
+    static bool IdpCheckUnserial(const char* ticket,std::string& idp_identity,
+                                 std::string& idp_session,std::string& provider);
+    static bool DeleteIdpCheck(const char* ticket);
 #endif
 private:
     static base_storage::DictionaryStorageEngine*     mem_engine_;

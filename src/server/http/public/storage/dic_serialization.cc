@@ -33,14 +33,48 @@ bool MemDicSerial::GetString(const char* key,const size_t key_len,
 }
 
 #if defined (MIG_SSO)
-bool MemDicSerial::IdpCheckSerial(const char* idp_identity,const char* idp_session,
-				  const char* provider,const char* username){
+bool MemDicSerial::IdpCheckSerial(const char* ticket,const char* idp_identity,
+                                  const char* idp_session,const char* provider){
     std::stringstream os;
     os<<idp_identity<<"|"<<idp_session<<"|"
-      <<provider;
+      <<provider<<"|";
    
-    return mem_engine_->SetValue(username,strlen(username)+1,
+    return mem_engine_->SetValue(ticket,strlen(ticket)+1,
                           os.str().c_str(),os.str().length());
+}
+
+bool MemDicSerial::IdpCheckUnserial(const char* ticket,std::string& idp_identity,
+                             std::string& idp_session,std::string& provider){
+     char* check_value;
+     char* head = NULL;
+     char* temp_head = NULL;
+     int32 temp_len = 0;  
+     size_t len;
+     int32 i = 0;
+     bool r = mem_engine_->GetValue(ticket,strlen(ticket)+1,&check_value,&len);
+     if(r){
+         temp_head = head = check_value;
+         while(i!=3){
+            temp_head = strchr(head,'|');
+            temp_len = temp_head - head;
+            if(i==0){
+                idp_identity.assign(head,temp_len);
+            }else if(i==1){
+                idp_session.assign(head,temp_len);
+            }else if(i=2){
+                provider.assign(head,temp_len);
+            }
+            i++;
+            temp_head++;
+            head = temp_head;
+         }
+     }
+     return false;
+}
+
+bool MemDicSerial::DeleteIdpCheck(const char* ticket){
+	bool r = mem_engine_->DelValue(ticket,strlen(ticket)+1);
+    return true;
 }
 #endif
 

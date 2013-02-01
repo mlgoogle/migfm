@@ -12,9 +12,12 @@ class IDProvider{
 public:
     IDProvider();
     virtual ~IDProvider();
-    bool InitSSO(std::string& path);
+    bool Init(std::string& path);
+    bool GetIdpDump(std::string& idp_dump);
+    bool InitSSO(void);
     bool SSOCheckUser(const std::string& request,const std::string& usr,
                       const std::string& pwd,std::string& respones);
+    bool SSOIdpCheck(const std::string& sp_soap_msg,std::string& idp_soap_msg);
 public:
     static IDProvider* GetInstance();
     static void FreeInstance();
@@ -22,8 +25,9 @@ private:
     static IDProvider*   instance_;
 
 private:
-    LassoLogin*  idp_login_;
-    LassoServer*  idp_server_login_;
+	std::string    path_;
+    LassoLogin*    idp_login_;
+    LassoServer*   idp_server_login_;
 };
 
 }

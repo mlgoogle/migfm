@@ -38,17 +38,20 @@ IDProvider::FreeInstance(){
     }
 }
 
+bool 
+IDProvider::Init(std::string& path){
+    path_ = path;
+}
 
-bool
-IDProvider::InitSSO(std::string& path){
+bool IDProvider::GetIdpDump(std::string& idp_dump){
      char* id_provider_context_dump = NULL;
      LassoServer* server_context =NULL;
-     std::string idp_metadata = path+ "/idp1-la/metadata.xml";
-     std::string idp_private_key_raw = path + "/idp1-la/private-key-raw.pem";
-     std::string idp_certificate = path + "/idp1-la/certificate.pem";
-     std::string sp_metdata = path + "/sp1-la/metadata.xml";
-     std::string sp_private_key_raw = path + "/sp1-la/public-key.pem";
-     std::string sp_certificate = path + "/ca1-la/certificate.pem";
+     std::string idp_metadata = path_+ "/idp1-la/metadata.xml";
+     std::string idp_private_key_raw = path_ + "/idp1-la/private-key-raw.pem";
+     std::string idp_certificate = path_ + "/idp1-la/certificate.pem";
+     std::string sp_metdata = path_ + "/sp1-la/metadata.xml";
+     std::string sp_private_key_raw = path_ + "/sp1-la/public-key.pem";
+     std::string sp_certificate = path_ + "/ca1-la/certificate.pem";
 
     server_context = lasso_server_new(idp_metadata.c_str(),
                       idp_private_key_raw.c_str(),
@@ -66,13 +69,24 @@ IDProvider::InitSSO(std::string& path){
         MIG_ERROR(USER_LEVEL,"id_provider_context_dump null");
         return false;
     }
+    idp_dump.assign(id_provider_context_dump);
+    g_object_unref(server_context); 
+    return true;
+}
+	
+bool
+IDProvider::InitSSO(void){
 
+    std::string idp_dump;
+    bool r = GetIdpDump(idp_dump);
+    if(!r)
+    	return false;
+    	
     idp_server_login_ = 
-       lasso_server_new_from_dump(id_provider_context_dump);
+       lasso_server_new_from_dump(idp_dump.c_str());
 
-    idp_login_ = lasso_login_new(idp_server_login_);
-
-    g_object_unref(server_context);    
+    idp_login_ = lasso_login_new(idp_server_login_);   
+    return true;
 }
 
 
@@ -172,7 +186,7 @@ bool IDProvider::SSOCheckUser(const std::string& request,const std::string& usr,
     response_url = LASSO_PROFILE(idp_login_)->msg_url;
     response_query = strchr(response_url,'?')+1;
     respones.assign(response_url); 
-    /*
+   
 
     temp_saml = strchr(response_query,'=');
    
@@ -203,14 +217,64 @@ bool IDProvider::SSOCheckUser(const std::string& request,const std::string& usr,
 
    memcpy(response,temp_saml,len);
 
-   response[len] = '\0'; //tciketi*/
-   
-   base_storage::MemDicSerial::IdpCheckSerial(idp_identity_context_dump,
+   response[len] = '\0'; //tciketi
+     
+   base_storage::MemDicSerial::IdpCheckSerial(response,idp_identity_context_dump,
                                               idp_session_context_dump,
-                                              service_provider_id,
-                                              usr.c_str());
+                                              service_provider_id);
    return true;
 
+}
+
+bool IDProvider::SSOIdpCheck(const std::string& sp_soap_msg,
+	                         std::string& idp_soap_msg){
+	LassoServer *idp_context;
+	LassoLogin *idp_login_context;
+	std::string identity;
+	std::string session;
+	std::string provider;
+    int32 rc = 0;
+    int32 request_type = lasso_profile_get_request_type_from_soap_msg(sp_soap_msg.c_str());
+    if(request_type==LASSO_REQUEST_TYPE_LOGIN){
+        MIG_ERROR(USER_LEVEL,"lasso_profile_get_request_type_from_soap_msg errnor");
+        return false;
+    }
+    std::string idp_dump;
+    bool r = GetIdpDump(idp_dump);
+    if(!r)
+    	return false;
+    idp_context = lasso_server_new_from_dump(idp_dump.c_str());
+    idp_login_context = lasso_login_new(idp_context);
+    
+    rc = lasso_login_process_request_msg(idp_login_context,(gchar*)sp_soap_msg.c_str());
+    
+    if(rc!=0){
+        MIG_ERROR(USER_LEVEL,"lasso_login_process_request_msg errno");
+        return false;
+    }
+    
+    r = base_storage::MemDicSerial::IdpCheckUnserial(idp_login_context->assertionArtifact,identity,
+    							                     session,provider);
+    if(!r)
+    	return false;
+    rc = lasso_profile_set_session_from_dump(LASSO_PROFILE(idp_login_context),session.c_str());
+    if(rc!=0){
+        MIG_ERROR(USER_LEVEL,"lasso_frofile_set_session_from_dump:[%d]",rc);
+        g_object_unref(idp_login_context);
+        g_object_unref(idp_context);
+        return false;
+    }
+    
+    rc = lasso_login_build_response_msg(idp_login_context,(gchar*)provider.c_str());
+    if(rc!=0){
+        MIG_ERROR(USER_LEVEL,"lasso_login_build_response_msg[%d]",rc);
+        g_object_unref(idp_login_context);
+        g_object_unref(idp_context);
+        return false;
+    }
+    base_storage::MemDicSerial::DeleteIdpCheck(idp_login_context->assertionArtifact);
+    idp_soap_msg.assign(LASSO_PROFILE(idp_login_context)->msg_body);
+    return true;
 }
 
 }
