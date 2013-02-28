@@ -3,8 +3,6 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "id_provider.h"
-#include "log/mig_log.h"
 #include "client/linux/handler/exception_handler.h"
 
 #if defined (FCGI_STD)
@@ -15,7 +13,11 @@
 #endif
 
 #include "log/mig_log.h"
-#include "basic/basic_util.h"
+#include "config/config.h"
+#include "record_engine.h"
+//#include "user_engine.h"
+
+
 static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 			 void* contect,bool succeeded){
 			 	    
@@ -24,46 +26,22 @@ static bool DumpCallBack(const char* dump_path,const char* minidump_id,
     return succeeded;
 }
 
-
-
 #if defined (FCGI_STD)
-
 static void GetRequestMethod(const char* query){
+    
+    std::string result;
+  //  userinfo::UserInfoEngine::GetEngine()->GetUserInfo(query,result);
 
+
+    printf("Content-type: text/html\r\n"
+           "\r\n"
+           "11111111111\n");
+    
 }
 
 static void PostRequestMethod(std::string& content){
-    MIG_INFO(USER_LEVEL,"post content [%s]",content.c_str());
     bool r = false;
-#if defined (IDP_CHECK)
-    std::string sso;
-    std::string username;
-    std::string password;
-    std::string response;
-    base::BasicUtil::ParserIdpPost(content,sso,username,password);
-    MIG_INFO(USER_LEVEL,"username[%s] password[%s] sso[%s]",
-             username.c_str(),password.c_str(),sso.c_str());
-   
-    r = mig_sso::IDProvider::GetInstance()->SSOCheckUser(sso,username,password,response);
-    if(r)
-        printf("Content-type: text/html\r\n"
-           "\r\n"
-           "%s\n"
-           ,response.c_str());
-#elif defined (SOAP_CHECK)
-    std::string soap_response;
-    r = mig_sso::IDProvider::GetInstance()->SSOIdpCheck(content,soap_response);
-    
-    if(r)
-        printf("Content-type: text/html\r\n"
-           "\r\n"
-           "%s\n"
-           ,soap_response.c_str());
-#endif
-    if(!r) 
-        printf("Content-type: text/html\r\n"
-           "\r\n"
-           "check errorn\n");
+    r = record::RecordEngine::GetEngine()->Recording(content);
 }
 
 static void PutRequestMethod(std::string& content){
@@ -73,7 +51,6 @@ static void PutRequestMethod(std::string& content){
 static void DeleteRequestMethod(std::string& content){
 
 }
-
 #elif defined (FCGI_PLUS)
 
 static void GetRequestMethod(FCGX_Request * request){
@@ -87,13 +64,14 @@ static void PostRequestMethod(FCGX_Request * request){
         char* content = new char[clen];
         std::cin.read(content, clen);
         clen = std::cin.gcount();
+       // UserMgr::GetInstance()->PostUserInfo(content,clen);
         if(content){
             delete content;
             content = NULL;
         }
     }
-} 
-
+    return;
+}
 
 static void PutRequestMethod(FCGX_Request * request){
 
@@ -104,18 +82,14 @@ static void DeleteRequestMethod(FCGX_Request * request){
 }
 #endif
 
-
 int main(int agrc,char* argv[]){
     
-    google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
-    std::string path = "./sso_config.xml";
-   
+    //google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
+    std::string path = "./config.xml";
+    config::FileConfig file_config;
     std::string content;
     const char* query;
     bool r = false;
-    
-    r = mig_sso::IDProvider::GetInstance()->InitSSO(path);
-    
     MIG_INFO(USER_LEVEL,"init fastcgi id:%d",getpid());
 #if defined (FCGI_PLUS)
     FCGX_Request request;
@@ -123,8 +97,15 @@ int main(int agrc,char* argv[]){
     FCGX_InitRequest(&request,0,0);
 #endif
 
+  //  if((!file_config.LoadConfig(path))){
+       // return 1;
+	//}
+  /*   r = userinfo::UserInfoEngine::GetEngine()->InitEngine(path);
      if(!r)
-         return r;
+         return r;*/
+    r = record::RecordEngine::GetEngine()->InitEngine(path);
+    if(!r)
+        return r;
 #if defined (FCGI_STD)
     while(FCGI_Accept()==0){
 #elif defined (FCGI_PLUS)
@@ -154,22 +135,17 @@ int main(int agrc,char* argv[]){
     char* request_method = "GET";
 #else
     char *request_method = getenv("REQUEST_METHOD");
-#endif
-    char *contentLength = getenv("CONTENT_LENGTH");
-    MIG_INFO(USER_LEVEL,"request_method[%s] content_length[%s]type[%s]",request_method,contentLength,getenv("CONTENT_LENGTH"));
+#endif   
+    char* contentLength = getenv("CONTENT_LENGTH");
+
     if(strcmp(request_method,"POST")==0){
         //std::cin>>content; 
-        int len = strtol(contentLength,NULL,10);
-        for(int i = 0;i<len;i++){
+        int32 len =strtol(contentLength,NULL,10);
+        for(int32 i =0;i<len;i++){
             char ch;
-            ch=getchar();
+            ch = getchar();
             content.append(1,ch);
-            //MIG_INFO(USER_LEVEL,"requesr content getchar[%c]",ch);
-            //putchar(ch);
         }
-        //MIG_INFO(USER_LEVEL,"request content [%s]",content.c_str());
-         //MIG_INFO(USER_LEVEL,"request content[%s][%c]",content.c_str(),t);
-        //MIG_INFO(USER_LEVEL,"post content [%d]",getenv("CONTENT_LENGTH"));
         PostRequestMethod(content);
         content.clear();
     }
@@ -204,11 +180,19 @@ int main(int agrc,char* argv[]){
 	else if(strcmp(request_method,"DELETE")==0)
 		DeleteRequestMethod(&request);
 #endif
-
+    //std::stringstream output;
+    //output<<"<iq id='v1' to='flaght' type='result'>"
+         // <<"<vCard xmlns='vcard-temp'>";
+    /*char* tmp ="<iq id='v1' to='flaght' type='result'><vCard xmlns='vcard-temp'>";
+    printf("Content-type: text/html\r\n"
+           "\r\n"
+           "<title>FastCGI echo</title>"
+           "<h1>%s</h1>\n"
+           "Process ID: %d [%s]\n"
+           ,tmp,getpid(),request_method);*/
     }
     
     MIG_INFO(USER_LEVEL,"deinit fastcgi id:%d",getpid());
+    //UserMgr::FreeInstance();
     return 0;
 }
-
-

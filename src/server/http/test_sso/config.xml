@@ -18,14 +18,8 @@
   		port ="6379"/>
 
      <memcached>
-       <config host = "42.121.112.248" port="11211"/>
+       <config host = "60.191.220.135" port="11211"/>
      </memcached>
- </cached>
-
-  <sso>
-      <cert path = "/home/data">
-      <serviceprovider url = "http://sso.miglab.com">
-      <idprovider url = "http://sso.miglab.com">
-  <sso>
+  </cached>
   
 </config>

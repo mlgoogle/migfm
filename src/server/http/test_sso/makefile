@@ -1,46 +1,47 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = /var/www/fcgi-bin/show.fcgi
-## 编译器
-COMPILER = g++
-COMPILERC = gcc
+OUTPUT_FILE = ./test_sso
 
+## 编译器
+COMPIlER = g++
+COMPILERC = gcc
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD #-DTEST
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG -DROOM_CHECK_COLUMN -DROOM_URANDOM_EXIST
 ## for release
-## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG -DROOM_CHECK_COLUMN -DROOM_URANDOM_EXIST
+# CPP_FLAG = -O3 -Wall -s -w  -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE
 
 ## 链接选项
 ## for debug
-LINK_FLAGS = -g  -fPIC
+LINK_FLAGS = -g 
 ## for release
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I../public/ -I /usr/local/libmemcached-1.0.7/include\
-		-I/usr/local/lib -I/root/third_party/hiredis\
-	        -I../../third_party/breakpad/src -I/usr/include/mysql 
+INCLUDE_PATHS = -I./ -I/usr/local/include/ -I/usr/include/glib-2.0/ -I/usr/include/xmlsec1/ \
+                -I/usr/include/libxml2/ -I/usr/lib64/glib-2.0/include/ -I../public/ \
+                -I/usr/local/libmemcached-1.0.7/include -I/root/third_party/hiredis\
+		-I/usr/include/mysql/
 
 ## 库
-LINK_PATHS =  -L/usr/local/libmemcached-1.0.7/lib/ -L/usr/lib64/mysql
-LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lmysqlclient -lexpat\
-					../lib/libbreakpad_client.a ../lib/libhiredis.a $(LINK_CORE_PATH)
+LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/ -L./usr/lib64/mysql/
+LINK_LIBRARYS = -lpthread -llasso -lmemcached -lmemcachedutil -lexpat  ../lib/libmysqlclient.a ../lib/libhiredis.a
 
+##3rd
+THIRD_PATH = ../
 # 编译
-COMPILE = $(COMPILER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
+COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 
 # 链接
-LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
+LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-
-output: userinfo.o usr_engine.o mig_log.o\
-	basic_info.o mem_storage_impl.o redis_storage_impl.o\
-	storage.o constants.o redis_warrper.o mysql_storage_impl.o\
-	basictypes.o config.o dic_serialization.o\
-	db_serialization.o xml_serialization.o basic_util.o
+output:	test_sso.o mig_log.o dic_serialization.o db_serialization.o\
+	basic_info.o mem_storage_impl.o mysql_storage_impl.o\
+        storage.o constants.o redis_warrper.o redis_storage_impl.o\
+        basictypes.o config.o xml_serialization.o basic_util.o json_writer.o\
+        json_value.o json_reader.o 
 	$(LINK)
 
 clean:
@@ -51,11 +52,9 @@ delete-temp-file:
 	-rm -f *.o
 
 ### 编译
-userinfo.o:
-	$(COMPILE) ./userinfo.cc
 
-usr_engine.o:
-	$(COMPILE) ./user_engine.cc
+test_sso.o:
+	$(COMPILE) ./test_sso.cc
 
 mig_log.o:
 	$(COMPILE) ./../public/log/mig_log.cc
@@ -98,3 +97,12 @@ xml_serialization.o:
 
 basic_util.o:
 	$(COMPILE) ./../public/basic/basic_util.cc
+
+json_reader.o:
+	$(COMPILE) ./../public/json/json_reader.cpp
+
+json_value.o:
+	$(COMPILE) ./../public/json/json_value.cpp
+
+json_writer.o:
+	$(COMPILE) ./../public/json/json_writer.cpp

@@ -1,14 +1,17 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = idp.fcgi
+OUTPUT_FILE_IDP = /var/www/fcgi-bin/idp.fcgi
+OUTPUT_FILE_SOAP = /var/www/fcgi-bin/soap.fcgi
 ## 编译器
 COMPILER = g++
 COMPILERC = gcc
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -DMIG_SSO -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD #-DTEST
+CPP_FLAG_IDP = -g -Wall -w -fPIC -c -DIDP_CHECK -D_LINUX -DDEBUG -DMIG_SSO -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD #-DTEST
+CPP_FLAG_SOAP = -g -Wall -w -fPIC -c -DSOAP_CHECK -D_LINUX -DDEBUG -DMIG_SSO -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -DMIG_SSO -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD
 ## for release
 ## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG -DROOM_CHECK_COLUMN -DROOM_URANDOM_EXIST
 
@@ -31,30 +34,42 @@ LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lm
 					../lib/libbreakpad_client.a ../lib/libhiredis.a $(LINK_CORE_PATH)
 
 # 编译
-COMPILE = $(COMPILER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
-
+COMPILE_IDP = $(COMPILER) $(CPP_FLAG_IDP) $(INCLUDE_PATHS) -o $@
+COMPILE_SOAP = $(COMPILER) $(CPP_FLAG_SOAP) $(INCLUDE_PATHS) -o $@
+COMPILE= $(COMPILER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 # 链接
-LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
+LINK_IDP = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE_IDP) $(LINK_LIBRARYS)
 
-all: clean output delete-temp-file
+LINK_SOAP = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE_SOAP) $(LINK_LIBRARYS)
 
-output: mig_idp.o mig_log.o id_provider.o config.o \
+all: clean outputsoap outputidp delete-temp-file
+
+outputidp: mig_idp_idp.o mig_log.o id_provider.o config.o \
 	basic_info.o dic_serialization.o db_serialization.o\
 	mem_storage_impl.o mysql_storage_impl.o\
 	storage.o constants.o redis_warrper.o redis_storage_impl.o\
-	basictypes.o 
-	$(LINK)
+	basictypes.o basic_util.o 
+	$(LINK_IDP)
+
+
+outputsoap: mig_idp_soap.o mig_log.o id_provider.o config.o \
+	basic_info.o dic_serialization.o db_serialization.o\
+	mem_storage_impl.o mysql_storage_impl.o\
+	storage.o constants.o redis_warrper.o redis_storage_impl.o\
+	basictypes.o basic_util.o
+	$(LINK_SOAP)
 
 clean:
 	-rm -f *.o
-	-rm -f $(OUTPUT_FILE)
+	-rm -f $(OUTPUT_FILE_IDP)
+	-rm -f $(OUTPUT_FILE_SOAP)
 
 delete-temp-file:
 	-rm -f *.o
 
-### 编译
-mig_idp.o:
-	$(COMPILE) ./mig_idp.cc
+
+mig_idp_soap.o:
+	$(COMPILE_SOAP) ./mig_idp.cc
 
 id_provider.o:
 	$(COMPILE) ./id_provider.cc
@@ -67,7 +82,6 @@ config.o:
 
 basic_info.o:
 	$(COMPILE) ./../public/basic/basic_info.cc
-
 
 dic_serialization.o:
 	$(COMPILE) ./../public/storage/dic_serialization.cc
@@ -95,3 +109,10 @@ redis_storage_impl.o:
 
 basictypes.o:
 	$(COMPILE) ./../public/basic/basictypes.cc
+
+basic_util.o:
+	$(COMPILE) ./../public/basic/basic_util.cc
+### 编译
+mig_idp_idp.o:
+	$(COMPILE_IDP) ./mig_idp.cc
+

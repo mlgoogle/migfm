@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-//#include "client/linux/handler/exception_handler.h"
+#include "client/linux/handler/exception_handler.h"
 
 #if defined (FCGI_STD)
 #include "fcgi_stdio.h"
@@ -14,6 +14,7 @@
 
 #include "log/mig_log.h"
 #include "config/config.h"
+#include "basic/basic_util.h"
 #include "user_engine.h"
 
 
@@ -38,6 +39,17 @@ static void GetRequestMethod(const char* query){
            /*"Process ID: %d %s<p>\n"
            ,getpid(),query);*/
     std::string result;
+    std::string request;
+    request.assign(query);
+    //check token
+    bool r = base::BasicUtil::CheckToken(request);
+    if(!r){    
+        printf("Content-type: text/html\r\n"
+           "\r\n"
+           "get userinfo errno\n");
+        return ;
+    }
+
     userinfo::UserInfoEngine::GetEngine()->GetUserInfo(query,result);
 
 

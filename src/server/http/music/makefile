@@ -1,14 +1,14 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = /var/www/fcgi-bin/sp.fcgi
+OUTPUT_FILE = /var/www/cgi-bin/record.fcgi
 ## 编译器
 COMPILER = g++
 COMPILERC = gcc
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -s -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD #-DTEST
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD #-DTEST
 ## for release
 ## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG -DROOM_CHECK_COLUMN -DROOM_URANDOM_EXIST
 
@@ -21,13 +21,11 @@ LINK_FLAGS = -g  -fPIC
 ## 头文件
 INCLUDE_PATHS = -I../public/ -I /usr/local/libmemcached-1.0.7/include\
 		-I/usr/local/lib -I../../third_party/hiredis\
-	        -I/root/third_party/breakpad/src/  -I/usr/include/mysql\
-                -I/usr/include/glib-2.0/ -I/usr/include/xmlsec1/ \
-                -I/usr/include/libxml2/ -I/usr/lib64/glib-2.0/include/\
-                -I/root/third_party/hiredis
+	        -I../../third_party/breakpad/src -I/usr/include/mysql 
+
 ## 库
 LINK_PATHS =  -L/usr/local/libmemcached-1.0.7/lib/ -L/usr/lib64/mysql
-LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lmysqlclient -lexpat -llasso -lcurl\
+LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lmysqlclient -lexpat\
 					../lib/libbreakpad_client.a ../lib/libhiredis.a $(LINK_CORE_PATH)
 
 # 编译
@@ -38,12 +36,11 @@ LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 
-output: mig_sp.o mig_log.o service_provider.o config.o \
-	basic_info.o http_response.o mem_storage_impl.o\
-        redis_warrper.o mysql_storage_impl.o\
-        basictypes.o config.o dic_serialization.o\
-        db_serialization.o xml_serialization.o basic_util.o\
-        redis_storage_impl.o storage.o constants.o
+output: record.o record_engine.o mig_log.o json_reader.o json_value.o json_writer.o\
+	basic_info.o mem_storage_impl.o redis_storage_impl.o\
+	storage.o constants.o redis_warrper.o mysql_storage_impl.o\
+	basictypes.o config.o dic_serialization.o\
+	db_serialization.o xml_serialization.o basic_util.o
 	$(LINK)
 
 clean:
@@ -54,29 +51,24 @@ delete-temp-file:
 	-rm -f *.o
 
 ### 编译
-mig_sp.o:
-	$(COMPILE) ./mig_sp.cc
+record.o:
+	$(COMPILE) ./record.cc
 
-service_provider.o:
-	$(COMPILE) ./service_provider.cc
+record_engine.o:
+	$(COMPILE) ./record_engine.cc
 
-http_response.o:
-	$(COMPILE) ./http_response.cc
 
 mig_log.o:
 	$(COMPILE) ./../public/log/mig_log.cc
-
-config.o:
-	$(COMPILE) ./../public/config/config.cc
-
-basic_info.o:
-	$(COMPILE) ./../public/basic/basic_info.cc
 
 dic_serialization.o:
 	$(COMPILE) ./../public/storage/dic_serialization.cc
 
 db_serialization.o:
 	$(COMPILE) ./../public/storage/db_serialization.cc
+
+basic_info.o:
+	$(COMPILE) ./../public/basic/basic_info.cc
 
 mem_storage_impl.o:
 	$(COMPILE) ./../public/storage/mem_storage_impl.cc
@@ -99,8 +91,20 @@ redis_storage_impl.o:
 basictypes.o:
 	$(COMPILE) ./../public/basic/basictypes.cc
 
+config.o:
+	$(COMPILE) ./../public/config/config.cc
+
 xml_serialization.o:
 	$(COMPILE) ./../public/xmpp/xml_serialization.cc
 
 basic_util.o:
 	$(COMPILE) ./../public/basic/basic_util.cc
+
+json_reader.o:
+	$(COMPILE) ./../public/json/json_reader.cpp
+
+json_value.o:
+	$(COMPILE) ./../public/json/json_value.cpp
+
+json_writer.o:
+	$(COMPILE) ./../public/json/json_writer.cpp

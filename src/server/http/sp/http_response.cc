@@ -29,10 +29,10 @@ static size_t HeaderFunction(void* ptr,size_t size,
     char* start,*end;
     char* p = (char*)ptr;
     std::string name,value;
-    if(curl_content->code_){
+    if(!curl_content->code_){
         while(*p && isspace(*p))
             ++p;
-        int32 rc = sscanf(p,"HTTP/1.%d %d",curl_content->subversion_,
+        int32 rc = sscanf(p,"HTTP/1.%d %d",&curl_content->subversion_,
                            &curl_content->code_);
         if(rc!=2)
         	return -1;
@@ -84,7 +84,9 @@ HttpPost::HttpPost(const MIG_URL& url)
 bool HttpPost::GetContent(std::string& content){
     for(std::vector<char>::iterator itr = content_.begin();
     	itr!=content_.end();++itr){
-        content.append((*itr),1);
+        content.append(1,(*itr));
+        MIG_DEBUG(USER_LEVEL,"(*itr)[%c]",(*itr));
+        MIG_DEBUG(USER_LEVEL,"content[%s]",content.c_str());
     }
     return true;
 }
@@ -152,7 +154,7 @@ bool HttpPost::Post(const char* post){
     curl_content.subversion_ = 0;
     curl_content.max_num_ = 1024*1024;
 	
-    curl_code = curl_easy_setopt(curl,CURLOPT_HEADERFUNCTION,HeaderFunction);
+    /*curl_code = curl_easy_setopt(curl,CURLOPT_HEADERFUNCTION,HeaderFunction);
     if(curl_code != CURLE_OK) {
 	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERFUNCTION failed: %s",
 		  curl_easy_strerror(curl_code));
@@ -164,7 +166,7 @@ bool HttpPost::Post(const char* post){
 	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERDATA failed: %s",
 		  curl_easy_strerror(curl_code));
 	goto out;
-   }
+   }*/
 
    curl_code = curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,ContentFunction);
    if(curl_code != CURLE_OK) {

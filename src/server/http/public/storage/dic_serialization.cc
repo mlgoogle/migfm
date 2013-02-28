@@ -38,9 +38,25 @@ bool MemDicSerial::IdpCheckSerial(const char* ticket,const char* idp_identity,
     std::stringstream os;
     os<<idp_identity<<"|"<<idp_session<<"|"
       <<provider<<"|";
-   
+    /*MIG_DEBUG(USER_LEVEL,"idp_identity[%s]",idp_identity);
+    MIG_DEBUG(USER_LEVEL,"===============================\n");
+    MIG_DEBUG(USER_LEVEL,"idp_session[%s]",idp_session);
+    MIG_DEBUG(USER_LEVEL,"===============================\n"); 
+    MIG_DEBUG(USER_LEVEL,"ticket[%s] length[%d]",ticket,os.str().length());
+    MIG_DEBUG(USER_LEVEL,"os[%s]",os.str().c_str()); 
+    MIG_DEBUG(USER_LEVEL,"======================================\n");
+    std::string txt = "idp_30078888888888";
+    mem_engine_->SetValue(txt.c_str(),txt.length(),os.str().c_str(),os.str().length());*/
+    //MIG_DEBUG(USER_LEVEL,"key[%s] length[%d]",ticket,os.str().length());
     return mem_engine_->SetValue(ticket,strlen(ticket)+1,
                           os.str().c_str(),os.str().length());
+
+    /*char* mem_value = NULL;
+    size_t mem_value_length = 0;
+    mem_engine_->GetValue(ticket,strlen(ticket)+1,&mem_value,&mem_value_length);
+    MIG_DEBUG(USER_LEVEL,"length[%d]\n",mem_value_length);
+    return true;*/
+  
 }
 
 bool MemDicSerial::IdpCheckUnserial(const char* ticket,std::string& idp_identity,
@@ -63,11 +79,13 @@ bool MemDicSerial::IdpCheckUnserial(const char* ticket,std::string& idp_identity
                 idp_session.assign(head,temp_len);
             }else if(i=2){
                 provider.assign(head,temp_len);
+
             }
             i++;
             temp_head++;
             head = temp_head;
          }
+         return true;
      }
      return false;
 }

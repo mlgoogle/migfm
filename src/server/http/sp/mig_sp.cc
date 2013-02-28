@@ -16,6 +16,7 @@
 
 #include "log/mig_log.h"
 #include "service_provider.h"
+#include "basic/basictypes.h"
 
 static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 			 void* contect,bool succeeded){
@@ -30,15 +31,40 @@ static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 #if defined (FCGI_STD)
 
 static void GetRequestMethod(const char* query){
-     
+    std::string request_url;
+    bool r = false;
+    if(strcmp(query,"sp")==0){
+        r = mig_sso::ServiceProvider::GetInstance()->GetRequestInfo(request_url);   
+        printf("Content-type: text/html\r\n"
+               "\r\n"
+               "%s\n"
+               ,request_url.c_str());
+    }else{ 
+        printf("Content-type: text/html\r\n"
+           "\r\n"
+           "request errnor\n");
+    }
 }
 
 static void PostRequestMethod(std::string& content){
      
+    std::string saml_art;
+    std::string relay_state;
+    std::string reponse;
+    std::string token;
+    bool r = false;
+ 
+    //base::BasicUtil::ParserSpPost(content,saml_art,relay_state);
+    std::string url = "http://sso.miglab.com/cgi-bin/soap.fcgi";
+    r = mig_sso::ServiceProvider::GetInstance()->TicketCheck(url,content,token);
+     
+    printf("Content-type: text/html\r\n"
+               "\r\n"
+               "%s\n"
+               ,token.c_str());
 }
 
 static void PutRequestMethod(std::string& content){
-
 }
 
 static void DeleteRequestMethod(std::string& content){
@@ -103,7 +129,7 @@ int main(int agrc,char* argv[]){
      if(!r)
          return r;
 #if defined (FCGI_STD)
-    while(FCGI_Accept()==0){
+    while(FCGI_Accept()>=0){
 #elif defined (FCGI_PLUS)
     while(FCGX_Accept_r(&request)==0){
 #endif
@@ -131,10 +157,18 @@ int main(int agrc,char* argv[]){
     char* request_method = "GET";
 #else
     char *request_method = getenv("REQUEST_METHOD");
-#endif    
+#endif
+    char* contentLength = getenv("CONTENT_LENGTH");    
     if(strcmp(request_method,"POST")==0){
-        std::cin>>content;
+        //MIG_INFO(USER_LEVEL,"request content[%s][%c]",content.c_str(),t);
+        int32 len =strtol(contentLength,NULL,10);
+        for(int32 i =0;i<len;i++){
+            char ch;
+            ch = getchar();
+            content.append(1,ch);
+        }
         PostRequestMethod(content);
+        content.clear();
     }
 		
     else if(strcmp(request_method,"GET")==0){
