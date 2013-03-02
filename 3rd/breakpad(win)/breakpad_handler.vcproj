@@ -185,7 +185,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\lib\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)\obj\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="1"
@@ -248,7 +248,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/ignore:4221"
-				OutputFile="$(OutDir)\lib\$(ProjectName).lib"
+				OutputFile="$(OutDir)\$(ProjectName).lib"
 				AdditionalLibraryDirectories="..\third_party\platformsdk_win7\files\Lib;..\third_party\directxsdk\files\Lib\x86"
 			/>
 			<Tool
