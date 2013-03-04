@@ -15,6 +15,8 @@ public:
 	virtual void WriteOutput(std::string& request,std::string& output,
 		                     int& code) = 0;
 
+	virtual void WriteOutput(std::string& request,std::string& post_content,
+							std::string& output,int& code) = 0; 
 	//virtual void StartTls(const std::string& domain) = 0;
 
 	//virtual void CloseConnection() = 0;

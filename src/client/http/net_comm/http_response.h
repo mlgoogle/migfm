@@ -26,6 +26,9 @@ public:
 	// Get the response from server.
 	virtual bool Get(void);
 
+	//Post to the server
+	virtual bool Post(const std::string& post_content);
+
 	virtual const GURL& GetUrl(void) {return url_;}
 
 	virtual int GetCode(void) {return code_;}

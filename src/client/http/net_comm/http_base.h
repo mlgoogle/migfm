@@ -28,6 +28,9 @@ public:
 	virtual bool GetSchemaOutPut(const std::string& url,
 								net_comm::SchemaOutPut& output);
 
+	virtual bool PostSchemaOutPut(const std::string& urlstring,
+								  const std::string& post_content,
+								  net_comm::SchemaOutPut& output);
 	//attributes
 
 	const std::string& proxy_host(void){return proxy_host_;}
@@ -47,6 +50,11 @@ protected:
 	void __RegisterConfs(Configuration* conf);
 
 	virtual net_comm::Response* GetResponse(const GURL& url,
+		net_comm::SchemaOutPut& output,
+		bool follow_redirects);
+
+	virtual net_comm::Response* PostResponse(const GURL& url,
+		const std::string& post_content,
 		net_comm::SchemaOutPut& output,
 		bool follow_redirects);
 

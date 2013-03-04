@@ -39,6 +39,8 @@ public:
 	void WriteOutput(std::string& request,std::string& output,
 					int32& code);
 
+	void WriteOutput(std::string& request,std::string& post_content,
+		             std::string& output,int& code);
 	//Event
 
 	void OnEventLogin();
@@ -68,6 +70,20 @@ HttpClient::Privates::WriteOutput(std::string& request,std::string& output,
 	//output.assign(schema_output.content())
 	output.assign(schema_output.content()->content());
 
+}
+
+void 
+HttpClient::Privates::WriteOutput(std::string& request,std::string& post_content,
+								  std::string& output,int32& code){
+	  scoped_ptr<net_comm::HttpBase>  http_base;
+	  net_comm::HttpBase* http = new net_comm::HttpBase;
+	  net_comm::SchemaOutPut schema_output;
+	  GURL url(request);
+	  http_base.reset(http);
+	  http_base->PostSchemaOutPut(url.spec(),post_content,schema_output);
+	  //code = schema_output.status();
+	  //output.assign(schema_output.content())
+	  output.assign(schema_output.content()->content());
 }
 
 

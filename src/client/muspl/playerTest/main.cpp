@@ -2,7 +2,7 @@
 #include "mainwindow.h"
 
 #ifdef _DEBUG
-#pragma comment(lib, "..\\Debug\\muspl.lib")
+#pragma comment(lib, "../../lib/Debug/muspl.lib")
 #else
 #pragma comment(lib, "..\\Release\\muspl.lib")
 #endif

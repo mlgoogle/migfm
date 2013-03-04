@@ -113,6 +113,132 @@ const std::string& HttpResponse::GetHeader(std::string &name){
 	return empty;
 }
 
+bool HttpResponse::Post(const std::string& post_content){
+	CURL* curl = curl_easy_init();
+	CURLcode curl_code;
+	char curl_error[CURL_ERROR_SIZE];
+	bool result = false;
+	CurlContent	curl_content;
+
+	if(!curl){
+		LOG(WARNING)<<"curl_easy_init error";
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error);
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_ERRORBUFFER failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_NOPROGRESS failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_NOSIGNAL failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_FAILONERROR failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	if(http_->use_proxy()){
+		curl_code = curl_easy_setopt(curl,CURLOPT_PROXY,
+			http_->proxy_host().c_str());
+		if(curl_code != CURLE_OK) {
+			LOG(WARNING) << "curl_easy_setopt, CURLOPT_PROXY failed: "
+				<< curl_easy_strerror(curl_code);
+			goto out;
+		}
+
+		curl_code = curl_easy_setopt(curl,CURLOPT_PROXYPORT,
+			http_->proxy_port());
+		if(curl_code != CURLE_OK) {
+			LOG(WARNING) << "curl_easy_setopt, CURLOPT_PROXYPORT failed: "
+				<< curl_easy_strerror(curl_code);
+			goto out;
+		}
+	}
+
+	curl_code = curl_easy_setopt(curl,CURLOPT_TIMEOUT,http_->user_agent());
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_USERAGENT failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl,CURLOPT_URL,url_.spec().c_str());
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_URL failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl,CURLOPT_POSTFIELDS,post_content.c_str());
+	if (curl_code!=CURLE_OK){
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_POSTFIELDS failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+	curl_content.base_ = http_;
+	curl_content.code_ = 0;
+	curl_content.content_ = &content_;
+	curl_content.headers_ =headers_;
+	curl_content.subversion_ = 0;
+	curl_code = curl_easy_setopt(curl,CURLOPT_HEADERFUNCTION,HeaderFunction);
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_HEADERFUNCTION failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl,CURLOPT_HEADERDATA,&curl_content);
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_HEADERDATA failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,ContentFunction);
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_WRITEFUNCTION failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_setopt(curl,CURLOPT_WRITEDATA,&curl_content);
+
+	if(curl_code != CURLE_OK) {
+		LOG(WARNING) << "curl_easy_setopt, CURLOPT_WRITEDATA failed: "
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+
+	curl_code = curl_easy_perform(curl);
+	if(curl_code != CURLE_OK) {
+		LOG(ERROR) << "curl_easy_perform failed: " 
+			<< curl_easy_strerror(curl_code);
+		goto out;
+	}
+	code_ = curl_content.code_;
+	result = true;
+out:
+	curl_easy_cleanup(curl);
+	return result;
+
+}
+
 bool HttpResponse::Get(){
 	CURL* curl = curl_easy_init();
 	CURLcode curl_code;

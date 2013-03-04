@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\lib\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)\obj\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -70,9 +70,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib dbghelp.lib base.lib base_i18n.lib breakpad_handler.lib dynamic_annotations.lib googleurl.lib icuuc.lib libcurl.lib libprotobuf.lib libprotoc.lib Wldap32.lib libexpat.lib"
-				AdditionalLibraryDirectories="../lib/Debug"
+				OutputFile="$(SolutionDir)\bin\Debug\$(ProjectName).dll"
+				AdditionalLibraryDirectories="../../lib/Debug"
 				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -122,6 +124,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;../../../../3rd/breakpad(win)/src&quot;;../../../../3rd;./../;./../../../;&quot;../../../../3rd/protobuf-2.3.0/src&quot;;../../../../3rd/curl/include;&quot;../../../../3rd/Expat-2.0.0/Source/lib&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;NET_COMM_EXPORTS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
