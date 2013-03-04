@@ -66,8 +66,8 @@ HttpEngineImpl::EnterExit::~EnterExit(){
 //  		engine_->output_handler_->WriteOutput(url,post_content,content,code);
 
  		/*url = "http://42.121.112.248/cgi-bin/record.fcgi";
-// 		
- 		std::string post_content = "{\"name\":\"flaght@gmail.com\",\"phone\":\"18668169052\",\"enter\":\"3\",\"music\":[{\"name\":\"ÊÄÑÔ1\", \"singer\":\"Íõ·Æ1\"},{\"name\":\"Äº´ºÇïÉ«\",\"singer\":\"ñ¼Î¨\"},{\"name\":\"Don't Break My Heart\",\"singer\":\"ºÚ±ªÀÖ¶Ó\"}]}";
+
+ 		std::string post_content = "content={\"name\":\"flaght@gmail.com\",\"phone\":\"18668169052\",\"enter\":\"3\",\"music\":[{\"name\":\"ÊÄÑÔ1\", \"singer\":\"Íõ·Æ1\"},{\"name\":\"Äº´ºÇïÉ«\",\"singer\":\"ñ¼Î¨\"},{\"name\":\"Don't Break My Heart\",\"singer\":\"ºÚ±ªÀÖ¶Ó\"}]}";
 		engine_->output_handler_->WriteOutput(url,post_content,content,code);*/
 	/*	engine_->output_handler_->WriteOutput(url,content,code);
 		int pos = content.find("?");
