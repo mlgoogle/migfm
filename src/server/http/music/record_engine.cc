@@ -59,30 +59,34 @@ bool RecordEngine::Recording(std::string& content){
     Json::Value root;
     std::string name;
     std::string phone;
+    std::string enter;
     std::stringstream os;
     bool r = false;
     MIG_DEBUG(USER_LEVEL,"\n\ncontent[%s]\n",content.c_str());
-    os<<"<info type=\"set\" from=\"flaght@gmail.com\">";
+    //os<<"<info type=\"set\" from=\"flaght@gmail.com\">";
     r = reader.parse(content.c_str(),root);
     if(!r)
         return r;
 
     name = root["name"].asString();
     phone = root["phone"].asString();
-
+    enter = root["enter"].asString();
+    os<<"<info type=\"set\"  from=\""<<name<<"\">";
     int32 music_infos_size = root["music"].size();
 
     Json::Value music = root["music"];
     for(int i = 0;i<music_infos_size;i++){
-        os<<"<music name=\\\""<<music[i]["name"].asString()<<"\\\" singer=\\\""
-          <<music[i]["singer"].asString()<<"\\\" />";
+        std::string song_name = music[i]["name"].asString();
+        std::string singer = music[i]["singer"].asString();
+        os<<"<music name=\\\""<<base::BasicUtil::GetRawString(song_name)<<"\\\" singer=\\\""
+          <<base::BasicUtil::GetRawString(singer)<<"\\\" />";
     }
 
     os<<"</info>";
    MIG_DEBUG(USER_LEVEL,"xml[%s]\n\n",os.str().c_str());
    MIG_DEBUG(USER_LEVEL,"===========\n");
    //write data
-   base_storage::MysqlSerial::SetMusicInfo(name,phone,os.str());
+   base_storage::MysqlSerial::SetMusicInfo(name,phone,enter,os.str());
    return true;
 }
 

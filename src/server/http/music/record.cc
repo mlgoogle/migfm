@@ -14,6 +14,7 @@
 
 #include "log/mig_log.h"
 #include "config/config.h"
+#include "basic/basic_util.h"
 #include "record_engine.h"
 //#include "user_engine.h"
 
@@ -41,7 +42,28 @@ static void GetRequestMethod(const char* query){
 
 static void PostRequestMethod(std::string& content){
     bool r = false;
-    r = record::RecordEngine::GetEngine()->Recording(content);
+    int32 result =0;
+    std::string out;
+    //parser post
+    std::string json_content;
+    std::string urlcode;
+    std::string enter;
+    base::BasicUtil::PaserRecordPost(content,enter,urlcode,json_content);
+    if(urlcode=="1"){
+        base::BasicUtil::UrlDecode(json_content,out);
+        MIG_DEBUG(USER_LEVEL,"post[%s]",out.c_str());
+        r = record::RecordEngine::GetEngine()->Recording(out);
+    }else{
+    	MIG_DEBUG(USER_LEVEL,"post[%s]",json_content.c_str());
+        r = record::RecordEngine::GetEngine()->Recording(json_content);
+    }
+    if(r)
+        result = 1;
+
+    printf("Content-type: text/html\r\n"
+           "\r\n"
+           "result=%d\n",result);
+
 }
 
 static void PutRequestMethod(std::string& content){

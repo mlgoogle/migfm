@@ -208,3 +208,27 @@
     <not-allowed xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
   </error>
 </iq>
+
+
+
+  SSO:
+  用户登录请求
+  username
+
+
+<!--移动平台 节省流量，故用jason格式-->(10首)
+  enter=1&urlcode=1&content={"name":"flaght@gmail.com","phone":"18668169052","music":[{"name": "誓言", "singer": "王菲"},
+  {"name": "暮春秋色", "singer": "窦唯"},{"name": "Don't Break My Heart", "singer": "黑豹乐队"}]}
+
+ <!--存储格式-->
+  <info type='set' from='flaght@gmail.com'>
+    <music name='誓言' singer='王菲'/>
+    <music name='誓言' singer='窦唯'/>
+    <music name='无地自容' singer='黑豹乐队'>
+  </info>
+  
+  
+  1.PC
+  2.ios
+  3.andriod
+  4,WP

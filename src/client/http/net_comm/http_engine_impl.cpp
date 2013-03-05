@@ -65,10 +65,25 @@ HttpEngineImpl::EnterExit::~EnterExit(){
 //   		url = "http://sso.miglab.com/cgi-bin/idp.fcgi";
 //  		engine_->output_handler_->WriteOutput(url,post_content,content,code);
 
- 		/*url = "http://42.121.112.248/cgi-bin/record.fcgi";
 
- 		std::string post_content = "content={\"name\":\"flaght@gmail.com\",\"phone\":\"18668169052\",\"enter\":\"3\",\"music\":[{\"name\":\"ÊÄÑÔ1\", \"singer\":\"Íõ·Æ1\"},{\"name\":\"Äº´ºÇïÉ«\",\"singer\":\"ñ¼Î¨\"},{\"name\":\"Don't Break My Heart\",\"singer\":\"ºÚ±ªÀÖ¶Ó\"}]}";
-		engine_->output_handler_->WriteOutput(url,post_content,content,code);*/
+		std::map<std::string,std::string> http_map;
+		std::string request_str = "enter=1&urlcode=0&content={\"name\":\"flaght@gmail.com\",\"phone\":\"18668169052\",\"music\":[{\"name\": \"ÊÄÑÔ\", \"singer\": \"Íõ·Æ\"},{\"name\": \"Äº´ºÇïÉ«\", \"singer\": \"ñ¼Î¨\"},{\"name\": \"Don't Break My Heart\", \"singer\": \"ºÚ±ªÀÖ¶Ó\"}]}";
+		while (request_str.length()!=0){
+			int32 start_pos = request_str.find("=");
+			int32 end_pos = request_str.find("&")==-1?request_str.length():request_str.find("&");
+			std::string key = request_str.substr(0,start_pos);
+			std::string value = request_str.substr(key.length()+1,end_pos - key.length()-1);
+			http_map[key] = value;
+			if (request_str.find("&")!=-1)  
+				request_str = request_str.substr(end_pos+1,request_str.length());
+			else
+				request_str.clear();            
+		}
+
+ 		url = "http://42.121.112.248/cgi-bin/record.fcgi";
+
+		std::string post_content = "enter=1&urlcode=0&content={\"name\":\"flaght@gmail.com\",\"phone\":\"18668169052\",\"music\":[{\"name\": \"ÊÄÑÔ\", \"singer\": \"Íõ·Æ\"},{\"name\": \"Äº´ºÇïÉ«\", \"singer\": \"ñ¼Î¨\"},{\"name\": \"Don't Break My Heart\", \"singer\": \"ºÚ±ªÀÖ¶Ó\"}]}";
+		engine_->output_handler_->WriteOutput(url,post_content,content,code);
 	/*	engine_->output_handler_->WriteOutput(url,content,code);
 		int pos = content.find("?");
 		std::string post_url = content.substr(0,pos);
