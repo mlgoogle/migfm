@@ -57,13 +57,13 @@ bool BasicUtil::ParserHttpRequest(const std::string& request,
     std::string request_str = request;
     while (request_str.length()!=0){
         int32 start_pos = request_str.find("=");
-	int32 end_pos = request_str.find("&")==-1?request.length():request_str.find("&");
-	std::string key = request_str.substr(0,start_pos);
-	std::string value = request_str.substr(key.length()+1,end_pos - key.length()-1);
-	http_map[key] = value;
-	if (request_str.find("&")!=-1)
-	    request_str = request_str.substr(end_pos+1,request_str.length());
-	else
+	    int32 end_pos = request_str.find("&")==std::string::nops?request.length():request_str.find("&");
+        std::string key = request_str.substr(0,start_pos);
+        std::string value = request_str.substr(key.length()+1,end_pos - key.length()-1);
+	    http_map[key] = value;
+	    if (request_str.find("&")!=std::string::nops)
+	        request_str = request_str.substr(end_pos+1,request_str.length());
+	    else
             request_str.clear();
     }
     return true;
@@ -74,7 +74,8 @@ void BasicUtil::ParserIdpPost(const std::string& request_string,std::string& sso
    
     int32 start_pos = request_string.find("username");
     int32 end_pos = request_string.find("&");
-    
+    if((start_pos==std::string::nops)||(end_pos==std::string::nops))
+    	return;
     username = request_string.substr(start_pos+9,end_pos-9);
     
     std::string temp_str;
@@ -83,6 +84,9 @@ void BasicUtil::ParserIdpPost(const std::string& request_string,std::string& sso
     start_pos = temp_str.find("password");
     end_pos = temp_str.find("&");
   
+    if((start_pos==std::string::nops)||(end_pos==std::string::nops))
+    	return;
+    	
     password = temp_str.substr(start_pos+9,end_pos-9);
    
     sso_info = temp_str.substr(end_pos+1,request_string.length());
@@ -91,7 +95,10 @@ void BasicUtil::ParserIdpPost(const std::string& request_string,std::string& sso
 void BasicUtil::ParserSpPost(const std::string& request_string,std::string& samlart,std::string& relay_state){
     int32 start_pos = request_string.find("SAMLart");
     int32 end_pos =request_string.find("&");
-  
+    
+    if((start_pos==std::string::nops)||(end_pos==std::string::nops))
+    	return;
+    	
     samlart = request_string.substr(start_pos+8,end_pos-8);
 
     std::string temp_str;
@@ -99,7 +106,10 @@ void BasicUtil::ParserSpPost(const std::string& request_string,std::string& saml
 
     start_pos = temp_str.find("RelayState");
     end_pos = temp_str.find("&");
-
+    
+    if((start_pos==std::string::nops)||(end_pos==std::string::nops))
+    	return;
+    	
     relay_state = temp_str.substr(start_pos+11,end_pos-11);
 }
 
@@ -109,11 +119,15 @@ bool BasicUtil::CheckToken(const std::string& request){
      char* mem_value = NULL;
      size_t mem_value_length = 0;
      int32 token_pos = request.find("token");
-     if(token_pos<=0)
-         return false;
+    if((token_pos==std::string::nops))
+    	return false;
      std::string temp_str = request.substr(token_pos,request.length());
      int32 and_pos = temp_str.find("&");
      int32 end_pos = and_pos>0?(and_pos-6):(request.length()-6);
+     
+     if((and_pos==std::string::nops)||(end_pos==std::string::nops))
+    	return;
+    	
      std::string token = temp_str.substr(6,end_pos);
      r = base_storage::MemDicSerial::GetString(token.c_str(),token.length(),
                                                 &mem_value,&mem_value_length);
