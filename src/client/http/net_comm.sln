@@ -2,6 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "net_comm", "net_comm\net_comm.vcproj", "{8D15A9FC-8218-4B97-B176-AEE7934A2CB1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30} = {3E283F37-A4ED-41B7-A3E6-A2D89D131A30}
+		{1832A374-8A74-4F9E-B536-69A699B3E165} = {1832A374-8A74-4F9E-B536-69A699B3E165}
+		{87EE9DA4-DE1E-4448-8324-183C98DCA588} = {87EE9DA4-DE1E-4448-8324-183C98DCA588}
+		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E} = {1738D5F6-ED1E-47E0-B2F0-456864B93C1E}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "breakpad_handler", "..\..\..\3rd\breakpad(win)\breakpad_handler.vcproj", "{B55CA863-B374-4BAF-95AC-539E4FA4C90C}"
 EndProject
@@ -17,7 +23,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotoc", "..\..\..\3rd\p
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcurl", "..\..\..\3rd\curl\lib\libcurl.vcproj", "{87EE9DA4-DE1E-4448-8324-183C98DCA588}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestNet", "..\TestNet\TestNet\TestNet.vcproj", "{E5F6E48B-26FE-4123-AC2A-233D1D29FF1B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestNet", "TestNet\TestNet.vcproj", "{E5F6E48B-26FE-4123-AC2A-233D1D29FF1B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8D15A9FC-8218-4B97-B176-AEE7934A2CB1} = {8D15A9FC-8218-4B97-B176-AEE7934A2CB1}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -139,7 +148,6 @@ Global
 		{B55CA863-B374-4BAF-95AC-539E4FA4C90C}.using libcurl LIB Release|x64.ActiveCfg = Release|x64
 		{B55CA863-B374-4BAF-95AC-539E4FA4C90C}.using libcurl LIB Release|x64.Build.0 = Release|x64
 		{1832A374-8A74-4F9E-B536-69A699B3E165}.Debug_dep|Win32.ActiveCfg = Debug_dep|Win32
-		{1832A374-8A74-4F9E-B536-69A699B3E165}.Debug_dep|Win32.Build.0 = Debug_dep|Win32
 		{1832A374-8A74-4F9E-B536-69A699B3E165}.Debug_dep|x64.ActiveCfg = Debug_dep|x64
 		{1832A374-8A74-4F9E-B536-69A699B3E165}.Debug_dep|x64.Build.0 = Debug_dep|x64
 		{1832A374-8A74-4F9E-B536-69A699B3E165}.Debug|Win32.ActiveCfg = Debug|Win32
@@ -191,7 +199,6 @@ Global
 		{1832A374-8A74-4F9E-B536-69A699B3E165}.using libcurl LIB Release|x64.ActiveCfg = Release|x64
 		{1832A374-8A74-4F9E-B536-69A699B3E165}.using libcurl LIB Release|x64.Build.0 = Release|x64
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug_dep|Win32.ActiveCfg = Debug|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug_dep|Win32.Build.0 = Debug|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug_dep|x64.ActiveCfg = Debug|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.ActiveCfg = Debug|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.Build.0 = Debug|Win32
@@ -230,7 +237,6 @@ Global
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.using libcurl LIB Release|Win32.Build.0 = Release|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.using libcurl LIB Release|x64.ActiveCfg = Release|Win32
 		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E}.Debug_dep|Win32.ActiveCfg = Debug|Win32
-		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E}.Debug_dep|Win32.Build.0 = Debug|Win32
 		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E}.Debug_dep|x64.ActiveCfg = Debug|Win32
 		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E}.Debug|Win32.Build.0 = Debug|Win32
@@ -269,7 +275,6 @@ Global
 		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E}.using libcurl LIB Release|Win32.Build.0 = Release|Win32
 		{1738D5F6-ED1E-47E0-B2F0-456864B93C1E}.using libcurl LIB Release|x64.ActiveCfg = Release|Win32
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug_dep|Win32.ActiveCfg = Debug|Win32
-		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug_dep|Win32.Build.0 = Debug|Win32
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug_dep|x64.ActiveCfg = Debug|Win32
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.Debug|Win32.Build.0 = Debug|Win32
@@ -308,7 +313,6 @@ Global
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.using libcurl LIB Release|Win32.Build.0 = Release|Win32
 		{B84FF31A-5F9A-46F8-AB22-DBFC9BECE3BE}.using libcurl LIB Release|x64.ActiveCfg = Release|Win32
 		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Debug_dep|Win32.ActiveCfg = Debug|Win32
-		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Debug_dep|Win32.Build.0 = Debug|Win32
 		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Debug_dep|x64.ActiveCfg = Debug|Win32
 		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Debug|Win32.ActiveCfg = Debug|Win32
 		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Debug|Win32.Build.0 = Debug|Win32

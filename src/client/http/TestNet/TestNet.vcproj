@@ -66,6 +66,7 @@
 				OutputFile="$(SolutionDir)\bin\Debug\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../lib/Debug"
+				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBCMTD"
 				GenerateDebugInformation="true"
 				SubSystem="1"
