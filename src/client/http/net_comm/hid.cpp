@@ -66,10 +66,11 @@ Hid::Hid(const std::string &hid_string,const std::string& hostname){
 }
 
 Hid::Hid(const std::string& usrname, const std::string& resource_name,const std::string& hostname){
-	
-
-	std::string node_name;
 	size_t slash = usrname.find('@');
+	if (slash == std::string::npos) {
+		return;
+	}
+	std::string node_name = usrname.substr(0, slash);
 	std::string domain_name = (slash == std::string::npos?STR_EMPTY:
 		usrname.substr(slash+1));
 

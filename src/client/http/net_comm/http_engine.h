@@ -12,11 +12,12 @@ namespace net_comm{
 
 class HttpOutPutHandler {
 public:
-	virtual void WriteOutput(std::string& request,std::string& output,
+	virtual void WriteOutput(const std::string& request, std::string& output,
 		                     int& code) = 0;
 
-	virtual void WriteOutput(std::string& request,std::string& post_content,
-							std::string& output,int& code) = 0; 
+	virtual void WriteOutput(const std::string& request, const std::string& post_content,
+							std::string& output, int& code) = 0;
+
 	//virtual void StartTls(const std::string& domain) = 0;
 
 	//virtual void CloseConnection() = 0;
@@ -39,7 +40,9 @@ public:
 		STATE_START,
 		STATE_OPENING, 
 		STATE_OPEN,
-		STATE_CLOSED
+		STATE_LOGIN,
+		STATE_LOGIC,
+		STATE_CLOSED,
 	};	
 
 	enum HttpReturnStatus {
@@ -51,12 +54,20 @@ public:
 		HTTP_RETURN_NOTYETIMPLEMENTED
 	};
 
+	enum HttpTypeStatus{
+		HTTP_GET_TYPE,
+		HTTP_POST_TYPE,
+		HTTP_PUT_TYPE,
+		HTTP_DEL_TYPE,
+	};
+
 	//HttpEngine(void);
 	static HttpEngine* Create();
-	~HttpEngine(void){};
+	virtual ~HttpEngine(void){};
+	
+	virtual Error GetError(int *subcode) = 0;
 
 	virtual HttpReturnStatus SetOutputHandler(HttpOutPutHandler* phoh) = 0;
-
 
 	virtual HttpReturnStatus SetUser(const net_comm::Hid& hid) = 0;
 
@@ -72,7 +83,6 @@ public:
 
 
 	virtual HttpReturnStatus OnUsrLogin() = 0;
-
 };
 }
 #endif

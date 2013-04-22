@@ -12,6 +12,7 @@ namespace net_comm{
 	class HttpOutPutHandler;
 	class HttpSessionHandler;
 	//class Hid;
+	class HttpLogicTask;
 }
 
 namespace net_comm{
@@ -20,6 +21,9 @@ class HttpEngineImpl:public net_comm::HttpEngine{
 public:
 	HttpEngineImpl();
 	virtual ~HttpEngineImpl();
+
+	virtual Error GetError( int *subcode );
+
 	virtual HttpEngine::HttpReturnStatus SetOutputHandler(HttpOutPutHandler* phoh);
 
 	virtual HttpEngine::HttpReturnStatus SetUser(const net_comm::Hid& hid);
@@ -34,9 +38,15 @@ public:
 
 	virtual const std::string& GetPassword() const;
 
+	virtual HttpEngine::HttpReturnStatus SetContent(const std::string& content);
+	
+	virtual const std::string& GetContent() const;
+
 	virtual HttpEngine::HttpReturnStatus OnUsrLogin();
 
-
+	virtual const HttpEngine::HttpTypeStatus GetHttpType() const;
+	
+	virtual HttpEngine::HttpReturnStatus SetHttpType(HttpEngine::HttpTypeStatus type);
 
 	class StanzaParseHandler :public base::XmppStanzaParseHandler{
 	public:
@@ -53,10 +63,17 @@ public:
 		HttpEngineImpl * const  outer_;
 	};
 
+	void SignalError(Error errorCode, int subCode);
+	bool HasError() { return error_code_ != ERROR_NONE; }
+	void RaiseReset() { raised_reset_ = true; }
+
 private:
 	friend class HttpLoginTask;
-	void InternalRequestLogin(const std::string& password);
-	void InternalGetUserInfoSelf(const std::string& uid);
+	friend class HttpLogicTask;
+
+	std::stringstream &output() { return *output_; }
+	std::stringstream &output_post() { return *output_post_; }
+
 	void IncomingStanza(const base::XmlElement* pelStanza);
 	void IncomingStart(const base::XmlElement* pelStanza);
 	void IncomingEnd(bool isError);
@@ -78,19 +95,29 @@ private:
 
 	 StanzaParseHandler stanzaParseHandler_;
 	 base::XmppStanzaParser stanzaParser_;
+	 bool raised_reset_;
+
 	 net_comm::Hid   hid_;
 	 std::string     resource_;
 	 std::string     password_;
+	 std::string     token_;
+
 	 State state_;
-	 Error error_;
+	 HttpEngine::HttpTypeStatus type_;
+	 Error error_code_;
+	 int subcode_;
 	 int   engine_entered_;
 	 std::string requested_resource_;
+
 	 scoped_ptr<std::stringstream> output_;
+	 scoped_ptr<std::stringstream> output_post_;
+	 std::string content_;
+
 	 net_comm::HttpOutPutHandler* output_handler_;
 	 net_comm::HttpSessionHandler* session_handler_;
-	 scoped_ptr<HttpLoginTask>  login_task_;
-
 	 
+	 scoped_ptr<HttpLoginTask>  login_task_;
+	 scoped_ptr<HttpLogicTask>  logic_task_;
 };
 
 }

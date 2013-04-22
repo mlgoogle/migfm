@@ -35,9 +35,9 @@ public:
 
 class XmlParser {
 public:
-  static void ParseXml(XmlParseHandler * pxph, std::string text);
+  static void ParseXml(XmlParseHandler * pxph, std::string text, const XML_Char *encoding=NULL);
 
-  explicit XmlParser(XmlParseHandler * pxph);
+  explicit XmlParser(XmlParseHandler * pxph, const XML_Char *encoding=NULL);
   bool Parse(const char * data, size_t len, bool isFinal);
   void Reset();
   virtual ~XmlParser();

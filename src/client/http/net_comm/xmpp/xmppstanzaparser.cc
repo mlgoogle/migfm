@@ -10,7 +10,7 @@ namespace base {
 XmppStanzaParser::XmppStanzaParser(XmppStanzaParseHandler *psph) :
   psph_(psph),
   innerHandler_(this),
-  parser_(&innerHandler_),
+  parser_(&innerHandler_, "UTF-8"),
   depth_(0),
   builder_() {
 }

@@ -11,6 +11,7 @@
 #include "net_comm/wrapper_http.h"
 // #include "net_comm/schema_output.h"
 // #include "net_comm/http_base.h"
+#include "net_comm/mig_http_module_impl.h"
 
 // #ifdef _DEBUG
 // #pragma comment(lib,"../lib/debug/breakpad_handler.lib")
@@ -80,7 +81,7 @@ int NET_Export MigInit(std::string& host,std::string& entry){
 
 // 	std::string hostname = "app.miglab.com";
 // 	std::string entry = "miglab";
-	net_comm::WrapperHttp::GetInstance()->Init(entry,host);
+	net_comm::WrapperHttp::GetInstance()->Init(NULL, entry,host);
 	return 1;
 }
 
@@ -90,4 +91,7 @@ int NET_Export MigUsrLogin(std::string& username,std::string& passwd,std::string
 	return 1;
 }
 
-
+net_comm::MigHttpModuleInterface * __stdcall CreateHttpModuleInst()
+{
+	return new net_comm::MigHttpModuleImpl();
+}

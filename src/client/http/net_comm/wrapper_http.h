@@ -13,18 +13,22 @@
 
 namespace net_comm{
 	class HttpClient;
+	class MigHttpModuleImpl;
 }
 
 namespace net_comm{
 
-class PE_EXPORT WrapperHttp{
+class PE_EXPORT WrapperHttp {
 public:
 	WrapperHttp();
 	~WrapperHttp();
 	static WrapperHttp* GetInstance(void);
 	static void FreeInstance(void);
-	void Init(std::string& resource,std::string& domain,bool tls = false);
-	bool UserLogin(std::string &usrname, std::string &passwd,std::string& hostname);
+	void Init(MigHttpModuleImpl *module, const std::string& resource,const std::string& domain,bool tls = false);
+	bool UserLogin(const std::string &usrname, const std::string &passwd, const std::string &hostname);
+
+public:
+	MigHttpModuleImpl *http_module() const { return http_module_; }
 
 private:
 	static WrapperHttp*             instance_;
@@ -32,6 +36,7 @@ private:
 	net_comm::Hid                   hid_;
 	net_comm::HttpClientSettings    xcs_;
 	scoped_ptr<net_comm::HttpClient> http_client_;
+	MigHttpModuleImpl				*http_module_;
 };
 
 }

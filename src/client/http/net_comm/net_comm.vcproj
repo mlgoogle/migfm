@@ -188,6 +188,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\message.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\message_dispatcher.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\message_factory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\mig_http_module_impl.cc"
+				>
+			</File>
+			<File
 				RelativePath=".\net_comm.cpp"
 				>
 			</File>
@@ -251,11 +267,15 @@
 					>
 				</File>
 				<File
-					RelativePath=".\http_response.cpp"
+					RelativePath=".\http_logic_task.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\httplogintask.cpp"
+					RelativePath=".\http_login_task.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\http_response.cpp"
 					>
 				</File>
 				<File
@@ -318,7 +338,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\buffered_queue.h"
+				>
+			</File>
+			<File
 				RelativePath=".\interface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\message.h"
+				>
+			</File>
+			<File
+				RelativePath=".\message_dispatcher.h"
+				>
+			</File>
+			<File
+				RelativePath=".\message_factory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mig_http_module_impl.h"
 				>
 			</File>
 			<File
@@ -389,11 +429,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\http_logic_task.h"
+					>
+				</File>
+				<File
+					RelativePath=".\http_login_task.h"
+					>
+				</File>
+				<File
 					RelativePath=".\http_response.h"
 					>
 				</File>
 				<File
-					RelativePath=".\httplogintask.h"
+					RelativePath=".\http_task_base.h"
 					>
 				</File>
 				<File

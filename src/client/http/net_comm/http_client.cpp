@@ -36,11 +36,11 @@ public:
 	sigslot::signal0<>               SignalLogin_;
 	sigslot::signal0<>               SignalRequest_;
 
-	void WriteOutput(std::string& request,std::string& output,
+	void WriteOutput(const std::string& request, std::string& output,
 					int32& code);
 
-	void WriteOutput(std::string& request,std::string& post_content,
-		             std::string& output,int& code);
+	void WriteOutput(const std::string& request, const std::string& post_content,
+		             std::string& output, int& code);
 	//Event
 
 	void OnEventLogin();
@@ -58,7 +58,7 @@ HttpClient::~HttpClient(){
 }
 
 void 
-HttpClient::Privates::WriteOutput(std::string& request,std::string& output,
+HttpClient::Privates::WriteOutput(const std::string& request, std::string& output,
 								  int32& code){
 	scoped_ptr<net_comm::HttpBase>  http_base;
 	net_comm::HttpBase* http = new net_comm::HttpBase;
@@ -73,8 +73,8 @@ HttpClient::Privates::WriteOutput(std::string& request,std::string& output,
 }
 
 void 
-HttpClient::Privates::WriteOutput(std::string& request,std::string& post_content,
-								  std::string& output,int32& code){
+HttpClient::Privates::WriteOutput(const std::string& request, const std::string& post_content,
+								  std::string& output, int32& code){
 	  scoped_ptr<net_comm::HttpBase>  http_base;
 	  net_comm::HttpBase* http = new net_comm::HttpBase;
 	  net_comm::SchemaOutPut schema_output;

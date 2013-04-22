@@ -15,15 +15,16 @@ WrapperHttp::~WrapperHttp(){
 
 }
 
-void WrapperHttp::Init(std::string& resource,std::string& domain,bool tls){
+void WrapperHttp::Init(MigHttpModuleImpl *module, const std::string& resource, const std::string& domain, bool tls){
 
+	http_module_ = module;
 	xcs_.set_resource(resource);
 	xcs_.set_host(domain);
 	xcs_.set_use_tls(tls);
 }
 
 
-bool WrapperHttp::UserLogin(std::string &usrname, std::string &passwd,std::string& hostname){
+bool WrapperHttp::UserLogin(const std::string &usrname, const std::string &passwd, const std::string& hostname){
 	std::string  lang;
 	hid_ = net_comm::Hid(usrname,hostname);
 	if (!hid_.IsValid()){
