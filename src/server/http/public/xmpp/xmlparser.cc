@@ -1,6 +1,6 @@
 #include "xmlparser.h"
 
-#include "stl_decl.h"
+#include "basic/stl_decl.h"
 #include <string>
 #include <vector>
 #include <iostream>

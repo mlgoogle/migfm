@@ -9,7 +9,7 @@
 #include "xmlbuilder.h"
 #include "xmlprinter.h"
 #include "xmlconstants.h"
-#include "basictypes.h"
+#include "basic/basictypes.h"
 
 namespace base {
 

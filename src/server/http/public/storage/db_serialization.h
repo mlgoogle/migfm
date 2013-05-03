@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "storage/storage.h"
 #include "basic/basictypes.h"
-
+#include "basic/basic_info.h"
 namespace base_storage{
 
 class MysqlSerial{
@@ -14,13 +14,24 @@ public:
 	
     static bool Init(std::list<base::ConnAddr>& addrlist);
     
-    static bool GetUserInfo(const int32 usr_id,std::string& username,int32& sex,std::string& extadd,
+    static bool GetUserInfo(const std::string& username,std::string& userid,int32& sex,std::string& extadd,
 	                        std::string& street,std::string& locality,std::string& regin,
 	                        int32& pcode,std::string& ctry,std::string& head,
 	                        std::string& birthday,std::string& nickname);
 
+  
+    static bool SpiderDouBan(const std::string& sidx,const std::string& ssidx,const std::string& title,
+                             const std::string& album,const std::string& albumtitle,
+                             const std::string& pubtime,const std::string& artist,
+                             const std::string& pic);
+
     static bool SetMusicInfo(const std::string& name,const std::string& phone,
                              const std::string& enter,const std::string& music_info);
+
+    static bool GetMusicInfos(std::list<base::MusicUsrInfo>& music_list);
+
+    static bool SetMusicTempInfo(const std::string& name,const std::string& enter,
+                                 const std::string& content);
 
 #if defined (MIG_SSO)
     static bool CheckUserPassword(const char* username,const char* password);

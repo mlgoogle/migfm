@@ -2,6 +2,36 @@
 
 namespace base{
 	
+MusicUsrInfo::MusicUsrInfo(){
+    data_ = new Data();
+}
+
+MusicUsrInfo::MusicUsrInfo(const std::string& name,const std::string& phone,
+                           const std::string& content){
+    data_ = new Data(name,phone,content);
+}
+
+
+MusicUsrInfo& MusicUsrInfo::operator=(const MusicUsrInfo& mi){
+    if(mi.data_!=NULL){
+        mi.data_->AddRef();
+    }
+    
+    if(data_!=NULL){
+        data_->Release();
+    }
+
+    data_ = mi.data_;
+    return *this;
+}
+
+MusicUsrInfo::MusicUsrInfo(const MusicUsrInfo& mi)
+:data_(mi.data_){
+    if(data_!=NULL){
+        data_->AddRef();
+    }
+}
+
 ConnAddr::ConnAddr(){
   
     data_ = new Data();

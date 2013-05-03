@@ -2,8 +2,8 @@
 #define _xmlbuilder_h_
 
 #include <string>
-#include "scoped_ptr.h"
-#include "stl_decl.h"
+#include "basic/scoped_ptr.h"
+#include "basic/stl_decl.h"
 #include "xmlparser.h"
 
 #include <expat.h>

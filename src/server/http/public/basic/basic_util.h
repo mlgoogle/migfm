@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string>
 #include <map>
+#include <iconv.h>
 #include "basic/basictypes.h"
 namespace base{
 
@@ -33,9 +34,16 @@ public:
 
     static std::string  GetRawString(std::string str);
 
+    static std::string GetSrcString(std::string str);
+
     static bool UrlDecode(std::string& content,std::string& out_str);
 
     static int32 php_htoi(char *s);
+
+	static bool GB2312ToUTF8 (const char *input, size_t inlen, char **output /* free */, size_t *outlen);
+
+	static bool UTF8ToGB2312 (const char *input, size_t inlen, char **output /* free */, size_t *outlen);
+
 };
 
 }

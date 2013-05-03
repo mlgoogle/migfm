@@ -4,7 +4,7 @@
 
 namespace base {
 
-bool XmlSerialization::XmlUserInfoSerialization(std::string& xml_result,const int32 usr_id,
+bool XmlSerialization::XmlUserInfoSerialization(std::string& xml_result,const std::string& usr_id,
 	                   const std::string& username,const int32& sex,const std::string& extadd,
                            const std::string& street,const std::string& locality,
                            const std::string& regin,const int32& pcode,std::string& ctry,
@@ -28,7 +28,7 @@ bool XmlSerialization::XmlUserInfoSerialization(std::string& xml_result,const in
      <nickname>kerry</nickname>
     </vCard>
 </iq>*/
-    MIG_INFO(USER_LEVEL,"usr_id[%d] sex[%d] extadd[%d] street[%s]",usr_id,sex,extadd.c_str());
+   // MIG_INFO(USER_LEVEL,"usr_id[%d] sex[%d] extadd[%d] street[%s]",usr_id,sex,extadd.c_str());
     std::stringstream output;
     output<<"<iq id='v1' to='"<<username<<"' type='result'>"
           <<"<vCard xmlns='vcard-temp'>";

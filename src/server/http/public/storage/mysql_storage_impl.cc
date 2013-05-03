@@ -66,7 +66,7 @@ bool MysqlStorageEngineImpl::FreeRes(){
 bool MysqlStorageEngineImpl::SQLExec(const char* sql){
     FreeRes();
     MYSQL* mysql = (MYSQL*)conn_.get()->proc;
-    MIG_DEBUG(USER_LEVEL,"SQLExec sql[%s]\n",sql);
+    //MIG_DEBUG(USER_LEVEL,"SQLExec sql[%s]\n",sql);
     mysql_query(mysql,sql);
     result_.get()->proc = mysql_store_result(mysql);
     return true;

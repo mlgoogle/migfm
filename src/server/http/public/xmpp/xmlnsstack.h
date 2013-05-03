@@ -2,8 +2,8 @@
 #define _xmlnsstack_h_
 
 #include <string>
-#include "scoped_ptr.h"
-#include "stl_decl.h"
+#include "basic/scoped_ptr.h"
+#include "basic/stl_decl.h"
 #include "qname.h"
 
 namespace base {

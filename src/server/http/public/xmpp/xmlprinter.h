@@ -3,7 +3,7 @@
 
 #include <iosfwd>
 #include <string>
-#include "scoped_ptr.h"
+#include "basic/scoped_ptr.h"
 
 namespace base {
 

@@ -1,7 +1,7 @@
 #include <expat.h>
 #include "xmlelement.h"
 #include "xmppstanzaparser.h"
-#include "constants.h"
+#include "basic/constants.h"
 
 #define new TRACK_NEW
 

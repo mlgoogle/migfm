@@ -11,7 +11,7 @@ public:
 	XmlSerialization(){}
 	virtual ~XmlSerialization(){}
 public:
-	static bool XmlUserInfoSerialization(std::string& xml_result,const int32 usr_id,
+	static bool XmlUserInfoSerialization(std::string& xml_result,const std::string& usr_id,
                                          const std::string& username,const int32& sex,
                                          const std::string& extadd,const std::string& street,
                                          const std::string& locality,const std::string& regin,

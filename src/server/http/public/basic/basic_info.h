@@ -4,6 +4,45 @@
 #include "constants.h"
 namespace base{
 
+class MusicUsrInfo{
+public:
+    explicit MusicUsrInfo();
+    explicit MusicUsrInfo(const std::string& name,const std::string& phone,
+                          const std::string& content);
+
+    MusicUsrInfo(const MusicUsrInfo& mi);
+    MusicUsrInfo& operator=(const MusicUsrInfo& mi);
+
+    ~MusicUsrInfo(){
+        if(data_!=NULL){
+            data_->Release();
+        }
+    }
+    const std::string& name() const {return !data_?STR_EMPTY:data_->name_;}
+    const std::string& phone() const {return !data_?STR_EMPTY:data_->phone_;}
+    const std::string& content() const {return !data_?STR_EMPTY:data_->content_;}
+private:
+    class Data{
+        public:
+            Data():refcount_(1){}
+            Data(const std::string& name,const std::string& phone,const std::string& content)
+                :name_(name)
+                ,phone_(phone)
+                ,content_(content)
+                ,refcount_(1){}
+            void AddRef(){refcount_++;}
+            void Release(){if(!--refcount_) delete this;}
+            const std::string name_;
+            const std::string phone_;
+            const std::string content_;
+        private:
+            int refcount_;
+    };
+
+    Data*           data_;
+};
+
+
 class ConnAddr{
 public:
     explicit ConnAddr();

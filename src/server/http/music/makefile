@@ -40,7 +40,7 @@ output: record.o record_engine.o mig_log.o json_reader.o json_value.o json_write
 	basic_info.o mem_storage_impl.o redis_storage_impl.o\
 	storage.o constants.o redis_warrper.o mysql_storage_impl.o\
 	basictypes.o config.o dic_serialization.o\
-	db_serialization.o xml_serialization.o basic_util.o
+	db_serialization.o xml_serialization.o basic_util.o base64.o
 	$(LINK)
 
 clean:
@@ -99,6 +99,9 @@ xml_serialization.o:
 
 basic_util.o:
 	$(COMPILE) ./../public/basic/basic_util.cc
+
+base64.o:
+	$(COMPILE) ./../public/basic/base64.cc
 
 json_reader.o:
 	$(COMPILE) ./../public/json/json_reader.cpp
