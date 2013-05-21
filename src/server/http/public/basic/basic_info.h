@@ -42,6 +42,79 @@ private:
     Data*           data_;
 };
 
+class MusicInfo{
+public:
+	explicit MusicInfo();
+	explicit MusicInfo(const std::string id,const std::string& sid,const std::string& ssid,
+						const std::string& album_title,const std::string& title,
+						const std::string& url,const std::string& pub_time,
+						const std::string& artist);
+
+	MusicInfo(const MusicInfo& mi);
+	MusicInfo& operator=(const MusicInfo& mi);
+
+	~MusicInfo(){
+		if(data_!=NULL){
+			data_->Release();
+		}
+	}
+
+	void set_id(const std::string& id) {data_->id_ = id;}
+	void set_sid(const std::string& sid) {data_->sid_ = sid;}
+	void set_ssid(const std::string& ssid) {data_->ssid_ = ssid;}
+	void set_album_title(const std::string& album_title) {data_->album_title_ = album_title;}
+	void set_title(const std::string& title) {data_->titile_ = title;}
+	void set_url(const std::string& url) {data_->url_ = url;}
+	void set_pub_time(const std::string& pub_time) {data_->pub_time_ = pub_time;}
+	void set_artist(const std::string& artist) {data_->artist_ = artist;}
+
+	const std::string& id() const {return !data_?STR_EMPTY:data_->id_;}
+	const std::string& sid() const {return !data_?STR_EMPTY:data_->sid_;}
+	const std::string& ssid() const {return !data_?STR_EMPTY:data_->ssid_;}
+	const std::string& album_title() const {return !data_?STR_EMPTY:data_->album_title_;}
+	const std::string& title() const {return !data_?STR_EMPTY:data_->titile_;}
+	const std::string& url() const {return !data_?STR_EMPTY:data_->url_;}
+	const std::string& pub_time() const {return !data_?STR_EMPTY:data_->pub_time_;}
+	const std::string& artist() const {return !data_?STR_EMPTY:data_->artist_;}
+
+	bool SerializedJson(std::string& json);
+// 	bool UnserializedJson(std::string& str);
+// 
+// 	bool SerializedXml(std::string& xml);
+// 	bool UnserializedXml(std::string& str);
+private:
+	class Data{
+	public:
+		Data():refcount_(1){}
+		Data(const std::string id,const std::string& sid,
+			const std::string& ssid,const std::string& album_title,
+			const std::string& title,const std::string& url,const std::string& pub_time,
+			const std::string& artist)
+			:id_(id)
+			,sid_(sid)
+			,ssid_(ssid)
+			,album_title_(album_title)
+			,titile_(title)
+			,url_(url)
+			,pub_time_(pub_time)
+			,artist_(artist)
+			,refcount_(1){}
+		void AddRef(){refcount_++;}
+		void Release(){if(!--refcount_) delete this;}
+		std::string id_;
+		std::string sid_;
+		std::string ssid_;
+		std::string album_title_;
+		std::string titile_;
+		std::string url_;
+		std::string pub_time_;
+		std::string artist_;
+	private:
+		int refcount_;
+	};
+
+	Data*           data_;
+};
 
 class ConnAddr{
 public:

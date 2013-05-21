@@ -1,6 +1,7 @@
 #include "redis_storage_impl.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <sstream>
 #include "log/mig_log.h"
 namespace base_storage{
 	
@@ -42,7 +43,9 @@ bool RedisStorageEngineImpl::SetValue(const char* key,const size_t key_len,
 
     if(PingRedis()!=1)
     	return false;
-    return (RedisAddValue(c_,key,key_len,val,val_len)==1?true:false);
+	int ret = RedisAddValue(c_,key,key_len,val,val_len);
+	//MIG_DEBUG(USER_LEVEL,"=====ret[%d]=======",ret);
+    return (ret==1?true:false);
 }
 
 bool RedisStorageEngineImpl::AddValue(const char* key,const size_t key_len,
@@ -55,11 +58,11 @@ bool RedisStorageEngineImpl::AddValue(const char* key,const size_t key_len,
     if(PingRedis()!=1)
     	return false;
     	
-    r = RedisGetValue(c_,key,key_len,&cval,&cval_len);
-    if(r){
-    	if(cval) delete cval;
-    	return false;
-    }
+//     r = RedisGetValue(c_,key,key_len,&cval,&cval_len);
+//     if(r){
+//     	if(cval) delete cval;
+//     	return false;
+//     }
     return SetValue(key,key_len,val,val_len)==1?true:false;
 }
 
@@ -76,6 +79,7 @@ bool RedisStorageEngineImpl::GetValue(const char* key,const size_t key_len,
 
     if(PingRedis()!=1)
     	return false;
+	MIG_DEBUG(USER_LEVEL,"key[%s] key_len[%d]",key,key_len);
     return RedisGetValue(c_,key,key_len,val,val_len)==1?true:false;
 }
 
@@ -104,6 +108,58 @@ bool RedisStorageEngineImpl::PingRedis(){
 	return (RedisPingRedis(c_)==1)?true:false;
 }
 
+bool RedisStorageEngineImpl::AddHashRadomElement(const char* hash_name,
+												 const char* val,const size_t val_len){
+
+	 if(PingRedis()!=1)
+		 return false;
+	 int64 current_pos = RedishHashSize(c_,hash_name);
+	 //MIG_DEBUG(USER_LEVEL,"current pos[%lld]",current_pos);
+	 std::stringstream index;
+	 index<<current_pos;
+
+	 bool r = RedisAddHashElement(c_,hash_name,index.str().c_str(),index.str().length(),
+							val,val_len);
+	 return r;
+}
+
+bool RedisStorageEngineImpl::GetHashRadomElement(const char* hash_name,char** val,size_t *val_len){
+	int32 current_size = RedishHashSize(c_,hash_name);
+	std::stringstream index;
+	index<<((time(NULL)+1)%(current_size-1));
+	if(PingRedis()!=1)
+		return false;
+	bool r = RedisGetHashElement(c_,hash_name,index.str().c_str(),
+								index.str().length(),val,val_len);
+	return r;
+}
+
+bool RedisStorageEngineImpl::DelHashRadomElement(const char* hash_name){
+	if(PingRedis()!=1)
+		return false;
+	return RedisDelHash(c_,hash_name);
+}
+
+bool RedisStorageEngineImpl::AddHashElement(const char* hash_name,const char* key,
+											const size_t key_len, const char* val,
+											const size_t val_len){
+	if(PingRedis()!=1)
+		return false;
+    return RedisAddHashElement(c_,hash_name,key,key_len,val,val_len);
+}
+
+bool RedisStorageEngineImpl::GetHashElement(const char* hash_name,const char* key,
+											const size_t key_len, char** val,size_t *val_len){
+	if(PingRedis()!=1)
+		return false;
+    return RedisGetHashElement(c_,hash_name,key,key_len,val,val_len);
+}
+
+bool RedisStorageEngineImpl::DelHashElement(const char* hash_name,const char* key,const size_t key_len){
+	if(PingRedis()!=1)
+		return false;
+	return RedisDelHashElement(c_,hash_name,key,key_len);
+}
 
 bool RedisStorageEngineImpl::AddListElement(const char* key,const size_t key_len,
 	                                        const char* val,const size_t val_len){

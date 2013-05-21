@@ -34,6 +34,22 @@ int RedisDelValue(warrper_redis_context_t* context,
 							
 int RedisPingRedis(warrper_redis_context_t* context);
 
+
+int RedisAddHashElement(warrper_redis_context_t* context,const char* hash_name,
+						const char* key,const size_t key_len,
+						const char* val,const size_t val_len);
+
+int RedisGetHashElement(warrper_redis_context_t* context,const char* hash_name,
+						const char* key,const size_t key_len,
+						char** val,size_t* val_len);
+
+int RedisDelHashElement(warrper_redis_context_t* context,const char* hash_name,
+						const char* key,const size_t key_len);
+
+long long RedishHashSize(warrper_redis_context_t* context,const char* hash_name);
+
+int RedisDelHash(warrper_redis_context_t* context,const char* hash_name);
+
 int RedisAddListElement(warrper_redis_context_t* context,
 				const char* key,const size_t key_len,
 				const char* val,const size_t val_len);
@@ -49,6 +65,9 @@ int RedisDelListElement(warrper_redis_context_t* context,int index,
 int RedisSetListElement(warrper_redis_context_t* context,int index,
 					const char* key,const size_t key_len,
 					const char* val,const size_t val_len);
+
+long long ReidsGetListSize(warrper_redis_context_t* context,const char* key,
+					  const size_t key_len);
 
 warrper_redis_reply_t* RedisGetListAll(warrper_redis_context_t* context,const char* key,const size_t key_len,char***val,int* val_len);
 							

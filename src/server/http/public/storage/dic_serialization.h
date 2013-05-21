@@ -37,6 +37,28 @@ public:
 	RedisDicSerial();
 	virtual ~RedisDicSerial();
 	static bool Init(std::list<base::ConnAddr>& addrlist);
+
+	static bool SetMusicInfos(const std::string& key,std::string& music_infos);
+	static bool GetMusicInfos(const std::string& key,std::string& music_infos);
+	static bool DelMusciInfos(const std::string& key);
+
+	static bool SetMusicMapInfo(const std::string& art_name,
+									const std::string& key,
+									const std::string song_id);
+
+	static bool GetMusicMapInfo(const std::string& art_name,
+		                         const std::string& key,
+		                         std::string& song_id);
+
+	static bool DelMusicMapInfo(const std::string& art_name,
+								const std::string& key);
+
+	static bool SetMusicMapRadom(const std::string& art_name,const std::string& song_id);
+
+	static bool GetMusicMapRadom(const std::string& art_name,std::string& song_id);
+
+	static bool DelMusicMapRadom(const std::string& art_name);
+	
 private:
 	static base_storage::DictionaryStorageEngine*    redis_engine_;
 	

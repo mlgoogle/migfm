@@ -45,6 +45,20 @@ public:
     virtual bool DelListElement(const char* key,const size_t key_len,const int index);
     
     virtual bool SetListElement(const int index,const char* key,const size_t key_len,const char* val,const size_t val_len);
+
+	virtual bool AddHashRadomElement(const char* hash_name,const char* val,const size_t val_len){}
+
+	virtual bool GetHashRadomElement(const char* hash_name,char** val,size_t *val_len){}
+
+	virtual bool DelHashRadomElement(const char* hash_name){}
+
+	virtual bool AddHashElement(const char* hash_name,const char* key,const size_t key_len,
+		const char* val,const size_t val_len){}
+
+	virtual bool GetHashElement(const char* hash_name,const char* key,const size_t key_len,
+		char** val,size_t *val_len){}
+
+	virtual bool DelHashElement(const char* hash_name,const char* key,const size_t key_len){}
     
     virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list);
 

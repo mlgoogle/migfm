@@ -33,7 +33,7 @@ class HttpPost{
 public:
     HttpPost(const MIG_URL& url);
     virtual ~HttpPost(void){}
-    bool Post(const char* post);
+    bool Post(const char* post,const int port = 80);
     bool GetContent(std::string& content);
 private:
 	const MIG_URL& url_;

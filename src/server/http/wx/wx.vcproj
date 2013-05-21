@@ -149,6 +149,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\wx_get_song.h"
+				>
+			</File>
+			<File
 				RelativePath=".\wx_packet.h"
 				>
 			</File>
@@ -162,6 +166,10 @@
 			</File>
 			<File
 				RelativePath=".\wx_engine.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\wx_get_song.cc"
 				>
 			</File>
 			<File

@@ -25,7 +25,7 @@ INCLUDE_PATHS = -I../public/ -I /usr/local/libmemcached-1.0.7/include\
 
 ## 库
 LINK_PATHS =  -L/usr/local/libmemcached-1.0.7/lib/ -L/usr/lib64/mysql
-LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lmysqlclient -lexpat\
+LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lmysqlclient -lexpat -lcurl\
 					../lib/libbreakpad_client.a ../lib/libhiredis.a $(LINK_CORE_PATH)
 
 # 编译
@@ -36,11 +36,14 @@ LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 
-output: wxinfo.o wx_engine.o mig_log.o\
+output: wxinfo.o wx_engine.o wx_packet.o wx_get_song.o http_response.o mig_log.o\
 	basic_info.o mem_storage_impl.o redis_storage_impl.o\
 	storage.o constants.o redis_warrper.o mysql_storage_impl.o\
 	basictypes.o config.o dic_serialization.o\
-	db_serialization.o xml_serialization.o basic_util.o base64.o
+	db_serialization.o xml_serialization.o basic_util.o base64.o\
+	qname.o xmlbuilder.o xmlconstants.o xmlelement.o xmlnsstack.o\
+	xmlparser.o xmlprinter.o xmppstanzaparser.o json_reader.o\
+	json_value.o json_writer.o
 	$(LINK)
 
 clean:
@@ -56,6 +59,15 @@ wxinfo.o:
 
 wx_engine.o:
 	$(COMPILE) ./wx_engine.cc
+
+wx_packet.o:
+	$(COMPILE) ./wx_packet.cc
+
+wx_get_song.o:
+	$(COMPILE) ./wx_get_song.cc
+
+http_response.o:
+	$(COMPILE) ./http_response.cc
 
 mig_log.o:
 	$(COMPILE) ./../public/log/mig_log.cc
@@ -96,8 +108,42 @@ config.o:
 xml_serialization.o:
 	$(COMPILE) ./../public/xmpp/xml_serialization.cc
 
-basic_util.o:
+qname.o:
+	$(COMPILE) ./../public/xmpp/qname.cc
+
+xmlbuilder.o:
+	$(COMPILE) ./../public/xmpp/xmlbuilder.cc
+
+xmlconstants.o:
+	$(COMPILE) ./../public/xmpp/xmlconstants.cc
+
+xmlelement.o:
+	$(COMPILE) ./../public/xmpp/xmlelement.cc
+
+xmlnsstack.o:
+	$(COMPILE) ./../public/xmpp/xmlnsstack.cc
+
+xmlparser.o:
+	$(COMPILE) ./../public/xmpp/xmlparser.cc
+
+xmlprinter.o:
+	$(COMPILE) ./../public/xmpp/xmlprinter.cc
+
+xmppstanzaparser.o:
+	$(COMPILE) ./../public/xmpp/xmppstanzaparser.cc
+
+basic_util.o: 
 	$(COMPILE) ./../public/basic/basic_util.cc
 
 base64.o:
 	$(COMPILE) ./../public/basic/base64.cc
+
+json_reader.o:
+	$(COMPILE) ./../public/json/json_reader.cpp
+
+json_value.o:
+	$(COMPILE) ./../public/json/json_value.cpp
+
+json_writer.o:
+	$(COMPILE) ./../public/json/json_writer.cpp
+

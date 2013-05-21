@@ -85,13 +85,11 @@ bool HttpPost::GetContent(std::string& content){
     for(std::vector<char>::iterator itr = content_.begin();
     	itr!=content_.end();++itr){
         content.append(1,(*itr));
-        MIG_DEBUG(USER_LEVEL,"(*itr)[%c]",(*itr));
-        MIG_DEBUG(USER_LEVEL,"content[%s]",content.c_str());
     }
     return true;
 }
 
-bool HttpPost::Post(const char* post){
+bool HttpPost::Post(const char* post,const int port){
     CURL* curl = curl_easy_init();
     CURLcode curl_code;
     char curl_error[CURL_ERROR_SIZE];
@@ -127,8 +125,16 @@ bool HttpPost::Post(const char* post){
     if(curl_code != CURLE_OK) {
         MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_FAILONERROR failed: %s",
 		  curl_easy_strerror(curl_code));
-	goto out;
+		goto out;
     }
+
+	//set port  
+	curl_code = curl_easy_setopt(curl, CURLOPT_PORT, port);
+	if(curl_code != CURLE_OK) {
+		MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_PORT failed: %s",
+			curl_easy_strerror(curl_code));
+		goto out;
+	}
 
 #if defined(GOOGLE_URL)
     curl_code = curl_easy_setopt(curl,CURLOPT_URL,url_.spec().c_str());

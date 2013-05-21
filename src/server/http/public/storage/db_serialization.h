@@ -33,6 +33,16 @@ public:
     static bool SetMusicTempInfo(const std::string& name,const std::string& enter,
                                  const std::string& content);
 
+	static bool GetMusicRaw(base::MusicInfo& music_info,std::string& sql);
+
+	static bool GetMusicRawDouBan(base::MusicInfo& music_info,std::string& sql);
+
+	static bool GetMusicDouBan(base::MusicInfo& music_info,std::string& sql);
+
+	static bool DelMusicDouBan(std::string& sql);
+
+	static bool GetMusicAll(std::list<base::MusicInfo >& music_info);
+
 #if defined (MIG_SSO)
     static bool CheckUserPassword(const char* username,const char* password);
 #endif 

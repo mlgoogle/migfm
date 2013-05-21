@@ -100,6 +100,7 @@ bool MysqlSerial::SetMusicTempInfo(const std::string& name,const std::string& en
     return r;
 }
 
+
 #if defined (MIG_SSO)
 bool MysqlSerial::CheckUserPassword(const char*username,const char* password){ 
     std::stringstream os;
@@ -132,6 +133,144 @@ bool MysqlSerial::CheckUserPassword(const char*username,const char* password){
     return  false;
 }
 #endif
+
+bool MysqlSerial::GetMusicAll(std::list<base::MusicInfo >& music_info){
+	std::stringstream os;
+	bool r = false;
+	uint32 num;
+	db_row_t* db_rows;
+	MYSQL_ROW rows;
+	os<<"select sidx,ssidx,albumtitle,title,artist,url,pubtime from migfm_music_douban";
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	num = mysql_db_engine_->RecordCount();
+	MIG_DEBUG(USER_LEVEL,"###num [%d]####",num);
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(mysql_db_engine_->FetchRows())->proc)){
+			base::MusicInfo music_info;
+			music_info.set_sid(rows[0]);
+			music_info.set_ssid(rows[1]);
+			music_info.set_album_title(rows[2]);
+			music_info.set_title(rows[3]);
+			music_info.set_artist(rows[4]);
+			//music_info.set_url(rows[5]);
+			music_info.set_pub_time(rows[6]);
+		}
+			return true;
+	}
+	return false;
+
+}
+
+bool MysqlSerial::DelMusicDouBan(std::string& sql){
+	std::stringstream os;
+	bool r = false;
+	uint32 num;
+	os<<"delete from migfm_music_douban where id = " 
+	   <<sql.c_str();
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+	return r;
+}
+
+bool MysqlSerial::GetMusicDouBan(base::MusicInfo& music_info,std::string& sql){
+	std::stringstream os;
+	bool r =false;
+	uint32 num;
+	db_row_t* db_rows;
+	MYSQL_ROW rows;
+	os<<"select sidx,ssidx,albumtitle,title,artist,url,pubtime from migfm_music_douban where id ="
+		<<sql.c_str();
+	
+	//MIG_DEBUG(USER_LEVEL,"sqlexec[%s]",os.str().c_str());
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+
+	num = mysql_db_engine_->RecordCount();
+	//MIG_DEBUG(USER_LEVEL,"###num [%d]####",num);
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(mysql_db_engine_->FetchRows())->proc)){
+			music_info.set_sid(rows[0]);
+			music_info.set_ssid(rows[1]);
+			music_info.set_album_title(rows[2]);
+			music_info.set_title(rows[3]);
+			music_info.set_artist(rows[4]);
+			//music_info.set_url(rows[5]);
+			music_info.set_pub_time(rows[6]);
+			music_info.set_id(sql);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool MysqlSerial::GetMusicRawDouBan(base::MusicInfo& music_info,std::string& sql){
+	std::stringstream os;
+	bool r = false;
+	uint32 num;
+	db_row_t* db_rows;
+	MYSQL_ROW rows;
+	os<<"select sidx,ssidx,albumtitle,title,artist,url,pubtime from migfm_music_douban where "
+		<<sql<<" ORDER BY RAND() LIMIT 1";
+
+	MIG_DEBUG(USER_LEVEL,"sqlexec[%s]",os.str().c_str());
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+
+	num = mysql_db_engine_->RecordCount();
+	MIG_DEBUG(USER_LEVEL,"###num [%d]####",num);
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(mysql_db_engine_->FetchRows())->proc)){
+			music_info.set_sid(rows[0]);
+			music_info.set_ssid(rows[1]);
+			music_info.set_album_title(rows[2]);
+			music_info.set_title(rows[3]);
+			music_info.set_artist(rows[4]);
+			//music_info.set_url(rows[5]);
+			music_info.set_pub_time(rows[6]);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool MysqlSerial::GetMusicRaw(base::MusicInfo& music_info,std::string& sql){
+	std::stringstream os;
+	bool r = false;
+	uint32 num;
+	db_row_t* db_rows;
+	MYSQL_ROW rows;
+	os<<"select sid,ssid,albumtitlle,titile,artist,url,public_time  from migfm_music_infos where "
+		<<sql<<"ORDER BY RAND() LIMIT 1";
+	MIG_DEBUG(USER_LEVEL,"sqlexec[%s]",os.str().c_str());
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+
+	num = mysql_db_engine_->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(mysql_db_engine_->FetchRows())->proc)){
+			music_info.set_sid(rows[0]);
+			music_info.set_ssid(rows[1]);
+			music_info.set_album_title(rows[2]);
+			music_info.set_title(rows[3]);
+			music_info.set_artist(rows[4]);
+			music_info.set_url(rows[5]);
+			music_info.set_pub_time(rows[6]);
+		}
+	}
+}
+
 bool MysqlSerial::GetMusicInfos(std::list<base::MusicUsrInfo>& music_list){
    std::stringstream os;
    bool r = false;

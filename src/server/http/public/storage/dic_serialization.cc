@@ -103,4 +103,97 @@ bool RedisDicSerial::Init(std::list<base::ConnAddr>& addrlist){
 	return redis_engine_->Connections(addrlist);
 }
 
+bool RedisDicSerial::SetMusicInfos(const std::string&key,std::string& music_infos){
+	bool r = redis_engine_->SetValue(key.c_str(),key.length(),
+					music_infos.c_str(),music_infos.length());
+	
+	MIG_DEBUG(USER_LEVEL,"r[%d] key[%s] value[%s]\n",r,key.c_str(),
+				music_infos.c_str());
+	return r;
+}
+
+bool RedisDicSerial::DelMusciInfos(const std::string& key){
+	return  redis_engine_->DelValue(key.c_str(),key.length());
+}
+
+bool RedisDicSerial::GetMusicInfos(const std::string& key,std::string& music_infos){
+    char* value;
+	size_t value_len = 0;
+	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
+										&value,&value_len);
+	if (r){
+		music_infos.assign(value,value_len-1);
+		if (value){
+			free(value);
+			value = NULL;
+		}
+	
+	}else{
+		MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	}
+	
+	return r;
+}
+
+bool RedisDicSerial::SetMusicMapInfo(const std::string& art_name, 
+									 const std::string& key, 
+									 const std::string song_id){
+     return redis_engine_->AddHashElement(art_name.c_str(),key.c_str(),
+											key.length(),song_id.c_str(),
+											song_id.length());
+}
+
+bool RedisDicSerial::GetMusicMapInfo(const std::string& art_name, 
+									 const std::string& key, 
+									 std::string& song_id){
+	 char* value;
+	 size_t value_len = 0;
+	 bool r = false;
+	 r = redis_engine_->GetHashElement(art_name.c_str(),key.c_str(),key.length(),
+												&value,&value_len);
+	 if (r){
+		 song_id.assign(value,value_len-1);
+		 if (value){
+			 free(value);
+			 value = NULL;
+		 }
+
+	 }else{
+		 MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	 }
+	 return r;
+}
+
+bool RedisDicSerial::DelMusicMapInfo(const std::string& art_name, const std::string& key){
+	return redis_engine_->DelHashElement(art_name.c_str(),key.c_str(),key.length());
+}
+
+bool RedisDicSerial::SetMusicMapRadom(const std::string& art_name,const std::string& song_id){
+	return redis_engine_->AddHashRadomElement(art_name.c_str(),song_id.c_str(),song_id.length());
+}
+
+bool RedisDicSerial::GetMusicMapRadom(const std::string& art_name,std::string& song_id){
+	char* value;
+	size_t value_len = 0;
+	bool r = false;
+	r = redis_engine_->GetHashRadomElement(art_name.c_str(),&value,&value_len);
+	if (r){
+		song_id.assign(value,value_len-1);
+		if (value){
+			free(value);
+			value = NULL;
+		}
+
+	}else{
+		MIG_DEBUG(USER_LEVEL,"GetValue error");
+	}
+	return r;
+}
+
+bool RedisDicSerial::DelMusicMapRadom(const std::string& art_name){
+	return redis_engine_->DelHashRadomElement(art_name.c_str());
+}
+
+
+
 }

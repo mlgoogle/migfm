@@ -69,12 +69,15 @@ bool MysqlStorageEngineImpl::SQLExec(const char* sql){
     //MIG_DEBUG(USER_LEVEL,"SQLExec sql[%s]\n",sql);
     mysql_query(mysql,sql);
     result_.get()->proc = mysql_store_result(mysql);
+// 	unsigned long ulCount = (unsigned long)mysql_num_rows((MYSQL_RES *)(result_.get()->proc));
+// 	MIG_DEBUG(USER_LEVEL,"ulconut %d\n",ulCount);
     return true;
 }
 
 uint32 MysqlStorageEngineImpl::RecordCount(){
-	MYSQL_RES* result = (MYSQL_RES*)(result_.get()->proc);
-    return (uint32)mysql_num_rows(result);
+    unsigned long ulCount = (unsigned long)mysql_num_rows((MYSQL_RES *)(result_.get()->proc));
+	MIG_DEBUG(USER_LEVEL,"ulconut ==%d===\n",ulCount);
+	return ulCount;
 }
 bool MysqlStorageEngineImpl::Affected(unsigned long& rows){
 	rows = (unsigned long)mysql_affected_rows((MYSQL*)conn_.get()->proc);

@@ -10,7 +10,10 @@
 #include "storage/dic_serialization.h"
 #include "xmpp/xml_serialization.h"
 #include "xmpp/xmppstanzaparser.h"
+#include "json/json.h"
 #include "wx_packet.h"
+#include "wx_get_song.h"
+
 namespace wxinfo{
 
 class WXInfoEngine{
@@ -18,9 +21,13 @@ public:
     WXInfoEngine();
     ~WXInfoEngine();
     bool InitEngine(std::string& path);
+    bool GetMusicInfosFromStroage();
 
 	void PostContent(const std::string& content);
 	std::string& GetProcessContent(){return content_;}
+private:
+	bool StorageOneWords(std::string &reponse_msg);
+	void StorageOneWord(std::string &attr, std::string &value);
 	class StanzaParseHandler:public base::XmppStanzaParseHandler{
 	public:
 		StanzaParseHandler(WXInfoEngine* outer):outer_(outer){}
@@ -47,13 +54,44 @@ private:
 	void ProcessMsgText(WXPacket& msg);
 	void PackageTextMsg(std::string& to_user,std::string& from_user,
 		                std::string& content);
+
+	void PackageMusicMsg(const std::string& to_user,
+						const std::string& from_user,
+						const std::string& title,
+						const std::string& description,
+						const std::string& url, const std::string& hq_url);
+
+	bool SegmentWordMsg(std::string& to_user,std::string& from_user,
+						std::string& content_s);
+
+	bool GetMusicInfo(base::MusicInfo& mi,std::string& content,std::string& key);
+
+	bool GetOneMusicInfo(base::MusicInfo& mi,std::string& flag,std::string& key,
+						std::string& content);
+
+	bool GetMusicInfos(base::MusicInfo& mi,std::string& content);
+
+	void PullAnyMusicMsg(std::string& to_user,std::string& from_user);
+
+	void PullRobotTextMsg(std::string& to_user,std::string& from_user,
+							std::string& content_s);
+
+	void StorageWordsDump();
 public: 
     static WXInfoEngine* GetEngine();
     static void  FreeEngine();
 private:
-    static wxinfo::WXInfoEngine* engine_;
-	std::string  content_;
-	std::string  url_;
+    static wxinfo::WXInfoEngine*                  engine_;
+	std::string                                   content_;
+	std::string                                   url_;
+	std::string                                   douban_url_;
+	std::string                                   segment_url_;
+	std::string                                   get_song_url_;
+	Json::Value                                   song_;
+	int32                                         count_;
+	int32                                         music_infos_size_;
+	wxinfo::WXGetSongUrl*                         wx_get_song_;
+	std::map<std::string,std::list<std::string> > word_map_;
 private:
 
 };

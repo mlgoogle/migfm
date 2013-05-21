@@ -1,4 +1,5 @@
 #include "basic_info.h"
+#include <sstream>
 
 namespace base{
 	
@@ -31,6 +32,57 @@ MusicUsrInfo::MusicUsrInfo(const MusicUsrInfo& mi)
         data_->AddRef();
     }
 }
+
+MusicInfo::MusicInfo(){
+	data_ = new Data();
+}
+
+MusicInfo::MusicInfo(const std::string id,const std::string& sid,const std::string& ssid,
+					 const std::string& album_title,const std::string& title,
+					 const std::string& url,const std::string& pub_time,
+					 const std::string& artist){
+
+		data_ = new Data(id,sid,ssid,album_title,title,url,pub_time,artist);
+}
+
+
+MusicInfo& MusicInfo::operator=(const MusicInfo& mi){
+	if(mi.data_!=NULL){
+		mi.data_->AddRef();
+	}
+
+	if(data_!=NULL){
+		data_->Release();
+	}
+
+	data_ = mi.data_;
+	return *this;
+}
+
+MusicInfo::MusicInfo(const MusicInfo& mi)
+:data_(mi.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+/*
+{"sid":"1911362","ssid_":"9310","album_title":"VGhlIFVsdGltYXRlIEp1bmcuLi4=","titile_":"TGltYiBCeSBMaW1iIChESiBTUyBNaXgp","pub_time_":"2008","artist_":"Q3V0dHkgUmFua3M="}
+*/
+bool MusicInfo::SerializedJson(std::string &json){
+	std::stringstream os;
+	os<<"{\"id\":"
+		<<"\""<<id().c_str()<<"\",\"sid\":"
+		<<"\""<<sid().c_str()<<"\",\"ssid\":"
+		<<"\""<<ssid().c_str()<<"\",\"album_title_\":"
+		<<"\""<<album_title().c_str()<<"\",\"titile_\":"
+		<<"\""<<title().c_str()<<"\",\"pub_time_\":"
+		<<"\""<<pub_time().c_str()<<"\",\"artist_\":"
+		<<"\""<<artist().c_str()<<"\"}";
+	json.assign(os.str().c_str(),os.str().length());
+	return true;
+
+}
+
 
 ConnAddr::ConnAddr(){
   

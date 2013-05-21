@@ -32,7 +32,7 @@ static void GetRequestMethod(const char* query){
    // char* header = "Content-type:text/html\r\n\r\n<title>FastCGI echo</title><h1>444444444</h1>\n";
     //printf("%s",header);
     //write(STDOUT_FILENO,header,strlen(header)+1);
-    std::map<string,string> http_map;
+	std::map<std::string,std::string> http_map;
     MIG_INFO(USER_LEVEL,"%s",query);
     base::BasicUtil::ParserHttpRequest(query,http_map);
     std::map<std::string,std::string>::iterator it = http_map.find("echostr");
@@ -51,6 +51,7 @@ static void PostRequestMethod(std::string& content){
   printf("Content-type: text/html\r\n"
 	  "\r\n"
 	  "%s",respone.c_str());
+  MIG_DEBUG(USER_LEVEL,"+++++++++++++++++++++++++++++++++++\n\n\n");
 }
 
 static void PutRequestMethod(std::string& content){
@@ -93,7 +94,7 @@ static void DeleteRequestMethod(FCGX_Request * request){
 
 int main(int agrc,char* argv[]){
     
-    //google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
+    google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
     std::string path = "./config.xml";
     config::FileConfig file_config;
     std::string content;

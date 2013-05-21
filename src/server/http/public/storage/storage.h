@@ -106,6 +106,21 @@ public:
     virtual bool SetListElement(const int index,const char* key,const size_t key_len,
     								const char* val,const size_t val_len) =0 ;
     
+	virtual bool AddHashRadomElement(const char* hash_name,const char* val,
+									const size_t val_len) = 0;
+
+	virtual bool GetHashRadomElement(const char* hash_name,char** val,size_t *val_len) = 0;
+
+	virtual bool DelHashRadomElement(const char* hash_name) = 0;
+
+	virtual bool AddHashElement(const char* hash_name,const char* key,const size_t key_len,
+								const char* val,const size_t val_len) = 0;
+
+	virtual bool GetHashElement(const char* hash_name,const char* key,const size_t key_len,
+								char** val,size_t *val_len) = 0;
+
+	virtual bool DelHashElement(const char* hash_name,const char* key,const size_t key_len) =0;
+
 	virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list) = 0;
 };
 
