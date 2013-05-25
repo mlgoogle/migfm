@@ -31,17 +31,11 @@ void WXBaiduGetSongImpl::Init(std::string& song_url){
 bool WXBaiduGetSongImpl::GetSongInfo(const std::string& artist,const std::string& title,
 									 const std::string album,std::string& song_url){
 	std::string key;
-	key = artist+title;
+	key = artist+title/*+album*/;
 	bool r = false;
 	r = HttpGetSongInfo(key,song_url);
-	if (song_url=="0"){
-		key = artist;
-		song_url = "";
-		r = HttpGetSongInfo(key,song_url);
-	}
-	if (song_url=="0"){
+	if (song_url=="0")
 		r = false;
-	}
 	return r;
 }
 

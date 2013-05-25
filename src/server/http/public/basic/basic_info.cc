@@ -1,4 +1,6 @@
 #include "basic_info.h"
+#include "json/json.h"
+#include "log/mig_log.h"
 #include <sstream>
 
 namespace base{
@@ -40,11 +42,10 @@ MusicInfo::MusicInfo(){
 MusicInfo::MusicInfo(const std::string id,const std::string& sid,const std::string& ssid,
 					 const std::string& album_title,const std::string& title,
 					 const std::string& url,const std::string& pub_time,
-					 const std::string& artist){
+					 const std::string& artist,const std::string& pic_url){
 
-		data_ = new Data(id,sid,ssid,album_title,title,url,pub_time,artist);
+		data_ = new Data(id,sid,ssid,album_title,title,url,pub_time,artist,pic_url);
 }
-
 
 MusicInfo& MusicInfo::operator=(const MusicInfo& mi){
 	if(mi.data_!=NULL){
@@ -73,17 +74,39 @@ bool MusicInfo::SerializedJson(std::string &json){
 	os<<"{\"id\":"
 		<<"\""<<id().c_str()<<"\",\"sid\":"
 		<<"\""<<sid().c_str()<<"\",\"ssid\":"
-		<<"\""<<ssid().c_str()<<"\",\"album_title_\":"
-		<<"\""<<album_title().c_str()<<"\",\"titile_\":"
-		<<"\""<<title().c_str()<<"\",\"pub_time_\":"
-		<<"\""<<pub_time().c_str()<<"\",\"artist_\":"
-		<<"\""<<artist().c_str()<<"\"}";
+		<<"\""<<ssid().c_str()<<"\",\"album_title\":"
+		<<"\""<<album_title().c_str()<<"\",\"titile\":"
+		<<"\""<<title().c_str()<<"\",\"pub_time\":"
+		<<"\""<<pub_time().c_str()<<"\",\"artist\":"
+		<<"\""<<artist().c_str()<<"\",\"pic_url\":"
+		<<"\""<<pic_url().c_str()<<"\"}";
 	json.assign(os.str().c_str(),os.str().length());
 	return true;
 
 }
 
-
+/*
+{\"id\":\"147\",\"sid\":\"1\",\"ssid\":\"79dd\",\"album_title_\":\"Umlub2Nlcm9zZQ==\",\"titile_\":\"Q3ViaWNsZSA=\",\"pub_time_\":\"2006\",\"artist_\":\"Umlub2Nlcm9zZQ==\"}
+*/
+bool MusicInfo::UnserializedJson(std::string& str){
+	Json::Reader reader;
+	Json::Value root;
+	bool r = false;
+	r = reader.parse(str.c_str(),root);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"json parser error");
+		return false;
+	}
+	
+	set_id(root["id"].asString());
+	set_sid(root["sid"].asString());
+	set_ssid(root["ssid"].asString());
+	set_album_title(root["album_title"].asString());
+	set_title(root["titile"].asString());
+	set_pub_time(root["pub_time"].asString());
+	set_artist(root["artist"].asString());
+	return true;
+}
 ConnAddr::ConnAddr(){
   
     data_ = new Data();

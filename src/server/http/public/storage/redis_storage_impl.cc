@@ -126,7 +126,12 @@ bool RedisStorageEngineImpl::AddHashRadomElement(const char* hash_name,
 bool RedisStorageEngineImpl::GetHashRadomElement(const char* hash_name,char** val,size_t *val_len){
 	int32 current_size = RedishHashSize(c_,hash_name);
 	std::stringstream index;
-	index<<((time(NULL)+1)%(current_size-1));
+	//index<<(((time(NULL)+1)%(current_size)))-1;
+	time_t current_time = time(NULL);
+	index<<((current_time)%(current_size+1));
+	MIG_DEBUG(USER_LEVEL,"index[%s] hashname[%s]time[%lld] current[%d]",
+		     index.str().c_str(),hash_name,
+		     current_time,current_size);
 	if(PingRedis()!=1)
 		return false;
 	bool r = RedisGetHashElement(c_,hash_name,index.str().c_str(),

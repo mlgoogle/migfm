@@ -181,7 +181,7 @@ bool MysqlSerial::GetMusicDouBan(base::MusicInfo& music_info,std::string& sql){
 	uint32 num;
 	db_row_t* db_rows;
 	MYSQL_ROW rows;
-	os<<"select sidx,ssidx,albumtitle,title,artist,url,pubtime from migfm_music_douban where id ="
+	os<<"select sidx,ssidx,albumtitle,title,artist,url,pubtime,pic from migfm_music_douban where id ="
 		<<sql.c_str();
 	
 	//MIG_DEBUG(USER_LEVEL,"sqlexec[%s]",os.str().c_str());
@@ -202,6 +202,7 @@ bool MysqlSerial::GetMusicDouBan(base::MusicInfo& music_info,std::string& sql){
 			music_info.set_artist(rows[4]);
 			//music_info.set_url(rows[5]);
 			music_info.set_pub_time(rows[6]);
+			music_info.set_pic_url(rows[7]);
 			music_info.set_id(sql);
 			return true;
 		}

@@ -21,7 +21,7 @@ int main(int agrc,char* argv[]){
 	r = base_storage::MysqlSerial::Init(config->mysql_db_list_);
 	r = base_storage::RedisDicSerial::Init(config->redis_list_);
 
-	for (int i = 1276;i<699194;i++){
+	for (int i = 147;i<699194;i++){
 		std::stringstream os;
 		std::string sql;
 		os<<i;
@@ -32,12 +32,13 @@ int main(int agrc,char* argv[]){
  			continue;
  		}
 
-		r = base_storage::MysqlSerial::DelMusicDouBan(sql);
+		//r = base_storage::MysqlSerial::DelMusicDouBan(sql);
+
 #if defined (_ARTLIST_)
  		std::string sjson;
  		mi.SerializedJson(sjson);
  		r = base_storage::RedisDicSerial::SetMusicInfos(mi.id(),sjson);
- 		MIG_INFO(USER_LEVEL,"r [%d] sid[%s] artlist[%s]",r,mi.sid().c_str(),mi.artist().c_str());
+/* 		MIG_INFO(USER_LEVEL,"r [%d] sid[%s] artlist[%s]",r,mi.sid().c_str(),mi.artist().c_str());*/
  //		std::string mjson;
  //		r = base_storage::RedisDicSerial::GetMusicInfos(mi.sid(),mjson);
 // 		MIG_DEBUG(USER_LEVEL,"r [%d] mjson[%s]",r,mjson.c_str());

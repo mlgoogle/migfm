@@ -71,6 +71,15 @@ private:
 
 	bool GetMusicInfos(base::MusicInfo& mi,std::string& content);
 
+	bool GetMusicWordInfo(std::list<std::string>& word_list,
+		                  std::string& word_name);
+
+	bool PutDesignationMusicInfo(base::MusicInfo& mi,std::list<std::string> mt_list,
+		                         std::string& artist,std::string& content);
+
+	bool PutRadomSong(base::MusicInfo& mi,std::list<std::string> mt_list,
+		              std::string& content,std::string& flag);
+
 	void PullAnyMusicMsg(std::string& to_user,std::string& from_user);
 
 	void PullRobotTextMsg(std::string& to_user,std::string& from_user,

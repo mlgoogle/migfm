@@ -14,9 +14,11 @@ namespace wxinfo{
 
 static void FindSpString(const char* str,int len,const char c,std::string& dest_string){
 	for (int index =0; index<len;index++){
-		if (str[index]==c)
-			MIG_DEBUG(USER_LEVEL,"========");
-		else
+// 		if (str[index]==c)
+// 			MIG_DEBUG(USER_LEVEL,"========");
+// 		else
+// 			dest_string.append(1,str[index]);
+		if (str[index]!=c)
 			dest_string.append(1,str[index]);
 	}
 	MIG_DEBUG(USER_LEVEL,"%s",dest_string.c_str());
@@ -304,15 +306,128 @@ WXInfoEngine::GetMusicInfo(base::MusicInfo& mi,std::string& content,std::string&
 	return r;
 }
 
+bool
+WXInfoEngine::GetMusicWordInfo(std::list<std::string>& word_list, 
+							   std::string& word_name){
+	 
+	int32 list_num = word_list.size();
+	if (list_num==0)
+		return false;
+	word_name = base64_encode((unsigned char*)(word_list.front().c_str()),word_list.front().length());
+	word_list.pop_front();
+	return true;
+}
+
+bool 
+WXInfoEngine::PutRadomSong(base::MusicInfo& mi,
+						   std::list<std::string> mt_list, 
+						   std::string& content,std::string& flag){
+   
+   bool r =false;
+   for (std::list<std::string>::iterator it = mt_list.begin();
+	   it!=mt_list.end();it++){
+		   std::stringstream os;
+		   std::string song_id;
+		   std::string music_info;
+		   std::string content_url;
+		   std::stringstream dec_os;
+		   base::MusicInfo smi;
+		   std::string base64_title = base64_encode((unsigned char*)((*it).c_str()),
+											(*it).length());
+		   os<<flag<<base64_title;
+		   r = base_storage::RedisDicSerial::GetMusicMapRadom(os.str(),song_id);
+		   if (!r)
+			   continue;
+		   r = base_storage::RedisDicSerial::GetMusicInfos(song_id,music_info);
+		   if (!r)
+			   continue;
+		   r = smi.UnserializedJson(music_info);
+		   if (!r)
+			   continue;
+		   r = wx_get_song_->GetSongInfo(smi.artist(),smi.title(),
+										smi.album_title(),content_url);
+		   if (!r)
+			   continue;
+		   smi.set_url(content_url);
+		   dec_os<<base64_decode(smi.artist()).c_str()<<" "
+			   <<base64_decode(smi.album_title()).c_str()
+			   <<" "<<smi.pub_time();
+		   content = dec_os.str();
+		   mi = smi;
+		   return true;
+   }
+   return false;
+}
+
+bool
+WXInfoEngine::PutDesignationMusicInfo(base::MusicInfo& mi,std::list<std::string> mt_list, 
+									  std::string& artist,std::string& content){
+	
+	std::stringstream os;
+	os<<"ad_"<<artist;
+	bool r = false;
+	for (std::list<std::string>::iterator it = mt_list.begin();
+		it!=mt_list.end();it++){
+			std::string song_id;
+			std::string music_info;
+			std::string content_url;
+			std::stringstream dec_os;
+			std::string base64_title = base64_encode((unsigned char*)((*it).c_str()),(*it).length());
+			r = base_storage::RedisDicSerial::GetMusicMapInfo(os.str(),
+											  base64_title,song_id);
+			if (!r)
+				continue;
+			r = base_storage::RedisDicSerial::GetMusicInfos(song_id,music_info);
+			if (!r)
+				continue;
+			r = mi.UnserializedJson(music_info);
+			if (!r)
+				continue;
+			r = wx_get_song_->GetSongInfo(mi.artist(),mi.title(),
+				                          mi.album_title(),content_url);
+			if (!r)
+				continue;
+			mi.set_url(content_url);
+			dec_os<<base64_decode(mi.artist()).c_str()<<" "
+			  <<base64_decode(mi.album_title()).c_str()
+				<<" "<<mi.pub_time();
+			content = dec_os.str();
+			break;
+	}
+	return  r;
+}
+
 bool 
 WXInfoEngine::GetMusicInfos(base::MusicInfo& mi,std::string& content){
 	bool r = false;
-	std::string nr = "nr";
-	std::string n = "n";
-	r = GetMusicInfo(mi,content,nr);
+	std::string word_mi = "mi";
+	std::string word_mt = "mt";
+	std::string word_sr = "sr_";
+	std::string word_ar = "ar_";
+	std::string base64_artist;
+	std::string base64_title;
+	std::map<std::string,std::list<std::string> >::iterator it 
+		= word_map_.find(word_mi);
+	
+	std::map<std::string,std::list<std::string> >::iterator itr 
+		= word_map_.find(word_mt);
+	//¸èÊÖ+¸èÇú
+	if (it!=word_map_.end()&&itr!=word_map_.end()){
+		GetMusicWordInfo(it->second,base64_artist);
+		r  = PutDesignationMusicInfo(mi,itr->second,base64_artist,content);
+	}
 	if (r)
 		return r;
-	r = GetMusicInfo(mi,content,n);
+
+	//¸èÇú
+	if (itr!=word_map_.end())
+		r = PutRadomSong(mi,itr->second,content,word_sr);
+	if (r)
+		return r;
+
+	//¸èÊÖ
+	if (it!=word_map_.end())
+		r = PutRadomSong(mi,it->second,content,word_ar);
 	if (r)
 		return r;
 
@@ -344,17 +459,12 @@ WXInfoEngine::SegmentWordMsg(std::string &to_user, std::string &from_user,
 	 }
 	 //StorageWordsDump();
 	 r = GetMusicInfos(mi,decs);
-	 std::string sjson;
-	 std::string mjson;
-	 mi.SerializedJson(sjson);
-	 base_storage::RedisDicSerial::SetMusicInfos(mi.sid(),sjson);
- //	 r = base_storage::RedisDicSerial::GetMusicInfos(mi.sid(),mjson);
-
 	 if (r){
 		PackageMusicMsg(from_user,to_user,base64_decode(mi.title()),
 		 decs,mi.url(),mi.url());
 		return true;
 	 }
+	 word_map_.clear();
 	 return false;
 }
 

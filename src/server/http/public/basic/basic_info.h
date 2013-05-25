@@ -45,10 +45,11 @@ private:
 class MusicInfo{
 public:
 	explicit MusicInfo();
-	explicit MusicInfo(const std::string id,const std::string& sid,const std::string& ssid,
-						const std::string& album_title,const std::string& title,
-						const std::string& url,const std::string& pub_time,
-						const std::string& artist);
+	explicit MusicInfo(const std::string id,const std::string& sid,
+					   const std::string& ssid,const std::string& album_title,
+					   const std::string& title,const std::string& url,
+					   const std::string& pub_time,const std::string& artist,
+					   const std::string& pic_url);
 
 	MusicInfo(const MusicInfo& mi);
 	MusicInfo& operator=(const MusicInfo& mi);
@@ -67,6 +68,7 @@ public:
 	void set_url(const std::string& url) {data_->url_ = url;}
 	void set_pub_time(const std::string& pub_time) {data_->pub_time_ = pub_time;}
 	void set_artist(const std::string& artist) {data_->artist_ = artist;}
+	void set_pic_url(const std::string& pic_url) {data_->pic_url_ = pic_url;}
 
 	const std::string& id() const {return !data_?STR_EMPTY:data_->id_;}
 	const std::string& sid() const {return !data_?STR_EMPTY:data_->sid_;}
@@ -76,9 +78,10 @@ public:
 	const std::string& url() const {return !data_?STR_EMPTY:data_->url_;}
 	const std::string& pub_time() const {return !data_?STR_EMPTY:data_->pub_time_;}
 	const std::string& artist() const {return !data_?STR_EMPTY:data_->artist_;}
+	const std::string& pic_url() const {return !data_?STR_EMPTY:data_->pic_url_;}
 
 	bool SerializedJson(std::string& json);
-// 	bool UnserializedJson(std::string& str);
+ 	bool UnserializedJson(std::string& str);
 // 
 // 	bool SerializedXml(std::string& xml);
 // 	bool UnserializedXml(std::string& str);
@@ -89,7 +92,7 @@ private:
 		Data(const std::string id,const std::string& sid,
 			const std::string& ssid,const std::string& album_title,
 			const std::string& title,const std::string& url,const std::string& pub_time,
-			const std::string& artist)
+			const std::string& artist,const std::string& pic_url)
 			:id_(id)
 			,sid_(sid)
 			,ssid_(ssid)
@@ -98,6 +101,7 @@ private:
 			,url_(url)
 			,pub_time_(pub_time)
 			,artist_(artist)
+			,pic_url_(pic_url)
 			,refcount_(1){}
 		void AddRef(){refcount_++;}
 		void Release(){if(!--refcount_) delete this;}
@@ -109,6 +113,7 @@ private:
 		std::string url_;
 		std::string pub_time_;
 		std::string artist_;
+		std::string pic_url_;
 	private:
 		int refcount_;
 	};

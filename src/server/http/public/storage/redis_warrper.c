@@ -83,7 +83,7 @@ int RedisGetHashElement(warrper_redis_context_t* context,const char* hash_name,
 						const char* key,const size_t key_len, char** val,size_t* val_len){
 	redisReply* reply;
 	reply =  redisCommand(context->context,"hget %s %s",hash_name,key);
-	if(strlen(reply->str)!=0){
+	if(reply->len!=0){
 		if (strlen(reply->str)<=0){
 			printf("########%d#########",strlen(reply->str));
 			return 0;
@@ -96,6 +96,7 @@ int RedisGetHashElement(warrper_redis_context_t* context,const char* hash_name,
 	}
 	*val_len = 0;
 	freeReplyObject(reply);
+	return 0;
 }
 
 
