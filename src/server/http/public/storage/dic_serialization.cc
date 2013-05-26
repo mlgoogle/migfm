@@ -194,6 +194,43 @@ bool RedisDicSerial::DelMusicMapRadom(const std::string& art_name){
 	return redis_engine_->DelHashRadomElement(art_name.c_str());
 }
 
+bool RedisDicSerial::GetMoodAndScensId(const std::string& key,std::string& word_id){
+	char* value;
+	size_t value_len = 0;
+	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
+		&value,&value_len);
+	if (r){
+		word_id.assign(value,value_len-1);
+		if (value){
+			free(value);
+			value = NULL;
+		}
 
+	}else{
+		MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	}
+
+	return r;
+}
+
+bool RedisDicSerial::GetArtistMoodAndScensNum(const std::string& key,
+											  std::string& num){
+	char* value;
+	size_t value_len = 0;
+	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
+	  &value,&value_len);
+	if (r){
+	  num.assign(value,value_len-1);
+	  if (value){
+		  free(value);
+		  value = NULL;
+	  }
+
+	}else{
+	  MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	}
+
+	return r;
+}
 
 }

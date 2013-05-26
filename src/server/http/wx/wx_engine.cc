@@ -42,7 +42,7 @@ WXInfoEngine::WXInfoEngine()
 
 
 	url_ = "http://sandbox.api.simsimi.com/request.p?key=274d7567-e7d8-4d08-a8b2-5c5a86721846&lc=ch&ft=1.0&text=";
-	douban_url_= "http://douban.fm/j/mine/playlist?type=n&sid=&pt=0.0&from=mainsite&channel=1";
+	douban_url_= "http://douban.fm/j/mine/playlist?type=n&sid=&pt=0.0&from=mainsite&channel=";
 
 	//segment_url_ = "http://60.191.222.130";
 	segment_url_ = "http://42.121.112.248";
@@ -142,7 +142,6 @@ WXInfoEngine::IncomingStanza(const base::XmlElement *pelStanza){
 	do {
 		std::string name = child->AsElement()->Name().LocalPart();
 		std::string name_content = child->AsElement()->FirstChild()->AsText()->Text();
-		MIG_DEBUG(USER_LEVEL,"name[%s] name_content[%s]",name.c_str(),name_content.c_str());
 		packet.PutAttrib(name,name_content);
 	} while ((child=child->NextChild())!=NULL);
 	ProcessMsg(packet);
@@ -164,11 +163,12 @@ WXInfoEngine::ProcessMsg(WXPacket& msg){
  	bool r = msg.GetPacketType(msgtype);
  	if (!r)
  		return;
-	MIG_DEBUG(USER_LEVEL,"%s",msgtype.c_str());
+	/*MIG_DEBUG(USER_LEVEL,"%s",msgtype.c_str());*/
 	if (msgtype=="text")
 		ProcessMsgText(msg);
 	return ;
 }
+
 
 /*
 <xml>
@@ -195,60 +195,63 @@ WXInfoEngine::ProcessMsgText(WXPacket& msg){
 
 	if (content_s=="1"){
 		PullAnyMusicMsg(to_user,from_user);
+	}else if (content_s=="cc"){
+		ChangeChannel(to_user,from_user);
+	}
+	else if (content_s=="mm"||content_s=="ms"||content_s=="mn"){//心情
+		SetUserMode(from_user,content_s);
 	}else{
+		//获取用户当前状态 心情,mm 场景ms 普通mn
+		std::string mode;
+		r = GetUserMode(from_user,mode);
+		if (r&&(mode=="mm"||mode=="ms")){
+			PullMoodAndSenceMusicInfo(to_user,from_user,content_s,mode);
+			return ;
+		}
+
 		r = SegmentWordMsg(to_user,from_user,content_s);
 		if (!r)
-			PullRobotTextMsg(to_user,from_user,content_s);
+			PullAnyMusicMsg(to_user,from_user);
+// 		if (!r)
+// 			PullRobotTextMsg(to_user,from_user,content_s);
 	}
 
+}
 
-	//std::stringstream os;
-	//os<<url_<<content_s;
-	//std::string url = os.str();
-	//wxinfo::HttpResponse http(url);
-	//http.Get();
-	//http.GetContent(content);
+bool WXInfoEngine::SetUserMode(const std::string& from_user,
+							   std::string& mode){
+   std::stringstream key;
+   char* value = NULL;
+   size_t value_len = 0;
+   bool r = false;
+   key<<from_user.c_str()
+	   <<"_m";
 
-	//bool r = reader.parse(content.c_str(),root);
-	//if (!r){
-	//	MIG_ERROR(USER_LEVEL,"parse json error[%s]",content.c_str());
-	//	return ;
-	//}
+   MIG_DEBUG(USER_LEVEL,"key[%s]",key.str().c_str());
+   r = base_storage::MemDicSerial::SetString(key.str().c_str(),key.str().length(),
+	                                         mode.c_str(),mode.length());
+   return r;
+}
 
-	//int ack_code = root["result"].asInt();
-	//if (ack_code==100){
-	//	std::string reponse = root["response"].asString();
-	///*char*  output;
-	//size_t output_len;
-	//base::BasicUtil::GB2312ToUTF8(content_s.c_str(),content_s.length(),
-	//								&output,&output_len);
-	//std::string utf8content;
-	//utf8content.assign(output,output_len);*/
+bool 
+WXInfoEngine::GetUserMode(const std::string& from_user,std::string& mode){
+	std::stringstream key;
+	char* value = NULL;
+	size_t value_len = 0;
+	bool r = false;
+	key<<from_user.c_str()
+	   <<"_m";
 
-	//	PackageTextMsg(from_user,to_user,reponse);
-	//}
-// 	std::string title = "指南针--选择坚强";
-// 	std::string description = "选择坚强";
-// 	std::string s_title;
-// 	std::string s_description;
-// 	char*  title_output;
-// 	size_t title_output_len;
-// 
-// 	char*  description_output;
-// 	size_t description_output_len;
-// 
-// 	base::BasicUtil::GB2312ToUTF8(title.c_str(),title.length(),
-// 									&title_output,&title_output_len);
-// 	s_title.assign(title_output,title_output_len);
-// 
-// 
-// 	base::BasicUtil::GB2312ToUTF8(description.c_str(),description.length(),
-// 		&description_output,&description_output_len);
-// 	s_description.assign(description_output,description_output_len);
-// 
-// 	std::string url = "http://mr4.douban.com/201305060009/d191e6bc3ef2e322b6af6b4b2edd2149/view/song/small/p1121382.mp3";
-	//PackageMusicMsg(from_user,to_user,s_title,s_description,url,url);
+	r = base_storage::MemDicSerial::GetString(key.str().c_str(),
+		                                      key.str().length(),
+											  &value,&value_len);
 
+	mode.assign(value,value_len);
+	if (value){
+		delete [] value;
+		value = NULL;
+	}
+	return r;
 }
 
 bool
@@ -397,6 +400,117 @@ WXInfoEngine::PutDesignationMusicInfo(base::MusicInfo& mi,std::list<std::string>
 	return  r;
 }
 
+//心情词性：mm 
+//场景词性: ms
+
+bool
+WXInfoEngine::GetMoodAndScenesMusicInfos(base::MusicInfo& mi,std::string& content,
+										 std::string& word_flag){
+	bool r = false;
+	std::string word_mi = "mi";
+	std::string ms_word;
+	std::string ms_word_id;
+	std::stringstream os;
+	std::map<std::string,std::list<std::string> >::iterator it 
+		= word_map_.find(word_flag);
+	
+	if (it==word_map_.end()){
+		return false;
+	}
+	r = GetMusicWordInfo(it->second,ms_word);
+	if (!r)
+		return false;
+
+	//获取心情,场景词对于的心情，场景号
+	r = base_storage::RedisDicSerial::GetMoodAndScensId(ms_word,ms_word_id);
+	if (!r)
+		return false;
+	//获取歌手
+	std::map<std::string,std::list<std::string> >::iterator itr
+		= word_map_.find(word_mi);
+	
+	while (itr!=word_map_.end()){//指定推荐
+		//mapname:mmd_1
+		//获取改歌手该心情场景有多少歌
+		//key:base64(astist)_wordflag
+		std::stringstream os_artist;
+		std::stringstream os_word_mapname;
+		std::string artist;
+		std::string artist_num;
+		std::string base64_artist;
+		r = GetMusicWordInfo(itr->second,artist);
+		if (!r)
+			break;
+// 		base64_artist = base64_encode((unsigned char*)(artist.c_str()),
+// 			                           artist.length());
+		os_artist<<artist.c_str()
+			     <<word_flag
+				 <<ms_word_id;
+		r = base_storage::RedisDicSerial::GetArtistMoodAndScensNum(os_artist.str(),
+			                                                       artist_num);
+		if (!r)
+			break;
+		int srand_num = (time(NULL)%(atol(artist_num.c_str())));
+		os_word_mapname<<word_flag<<"_d"<<ms_word_id;
+		std::string song_id;
+		std::stringstream key;
+		key<<artist.c_str()<<"_"<<srand_num;
+
+		MIG_DEBUG(USER_LEVEL,"mapname[%s] key [%s]",os_word_mapname.str().c_str(),
+			                                        key.str().c_str());
+		r = base_storage::RedisDicSerial::GetMusicMapInfo(os_word_mapname.str(),
+			                                              key.str(),song_id);
+		if (!r)
+			break;
+		GetOneMusicInfo(song_id,mi,content);
+		return true;
+
+	}
+	//mapname:mmr_1
+	os<<word_flag<<"_r"<<ms_word_id;
+	MIG_DEBUG(USER_LEVEL,"map_name:[%s]",os.str().c_str());
+	std::string song_id;
+	r = base_storage::RedisDicSerial::GetMusicMapRadom(os.str(),song_id);
+
+	if (!r)
+		return false;
+	GetOneMusicInfo(song_id,mi,content);
+	return true;
+	
+}
+
+bool
+WXInfoEngine::GetOneMusicInfo(const std::string& song_id, 
+							  base::MusicInfo& mi, 
+							  std::string& content){
+    
+	std::stringstream dec_os;
+	base::MusicInfo smi;
+	std::string music_info;
+	std::string content_url;
+	bool r = false;
+	r = base_storage::RedisDicSerial::GetMusicInfos(song_id,music_info);
+	if (!r)
+		return false;
+	MIG_DEBUG(USER_LEVEL,"song_id[%s] json[%s]",song_id.c_str(),
+		      music_info.c_str());
+
+	r = smi.UnserializedJson(music_info);
+	if (!r)
+		return false;
+	r = wx_get_song_->GetSongInfo(smi.artist(),smi.title(),
+	smi.album_title(),content_url);
+	if (!r)
+		return false;
+	smi.set_url(content_url);
+	dec_os<<base64_decode(smi.artist()).c_str()<<" "
+	<<base64_decode(smi.album_title()).c_str()
+	<<" "<<smi.pub_time();
+	content = dec_os.str();
+	mi = smi;
+	return true;
+}
+
 bool 
 WXInfoEngine::GetMusicInfos(base::MusicInfo& mi,std::string& content){
 	bool r = false;
@@ -433,6 +547,43 @@ WXInfoEngine::GetMusicInfos(base::MusicInfo& mi,std::string& content){
 
 	return r;
 }
+
+bool 
+WXInfoEngine::PullMoodAndSenceMusicInfo(std::string& to_user,
+								std::string& from_user, 
+								std::string& content_s,
+								std::string& word_flag){
+	wxinfo::HttpPost http(segment_url_);
+	bool r = false;
+	base::MusicInfo mi;
+	std::string content;
+	std::string decs;
+	int port =8080;
+	r = http.Post(content_s.c_str(),port);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"segment http post error");
+		return false;
+	}
+
+	http.GetContent(content);
+	MIG_DEBUG(USER_LEVEL,"%s",content.c_str());
+	r = StorageOneWords(content);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"storage word error");
+		return false;
+	}
+
+	r = GetMoodAndScenesMusicInfos(mi,content,word_flag);
+	if (!r)
+		return false;
+
+	//MIG_DEBUG(USER_LEVEL,"title[%s]",mi.title().c_str());
+	PackageMusicMsg(from_user,to_user,base64_decode(mi.title()),
+		            content,mi.url(),mi.url());
+	word_map_.clear();
+	return true;
+}
+
 
 bool
 WXInfoEngine::SegmentWordMsg(std::string &to_user, std::string &from_user, 
@@ -494,9 +645,72 @@ WXInfoEngine::PullRobotTextMsg(std::string& to_user,std::string& from_user,
 	}
 }
 
+
+void
+WXInfoEngine::ChangeChannel(std::string& to_user,std::string& from_user){
+	std::string douban_url;
+	std::string durl;
+	std::string title;
+	std::string decs;
+	std::string content;
+	int32 channel = 0;
+	bool r = false;
+	time_t json_time;
+	time_t current_time = time(NULL);
+
+	//channcel|num|time|json
+	r = GetMemMusicInfo(from_user,durl,title,decs,json_time,channel);
+	if (!r)
+		channel = 0;
+
+	int32 new_channel = (channel+1)%11;
+	r = HttpGetDoubanMusicInfo(content,new_channel);
+	if (r){
+		time_t json_time = time(NULL)+(60*60*2);
+		r = SetMemMusicInfo(from_user,1,new_channel,content,json_time);
+		r = ParseJson(0,content,from_user,durl,title,decs);
+	}
+	else{
+		MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
+		return ;
+	}
+	PackageMusicMsg(from_user,to_user,title,decs,durl,durl);
+
+}
+
 void 
 WXInfoEngine::PullAnyMusicMsg(std::string& to_user,std::string& from_user){
+
+	std::string douban_url;
+	std::string durl;
+	std::string title;
+	std::string decs;
 	std::string content;
+	int channel = 0;
+	bool r = false;
+	time_t json_time;
+	time_t current_time = time(NULL);
+
+	//channcel|num|time|json
+	r = GetMemMusicInfo(from_user,durl,title,decs,json_time,channel);
+
+	//判断是否存在或者是否超时
+	if ((!r)||(json_time<current_time)){
+		r = HttpGetDoubanMusicInfo(content,1);
+		if (r){
+			time_t json_time = time(NULL)+(60*60*2);
+		    r = SetMemMusicInfo(from_user,1,1,content,json_time);
+			r = ParseJson(0,content,from_user,durl,title,decs);
+		}
+		else{
+			MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
+			return ;
+		}
+	}
+
+	PackageMusicMsg(from_user,to_user,title,decs,durl,durl);
+
+	/*std::string content;
 	Json::Reader reader;
 	Json::Value  root;
 	bool r = false;
@@ -511,7 +725,6 @@ WXInfoEngine::PullAnyMusicMsg(std::string& to_user,std::string& from_user){
 // 	int32 rand_num = 10%(rand());
 // 	os_url<<douban_url_<<rand_num;
 // 	std::string temp = os_url.str();
-
 	if (count_>=music_infos_size_){
 		count_ = 0;
 		wxinfo::HttpResponse http(douban_url_);
@@ -551,7 +764,7 @@ WXInfoEngine::PullAnyMusicMsg(std::string& to_user,std::string& from_user){
 	std::string decs = os.str();
 
 	PackageMusicMsg(from_user,to_user,title,decs,durl,durl);
-	count_++;
+	count_++;*/
 }
 
 void
@@ -651,4 +864,139 @@ void WXInfoEngine::StorageWordsDump(){
 	}
 }
 
+
+bool WXInfoEngine::GetMemMusicInfo(std::string& from_user,
+								   std::string& durl,std::string& title,
+								   std::string& decs,time_t& current,
+								   int& current_channel){
+	 bool r = false;
+	 size_t value_len = 0;;
+	 char* value = NULL;
+	 int num = 0;
+	 std::string content;
+	 r = base_storage::MemDicSerial::GetString(from_user.c_str(),
+	                             from_user.length(),&value,&value_len);
+	 if (!r)
+		 return false;
+
+	 const char* temp_value = value;
+	 char* temp = strstr(temp_value,"|");
+	 int channel_pos = temp  - temp_value;
+	 std::string channel;
+	 channel.assign(temp_value,channel_pos);
+	 current_channel = atol(channel.c_str());
+
+	 temp_value = temp+1;
+	 temp = strstr(temp_value,"|");
+	 int num_pos = temp - temp_value;
+	 std::string num_str;
+	 num_str.assign(temp_value,num_pos);
+	 num = atol(num_str.c_str());
+
+	 temp_value = temp+1;
+	 temp = strstr(temp_value,"|");
+	 int time_pos = temp - temp_value;
+	 std::string current_time;
+	 current_time.assign(temp_value,time_pos);
+	 current = atol(current_time.c_str());
+
+	 content.assign(temp+1,value_len-4);
+	 MIG_DEBUG(USER_LEVEL,"content %s",content.c_str());
+	 r = ParseJson(num,content,from_user,durl,title,decs);
+
+	 //是否到达最后一个
+	 if((num+1)<5)
+		 r = SetMemMusicInfo(from_user,(num+1),atol(channel.c_str()),content,current);
+	 else{
+		 std::string s_content;
+		 r = HttpGetDoubanMusicInfo(s_content,1);
+		 if (r){
+			 time_t json_time = time(NULL)+(60*60*2);
+			 r = SetMemMusicInfo(from_user,0,1,s_content,json_time);
+			 r = ParseJson(0,content,from_user,durl,title,decs);
+		 }
+		 else{
+			 MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
+			 return r;
+		 }
+	 }
+	 
+	 return true;
+}
+
+bool WXInfoEngine::SetMemMusicInfo(std::string& from_user,
+								   int32 num,int32 channel, 
+								   std::string& json,time_t json_time){
+    std::stringstream os;
+	bool r = false;
+	os<<channel<<"|"<<num<<"|"<<json_time<<"|"<<json;
+	r = base_storage::MemDicSerial::SetString(from_user.c_str(),from_user.length(),
+		                                      os.str().c_str(),os.str().length());
+
+	return r;
+}
+
+bool WXInfoEngine::ParseJson(int32 num,std::string& content,
+							 std::string& from_user, 
+							 std::string& durl,std::string& title,
+							 std::string& decs){
+
+	 Json::Reader reader;
+	 Json::Value  root;
+	 std::string artist;
+	 std::string pub_time;
+	 std::string albumtitle;
+	 int32 music_infos_size;
+	 std::stringstream os;
+	 Json::Value song;
+	 bool r = false;
+	 r = reader.parse(content.c_str(),root);
+	 if (!r){
+		 MIG_ERROR(USER_LEVEL,"parse json error[%s]",content.c_str());
+		 return false;
+	 }
+	 music_infos_size = root["song"].size();
+	 if (music_infos_size<=0){
+		 MIG_ERROR(USER_LEVEL,"song valiled size[%d]",music_infos_size_);
+		 return false;
+	 }
+	 song = root["song"];
+	 if (num<0||num>music_infos_size){
+		 MIG_ERROR(USER_LEVEL,"num error [%d]",num);
+		 return false;
+	 }
+
+	 artist = song[num]["artist"].asString();
+	 durl = song[num]["url"].asString();
+	 title = song[num]["title"].asString();
+	 pub_time = song[num]["public_time"].asString();
+	 albumtitle = song[num]["albumtitle"].asString();
+
+	 MIG_DEBUG(USER_LEVEL,
+		       "artist[%s] durl[%s] title[%s] pubtime[%s] albuntitle[%s]",
+			   artist.c_str(),durl.c_str(),title.c_str(),pub_time.c_str(),
+			   albumtitle.c_str());
+	 os<<artist.c_str()<<" "<<albumtitle.c_str()<<" "<<pub_time.c_str();
+	 decs = os.str();
+	 return true;
+}
+
+bool
+WXInfoEngine::HttpGetDoubanMusicInfo(std::string& content,int32 channel){
+	std::string douban_url;
+	douban_url = douban_url_ ;
+	bool r = false;
+	std::stringstream os;
+	os<<channel;
+	douban_url.append(os.str().c_str());
+	MIG_DEBUG(USER_LEVEL,"doubam_url[%s]",douban_url.c_str());
+	wxinfo::HttpResponse http(douban_url);
+	r = http.Get();
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"get douban error");
+		return false;
+	}
+	r = http.GetContent(content);
+	return r;
+}
 }

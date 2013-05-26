@@ -30,7 +30,7 @@ int RedisGetValue(warrper_redis_context_t* context,
 
 	redisReply* reply;
 	reply = redisCommand(context->context,"GET %s",key);
-	if(strlen(reply->str)!=0){
+	if(reply->len!=0){
 		if (strlen(reply->str)<=0){
 			printf("########%d#########",strlen(reply->str));
 			return 0;

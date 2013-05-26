@@ -61,13 +61,25 @@ private:
 						const std::string& description,
 						const std::string& url, const std::string& hq_url);
 
+	bool GetUserMode(const std::string& from_user,std::string& mode);
+
+	bool SetUserMode(const std::string& from_user,std::string& mode);
+
 	bool SegmentWordMsg(std::string& to_user,std::string& from_user,
 						std::string& content_s);
+
+
+	bool GetOneMusicInfo(const std::string& song_id,
+		                 base::MusicInfo& mi,
+						 std::string& content);
 
 	bool GetMusicInfo(base::MusicInfo& mi,std::string& content,std::string& key);
 
 	bool GetOneMusicInfo(base::MusicInfo& mi,std::string& flag,std::string& key,
 						std::string& content);
+
+	bool GetMoodAndScenesMusicInfos(base::MusicInfo& mi,std::string& content,
+									std::string& word_flag);
 
 	bool GetMusicInfos(base::MusicInfo& mi,std::string& content);
 
@@ -82,10 +94,34 @@ private:
 
 	void PullAnyMusicMsg(std::string& to_user,std::string& from_user);
 
+	void ChangeChannel(std::string& to_user,std::string& from_user);
+
 	void PullRobotTextMsg(std::string& to_user,std::string& from_user,
 							std::string& content_s);
 
+	bool PullMoodAndSenceMusicInfo(std::string& to_user,
+		                           std::string& from_user,
+		                           std::string& content_s,
+								   std::string& word_flag);
+
+
 	void StorageWordsDump();
+
+	bool GetMemMusicInfo(std::string& from_user,std::string& durl,
+		                 std::string& title,std::string& decs,
+						 time_t& current,int& current_channel);
+
+
+	bool ParseJson(int32 num,std::string& content,std::string& from_user,
+		           std::string& durl,
+				   std::string& title,
+		           std::string& decs);
+
+	bool SetMemMusicInfo(std::string& from_user,int32 num,int32 channel,
+		                 std::string& json,time_t json_time);
+
+	bool HttpGetDoubanMusicInfo(std::string& content,int32 channel);
+
 public: 
     static WXInfoEngine* GetEngine();
     static void  FreeEngine();

@@ -42,6 +42,10 @@ public:
 	static bool GetMusicInfos(const std::string& key,std::string& music_infos);
 	static bool DelMusciInfos(const std::string& key);
 
+	static bool GetMoodAndScensId(const std::string& key,std::string& word_id);
+
+	static bool GetArtistMoodAndScensNum(const std::string& key,std::string& num);
+
 	static bool SetMusicMapInfo(const std::string& art_name,
 									const std::string& key,
 									const std::string song_id);
