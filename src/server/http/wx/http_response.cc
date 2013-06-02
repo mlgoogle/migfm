@@ -216,8 +216,6 @@ bool HttpResponse::GetContent(std::string& content){
     for(std::vector<char>::iterator itr = content_.begin();
     	itr!=content_.end();++itr){
         content.append(1,(*itr));
-		//MIG_DEBUG(USER_LEVEL,"(*itr)[%c]",(*itr));
-		//MIG_DEBUG(USER_LEVEL,"content[%s]",content.c_str());
     }
     return true;
 }

@@ -16,6 +16,7 @@
 
 namespace wxinfo{
 
+
 class WXInfoEngine{
 public:
     WXInfoEngine();
@@ -26,6 +27,7 @@ public:
 	void PostContent(const std::string& content);
 	std::string& GetProcessContent(){return content_;}
 private:
+	bool InitChannelAndMode(void);
 	bool StorageOneWords(std::string &reponse_msg);
 	void StorageOneWord(std::string &attr, std::string &value);
 	class StanzaParseHandler:public base::XmppStanzaParseHandler{
@@ -52,6 +54,7 @@ private:
 	void IncomingEnd(bool isError);
 	void ProcessMsg(WXPacket& msg);
 	void ProcessMsgText(WXPacket& msg);
+	void ProcessEventText(WXPacket& msg);
 	void PackageTextMsg(std::string& to_user,std::string& from_user,
 		                std::string& content);
 
@@ -63,7 +66,8 @@ private:
 
 	bool GetUserMode(const std::string& from_user,std::string& mode);
 
-	bool SetUserMode(const std::string& from_user,std::string& mode);
+	bool SetUserMode(std::string& from_user,std::string to_user,
+		             std::string& mode);
 
 	bool SegmentWordMsg(std::string& to_user,std::string& from_user,
 						std::string& content_s);
@@ -96,6 +100,9 @@ private:
 
 	void ChangeChannel(std::string& to_user,std::string& from_user);
 
+	void RecommendationMusic(std::string& to_user,std::string& from_user,
+		                     std::string& content);
+
 	void PullRobotTextMsg(std::string& to_user,std::string& from_user,
 							std::string& content_s);
 
@@ -111,6 +118,7 @@ private:
 		                 std::string& title,std::string& decs,
 						 time_t& current,int& current_channel);
 
+	bool GetMemChanncel(std::string& from_user,int& current_channel);
 
 	bool ParseJson(int32 num,std::string& content,std::string& from_user,
 		           std::string& durl,
@@ -138,6 +146,8 @@ private:
 	wxinfo::WXGetSongUrl*                         wx_get_song_;
 	std::map<std::string,std::list<std::string> > word_map_;
 private:
+	std::vector<std::string>                      channel_;
+	std::map<std::string,std::string>             mode_map_;
 
 };
 }

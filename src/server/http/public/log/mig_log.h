@@ -28,6 +28,7 @@ enum {
     SYSTEM_LEVEL
 };
 
+
 #define MIG_DEBUG(level, format, ...)  \
         log_impl(__FILE__, __LINE__, __FUNCTION__, (level), DEBUG_PRIORITY, (format), ##__VA_ARGS__)
 

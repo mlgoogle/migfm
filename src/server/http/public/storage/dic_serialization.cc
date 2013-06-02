@@ -129,7 +129,7 @@ bool RedisDicSerial::GetMusicInfos(const std::string& key,std::string& music_inf
 		}
 	
 	}else{
-		MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
 	}
 	
 	return r;
@@ -159,7 +159,7 @@ bool RedisDicSerial::GetMusicMapInfo(const std::string& art_name,
 		 }
 
 	 }else{
-		 MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+		 MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
 	 }
 	 return r;
 }
@@ -185,7 +185,7 @@ bool RedisDicSerial::GetMusicMapRadom(const std::string& art_name,std::string& s
 		}
 
 	}else{
-		MIG_DEBUG(USER_LEVEL,"GetValue error");
+		MIG_ERROR(USER_LEVEL,"GetValue error");
 	}
 	return r;
 }
@@ -207,7 +207,7 @@ bool RedisDicSerial::GetMoodAndScensId(const std::string& key,std::string& word_
 		}
 
 	}else{
-		MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
 	}
 
 	return r;
@@ -227,7 +227,7 @@ bool RedisDicSerial::GetArtistMoodAndScensNum(const std::string& key,
 	  }
 
 	}else{
-	  MIG_DEBUG(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	  MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
 	}
 
 	return r;

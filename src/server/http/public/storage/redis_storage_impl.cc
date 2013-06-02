@@ -128,7 +128,7 @@ bool RedisStorageEngineImpl::GetHashRadomElement(const char* hash_name,char** va
 	std::stringstream index;
 	//index<<(((time(NULL)+1)%(current_size)))-1;
 	time_t current_time = time(NULL);
-	index<<(((current_time)%(current_size)))-1;
+	index<<(((current_time)%(current_size)));
 	MIG_DEBUG(USER_LEVEL,"index[%s] hashname[%s]time[%lld] current[%d]",
 		     index.str().c_str(),hash_name,
 		     current_time,current_size);

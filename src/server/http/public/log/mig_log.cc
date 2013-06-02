@@ -86,8 +86,10 @@ int log_impl (const char *file, const int line, const char *func, int level, int
         break;
 
     case DEBUG_PRIORITY:
+#if _DEBUG
         syslog (LOG_DEBUG, "%s %s", "DEBUG", message);
         FPRINTF (stderr, "%s %s\n", "DEBUG", message);
+#endif
         break;
 
     case INFO_PRIORITY:

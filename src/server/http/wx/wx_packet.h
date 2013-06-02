@@ -9,6 +9,7 @@
 #define  CreateTime    "CreateTime"
 #define  Content       "Content"
 #define  MsgId         "MsgId"
+#define  Event         "Event"
 
 namespace wxinfo{
 

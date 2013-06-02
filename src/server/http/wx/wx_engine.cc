@@ -102,23 +102,26 @@ bool WXInfoEngine::InitEngine(std::string& path){
 	}
 	wx_get_song_->Init(get_song_url_);
 
-	wxinfo::HttpResponse http(douban_url_);
-	http.Get();
-	http.GetContent(content);
-
-	r = reader.parse(content.c_str(),root);
-	if (!r){
-		MIG_ERROR(USER_LEVEL,"parse json error[%s]",content.c_str());
-		return r;
-	}
-	music_infos_size_ = root["song"].size();
-	if (music_infos_size_<=0){
-		MIG_ERROR(USER_LEVEL,"song valiled size[%d]",music_infos_size_);
-		return r;
-	}
-	song_ = root["song"];
-	MIG_DEBUG(USER_LEVEL,"%s",content.c_str());
+	InitChannelAndMode();
     return r;
+}
+
+bool
+WXInfoEngine::InitChannelAndMode(void){
+	channel_.push_back("一号");
+	channel_.push_back("二号");
+	channel_.push_back("三号");
+	channel_.push_back("四号");
+	channel_.push_back("五号");
+	channel_.push_back("六号");
+	channel_.push_back("七号");
+	channel_.push_back("八号");
+	channel_.push_back("九号");
+	channel_.push_back("十号");
+
+	mode_map_["mm"] = "心情模式";
+	mode_map_["ms"] = "情景模式";
+	mode_map_["mn"] = "普通模式"; 
 }
 
 bool 
@@ -141,6 +144,8 @@ WXInfoEngine::IncomingStanza(const base::XmlElement *pelStanza){
 	const base::XmlChild* child = pelStanza->FirstChild();
 	do {
 		std::string name = child->AsElement()->Name().LocalPart();
+		if (name=="EventKey")
+			continue;
 		std::string name_content = child->AsElement()->FirstChild()->AsText()->Text();
 		packet.PutAttrib(name,name_content);
 	} while ((child=child->NextChild())!=NULL);
@@ -166,6 +171,8 @@ WXInfoEngine::ProcessMsg(WXPacket& msg){
 	/*MIG_DEBUG(USER_LEVEL,"%s",msgtype.c_str());*/
 	if (msgtype=="text")
 		ProcessMsgText(msg);
+	else if (msgtype=="event")
+		ProcessEventText(msg);
 	return ;
 }
 
@@ -180,6 +187,43 @@ WXInfoEngine::ProcessMsg(WXPacket& msg){
 <FuncFlag>0</FuncFlag>
 </xml>
 */
+
+void 
+WXInfoEngine::ProcessEventText(WXPacket& msg){
+	std::string str_event;
+	std::string to_user;
+	std::string from_user;
+	msg.GetAttrib(ToUserName,to_user);
+	msg.GetAttrib(FromUserName,from_user);
+	msg.GetAttrib(Event,str_event);
+	std::string content;
+	if (str_event=="subscribe"){
+		content="MIG音乐助手是以推荐为主的微信应用,而且在移动设备上不需要装任何音乐app,"
+                "便可想听你想要的音乐:\n"
+			    "1,有10个音乐频道,每个音乐频道将为你推荐不同风格的音乐.按发送字符\"n\"后,"
+				"系统会推荐一首音乐,提供试听."
+			    "如果觉得该频道不对味,可发送字符\"cc\",便可切换音乐频道.系统默认为频道一\n\n"
+			    "2,提供歌曲推荐,歌手推荐.可输入歌曲名.如:如果没有你 "
+				"系统便会自动推荐任意一个演绎改歌曲的歌手的音乐."
+                "若输入歌手名: 张学友 系统便会自动推荐一首该歌手的任意一首歌曲.\n\n"
+                "PS:如果你是苹果用户,那么使用更简便的功能:微信的语音助手插件"
+				"(在设置中,找到功能按钮,点击去便可添加)."
+                "只需对其说:王菲 便可获取到系统推荐的王菲一首歌,省去了手工输入麻烦.\n"
+	            "如有问题和建议可微信直接回复该号码,我们即可马上收到."
+				"感谢大家内测的支持,下个月将发布正式版,并加入心情推荐和场景推荐\n";
+		char* utf_content = NULL;
+		size_t utf_content_size = 0;
+		std::string str_utf8_content;
+		base::BasicUtil::GB2312ToUTF8(content.c_str(),content.length(),&utf_content,&utf_content_size);
+		str_utf8_content.assign(utf_content,utf_content_size);
+		PackageTextMsg(from_user,to_user,str_utf8_content);
+		if (utf_content){
+			delete [] utf_content;
+			utf_content = NULL;
+		}
+	}
+}
+
 void
 WXInfoEngine::ProcessMsgText(WXPacket& msg){
 	std::string to_user;
@@ -193,13 +237,66 @@ WXInfoEngine::ProcessMsgText(WXPacket& msg){
 	msg.GetAttrib(FromUserName,from_user);
 	msg.GetAttrib(Content,content_s);
 
-	if (content_s=="1"){
+	if (content_s=="n"){
 		PullAnyMusicMsg(to_user,from_user);
 	}else if (content_s=="cc"){
 		ChangeChannel(to_user,from_user);
-	}
-	else if (content_s=="mm"||content_s=="ms"||content_s=="mn"){//心情
-		SetUserMode(from_user,content_s);
+	}else if (content_s=="r1"||content_s=="r2"||
+			content_s=="r3"||content_s=="r4"||content_s=="r5"||content_s=="d1"){
+		RecommendationMusic(to_user,from_user,content_s);
+	}else if (content_s=="lp1"||content_s=="lp2"||content_s=="lp3"||
+		      content_s=="lp4"||content_s=="lp5"||content_s=="lp6"||
+			  content_s=="lp7"||content_s=="lp8"){
+		 std::string title;
+		 std::string url;
+		 std::stringstream os;
+		 if (content_s=="lp1"){
+			 title = "擦身而过";
+			 url = "http://42.121.14.108/wx/lp1.mp3";
+		 }else if (content_s=="lp2"){
+			 title = "出界";
+			 url = "http://42.121.14.108/wx/lp2.mp3";
+		 }else if (content_s=="lp3"){
+			 title = "倒带";
+			 url = "http://42.121.14.108/wx/lp3.mp3";
+		 }else if (content_s=="lp4"){
+			 title = "解脱";
+			 url = "http://42.121.14.108/wx/lp4.mp3";
+		 }else if (content_s=="lp5"){
+			 title = "天灯";
+			 url = "http://42.121.14.108/wx/lp5.mp3";
+		 }else if (content_s=="lp6"){
+			 title = "雨蝶";
+			 url = "http://42.121.14.108/wx/lp6.mp3";
+		 }else if (content_s=="lp7"){
+			 title = "日不落";
+			 url = "http://42.121.14.108/wx/lp7.mp3";
+		 }else if (content_s=="lp8"){
+			 title = "原来你也在这里";
+			 url = "http://42.121.14.108/wx/lp8.mp3";
+		 }
+		 os<<"某只会唱歌的萝卜";
+		 char* r_title = NULL;
+		 size_t r_title_size = 0;
+		 char* r_os = NULL;
+		 size_t r_os_size = 0;
+		 base::BasicUtil::GB2312ToUTF8(title.c_str(),title.length(),&r_title,&r_title_size);
+		 base::BasicUtil::GB2312ToUTF8(os.str().c_str(),os.str().length(),&r_os,&r_os_size);
+		 std::string s_title;
+		 std::string s_os;
+		 s_title.assign(r_title,r_title_size);
+		 s_os.assign(r_os,r_os_size);
+	     PackageMusicMsg(from_user,to_user,s_title,s_os,url,url);
+		 if (r_title){
+			delete [] r_title;
+			r_title = NULL;
+		 }
+		 if (r_os){
+			 delete[] r_os;
+			 r_os = NULL;
+		 }
+	}else if (content_s=="mm"||content_s=="ms"||content_s=="mn"){//心情
+		SetUserMode(from_user,to_user,content_s);
 	}else{
 		//获取用户当前状态 心情,mm 场景ms 普通mn
 		std::string mode;
@@ -218,11 +315,10 @@ WXInfoEngine::ProcessMsgText(WXPacket& msg){
 
 }
 
-bool WXInfoEngine::SetUserMode(const std::string& from_user,
+bool WXInfoEngine::SetUserMode(std::string& from_user,std::string to_user,
 							   std::string& mode){
    std::stringstream key;
-   char* value = NULL;
-   size_t value_len = 0;
+   std::stringstream content;
    bool r = false;
    key<<from_user.c_str()
 	   <<"_m";
@@ -230,6 +326,22 @@ bool WXInfoEngine::SetUserMode(const std::string& from_user,
    MIG_DEBUG(USER_LEVEL,"key[%s]",key.str().c_str());
    r = base_storage::MemDicSerial::SetString(key.str().c_str(),key.str().length(),
 	                                         mode.c_str(),mode.length());
+
+   std::map<std::string,std::string>::iterator it = mode_map_.find(mode);
+   content<<"切换模式成功，您已经切换到"<<it->second.c_str();
+   size_t out_len;
+   char* out;
+   std::string str_out;
+   base::BasicUtil::GB2312ToUTF8(content.str().c_str(),
+	                             content.str().length(),
+								 &out,
+								 &out_len);
+   str_out.assign(out,out_len);
+   if (out){
+	   delete [] out;
+	   out = NULL;
+   }
+   PackageTextMsg(from_user,to_user,str_out);
    return r;
 }
 
@@ -646,13 +758,92 @@ WXInfoEngine::PullRobotTextMsg(std::string& to_user,std::string& from_user,
 }
 
 
-void
-WXInfoEngine::ChangeChannel(std::string& to_user,std::string& from_user){
-	std::string douban_url;
-	std::string durl;
+void 
+WXInfoEngine::RecommendationMusic(std::string& to_user,
+								  std::string& from_user, 
+								  std::string& content){
+	std::string url;
 	std::string title;
 	std::string decs;
-	std::string content;
+	std::string utf_8_title;
+	std::string utf8_decs;
+	char* str_title = NULL;
+	size_t str_title_size = 0;
+	char* str_decs =NULL;
+	size_t str_decs_size = 0;
+    
+	if (content=="r1"){
+		return ;
+	}else if (content=="r2"){
+		title = "孤独的人是可耻的";
+		decs = "张楚 1994 孤独的人是可耻的";
+		url = "http://42.121.14.108/wx/r2.mp3";
+	}else if (content=="r3"){
+		title = "一块红布";
+		decs = "崔健 1991 解决";
+		url = "http://42.121.14.108/wx/r3.mp3";
+	}else if (content=="r4"){
+		title = "花太香";
+		decs = "任贤齐 2001 飞鸟";
+		url = "http://42.121.14.108/wx/r4.mp3";
+	}else if (content=="r5"){
+		title = "鲁冰花";
+		decs = "甄妮 2003 鲁冰花";
+		url = "http://42.121.14.108/wx/r5.mp3";
+	}
+	base::BasicUtil::GB2312ToUTF8(title.c_str(),title.length(),&str_title,&str_title_size);
+	utf_8_title.assign(str_title,str_title_size);
+	base::BasicUtil::GB2312ToUTF8(decs.c_str(),decs.length(),&str_decs,&str_decs_size);
+	utf8_decs.assign(str_decs,str_decs_size);
+	PackageMusicMsg(from_user,to_user,utf_8_title,utf8_decs,url,url);
+	if (str_decs){
+		delete [] str_decs;
+		str_decs = NULL;
+	}
+	if (str_title){
+		delete [] str_title;
+		str_title = NULL;
+	}
+}
+
+void
+WXInfoEngine::ChangeChannel(std::string& to_user,std::string& from_user){
+	bool r = false;
+	std::string  content;
+	std::stringstream msg;
+	int32 channel = 0;
+	r = GetMemChanncel(from_user,channel);
+	int32 new_channel = (channel+1)%10;
+	MIG_INFO(USER_LEVEL,"new_channel[%d]",new_channel);
+	r = HttpGetDoubanMusicInfo(content,new_channel);
+	if (r){
+		time_t json_time = time(NULL)+(60*60*2);
+		char* out;
+		size_t out_len;
+		std::string str_out;
+		r = SetMemMusicInfo(from_user,1,new_channel,content,json_time);
+		msg<<"您已经切换到新的频道，当前是"<<channel_[new_channel]<<"频道";
+		base::BasicUtil::GB2312ToUTF8(msg.str().c_str(),msg.str().length(),&out,&out_len);
+		str_out.assign(out,out_len);
+		PackageTextMsg(from_user,to_user,str_out);
+		if (out){
+			delete [] out;
+			out = NULL;
+		}
+	}
+	else{
+		MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
+		return ;
+	}
+
+
+/*
+	std::string       douban_url;
+	std::string       durl;
+	std::string       title;
+	std::string       decs;
+	std::string       content;
+	std::stringstream msg;
 	int32 channel = 0;
 	bool r = false;
 	time_t json_time;
@@ -668,13 +859,13 @@ WXInfoEngine::ChangeChannel(std::string& to_user,std::string& from_user){
 	if (r){
 		time_t json_time = time(NULL)+(60*60*2);
 		r = SetMemMusicInfo(from_user,1,new_channel,content,json_time);
-		r = ParseJson(0,content,from_user,durl,title,decs);
+		//r = ParseJson(0,content,from_user,durl,title,decs);
 	}
 	else{
 		MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
 		return ;
 	}
-	PackageMusicMsg(from_user,to_user,title,decs,durl,durl);
+	PackageMusicMsg(from_user,to_user,title,decs,durl,durl);*/
 
 }
 
@@ -696,10 +887,10 @@ WXInfoEngine::PullAnyMusicMsg(std::string& to_user,std::string& from_user){
 
 	//判断是否存在或者是否超时
 	if ((!r)||(json_time<current_time)){
-		r = HttpGetDoubanMusicInfo(content,1);
+		r = HttpGetDoubanMusicInfo(content,channel);
 		if (r){
 			time_t json_time = time(NULL)+(60*60*2);
-		    r = SetMemMusicInfo(from_user,1,1,content,json_time);
+		    r = SetMemMusicInfo(from_user,1,channel,content,json_time);
 			r = ParseJson(0,content,from_user,durl,title,decs);
 		}
 		else{
@@ -864,13 +1055,47 @@ void WXInfoEngine::StorageWordsDump(){
 	}
 }
 
+bool WXInfoEngine::GetMemChanncel(std::string &from_user, int &current_channel){
+	bool r = false;
+	size_t value_len = 0;
+	char* value = NULL;
+	int32 num = 0;
+	/*std::string content;*/
+	r = base_storage::MemDicSerial::GetString(from_user.c_str(),
+		from_user.length(),&value,&value_len);
+	if (!r)
+		return false;
+
+	const char* temp_value = value;
+	char* temp = strstr(temp_value,"|");
+	int channel_pos = temp  - temp_value;
+	std::string channel;
+	channel.assign(temp_value,channel_pos);
+	current_channel = atol(channel.c_str());
+
+	/*temp_value = temp+1;
+	temp = strstr(temp_value,"|");
+	int num_pos = temp - temp_value;
+	std::string num_str;
+	num_str.assign(temp_value,num_pos);
+	num = atol(num_str.c_str());
+
+	temp_value = temp+1;
+	temp = strstr(temp_value,"|");
+	int time_pos = temp - temp_value;
+	std::string current_time;
+	current_time.assign(temp_value,time_pos);*/
+	//current = atol(current_time.c_str());
+	//content.assign(temp+1,value_len-4);
+	//MIG_DEBUG(USER_LEVEL,"content %s",content.c_str());
+}
 
 bool WXInfoEngine::GetMemMusicInfo(std::string& from_user,
 								   std::string& durl,std::string& title,
 								   std::string& decs,time_t& current,
 								   int& current_channel){
 	 bool r = false;
-	 size_t value_len = 0;;
+	 size_t value_len = 0;
 	 char* value = NULL;
 	 int num = 0;
 	 std::string content;
@@ -909,10 +1134,10 @@ bool WXInfoEngine::GetMemMusicInfo(std::string& from_user,
 		 r = SetMemMusicInfo(from_user,(num+1),atol(channel.c_str()),content,current);
 	 else{
 		 std::string s_content;
-		 r = HttpGetDoubanMusicInfo(s_content,1);
+		 r = HttpGetDoubanMusicInfo(s_content,current_channel);
 		 if (r){
 			 time_t json_time = time(NULL)+(60*60*2);
-			 r = SetMemMusicInfo(from_user,0,1,s_content,json_time);
+			 r = SetMemMusicInfo(from_user,0,current_channel,s_content,json_time);
 			 r = ParseJson(0,content,from_user,durl,title,decs);
 		 }
 		 else{

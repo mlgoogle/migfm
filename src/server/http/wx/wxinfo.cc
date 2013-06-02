@@ -48,9 +48,10 @@ static void GetRequestMethod(const char* query){
 static void PostRequestMethod(std::string& content){
   wxinfo::WXInfoEngine::GetEngine()->PostContent(content);
   std::string respone = wxinfo::WXInfoEngine::GetEngine()->GetProcessContent();
-  printf("Content-type: text/html\r\n"
-	  "\r\n"
-	  "%s",respone.c_str());
+  if (!respone.empty())
+	printf("Content-type: text/html\r\n"
+		  "\r\n"
+		"%s",respone.c_str());
   MIG_DEBUG(USER_LEVEL,"+++++++++++++++++++++++++++++++++++\n\n\n");
 }
 
