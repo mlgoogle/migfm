@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <config>
   <database>
-     <mysql host ="127.0.0.1" 
+     <mysql host ="10.135.11.98" 
             port ="3306" 
             user = "root" 
             pass = "miglab2012"  

@@ -134,6 +134,33 @@ bool MysqlSerial::CheckUserPassword(const char*username,const char* password){
 }
 #endif
 
+
+bool MysqlSerial::GetWXMusicInfo(const std::string& id,
+								 std::string& title,
+								 std::string& desc, 
+								 std::string& url){
+    std::stringstream os;
+	bool r = false;
+	uint32 num;
+	db_row_t* db_rows;
+	MYSQL_ROW rows;
+	os<<"select title,description,url from migfm_wx_msg where id = "
+		<<id;
+	MIG_DEBUG(USER_LEVEL,"%s",os.str().c_str());
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	num = mysql_db_engine_->RecordCount();
+	MIG_DEBUG(USER_LEVEL,"###num [%d]####",num);
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(mysql_db_engine_->FetchRows())->proc)){
+			title.assign(rows[0]);
+			desc.assign(rows[1]);
+			url.assign(rows[2]);
+		}
+		return true;
+	}
+	return false;
+}
+
 bool MysqlSerial::GetMusicAll(std::list<base::MusicInfo >& music_info){
 	std::stringstream os;
 	bool r = false;
@@ -270,6 +297,34 @@ bool MysqlSerial::GetMusicRaw(base::MusicInfo& music_info,std::string& sql){
 			music_info.set_pub_time(rows[6]);
 		}
 	}
+}
+
+bool MysqlSerial::GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& num){
+	std::stringstream os;
+	bool r = false;
+	db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	os<<"select id,channel_id,channel_name from migfm_channel";
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+
+	num = mysql_db_engine_->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(mysql_db_engine_->FetchRows())->proc)){
+
+			std::string id = rows[0];
+			std::string channel_id = rows[1];
+			std::string channel_name = rows[2];
+			MIG_INFO(USER_LEVEL,"id[%s] channel[%s] channel_name[%s]",
+				      id.c_str(),channel_id.c_str(),channel_name.c_str());
+			base::ChannelInfo ci(id,channel_id,channel_name);
+			channel.push_back(ci);
+		}
+	}
+	 return true;
 }
 
 bool MysqlSerial::GetMusicInfos(std::list<base::MusicUsrInfo>& music_list){

@@ -35,6 +35,38 @@ MusicUsrInfo::MusicUsrInfo(const MusicUsrInfo& mi)
     }
 }
 
+ChannelInfo::ChannelInfo(){
+	data_ = new Data();
+}
+
+ChannelInfo::ChannelInfo(const std::string& index,
+						 const std::string& douban_index, 
+						 const std::string& channel_name){
+    data_ = new Data(index,douban_index,channel_name);
+}
+
+ChannelInfo& ChannelInfo::operator=(const ChannelInfo& mi){
+	if(mi.data_!=NULL){
+		mi.data_->AddRef();
+	}
+
+	if(data_!=NULL){
+		data_->Release();
+	}
+
+	data_ = mi.data_;
+	return *this;
+}
+
+ChannelInfo::ChannelInfo(const ChannelInfo& mi)
+:data_(mi.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+
+
 MusicInfo::MusicInfo(){
 	data_ = new Data();
 }

@@ -8,7 +8,7 @@ COMPILERC = gcc
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD -D_TFS_#-DTEST
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD -D_TFS_ -D_ARTLIST_#-DTEST
 ## for release
 #CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD -D_TFS_
 
@@ -96,7 +96,7 @@ constants.o:
 	$(COMPILE) ./../public/basic/constants.cc
 
 redis_warrper.o:
-	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ./../public/storage/redis_warrper.c
+	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS)  -O0 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ./../public/storage/redis_warrper.c
 
 redis_storage_impl.o:
 	$(COMPILE) ./../public/storage/redis_storage_impl.cc

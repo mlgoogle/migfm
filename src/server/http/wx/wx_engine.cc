@@ -47,7 +47,8 @@ WXInfoEngine::WXInfoEngine()
 	//segment_url_ = "http://60.191.222.130";
 	segment_url_ = "http://42.121.112.248";
 
-    get_song_url_ = "http://121.199.32.88/GetMusicUrl.ashx";
+    get_song_url_ = "http://121.199.32.88/getmusicurl.ashx";
+	channel_desc_ = base::ConStants::channel_dec();
 }
 
 
@@ -108,7 +109,7 @@ bool WXInfoEngine::InitEngine(std::string& path){
 
 bool
 WXInfoEngine::InitChannelAndMode(void){
-	channel_.push_back("一号");
+	/*channel_.push_back("一号");
 	channel_.push_back("二号");
 	channel_.push_back("三号");
 	channel_.push_back("四号");
@@ -117,8 +118,8 @@ WXInfoEngine::InitChannelAndMode(void){
 	channel_.push_back("七号");
 	channel_.push_back("八号");
 	channel_.push_back("九号");
-	channel_.push_back("十号");
-
+	channel_.push_back("十号");*/
+	base_storage::MysqlSerial::GetChannelInfo(channel_mode_,channel_num_);
 	mode_map_["mm"] = "心情模式";
 	mode_map_["ms"] = "情景模式";
 	mode_map_["mn"] = "普通模式"; 
@@ -200,7 +201,7 @@ WXInfoEngine::ProcessEventText(WXPacket& msg){
 	if (str_event=="subscribe"){
 		content="MIG音乐助手是以推荐为主的微信应用,而且在移动设备上不需要装任何音乐app,"
                 "便可想听你想要的音乐:\n"
-			    "1,有10个音乐频道,每个音乐频道将为你推荐不同风格的音乐.按发送字符\"n\"后,"
+			    "1,有20个音乐频道,每个音乐频道将为你推荐不同风格的音乐.按发送字符\"n\"后,"
 				"系统会推荐一首音乐,提供试听."
 			    "如果觉得该频道不对味,可发送字符\"cc\",便可切换音乐频道.系统默认为频道一\n\n"
 			    "2,提供歌曲推荐,歌手推荐.可输入歌曲名.如:如果没有你 "
@@ -241,8 +242,17 @@ WXInfoEngine::ProcessMsgText(WXPacket& msg){
 		PullAnyMusicMsg(to_user,from_user);
 	}else if (content_s=="cc"){
 		ChangeChannel(to_user,from_user);
-	}else if (content_s=="r1"||content_s=="r2"||
-			content_s=="r3"||content_s=="r4"||content_s=="r5"||content_s=="d1"){
+	}else if (content_s=="jazz"){
+		SettingChannel(to_user,from_user,9);
+	}else if (content_s=="my"){
+		SettingChannel(to_user,from_user,7);
+	}else if(content_s=="class"){
+                SettingChannel(to_user,from_user,17);
+        }else if(content_s=="hy"){
+                SettingChannel(to_user,from_user,0);
+        }else if(content_s=="rock"){
+                SettingChannel(to_user,from_user,6);
+        }else if (content_s[0]=='r'){
 		RecommendationMusic(to_user,from_user,content_s);
 	}else if (content_s=="lp1"||content_s=="lp2"||content_s=="lp3"||
 		      content_s=="lp4"||content_s=="lp5"||content_s=="lp6"||
@@ -556,6 +566,7 @@ WXInfoEngine::GetMoodAndScenesMusicInfos(base::MusicInfo& mi,std::string& conten
 // 		base64_artist = base64_encode((unsigned char*)(artist.c_str()),
 // 			                           artist.length());
 		os_artist<<artist.c_str()
+			     <<"_"
 			     <<word_flag
 				 <<ms_word_id;
 		r = base_storage::RedisDicSerial::GetArtistMoodAndScensNum(os_artist.str(),
@@ -610,6 +621,8 @@ WXInfoEngine::GetOneMusicInfo(const std::string& song_id,
 	r = smi.UnserializedJson(music_info);
 	if (!r)
 		return false;
+	MIG_DEBUG(USER_LEVEL,"artist[%s] title[%s]",smi.artist().c_str(),
+		smi.title().c_str());
 	r = wx_get_song_->GetSongInfo(smi.artist(),smi.title(),
 	smi.album_title(),content_url);
 	if (!r)
@@ -762,7 +775,26 @@ void
 WXInfoEngine::RecommendationMusic(std::string& to_user,
 								  std::string& from_user, 
 								  std::string& content){
+
+
+    //char index = content[1];
+	std::string id;
+	id.assign(content.c_str()+1,content.length()-1);
+	std::string title;
+	std::string decs;
+	std::string base64_title;
+	std::string base64_decs;
 	std::string url;
+	bool r =false;
+	r = base_storage::MysqlSerial::GetWXMusicInfo(id,base64_title,
+		                                         base64_decs,url);
+	if (r){
+		title = base64_decode(base64_title);
+		decs = base64_decode(base64_decs);
+		PackageMusicMsg(from_user,to_user,title,decs,url,url);
+
+	}
+	/*std::string url;
 	std::string title;
 	std::string decs;
 	std::string utf_8_title;
@@ -803,6 +835,41 @@ WXInfoEngine::RecommendationMusic(std::string& to_user,
 	if (str_title){
 		delete [] str_title;
 		str_title = NULL;
+	}*/
+}
+
+void 
+WXInfoEngine::SettingChannel(std::string& to_user,std::string& from_user,
+							 int new_channel){
+	bool r = false;
+	std::string  content;
+	std::stringstream  msg;
+	int32 channel = 0;
+	base::ChannelInfo channel_info;
+
+	channel_info = channel_mode_[new_channel];
+
+	r = HttpGetDoubanMusicInfo(content,
+		atol(channel_info.douban_index().c_str()));
+
+	if (r){
+		time_t json_time = time(NULL)+(60*60*2);
+		r = SetMemMusicInfo(from_user,1,new_channel,content,json_time);
+		msg<<channel_desc_.c_str()
+			<<channel_info.channel_name().c_str();
+
+		MIG_DEBUG(USER_LEVEL,"channel_name[%s] index[%s]",
+			channel_info.channel_name().c_str(),
+			channel_info.douban_index().c_str());
+
+		std::string msg_content = msg.str();
+		MIG_DEBUG(USER_LEVEL,"%s",msg_content.c_str());
+
+		PackageTextMsg(from_user,to_user,msg_content);
+	}
+	else{
+		MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
+		return ;
 	}
 }
 
@@ -810,62 +877,37 @@ void
 WXInfoEngine::ChangeChannel(std::string& to_user,std::string& from_user){
 	bool r = false;
 	std::string  content;
-	std::stringstream msg;
+	std::stringstream  msg;
 	int32 channel = 0;
+	base::ChannelInfo channel_info;
 	r = GetMemChanncel(from_user,channel);
-	int32 new_channel = (channel+1)%10;
+	int32 new_channel = (channel+1)%channel_num_;
 	MIG_INFO(USER_LEVEL,"new_channel[%d]",new_channel);
-	r = HttpGetDoubanMusicInfo(content,new_channel);
+
+	channel_info = channel_mode_[new_channel];
+
+	r = HttpGetDoubanMusicInfo(content,
+		                       atol(channel_info.douban_index().c_str()));
+
 	if (r){
 		time_t json_time = time(NULL)+(60*60*2);
-		char* out;
-		size_t out_len;
-		std::string str_out;
 		r = SetMemMusicInfo(from_user,1,new_channel,content,json_time);
-		msg<<"您已经切换到新的频道，当前是"<<channel_[new_channel]<<"频道";
-		base::BasicUtil::GB2312ToUTF8(msg.str().c_str(),msg.str().length(),&out,&out_len);
-		str_out.assign(out,out_len);
-		PackageTextMsg(from_user,to_user,str_out);
-		if (out){
-			delete [] out;
-			out = NULL;
-		}
+		msg<<channel_desc_.c_str()
+			<<channel_info.channel_name().c_str();
+
+		MIG_DEBUG(USER_LEVEL,"channel_name[%s] index[%s]",
+			channel_info.channel_name().c_str(),
+			channel_info.douban_index().c_str());
+
+		std::string msg_content = msg.str();
+		MIG_DEBUG(USER_LEVEL,"%s",msg_content.c_str());
+
+		PackageTextMsg(from_user,to_user,msg_content);
 	}
 	else{
 		MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
 		return ;
 	}
-
-
-/*
-	std::string       douban_url;
-	std::string       durl;
-	std::string       title;
-	std::string       decs;
-	std::string       content;
-	std::stringstream msg;
-	int32 channel = 0;
-	bool r = false;
-	time_t json_time;
-	time_t current_time = time(NULL);
-
-	//channcel|num|time|json
-	r = GetMemMusicInfo(from_user,durl,title,decs,json_time,channel);
-	if (!r)
-		channel = 0;
-
-	int32 new_channel = (channel+1)%11;
-	r = HttpGetDoubanMusicInfo(content,new_channel);
-	if (r){
-		time_t json_time = time(NULL)+(60*60*2);
-		r = SetMemMusicInfo(from_user,1,new_channel,content,json_time);
-		//r = ParseJson(0,content,from_user,durl,title,decs);
-	}
-	else{
-		MIG_ERROR(USER_LEVEL,"GetDoubanMusic Error");
-		return ;
-	}
-	PackageMusicMsg(from_user,to_user,title,decs,durl,durl);*/
 
 }
 
@@ -881,13 +923,15 @@ WXInfoEngine::PullAnyMusicMsg(std::string& to_user,std::string& from_user){
 	bool r = false;
 	time_t json_time;
 	time_t current_time = time(NULL);
+	base::ChannelInfo ci;
 
 	//channcel|num|time|json
 	r = GetMemMusicInfo(from_user,durl,title,decs,json_time,channel);
 
+	ci = channel_mode_[channel];
 	//判断是否存在或者是否超时
 	if ((!r)||(json_time<current_time)){
-		r = HttpGetDoubanMusicInfo(content,channel);
+		r = HttpGetDoubanMusicInfo(content,atol(ci.douban_index().c_str()));
 		if (r){
 			time_t json_time = time(NULL)+(60*60*2);
 		    r = SetMemMusicInfo(from_user,1,channel,content,json_time);
@@ -1099,6 +1143,7 @@ bool WXInfoEngine::GetMemMusicInfo(std::string& from_user,
 	 char* value = NULL;
 	 int num = 0;
 	 std::string content;
+	 base::ChannelInfo ci;
 	 r = base_storage::MemDicSerial::GetString(from_user.c_str(),
 	                             from_user.length(),&value,&value_len);
 	 if (!r)
@@ -1133,8 +1178,9 @@ bool WXInfoEngine::GetMemMusicInfo(std::string& from_user,
 	 if((num+1)<5)
 		 r = SetMemMusicInfo(from_user,(num+1),atol(channel.c_str()),content,current);
 	 else{
+		 ci = channel_mode_[current_channel];
 		 std::string s_content;
-		 r = HttpGetDoubanMusicInfo(s_content,current_channel);
+		 r = HttpGetDoubanMusicInfo(s_content,atol(ci.douban_index().c_str()));
 		 if (r){
 			 time_t json_time = time(NULL)+(60*60*2);
 			 r = SetMemMusicInfo(from_user,0,current_channel,s_content,json_time);

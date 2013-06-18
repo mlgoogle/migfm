@@ -16,6 +16,7 @@ public:
     static const std::string& str_empty();
     static void fcgi_http_head();
     static const std::string& ns_stream();
+	static const std::string& channel_dec();
 };
 
 }

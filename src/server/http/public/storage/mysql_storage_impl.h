@@ -26,6 +26,7 @@ private:
 	scoped_ptr<db_res_t>     result_;
 	scoped_ptr<db_row_t>     rows_;
 	bool connected_;
+	MYSQL_ROW                row_;
 };
 
 }

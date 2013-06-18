@@ -32,7 +32,7 @@ int main(int agrc,char* argv[]){
  			continue;
  		}
 
-		//r = base_storage::MysqlSerial::DelMusicDouBan(sql);
+		r = base_storage::MysqlSerial::DelMusicDouBan(sql);
 
 #if defined (_ARTLIST_)
  		std::string sjson;

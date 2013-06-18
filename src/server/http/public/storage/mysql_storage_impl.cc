@@ -86,10 +86,10 @@ bool MysqlStorageEngineImpl::Affected(unsigned long& rows){
 
 db_row_t* MysqlStorageEngineImpl::FetchRows(){
 	//MYSQL_ROW* row = (MYSQL_ROW*)(rows_.get()->proc);
-        MYSQL_ROW row;
+    
 	MYSQL_RES* result = (MYSQL_RES*)(result_.get()->proc);
-	row = mysql_fetch_row(result);
-        rows_.get()->proc = &row;
+	row_ = mysql_fetch_row(result);
+    rows_.get()->proc = &row_;
 	return rows_.get();
 }
 

@@ -1,6 +1,7 @@
 #ifndef _MIG_FM_PLUBLIC_STORAGE_DB_SERIALIZATION_H__
 #define _MIG_FM_PLUBLIC_STORAGE_DB_SERIALIZATION_H__
 #include <stdio.h>
+#include <vector>
 #include "storage/storage.h"
 #include "basic/basictypes.h"
 #include "basic/basic_info.h"
@@ -33,6 +34,8 @@ public:
     static bool SetMusicTempInfo(const std::string& name,const std::string& enter,
                                  const std::string& content);
 
+	static bool GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& num);
+
 	static bool GetMusicRaw(base::MusicInfo& music_info,std::string& sql);
 
 	static bool GetMusicRawDouBan(base::MusicInfo& music_info,std::string& sql);
@@ -42,6 +45,9 @@ public:
 	static bool DelMusicDouBan(std::string& sql);
 
 	static bool GetMusicAll(std::list<base::MusicInfo >& music_info);
+
+	static bool GetWXMusicInfo(const std::string& id,std::string& title,std::string& desc,
+		                       std::string& url);
 
 #if defined (MIG_SSO)
     static bool CheckUserPassword(const char* username,const char* password);

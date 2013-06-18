@@ -100,6 +100,9 @@ private:
 
 	void ChangeChannel(std::string& to_user,std::string& from_user);
 
+	void SettingChannel(std::string& to_user,std::string& from_user,
+		                int new_channel);
+
 	void RecommendationMusic(std::string& to_user,std::string& from_user,
 		                     std::string& content);
 
@@ -148,6 +151,9 @@ private:
 private:
 	std::vector<std::string>                      channel_;
 	std::map<std::string,std::string>             mode_map_;
+	std::vector<base::ChannelInfo>                channel_mode_;
+	int                                           channel_num_;
+	std::string                                   channel_desc_;
 
 };
 }

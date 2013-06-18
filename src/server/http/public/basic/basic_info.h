@@ -121,6 +121,47 @@ private:
 	Data*           data_;
 };
 
+class ChannelInfo{
+public:
+	explicit ChannelInfo();
+	explicit ChannelInfo(const std::string& index,const std::string& douban_index,
+		const std::string& channel_name);
+
+	~ChannelInfo(){
+		if(data_!=NULL){
+			data_->Release();
+		}
+	} 
+
+	ChannelInfo(const ChannelInfo& mi);
+	ChannelInfo& operator=(const ChannelInfo& mi);
+
+	const std::string& index() const {return data_->index_;}
+	const std::string& douban_index() const {return data_->douban_index_;}
+	const std::string& channel_name() const {return data_->channel_name_;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(1){}
+		Data(const std::string& index,const std::string& douban_index,
+			const std::string& channel_name)
+			:index_(index)
+			,douban_index_(douban_index)
+			,channel_name_(channel_name)
+			,refcount_(1){}
+		void AddRef(){refcount_++;}
+		void Release() {if(!--refcount_) delete this;}
+		const std::string index_;
+		const std::string douban_index_;
+		const std::string channel_name_;
+	private:
+		int refcount_;
+	};
+
+    Data*    data_;
+};
+
 class ConnAddr{
 public:
     explicit ConnAddr();
@@ -166,6 +207,8 @@ private:
     
     Data*    data_;
 };
+
+
 
 }
 
