@@ -1,7 +1,7 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = /var/www/fcgi-bin/show.fcgi
+OUTPUT_FILE = parser
 ## 编译器
 COMPILER = g++
 COMPILERC = gcc
@@ -20,7 +20,7 @@ LINK_FLAGS = -g  -fPIC
 
 ## 头文件
 INCLUDE_PATHS = -I../public/ -I /usr/local/libmemcached-1.0.7/include\
-		-I/usr/local/lib -I/root/third_party/hiredis\
+		-I/usr/local/lib -I../../third_party/hiredis\
 	        -I../../third_party/breakpad/src -I/usr/include/mysql 
 
 ## 库
@@ -36,11 +36,13 @@ LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 
-output: userinfo.o usr_engine.o mig_log.o\
+output: parser.o parser_engine.o mig_log.o dic_serialization.o db_serialization.o base64.o\
 	basic_info.o mem_storage_impl.o redis_storage_impl.o\
 	storage.o constants.o redis_warrper.o mysql_storage_impl.o\
 	basictypes.o config.o dic_serialization.o\
-	db_serialization.o xml_serialization.o basic_util.o base64.o
+	db_serialization.o xml_serialization.o basic_util.o\
+	xml_serialization.o xmlbuilder.o xmlconstants.o xmlelement.o\
+	xmlnsstack.o xmlparser.o xmlprinter.o xmppstanzaparser.o qname.o
 	$(LINK)
 
 clean:
@@ -51,11 +53,11 @@ delete-temp-file:
 	-rm -f *.o
 
 ### 编译
-userinfo.o:
-	$(COMPILE) ./userinfo.cc
+parser.o:
+	$(COMPILE) ./main.cc
 
-usr_engine.o:
-	$(COMPILE) ./user_engine.cc
+parser_engine.o:
+	$(COMPILE) ./parser_engine.cc
 
 mig_log.o:
 	$(COMPILE) ./../public/log/mig_log.cc
@@ -90,9 +92,6 @@ redis_storage_impl.o:
 basictypes.o:
 	$(COMPILE) ./../public/basic/basictypes.cc
 
-base64.o:
-	$(COMPILE) ./../public/basic/base64.cc
-
 config.o:
 	$(COMPILE) ./../public/config/config.cc
 
@@ -101,3 +100,30 @@ xml_serialization.o:
 
 basic_util.o:
 	$(COMPILE) ./../public/basic/basic_util.cc
+
+base64.o:
+	$(COMPILE) ./../public/basic/base64.cc
+
+qname.o:
+	$(COMPILE) ./../public/xmpp/qname.cc
+
+xmlbuilder.o:
+	$(COMPILE) ./../public/xmpp/xmlbuilder.cc
+
+xmlconstants.o:
+	$(COMPILE) ./../public/xmpp/xmlconstants.cc
+
+xmlelement.o:
+	$(COMPILE) ./../public/xmpp/xmlelement.cc
+
+xmlnsstack.o:
+	$(COMPILE) ./../public/xmpp/xmlnsstack.cc
+
+xmlparser.o:
+	$(COMPILE) ./../public/xmpp/xmlparser.cc
+
+xmlprinter.o:
+	$(COMPILE) ./../public/xmpp/xmlprinter.cc
+
+xmppstanzaparser.o:
+	$(COMPILE) ./../public/xmpp/xmppstanzaparser.cc

@@ -166,7 +166,7 @@ int main(int agrc,char* argv[]){
 		
     else if(strcmp(request_method,"GET")==0){
 #if defined (TEST)
-        query = "userid=10001";
+        query = "username=flaght@gmail.com";
 #else
         query = getenv("QUERY_STRING");
 #endif

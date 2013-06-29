@@ -15,8 +15,7 @@
 #include "log/mig_log.h"
 #include "config/config.h"
 #include "basic/basic_util.h"
-#include "record_engine.h"
-//#include "user_engine.h"
+#include "wx_engine.h"
 
 
 static bool DumpCallBack(const char* dump_path,const char* minidump_id,
@@ -30,40 +29,30 @@ static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 #if defined (FCGI_STD)
 static void GetRequestMethod(const char* query){
     
-    std::string result;
-  //  userinfo::UserInfoEngine::GetEngine()->GetUserInfo(query,result);
-
-    //MIG_DEBUG(USER_LEVEL,"query[%s]",query);
+   // char* header = "Content-type:text/html\r\n\r\n<title>FastCGI echo</title><h1>444444444</h1>\n";
+    //printf("%s",header);
+    //write(STDOUT_FILENO,header,strlen(header)+1);
+	std::map<std::string,std::string> http_map;
+    MIG_INFO(USER_LEVEL,"%s",query);
+    base::BasicUtil::ParserHttpRequest(query,http_map);
+    std::map<std::string,std::string>::iterator it = http_map.find("echostr");
+    if(it!=http_map.end()){
+        MIG_INFO(USER_LEVEL,"%s",it->second.c_str());
+    }
     printf("Content-type: text/html\r\n"
            "\r\n"
-           "11111111111\n");
+           "%s",it->second.c_str());
     
 }
 
 static void PostRequestMethod(std::string& content){
-    bool r = false;
-    int32 result =0;
-    std::string out;
-    //parser post
-    std::string json_content;
-    std::string urlcode;
-    std::string enter;
-    base::BasicUtil::PaserRecordPost(content,enter,urlcode,json_content);
-    if(urlcode=="1"){
-        base::BasicUtil::UrlDecode(json_content,out);
-        //MIG_DEBUG(USER_LEVEL,"post[%s]",out.c_str());
-        r = record::RecordEngine::GetEngine()->Recording(out);
-    }else{
-    	//MIG_DEBUG(USER_LEVEL,"post[%s]",json_content.c_str());
-        r = record::RecordEngine::GetEngine()->Recording(json_content);
-    }
-    if(r)
-        result = 1;
-
-    printf("Content-type: text/html\r\n"
-           "\r\n"
-           "result=%d\n",result);
-
+  wxinfo::WXInfoEngine::GetEngine()->PostContent(content);
+  std::string respone = wxinfo::WXInfoEngine::GetEngine()->GetProcessContent();
+  if (!respone.empty())
+	printf("Content-type: text/html\r\n"
+		  "\r\n"
+		"%s",respone.c_str());
+  MIG_DEBUG(USER_LEVEL,"+++++++++++++++++++++++++++++++++++\n\n\n");
 }
 
 static void PutRequestMethod(std::string& content){
@@ -106,7 +95,7 @@ static void DeleteRequestMethod(FCGX_Request * request){
 
 int main(int agrc,char* argv[]){
     
-    //google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
+    google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
     std::string path = "./config.xml";
     config::FileConfig file_config;
     std::string content;
@@ -122,12 +111,9 @@ int main(int agrc,char* argv[]){
   //  if((!file_config.LoadConfig(path))){
        // return 1;
 	//}
-  /*   r = userinfo::UserInfoEngine::GetEngine()->InitEngine(path);
+     r = wxinfo::WXInfoEngine::GetEngine()->InitEngine(path);
      if(!r)
-         return r;*/
-    r = record::RecordEngine::GetEngine()->InitEngine(path);
-    if(!r)
-        return r;
+         return r;
 #if defined (FCGI_STD)
     while(FCGI_Accept()==0){
 #elif defined (FCGI_PLUS)
@@ -154,20 +140,23 @@ int main(int agrc,char* argv[]){
 #if defined (FCGI_STD)
     
 #if defined (TEST)
-    char* request_method = "GET";
+    char* request_method = "POST";
 #else
     char *request_method = getenv("REQUEST_METHOD");
-#endif   
-    char* contentLength = getenv("CONTENT_LENGTH");
-
+#endif 
+    char *contentLength = getenv("CONTENT_LENGTH");
+    //MIG_INFO(USER_LEVEL,"request_method[%s] content_length[%s]type[%s]",request_method,contentLength,getenv("CONTENT_LENGTH"));
     if(strcmp(request_method,"POST")==0){
-        //std::cin>>content; 
-        int32 len =strtol(contentLength,NULL,10);
-        for(int32 i =0;i<len;i++){
+#if defined (TEST)
+		content = "<xml><ToUserName><![CDATA[gh_d3bb2b72027e]]></ToUserName><FromUserName><![CDATA[oQVP7jtxmJTW3gkS45onFxUn1ykk]]></FromUserName><CreateTime>1367373850</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[douwei]]></Content><MsgId>5872825967155609610</MsgId></xml>";
+#else
+        int len = strtol(contentLength,NULL,10);
+        for(int i = 0;i<len;i++){
             char ch;
-            ch = getchar();
+            ch=getchar();
             content.append(1,ch);
         }
+#endif
         PostRequestMethod(content);
         content.clear();
     }

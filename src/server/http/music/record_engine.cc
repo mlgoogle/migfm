@@ -78,8 +78,8 @@ bool RecordEngine::Recording(std::string& content){
     for(int i = 0;i<music_infos_size;i++){
         std::string song_name = music[i]["name"].asString();
         std::string singer = music[i]["singer"].asString();
-        os<<"<music name=\\\""<<base::BasicUtil::GetRawString(song_name)<<"\\\" singer=\\\""
-          <<base::BasicUtil::GetRawString(singer)<<"\\\" />";
+        os<<"<music name=\""<<base::BasicUtil::GetRawString(song_name)<<"\" singer=\""
+          <<base::BasicUtil::GetRawString(singer)<<"\" />";
     }
 
     os<<"</info>";

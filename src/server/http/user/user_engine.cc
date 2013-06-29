@@ -56,8 +56,7 @@ bool UserInfoEngine::InitEngine(std::string& path){
 bool UserInfoEngine::GetUserInfo(const char* query,std::string& result){
     
     //std::string result;
-    std::string str_id;
-    int32 usr_id;
+    std::string usr_id;
     int32 sex;
     std::string ext_add;
     std::string street;
@@ -69,22 +68,23 @@ bool UserInfoEngine::GetUserInfo(const char* query,std::string& result){
     std::string birthday;
     std::string nickname;
     std::string username;
-    const char* key="userid";
+    const char* key="username";
     bool r = false;
     std::stringstream mem_key;
     char* mem_value = NULL;
     size_t mem_value_length = 0;
     //parser    
-    base::BasicUtil::GetHttpParamElement(query,key,str_id);
-    usr_id = atol(str_id.c_str());
+    base::BasicUtil::GetHttpParamElement(query,key,username);
 
-    mem_key<<usr_id<<"_userinfo";
+    //usr_id = atol(str_id.c_str());
+
+    mem_key<<username<<"_userinfo";
 
     //get memcached
     r = base_storage::MemDicSerial::GetString(mem_key.str().c_str(),mem_key.str().length(),
                                               &mem_value,&mem_value_length);
     if(!r){
-        r = base_storage::MysqlSerial::GetUserInfo(usr_id,username,sex,ext_add,street,
+        r = base_storage::MysqlSerial::GetUserInfo(username,usr_id,sex,ext_add,street,
             locality,regin,pcode,ctry,head,birthday,nickname);
 
         xml_serialization_->XmlUserInfoSerialization(result,usr_id,username,sex,ext_add,street,
