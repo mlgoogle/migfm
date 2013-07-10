@@ -1,6 +1,7 @@
 #include "constants.h"
 #include "basic/basic_util.h"
 #include <string.h>
+#include <sstream>
 
 namespace base{
 
@@ -32,6 +33,21 @@ const std::string& ConStants::channel_dec(){
 		out = NULL;
 	}
 	return str_out;
+}
+
+void ConStants::get_result_msg(std::string &status, 
+							   std::string &msg, 
+							   std::string &result,
+							   std::string &out_str){
+    char* out;
+    size_t out_len;
+	std::stringstream os;
+	os<<"{\"status\":"<<status.c_str()<<",\"msg\":"
+		<<msg.c_str()<<",\"result\":{"<<result.c_str()
+		<<"}";
+	base::BasicUtil::GB2312ToUTF8(os.str().c_str(),os.str().length(),
+		                          &out,&out_len);
+	out_str.assign(out,out_len);
 }
 
 #if defined (XMPP)

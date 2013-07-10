@@ -5,6 +5,34 @@
 
 namespace base{
 	
+WordAttrInfo::WordAttrInfo(){
+	data_ = new Data();
+}
+
+WordAttrInfo::WordAttrInfo(const std::string &word_id, const std::string &name){
+	data_ = new Data(word_id,name);
+}
+
+WordAttrInfo& WordAttrInfo::operator=(const WordAttrInfo& mi){
+	if(mi.data_!=NULL){
+		mi.data_->AddRef();
+	}
+
+	if(data_!=NULL){
+		data_->Release();
+	}
+
+	data_ = mi.data_;
+	return *this;
+}
+
+WordAttrInfo::WordAttrInfo(const WordAttrInfo& mi)
+:data_(mi.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
 MusicUsrInfo::MusicUsrInfo(){
     data_ = new Data();
 }
@@ -41,8 +69,9 @@ ChannelInfo::ChannelInfo(){
 
 ChannelInfo::ChannelInfo(const std::string& index,
 						 const std::string& douban_index, 
-						 const std::string& channel_name){
-    data_ = new Data(index,douban_index,channel_name);
+						 const std::string& channel_name,
+						 const std::string pic/* = "http://fm.miglab.com"*/){
+    data_ = new Data(index,douban_index,channel_name,pic);
 }
 
 ChannelInfo& ChannelInfo::operator=(const ChannelInfo& mi){
@@ -74,9 +103,10 @@ MusicInfo::MusicInfo(){
 MusicInfo::MusicInfo(const std::string id,const std::string& sid,const std::string& ssid,
 					 const std::string& album_title,const std::string& title,
 					 const std::string& url,const std::string& pub_time,
-					 const std::string& artist,const std::string& pic_url){
+					 const std::string& artist,const std::string& pic_url,
+					 int32 time){
 
-		data_ = new Data(id,sid,ssid,album_title,title,url,pub_time,artist,pic_url);
+		data_ = new Data(id,sid,ssid,album_title,title,url,pub_time,artist,pic_url,time);
 }
 
 MusicInfo& MusicInfo::operator=(const MusicInfo& mi){
@@ -137,6 +167,7 @@ bool MusicInfo::UnserializedJson(std::string& str){
 	set_title(root["titile"].asString());
 	set_pub_time(root["pub_time"].asString());
 	set_artist(root["artist"].asString());
+	set_pic_url(root["pic_url"].asString());
 	return true;
 }
 ConnAddr::ConnAddr(){

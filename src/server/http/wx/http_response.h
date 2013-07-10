@@ -1,5 +1,5 @@
-#ifndef _MIG_WX_HTTP_RESPONSE_H__
-#define _MIG_WX_HTTP_RESPONSE_H__
+#ifndef _MASTER_PLUGIN_MUSIC_HTTP_RESPONSE_H__
+#define _MASTER_PLUGIN_MUSIC_HTTP_RESPONSE_H__
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ typedef GURL            MIG_URL;
 typedef std::string     MIG_URL;
 #endif
 
-namespace wxinfo{
+namespace music_logic{
 class HttpResponse{
 public:
     HttpResponse(const MIG_URL& url);
