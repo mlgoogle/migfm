@@ -247,6 +247,7 @@ bool MusicCacheManager::AddMusicChannelInfos(int channel,
 	if(cc==NULL)
 		return false;
 	cc->channel_music_infos_ = list;
+	cc->current_time = time(NULL)+(60*60*2);
 	return true;
 }
 
@@ -258,6 +259,32 @@ int MusicCacheManager::GetMusicCHannelNum(int channel){
 		return num;
 	num = cc->channel_music_infos_.size();
 	return num;
+}
+
+
+time_t MusicCacheManager::GetMusicTime(int channel){
+	usr_logic::RLockGd lr(cache_mgr_lock_);
+	ChannelCache* cc = GetChannelCache(channel);
+	time_t music_time = -1;
+	if (cc==NULL)
+		return music_time;
+	music_time = cc->current_time;
+	return music_time;
+}
+
+void MusicCacheManager::IsTimeMusiChannelInfos(std::string& channel){
+	time_t music_time = GetMusicTime(atol(channel.c_str()));
+	std::string content;
+	bool r = false;
+	if (music_time==-1)
+		return;
+	time_t current_time = time(NULL);
+	if (music_time<current_time){
+		r = RequestDoubanMusicInfos(channel,content);
+		if (r){
+			PutJsonMusicChannel(atol(channel.c_str()),content);
+		}
+	}
 }
 
 void MusicCacheManager::IsLessMuciChannelInfos(std::string& channel, int num){
@@ -290,12 +317,12 @@ bool MusicCacheManager::GetMusicChannelInfos(int channel, std::string &json_cont
 
 		if (it!=cc->channel_music_infos_.end()){
 			base::MusicInfo mi = (*it);
-			os<<"{\"id\":\""<<mi.id().c_str()<<"\",\"title:\""<<mi.title().c_str()
+			os<<"{\"id\":\""<<mi.id().c_str()<<"\",\"title\":\""<<mi.title().c_str()
 				<<"\",\"artist\":\""<<mi.artist().c_str()<<"\",\"pub_time\":\""
 				<<mi.pub_time().c_str()<<"\",\"album\":\""<<mi.album_title().c_str()
 				<<"\",\"url\":\""<<mi.url().c_str()
 				<<"\",\"pic\":\""<<mi.pic_url().c_str()<<"\",\"time\":\""
-				<<mi.music_time()<<"\"}";
+				<<mi.music_time()<<"\",\"like\":\"0\"}";
 			if (i==0){
 				os<<",";
 				cc->channel_music_infos_.pop_front();
@@ -354,8 +381,9 @@ bool MusicCacheManager::RequestDoubanMusicInfos(const std::string& channel,
 
 bool MusicCacheManager::GetMusicChannel(std::string& num,std::string& content){
 	usr_logic::RLockGd lr(cache_mgr_lock_);
-	int32 pos = atol(num.c_str());
+	int32 pos = (atol(num.c_str()))%(channel_mode_.size());
 	std::stringstream os;
+	
 	LOG_DEBUG2("id[%s] name[%s] pic[%s]",channel_mode_[pos].douban_index().c_str(),
 		      channel_mode_[pos].channel_name().c_str(),
 			  channel_mode_[pos].channel_pic().c_str());
@@ -363,12 +391,21 @@ bool MusicCacheManager::GetMusicChannel(std::string& num,std::string& content){
 		 <<"\",\"name\":\""<<channel_mode_[pos].channel_name().c_str()
 		 <<"\",\"pic\":\""<<channel_mode_[pos].channel_pic().c_str()
 		 <<"\"}";
-	 for (int i = pos+1;i<(pos+4)&&i<channel_num_;i++){
+	 for (int i = pos+1;i<(pos+9);i++){
 		 os<<",";
-		 os<<"{\"id\":\""<<channel_mode_[i].douban_index().c_str()
+		 if (i<channel_num_)
+			 os<<"{\"id\":\""<<channel_mode_[i].douban_index().c_str()
 			 <<"\",\"name\":\""<<channel_mode_[i].channel_name().c_str()
 			 <<"\",\"pic\":\""<<channel_mode_[i].channel_pic().c_str()
 			 <<"\"}";
+		 else{
+			 int current = i%channel_num_;
+			 LOG_DEBUG2("current[%d] i[%d]",current,i);
+			 os<<"{\"id\":\""<<channel_mode_[current].douban_index().c_str()
+				 <<"\",\"name\":\""<<channel_mode_[current].channel_name().c_str()
+				 <<"\",\"pic\":\""<<channel_mode_[current].channel_pic().c_str()
+				 <<"\"}";
+		 }
 	 }
 	 os<<"]";
 	 content = os.str();

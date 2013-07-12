@@ -37,6 +37,16 @@ MusicMgrEngine::MusicMgrEngine(){
 	std::string get_song_url = "http://121.199.32.88/getmusicurl.ashx";
 	get_song_engine_->Init(get_song_url);
 
+	std::string name = "hello world";
+	std::string b64_name;
+	std::string deb64_name;
+
+	Base64Encode(name,&b64_name);
+	LOG_DEBUG2("b64_name[%s]",b64_name.c_str());
+
+	Base64Decode(b64_name,&deb64_name);
+	LOG_DEBUG2("deb64_name[%s]",deb64_name.c_str());
+
 }
 
 MusicMgrEngine::~MusicMgrEngine(){
@@ -124,6 +134,9 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	std::string music_info;
 	std::string content_url;
 	base::MusicInfo smi;
+	std::string b64title;
+	std::string b64artist;
+	std::string b64album;
 	bool r = pack.GetAttrib(MODE,mode);
 	if (!r){
 		LOG_ERROR("get MODE error");
@@ -161,16 +174,18 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 		return true;
 
 	smi.set_url(content_url);
-
+	Base64Decode(smi.title(),&b64title);
+	Base64Decode(smi.artist(),&b64artist);
+	Base64Decode(smi.album_title(),&b64album);
 	os1<<"\"word\":[{";
 	os1<<"\"id\":\""<<smi.id().c_str()
-		<<"\",\"title\":\""<<base64_decode(smi.title()).c_str()
-		<<"\",\"artist\":\""<<base64_decode(smi.artist()).c_str()
+		<<"\",\"title\":\""<<b64title.c_str()
+		<<"\",\"artist\":\""<<b64artist.c_str()
 		<<"\",\"url\":\""<<smi.url().c_str()
 		<<"\",\"pub_time\":\""<<smi.pub_time().c_str()
-		<<"\",\"album\":\""<<base64_decode(smi.album_title()).c_str()
+		<<"\",\"album\":\""<<b64album.c_str()
 		<<"\",\"pic\":\""<<smi.pic_url().c_str()
-		<<"\"}]";
+		<<"\",\"like\":\"0\"}]";
 	result = os1.str();
 	status = "0";
 	msg = "0";
@@ -251,6 +266,9 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 	 result = "1";
 	 music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
 	 //
+	 status = "0";
+	 msg = "0";
+	 mcm->IsTimeMusiChannelInfos(channel);
 	 mcm->IsLessMuciChannelInfos(channel,3);
 	 mcm->GetMusicChannelInfos(atol(channel.c_str()),result);
 	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);

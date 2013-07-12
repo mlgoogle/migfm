@@ -25,8 +25,9 @@ public:
 	bool AddMusicChannelInfos(int channel,std::list<base::MusicInfo>& list);
 	bool GetMusicChannelInfos(int channel,std::string& json_content);
 	int  GetMusicCHannelNum(int channel);
-	//void GetMusicTime(int channel);
+	time_t GetMusicTime(int channel);
 	void IsLessMuciChannelInfos(std::string& channel, int num);
+	void IsTimeMusiChannelInfos(std::string& channel);
 	bool RequestDoubanMusicInfos(const std::string& channel,
 		                         std::string& content);
 

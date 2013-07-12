@@ -44,9 +44,18 @@ private:
 	bool UpdateUserinfo(const int socket,const packet::HttpPacket& packet);
 
 	bool GetUserInfo(const int socket,const packet::HttpPacket& packet);
-	
+
+	bool CreateGuest(const int socket,const packet::HttpPacket& packet);
+
 	void GetResultMsg(std::string &status, std::string &msg,
 		              std::string &result,std::string &out_str);
+private:
+	bool RegeditUsr(const int socket,const int flag,const std::string username,
+		            const std::string password,const std::string nickname,
+	                const std::string source,const std::string gender = "1",
+	                const std::string type = "1",const std::string birthday = "1986-10-01",
+	                const std::string location = "浙江省杭州市",
+					const std::string head = "http://fm.miglab.com/default.jpg");
 };
 
 }

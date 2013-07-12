@@ -1,6 +1,7 @@
 #include "get_song.h"
 #include "json/json.h"
 #include "log/mig_log.h"
+#include "logic_comm.h"
 #include "http_response.h"
 #include "basic/base64.h"
 #include <sstream>
@@ -32,9 +33,15 @@ bool SoGouGetSongImpl::GetSongInfo(const std::string& artist,const std::string& 
 									 const std::string album,std::string& song_url){
 	std::string key;
 	std::stringstream s_key;
-	key = artist+title/*+album*/;
+	key = artist+title;
 	bool r = false;
-	s_key<<"keys="<<base64_decode(artist)<<" "<<base64_decode(title);
+	std::string b64artist;
+	std::string b64title;
+	Base64Decode(artist,&b64artist);
+	Base64Decode(title,&b64title);
+	LOG_DEBUG2("b64artist[%s]",b64artist.c_str());
+	LOG_DEBUG2("b64title[%s]",b64title.c_str());
+	s_key<<"keys="<<b64artist.c_str()<<b64title.c_str();
 	key = s_key.str();
 	r = HttpGetSongInfo(key,song_url);
 	MIG_DEBUG(USER_LEVEL,"%s",song_url.c_str());

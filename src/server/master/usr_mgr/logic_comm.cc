@@ -130,4 +130,35 @@ void SomeUtils::GetCurrntTimeFormat(std::string& current_time){
 	current_time = os.str();
 } 
 
+
+FILE *SomeUtils::m_urandomfp = NULL;
+
+bool SomeUtils::InitRandom (){
+
+	m_urandomfp = fopen ("/dev/urandom", "rb");
+	if (m_urandomfp == NULL) {
+		assert (0);
+		return false;
+	}
+
+	setvbuf (m_urandomfp, NULL, _IONBF, 0);
+	return true;
+}
+
+int SomeUtils::GetRandomID (){
+	int rd = 0;
+	do {
+		errno = 0;
+		fread (&rd, sizeof (rd), 1, m_urandomfp);
+	} while (errno == EINTR);
+	LOG_DEBUG2("m_urandomfp rd[%d]",rd);
+	return rd;
+}
+
+bool SomeUtils::DeinitRandom (){
+	fclose (m_urandomfp);
+
+	return true;
+}
+
 }

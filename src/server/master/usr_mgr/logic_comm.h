@@ -72,7 +72,15 @@ public:
 		                     std::string &result,std::string &out_str,
 		                     int32 flag = 1);
 	
+	static bool InitRandom ();
+
+	static int GetRandomID ();
+
+	static bool DeinitRandom ();
+
 	static void GetCurrntTimeFormat(std::string& current_time);
+private:
+	static FILE *m_urandomfp;
 };
 
 }

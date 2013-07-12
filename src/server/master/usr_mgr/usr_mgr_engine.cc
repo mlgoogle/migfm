@@ -17,6 +17,7 @@ UsrMgrEngine::UsrMgrEngine(){
 	bool r = false;
 	std::string path = DEFAULT_CONFIG_PATH;
 	usr_logic::ThreadKey::InitThreadKey();
+	usr_logic::SomeUtils::InitRandom();
 	config::FileConfig* config = config::FileConfig::GetFileConfig();
 	if(config==NULL){
 		return;
@@ -29,8 +30,10 @@ UsrMgrEngine::UsrMgrEngine(){
 }
 
 UsrMgrEngine::~UsrMgrEngine(){
-
+	ThreadKey::DeinitThreadKey ();
+	SomeUtils::DeinitRandom ();
 }
+
 UsrMgrEngine* UsrMgrEngine::instance_ = NULL;
 UsrMgrEngine* UsrMgrEngine::GetInstance(){
    if (instance_==NULL){
@@ -89,10 +92,34 @@ bool UsrMgrEngine::OnUsrMgrMessage(struct server *srv, int socket,
 		UpdateUserinfo(socket,packet);
 	}else if (type=="get"){
 		GetUserInfo(socket,packet);
+	}else if (type=="guest"){
+		CreateGuest(socket,packet);
 	}
     return true;
 }
 
+
+bool UsrMgrEngine::CreateGuest(const int socket, const packet::HttpPacket &packet){
+	
+	packet::HttpPacket pack = packet;
+	std::stringstream os;
+	std::stringstream os1;
+	std::stringstream os2;
+	std::string nickname;
+	char* utf_nickname;
+	size_t utf_nickname_size;
+	std::string source = "0";
+	int32 random_num = usr_logic::SomeUtils::GetRandomID();
+	os<<random_num<<"@miglab.com";
+	os1<<random_num;
+	os2<<"游客"<<random_num;
+	base::BasicUtil::GB2312ToUTF8(os2.str().c_str(),os2.str().length(),
+		&utf_nickname,&utf_nickname_size);
+	nickname.assign(utf_nickname,utf_nickname_size);
+
+	RegeditUsr(socket,0,os.str(),os1.str(),nickname,source);
+
+}
 
 bool UsrMgrEngine::GetUserInfo(const int socket,const packet::HttpPacket& packet){
 	std::string uid;
@@ -230,19 +257,6 @@ bool UsrMgrEngine::RegeditUsr(const int socket,const packet::HttpPacket& packet)
 	std::string password;
 	std::string nickname;
 	std::string source;
-	std::string gender = "1";
-	std::string type = "1";
-	std::string birthday = "1986-10-01";
-	std::string location = "浙江省杭州市";
-	std::string head = "http://fm.miglab.com/default.jpg";
-	int uid  = 0;
-	std::string result_out;
-	std::string status = "0";
-	std::string msg = "0";
-	std::string result;
-	char* utf_location = NULL;
-	size_t utf_location_size = 0;
-	std::string str_utf8_location;
 
 	r = pack.GetAttrib(USERNAME,username);
 	if (!r){
@@ -267,64 +281,92 @@ bool UsrMgrEngine::RegeditUsr(const int socket,const packet::HttpPacket& packet)
 		LOG_ERROR("get source error");
 		return false;
 	}
-	
-	//check user Exist
-	r = storage::DBComm::GetUserIndent(username,uid);
-	if (r){//exist
-	   //
-		status = "0";
-		msg = "账号已存在";
-		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
-		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
-		return false;
-	}
 
-	r = storage::DBComm::RegeditUser(username,password,nickname,source);
-	if (!r){//regedit
-		status = "0";
-		msg = "注册失败";
-		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
-		LOG_DEBUG2("[%s]",result_out.c_str());
-		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
-		return false;
-	}
+	RegeditUsr(socket,1,username,password,nickname,source);
 
-	r = storage::DBComm::GetUserIndent(username,uid);
-	if (!r){ //vailed.
-		status = "0";
-		msg = "账号不存在";
-		//msg = "1";
-		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
-		LOG_DEBUG2("[%s]",result_out.c_str());
-		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
-		return false;
-	}
-
-	base::BasicUtil::GB2312ToUTF8(location.c_str(),location.length(),
-		&utf_location,&utf_location_size);
-	str_utf8_location.assign(utf_location,utf_location_size);
-	LOG_DEBUG2("[%s]",str_utf8_location.c_str());
-	if (utf_location){
-		delete [] utf_location;
-		utf_location = NULL;
-	}
-
-	r = storage::DBComm::AddUserInfos(uid,username,nickname,gender,type,
-		                                 birthday,str_utf8_location,source,head);
-	if (!r){//init error
-		status = "0";
-		msg = "更新用户信息失败";
-		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
-		LOG_DEBUG2("[%s]",result_out);
-		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
-		return false;
-	}
-
-	status = "0";
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
-	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
+}
+
+bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string username, 
+							  const std::string password, const std::string nickname, 
+							  const std::string source, const std::string gender /*= "1"*/, 
+							  const std::string type/* = "1"*/, 
+							  const std::string birthday/* = "1986-10-01"*/, 
+							  const std::string location,const std::string head){
+	  //check user Exist
+	  bool r = false;
+	  int uid  = 0;
+	  std::string result_out;
+	  std::string status = "0";
+	  std::string msg = "0";
+	  std::string result;
+	  std::stringstream os;
+	  char* utf_location = NULL;
+	  size_t utf_location_size = 0;
+	  std::string str_utf8_location;
+	  if (flag){
+		  r = storage::DBComm::GetUserIndent(username,uid);
+		  if (r){//exist
+			  //
+			  status = "0";
+			  msg = "账号已存在";
+			  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+			  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+			  return false;
+		  }
+	  }
+
+	  r = storage::DBComm::RegeditUser(username,password,nickname,source);
+	  if (!r){//regedit
+		  status = "0";
+		  msg = "注册失败";
+		  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+		  LOG_DEBUG2("[%s]",result_out.c_str());
+		  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+		  return false;
+	  }
+
+	  r = storage::DBComm::GetUserIndent(username,uid);
+	  if (!r){ //vailed.
+		  status = "0";
+		  msg = "账号不存在";
+		  //msg = "1";
+		  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+		  LOG_DEBUG2("[%s]",result_out.c_str());
+		  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+		  return false;
+	  }
+
+	  base::BasicUtil::GB2312ToUTF8(location.c_str(),location.length(),
+		  &utf_location,&utf_location_size);
+	  str_utf8_location.assign(utf_location,utf_location_size);
+	  LOG_DEBUG2("[%s]",str_utf8_location.c_str());
+	  if (utf_location){
+		  delete [] utf_location;
+		  utf_location = NULL;
+	  }
+
+	  r = storage::DBComm::AddUserInfos(uid,username,nickname,gender,type,
+		  birthday,str_utf8_location,source,head);
+	  if (!r){//init error
+		  status = "0";
+		  msg = "更新用户信息失败";
+		  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+		  LOG_DEBUG2("[%s]",result_out);
+		  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+		  return false;
+	  }
+
+	  status = "0";
+	  if (flag==0){
+		  os<<"\"username\":\""<<username.c_str()<<"\",\"password\":\""
+			  <<password.c_str()<<"\"}";
+		  result = os.str();
+	  }
+
+	  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+	  LOG_DEBUG2("[%s]",result_out.c_str());
+	  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
 
 void UsrMgrEngine::GetResultMsg(std::string &status, std::string &msg, 
