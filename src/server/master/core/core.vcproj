@@ -179,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\linuxlist.h"
+				>
+			</File>
+			<File
 				RelativePath=".\native_library.h"
 				>
 			</File>

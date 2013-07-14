@@ -102,34 +102,60 @@ PLUGIN_TO_SLOT(PLUGIN_FUNC_HANDLER_CLEAN_UP,clean_up);
 #undef PLUGIN_TO_SLOT
 
 
-#define PLUGIN_TO_SLOT(x,y)\
-    handler_t plugins_call_##y(struct server* srv) {\
-        struct plugin** slot;\
-        int j;\
-        struct plugin* p;\
-        handler_t r;\
-        if(!srv->plugins_slot) return HANDLER_GO_ON;\
-        slot = ((struct plugin***)srv->plugins_slot)[x];\
-        if(!slot) return HANDLER_GO_ON;\
-        for(j=0;j<srv->plugins.used&&slot[j];j++){\
-            p=slot[j];\
-            switch(r=(p->y(srv))){\
-               case HANDLER_GO_ON:\
-                   break;\
-               case HANDLER_FINISHED:\
-               case HANDLER_COMEBACK:\
-               case HANDLER_WAIT_FOR_EVENT:\
-               case HANDLER_WAIT_FOR_FD:\
-               case HANDLER_ERROR:\
-                   return r;\
-               default:\
-                   MIG_ERROR(USER_LEVEL,"%s unkown state:%d\n",p->name->ptr,r);\
-            }\
-        }\
-       return HANDLER_GO_ON;\
-    }  
-PLUGIN_TO_SLOT(PLUGIN_FUNC_TIME_INIT,handler_init_time);
-#undef PLUGIN_TO_SLOT
+handler_t plugins_call_handler_init_time(struct server *srv){
+     struct plugin** slot;
+     int j;
+     struct plugin* p;
+     handler_t r;
+     if(!srv->plugins_slot) return HANDLER_GO_ON;
+     slot = ((struct plugin***)srv->plugins_slot)[11];
+     if(!slot) return HANDLER_GO_ON;
+     for(j=0;j<srv->plugins.used&&slot[j];j++){
+         p=slot[j];
+         switch(r=(p->handler_init_time(srv))){
+            case HANDLER_GO_ON:
+                break;
+            case HANDLER_FINISHED:
+            case HANDLER_COMEBACK:
+            case HANDLER_WAIT_FOR_EVENT:
+            case HANDLER_WAIT_FOR_FD:
+            case HANDLER_ERROR:
+                return r;
+            default:
+                MIG_ERROR(USER_LEVEL,"%s unkown state:%d\n",p->name->ptr,r);\
+         }
+     }
+    return HANDLER_GO_ON;
+}  
+
+// #define PLUGIN_TO_SLOT(x,y)\
+//     handler_t plugins_call_##y(struct server* srv) {\
+//         struct plugin** slot;\
+//         int j;\
+//         struct plugin* p;\
+//         handler_t r;\
+//         if(!srv->plugins_slot) return HANDLER_GO_ON;\
+//         slot = ((struct plugin***)srv->plugins_slot)[x];\
+//         if(!slot) return HANDLER_GO_ON;\
+//         for(j=0;j<srv->plugins.used&&slot[j];j++){\
+//             p=slot[j];\
+//             switch(r=(p->y(srv))){\
+//                case HANDLER_GO_ON:\
+//                    break;\
+//                case HANDLER_FINISHED:\
+//                case HANDLER_COMEBACK:\
+//                case HANDLER_WAIT_FOR_EVENT:\
+//                case HANDLER_WAIT_FOR_FD:\
+//                case HANDLER_ERROR:\
+//                    return r;\
+//                default:\
+//                    MIG_ERROR(USER_LEVEL,"%s unkown state:%d\n",p->name->ptr,r);\
+//             }\
+//         }\
+//        return HANDLER_GO_ON;\
+//     }  
+// PLUGIN_TO_SLOT(PLUGIN_FUNC_TIME_INIT,handler_init_time);
+// #undef PLUGIN_TO_SLOT
     
 #define PLUGIN_TO_SLOT(x,y)\
     handler_t plugins_call_##y(struct server* srv,int fd,void *pd,int len) {\

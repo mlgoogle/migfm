@@ -164,6 +164,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\basic\http_packet.h"
+					>
+				</File>
+				<File
 					RelativePath=".\basic\linuxlist.h"
 					>
 				</File>
@@ -201,6 +205,10 @@
 				</File>
 				<File
 					RelativePath=".\basic\constants.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\http_packet.cc"
 					>
 				</File>
 				<File
@@ -524,6 +532,22 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="comm"
+			>
+			<File
+				RelativePath=".\comm\buffer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\comm\core_interface.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\comm\core_interface.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

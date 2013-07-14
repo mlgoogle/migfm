@@ -2,6 +2,7 @@
 #define _MIG_FM_PUBLIC_BASIC_BASIC_INFO_H__
 #include <stdio.h>
 #include "constants.h"
+#include "basictypes.h"
 namespace base{
 
 class MusicUsrInfo{
@@ -49,7 +50,7 @@ public:
 					   const std::string& ssid,const std::string& album_title,
 					   const std::string& title,const std::string& url,
 					   const std::string& pub_time,const std::string& artist,
-					   const std::string& pic_url);
+					   const std::string& pic_url,const int32 time = 0);
 
 	MusicInfo(const MusicInfo& mi);
 	MusicInfo& operator=(const MusicInfo& mi);
@@ -69,6 +70,7 @@ public:
 	void set_pub_time(const std::string& pub_time) {data_->pub_time_ = pub_time;}
 	void set_artist(const std::string& artist) {data_->artist_ = artist;}
 	void set_pic_url(const std::string& pic_url) {data_->pic_url_ = pic_url;}
+	void set_music_time(const int32 music_time) {data_->music_time_ = music_time;}
 
 	const std::string& id() const {return !data_?STR_EMPTY:data_->id_;}
 	const std::string& sid() const {return !data_?STR_EMPTY:data_->sid_;}
@@ -79,6 +81,7 @@ public:
 	const std::string& pub_time() const {return !data_?STR_EMPTY:data_->pub_time_;}
 	const std::string& artist() const {return !data_?STR_EMPTY:data_->artist_;}
 	const std::string& pic_url() const {return !data_?STR_EMPTY:data_->pic_url_;}
+	const int32 music_time() const {return !data_?0:data_->music_time_;}
 
 	bool SerializedJson(std::string& json);
  	bool UnserializedJson(std::string& str);
@@ -92,7 +95,7 @@ private:
 		Data(const std::string id,const std::string& sid,
 			const std::string& ssid,const std::string& album_title,
 			const std::string& title,const std::string& url,const std::string& pub_time,
-			const std::string& artist,const std::string& pic_url)
+			const std::string& artist,const std::string& pic_url,int32 time)
 			:id_(id)
 			,sid_(sid)
 			,ssid_(ssid)
@@ -102,6 +105,7 @@ private:
 			,pub_time_(pub_time)
 			,artist_(artist)
 			,pic_url_(pic_url)
+			,music_time_(time)
 			,refcount_(1){}
 		void AddRef(){refcount_++;}
 		void Release(){if(!--refcount_) delete this;}
@@ -114,6 +118,7 @@ private:
 		std::string pub_time_;
 		std::string artist_;
 		std::string pic_url_;
+		int32       music_time_;
 	private:
 		int refcount_;
 	};
@@ -121,11 +126,47 @@ private:
 	Data*           data_;
 };
 
+
+class WordAttrInfo{
+public:
+	explicit WordAttrInfo();
+	explicit WordAttrInfo(const std::string& word_id,const std::string& name);
+
+	~WordAttrInfo(){
+		if(data_!=NULL){
+			data_->Release();
+		}
+	}
+
+	WordAttrInfo(const WordAttrInfo& mi);
+	WordAttrInfo& operator=(const WordAttrInfo& mi);
+
+	const std::string& id(){return data_->word_id_;}
+	const std::string& name() {return data_->name_;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(1){}
+		Data(const std::string& word_id,const std::string& name)
+			:word_id_(word_id)
+			,name_(name)
+			,refcount_(1){}
+		void AddRef(){refcount_++;}
+		void Release() {if(!--refcount_) delete this;}
+		const std::string word_id_;
+		const std::string name_;
+	private:
+		int refcount_;
+	};
+	Data*    data_;
+};
+
 class ChannelInfo{
 public:
 	explicit ChannelInfo();
 	explicit ChannelInfo(const std::string& index,const std::string& douban_index,
-		const std::string& channel_name);
+		const std::string& channel_name,const std::string pic = "http://fm.miglab.com");
 
 	~ChannelInfo(){
 		if(data_!=NULL){
@@ -139,22 +180,25 @@ public:
 	const std::string& index() const {return data_->index_;}
 	const std::string& douban_index() const {return data_->douban_index_;}
 	const std::string& channel_name() const {return data_->channel_name_;}
+	const std::string& channel_pic() const {return data_->channel_pic_;}
 
 private:
 	class Data{
 	public:
 		Data():refcount_(1){}
 		Data(const std::string& index,const std::string& douban_index,
-			const std::string& channel_name)
+			const std::string& channel_name,const std::string pic)
 			:index_(index)
 			,douban_index_(douban_index)
 			,channel_name_(channel_name)
+			,channel_pic_(pic)
 			,refcount_(1){}
 		void AddRef(){refcount_++;}
 		void Release() {if(!--refcount_) delete this;}
 		const std::string index_;
 		const std::string douban_index_;
 		const std::string channel_name_;
+		const std::string channel_pic_;
 	private:
 		int refcount_;
 	};

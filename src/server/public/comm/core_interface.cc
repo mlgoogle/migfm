@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
- #include <fcntl.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -19,7 +19,7 @@
 #include "buffer.h"
 #include <sys/un.h>
 #include <sys/ioctl.h>
-#include "mig_log.h"
+#include "log/mig_log.h"
 
 #include <iostream>
 using namespace std;
@@ -64,7 +64,7 @@ bool _try_connect() {
 	if (-1 == connect(_svr_socket, &_svr_sock_addr.saddr, _svr_sock_addr.addr_len)) {
 		close(_svr_socket);
 		_svr_socket = INVALID_SOCKT;
-		MIG_WARN(USER_LEVEL, "socket连接失败:%s", strerror(errno));
+		MIG_WARN(USER_LEVEL, "socket连接失败:%s %d", strerror(errno),errno);
 		return false;
 	}
 
@@ -94,6 +94,8 @@ bool _try_send(int sock, const void *buff, size_t len, int flags, int &ret_code)
 	return true;
 }
 }
+
+namespace net {
 
 bool core_connect_net(const char *addr, unsigned short port) {
 	assert(addr && addr[0]);
@@ -179,7 +181,7 @@ bool core_get(int /*socket*/, const char *key, size_t key_len,
 
 	value.assign(recv_buffer);
 
-	return false;
+	return true;
 }
 
 void core_close() {
@@ -187,4 +189,6 @@ void core_close() {
 	_svr_socket = INVALID_SOCKT;
 
 	MIG_WARN(USER_LEVEL, "关闭套接字");
+}
+
 }
