@@ -36,7 +36,7 @@ LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 output:	main.o mig_log.o http_response.o baidu_lbs_connector.o redis_connector.o \
-	json_reader.o json_value.o json_writer.o \
+	json_reader.o json_value.o json_writer.o lbs_logic.o \
 	storage.o redis_storage_impl.o redis_warrper.o basic_info.o
 	$(LINK)
 
@@ -54,7 +54,10 @@ main.o:
 
 mig_log.o:
 	$(COMPILE) ../../public/log/mig_log.cc
-	
+
+lbs_logic.o:
+	$(COMPILE) ./lbs_logic.cc
+
 http_response.o:
 	$(COMPILE) ./http_response.cc
 
@@ -84,4 +87,3 @@ redis_storage_impl.o:
 
 redis_warrper.o:
 	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ../../public/storage/redis_warrper.c
-

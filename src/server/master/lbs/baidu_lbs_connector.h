@@ -11,6 +11,10 @@
 #include <string>
 #include "basic/basictypes.h"
 
+namespace Json {
+	class Value;
+}
+
 namespace mig_lbs {
 
 class BaiduLBSConnector {
@@ -19,30 +23,21 @@ public:
 	~BaiduLBSConnector();
 
 public:
-	int SetPOI(int64 user_id, double longitude, double latitude,
-			const std::string &data);
-
-	int DelPOI(int64 user_id);
-
-	int SearchNearby(double longitude, double latitude, uint32 radius,
-			const std::string &filter);
-
-	int SearchRegin(double longitude, double latitude);
-
-	int SearchBounds(double longitude1, double latitude1,
-			double longitude2, double latitude2);
-
-	int SearchDetail();
-
-private:
-	int _CreatePOI(int64 user_id, double longitude, double latitude, int64 &poi_id);
-	int _CreatePOIEX(int64 user_id, int64 poi_id, const std::string& data);
-	int _UpdatePOI(int64 poi_id, double longitude, double latitude);
-	int _UpdatePOIEX(int64 poi_id, const std::string& data);
-	int _DelPOI(int64 poi_id);
-	int _DelPOIEX(int64 poi_id);
-	int _SearchNearby(double longitude, double latitude, uint32 radius,
-			const std::string &filter);
+	int CreatePOI(int64 user_id, double longitude, double latitude, int64 &poi_id,
+			std::string &response, std::string &err_msg);
+	int CreatePOIEX(int64 user_id, int64 poi_id, const std::string& data,
+			std::string &response, std::string &err_msg);
+	int UpdatePOI(int64 poi_id, double longitude, double latitude,
+			std::string &response, std::string &err_msg);
+	int UpdatePOIEX(int64 poi_id, const std::string& data,
+			std::string &response, std::string &err_msg);
+	int DelPOI(int64 poi_id,
+			std::string &response, std::string &err_msg);
+	int DelPOIEX(int64 poi_id,
+			std::string &response, std::string &err_msg);
+	int SearchNearby(double longitude, double latitude, uint32 radius, const std::string &filter,
+			uint32 page_index, uint32 page_size, Json::Value &result,
+			std::string &response, std::string &err_msg);
 
 	std::string CalcSN(const std::string &base_string);
 

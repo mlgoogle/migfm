@@ -12,6 +12,7 @@
 #include "log/mig_log.h"
 #include "json/json.h"
 #include "redis_connector.h"
+#include "defines.h"
 //#include "curl/curl.h"
 //#include "md5.h"
 
@@ -33,56 +34,6 @@ BaiduLBSConnector::~BaiduLBSConnector() {
 	// TODO Auto-generated destructor stub
 }
 
-int BaiduLBSConnector::SetPOI(int64 user_id, double longitude,
-		double latitude, const std::string& data) {
-	using namespace std;
-
-	if (0 == user_id)
-		return -1;
-
-	RedisConnector *rc = RedisConnector::GetInstance();
-
-	int64 poi_id = rc->FindUserPOIID(user_id);
-
-	if (0 == poi_id) {
-		// 不存在POI,创建
-		if (0 != _CreatePOI(user_id, longitude, latitude, poi_id)) {
-			return -1;
-		}
-
-		ASSERT(poi_id != 0);
-		_CreatePOIEX(user_id, poi_id, data);
-
-		rc->BindUserPOI(user_id, poi_id);
-	} else {
-		// 已存在,更新
-		_UpdatePOI(poi_id, longitude, latitude);
-
-		_UpdatePOIEX(poi_id, data);
-	}
-
-	return 0;
-}
-
-int BaiduLBSConnector::DelPOI(int64 user_id) {
-	using namespace std;
-
-	if (0 == user_id)
-		return -1;
-
-	RedisConnector *rc = RedisConnector::GetInstance();
-
-	int64 poi_id = rc->FindUserPOIID(user_id);
-
-	if (0 != poi_id) {
-		_DelPOIEX(poi_id);
-		_DelPOI(poi_id);
-	}
-
-	rc->DeleteUserPOI(user_id);
-
-	return 0;
-}
 
 //std::string BaiduLBSConnector::CalcSN(const std::string& base_string) {
 //	std::string str1 = base_string + BD_ACCESS_KEY;
@@ -126,325 +77,427 @@ int BaiduLBSConnector::DelPOI(int64 user_id) {
 //	return ret;
 //}
 
-int BaiduLBSConnector::_CreatePOI(int64 user_id, double longitude,
-									double latitude, int64& poi_id) {
+int BaiduLBSConnector::CreatePOI(int64 user_id, double longitude,
+		double latitude, int64& poi_id, std::string &response,
+		std::string &err_msg) {
 	using namespace std;
 
 	ASSERT(user_id != 0);
 
 	poi_id = 0;
+	response.erase();
+	err_msg.erase();
 
-	HttpPost post(BD_URL_POI);
-	stringstream ss;
-	ss << "method=create";
-	ss << "&name=" << "migfm_user";
-	ss << "&original_lat=" << latitude;
-	ss << "&original_lon=" << longitude;
-	ss << "&original_coord_type=" << 1;
-	ss << "&databox_id=" << BD_DATABOX_ID;
-	ss << "&ak=" << BD_ACCESS_KEY;
-	ss << ends;
-	string str_post = ss.str();
-	MIG_INFO(USER_LEVEL, "lbs poi create request:%s", str_post.c_str());
-	if (post.Post(str_post.c_str())) {
-		MIG_WARN(USER_LEVEL, "lbs poi create failed: calling faild");
-		return -1;
+	try {
+		HttpPost post(BD_URL_POI);
+		stringstream ss;
+		ss << "method=create";
+		ss << "&name=" << "migfm_user";
+		ss << "&original_lat=" << latitude;
+		ss << "&original_lon=" << longitude;
+		ss << "&original_coord_type=" << 1;
+		ss << "&databox_id=" << BD_DATABOX_ID;
+		ss << "&ak=" << BD_ACCESS_KEY;
+		ss << ends;
+		string str_post = ss.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poi create request:%s", str_post.c_str());
+		if (!post.Post(str_post.c_str())) {
+			MIG_WARN(USER_LEVEL, "lbs poi create failed: calling faild");
+			err_msg = "can not connect baidu lbs";
+			return ERR_CAN_NOT_CONNECT;
+		}
+
+		string content;
+		post.GetContent(content);
+		MIG_DEBUG(USER_LEVEL, "lbs poi create response:%s", content.c_str());
+
+		Json::Reader jrd;
+		Json::Value val;
+
+		if (!jrd.parse(content, val)) {
+			MIG_WARN(USER_LEVEL, "lbs poi create failed: invalid json format");
+			err_msg = "parse baidu lbs response failed";
+			return ERR_PARSE_FAILED;
+		}
+
+		int status = val["status"].asInt();
+		if (0 != status) {
+			err_msg = val["message"].asCString();
+			MIG_WARN(USER_LEVEL, "lbs poi create failed! code:%d, msg:%s",
+					status, err_msg.c_str());
+			return status;
+		}
+
+		poi_id = val["id"].asInt();
+	} catch (std::exception &ex) {
+		err_msg = ex.what();
+		return ERR_STD_EXCEPTION;
+	} catch (...) {
+		err_msg = "unknown exception";
+		return ERR_UNKNOWN;
 	}
 
-	string content;
-	post.GetContent(content);
-	MIG_INFO(USER_LEVEL, "lbs poi create response:%s", content.c_str());
-
-	Json::Reader jrd;
-	Json::Value val;
-
-	if (!jrd.parse(content, val)) {
-		MIG_WARN(USER_LEVEL, "lbs poi create failed: invalid json format");
-		return -2;
-	}
-
-	int status = val["status"].asInt();
-	if (0 != status) {
-		MIG_WARN(USER_LEVEL, "lbs poi create failed! code:%d, msg:%s", status,
-				val["message"].asCString());
-		return status;
-	}
-
-	poi_id = val["id"].asInt();
-
-	return 0;
+	return ERR_SUCCESS;
 }
 
-int BaiduLBSConnector::_UpdatePOI(int64 poi_id, double longitude, double latitude) {
+int BaiduLBSConnector::UpdatePOI(int64 poi_id, double longitude, double latitude,
+		std::string &response, std::string &err_msg) {
 	ASSERT(poi_id != 0);
 
 	using namespace std;
 
-	stringstream url;
-	url << BD_URL_POI << "/" << poi_id << ends;
-	string str_url = url.str();
-	MIG_INFO(USER_LEVEL, "lbs poi update url:%s", str_url.c_str());
+	response.erase();
+	err_msg.erase();
 
-	HttpPost http_post(str_url);
+	try {
+		stringstream url;
+		url << BD_URL_POI << "/" << poi_id << ends;
+		string str_url = url.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poi update url:%s", str_url.c_str());
 
-	stringstream post;
-	post << "method=update";
-	post << "&original_lat=" << latitude;
-	post << "&original_lon=" << longitude;
-	post << "&original_coord_type=" << 1;
-	post << "&ak=" << BD_ACCESS_KEY;
-	post << ends;
+		HttpPost http_post(str_url);
 
-	string str_post = post.str();
-	MIG_INFO(USER_LEVEL, "lbs poi update request:%s", str_post.c_str());
-	if (!http_post.Post(str_post.c_str())) {
-		MIG_WARN(USER_LEVEL, "lbs poi update failed: calling failed");
-		return -1;
+		stringstream post;
+		post << "method=update";
+		post << "&original_lat=" << latitude;
+		post << "&original_lon=" << longitude;
+		post << "&original_coord_type=" << 1;
+		post << "&ak=" << BD_ACCESS_KEY;
+		post << ends;
+
+		string str_post = post.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poi update request:%s", str_post.c_str());
+		if (!http_post.Post(str_post.c_str())) {
+			MIG_WARN(USER_LEVEL, "lbs poi update failed: calling failed");
+			err_msg = "can not connect baidu lbs";
+			return ERR_CAN_NOT_CONNECT;
+		}
+
+		string content;
+		http_post.GetContent(content);
+		MIG_DEBUG(USER_LEVEL, "lbs poi update response:%s", content.c_str());
+
+		Json::Reader jrd;
+		Json::Value val;
+
+		if (!jrd.parse(content, val)) {
+			MIG_WARN(USER_LEVEL, "lbs poi update failed: invalid json format");
+			err_msg = "parse baidu lbs response failed";
+			return ERR_PARSE_FAILED;
+		}
+
+		int status = val["status"].asInt();
+		if (0 != status) {
+			//err_msg = val["message"].asCString();
+			MIG_WARN(USER_LEVEL, "lbs poi update failed! code:%d, msg:%s",
+					status, err_msg.c_str());
+			return status;
+		}
+	} catch (std::exception &ex) {
+		err_msg = ex.what();
+		return ERR_STD_EXCEPTION;
+	} catch (...) {
+		err_msg = "unknown exception";
+		return ERR_UNKNOWN;
 	}
 
-	string content;
-	http_post.GetContent(content);
-	MIG_INFO(USER_LEVEL, "lbs poi update response:%s", content.c_str());
-
-	Json::Reader jrd;
-	Json::Value val;
-
-	if (!jrd.parse(content, val)) {
-		MIG_WARN(USER_LEVEL, "lbs poi update failed: invalid json format");
-		return -2;
-	}
-
-	int status = val["status"].asInt();
-	if (0 != status) {
-		MIG_WARN(USER_LEVEL, "lbs poi update failed! code:%d, msg:%s", status,
-				val["message"].asCString());
-		return status;
-	}
-
-	return 0;
+	return ERR_SUCCESS;
 }
 
-int BaiduLBSConnector::_CreatePOIEX(int64 user_id, int64 poi_id, const std::string& data) {
+int BaiduLBSConnector::CreatePOIEX(int64 user_id, int64 poi_id, const std::string& data,
+		std::string &response, std::string &err_msg) {
 	using namespace std;
 
 	ASSERT(user_id != 0);
 	ASSERT(poi_id != 0);
 
-	HttpPost post(BD_URL_POIEX);
-	stringstream ss;
-	ss << "method=create";
-	ss << "&poi_id=" << poi_id;
-	ss << "&user_id=" << user_id;
-	ss << "&extra_data=" << data;
-	ss << "&ak=" << BD_ACCESS_KEY;
-	ss << ends;
-	string str_post = ss.str();
-	MIG_INFO(USER_LEVEL, "lbs poiex create request:%s", str_post.c_str());
-	if (!post.Post(str_post.c_str())) {
-		MIG_WARN(USER_LEVEL, "lbs poiex create failed: call failed");
-		return -1;
+	response.erase();
+	err_msg.erase();
+
+	try {
+		HttpPost post(BD_URL_POIEX);
+		stringstream ss;
+		ss << "method=create";
+		ss << "&poi_id=" << poi_id;
+		ss << "&user_id=" << user_id;
+		ss << "&extra_data=" << data;
+		ss << "&ak=" << BD_ACCESS_KEY;
+		ss << ends;
+		string str_post = ss.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poiex create request:%s", str_post.c_str());
+		if (!post.Post(str_post.c_str())) {
+			MIG_WARN(USER_LEVEL, "lbs poiex create failed: call failed");
+			err_msg = "can not connect baidu lbs";
+			return ERR_CAN_NOT_CONNECT;
+		}
+
+		string content;
+		post.GetContent(content);
+		MIG_DEBUG(USER_LEVEL, "lbs poiex create response:%s", content.c_str());
+
+		Json::Reader jrd;
+		Json::Value val;
+
+		if (!jrd.parse(content, val)) {
+			MIG_WARN(USER_LEVEL,
+					"lbs poiex create failed: invalid json format");
+			err_msg = "parse baidu lbs response failed";
+			return ERR_PARSE_FAILED;
+		}
+
+		int status = val["status"].asInt();
+		if (0 != status) {
+			//err_msg = val["message"].asCString();
+			MIG_WARN(USER_LEVEL, "lbs poiex create failed! code:%d, msg:%s",
+					status, err_msg.c_str());
+			return status;
+		}
+	} catch (std::exception &ex) {
+		err_msg = ex.what();
+		return ERR_STD_EXCEPTION;
+	} catch (...) {
+		err_msg = "unknown exception";
+		return ERR_UNKNOWN;
 	}
 
-	string content;
-	post.GetContent(content);
-	MIG_INFO(USER_LEVEL, "lbs poiex create response:%s", content.c_str());
-
-	Json::Reader jrd;
-	Json::Value val;
-
-	if (!jrd.parse(content, val)) {
-		MIG_WARN(USER_LEVEL, "lbs poiex create failed: invalid json format");
-		return -2;
-	}
-
-	int status = val["status"].asInt();
-	if (0 != status) {
-		MIG_WARN(USER_LEVEL, "lbs poiex create failed! code:%d, msg:%s", status,
-				val["message"].asCString());
-		return status;
-	}
-
-	return 0;
+	return ERR_SUCCESS;
 }
 
-int BaiduLBSConnector::_UpdatePOIEX(int64 poi_id, const std::string& data) {
+int BaiduLBSConnector::UpdatePOIEX(int64 poi_id, const std::string& data,
+		std::string &response, std::string &err_msg) {
 	using namespace std;
 
 	ASSERT(poi_id != 0);
 
-	HttpPost http_post(BD_URL_POIEX);
-	stringstream post;
-	post << "method=update";
-	post << "&poi_id=" << poi_id;
-	post << "&extra_data=" << data;
-	post << "&ak=" << BD_ACCESS_KEY;
-	post << ends;
-	string str_post = post.str();
-	MIG_INFO(USER_LEVEL, "lbs poiex update request:%s", str_post.c_str());
-	if (!http_post.Post(str_post.c_str())) {
-		MIG_WARN(USER_LEVEL, "lbs poiex update failed: calling failed");
-		return -1;
+	response.erase();
+	err_msg.erase();
+
+	try {
+		HttpPost http_post(BD_URL_POIEX);
+		stringstream post;
+		post << "method=update";
+		post << "&poi_id=" << poi_id;
+		post << "&extra_data=" << data;
+		post << "&ak=" << BD_ACCESS_KEY;
+		post << ends;
+		string str_post = post.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poiex update request:%s", str_post.c_str());
+		if (!http_post.Post(str_post.c_str())) {
+			MIG_WARN(USER_LEVEL, "lbs poiex update failed: calling failed");
+			err_msg = "can not connect baidu lbs";
+			return ERR_CAN_NOT_CONNECT;
+		}
+
+		string content;
+		http_post.GetContent(content);
+		MIG_DEBUG(USER_LEVEL, "lbs poiex update response:%s", content.c_str());
+
+		Json::Reader jrd;
+		Json::Value val;
+
+		if (!jrd.parse(content, val)) {
+			MIG_WARN(USER_LEVEL,
+					"lbs poiex update failed: invalid json format");
+			err_msg = "parse baidu lbs response failed";
+			return ERR_PARSE_FAILED;
+		}
+
+		int status = val["status"].asInt();
+		if (0 != status) {
+			//err_msg = val["message"].asCString();
+			MIG_WARN(USER_LEVEL, "lbs poiex update failed! code:%d, msg:%s",
+					status, err_msg.c_str());
+			return status;
+		}
+	} catch (std::exception &ex) {
+		err_msg = ex.what();
+		return ERR_STD_EXCEPTION;
+	} catch (...) {
+		err_msg = "unknown exception";
+		return ERR_UNKNOWN;
 	}
 
-	string content;
-	http_post.GetContent(content);
-	MIG_INFO(USER_LEVEL, "lbs poiex update response:%s", content.c_str());
-
-	Json::Reader jrd;
-	Json::Value val;
-
-	if (!jrd.parse(content, val)) {
-		MIG_WARN(USER_LEVEL, "lbs poiex update failed: invalid json format");
-		return -2;
-	}
-
-	int status = val["status"].asInt();
-	if (0 != status) {
-		MIG_WARN(USER_LEVEL, "lbs poiex update failed! code:%d, msg:%s", status,
-				val["message"].asCString());
-		return status;
-	}
-
-	return 0;
+	return ERR_SUCCESS;
 }
 
-int BaiduLBSConnector::_DelPOI(int64 poi_id) {
+int BaiduLBSConnector::DelPOI(int64 poi_id, std::string &response, std::string &err_msg) {
 	ASSERT(poi_id != 0);
 
 	using namespace std;
 
-	stringstream url;
-	url << BD_URL_POI << "/" << poi_id << ends;
-	string str_url = url.str();
-	MIG_INFO(USER_LEVEL, "lbs poi delete url:%s", str_url.c_str());
+	response.erase();
+	err_msg.erase();
 
-	HttpPost http_post(str_url);
+	try {
+		stringstream url;
+		url << BD_URL_POI << "/" << poi_id << ends;
+		string str_url = url.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poi delete url:%s", str_url.c_str());
 
-	stringstream post;
-	post << "method=delete";
-	post << "&ak=" << BD_ACCESS_KEY;
-	post << ends;
+		HttpPost http_post(str_url);
 
-	string str_post = post.str();
-	MIG_INFO(USER_LEVEL, "lbs poi delete request:%s", str_post.c_str());
-	if (!http_post.Post(str_post.c_str())) {
-		MIG_WARN(USER_LEVEL, "lbs poi delete failed: calling failed");
-		return -1;
+		stringstream post;
+		post << "method=delete";
+		post << "&ak=" << BD_ACCESS_KEY;
+		post << ends;
+
+		string str_post = post.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poi delete request:%s", str_post.c_str());
+		if (!http_post.Post(str_post.c_str())) {
+			MIG_WARN(USER_LEVEL, "lbs poi delete failed: calling failed");
+			err_msg = "can not connect baidu lbs";
+			return ERR_CAN_NOT_CONNECT;
+		}
+
+		string content;
+		http_post.GetContent(content);
+		MIG_DEBUG(USER_LEVEL, "lbs poi delete response:%s", content.c_str());
+
+		Json::Reader jrd;
+		Json::Value val;
+
+		if (!jrd.parse(content, val)) {
+			MIG_WARN(USER_LEVEL, "lbs poi delete failed: invalid json format");
+			err_msg = "parse baidu lbs response failed";
+			return ERR_PARSE_FAILED;
+		}
+
+		int status = val["status"].asInt();
+		if (0 != status) {
+			//err_msg = val["message"].asCString();
+			MIG_WARN(USER_LEVEL, "lbs poi delete failed! code:%d, msg:%s",
+					status, err_msg.c_str());
+			return status;
+		}
+	} catch (std::exception &ex) {
+		err_msg = ex.what();
+		return ERR_STD_EXCEPTION;
+	} catch (...) {
+		err_msg = "unknown exception";
+		return ERR_UNKNOWN;
 	}
 
-	string content;
-	http_post.GetContent(content);
-	MIG_INFO(USER_LEVEL, "lbs poi delete response:%s", content.c_str());
-
-	Json::Reader jrd;
-	Json::Value val;
-
-	if (!jrd.parse(content, val)) {
-		MIG_WARN(USER_LEVEL, "lbs poi delete failed: invalid json format");
-		return -2;
-	}
-
-	int status = val["status"].asInt();
-	if (0 != status) {
-		MIG_WARN(USER_LEVEL, "lbs poi delete failed! code:%d, msg:%s", status,
-				val["message"].asCString());
-		return status;
-	}
-
-	return 0;
+	return ERR_SUCCESS;
 }
 
-int BaiduLBSConnector::SearchNearby(double longitude, double latitude,
-		uint32 radius, const std::string& filter) {
-
-	_SearchNearby(longitude, latitude, radius, filter);
-
-	return 0;
-}
-
-int BaiduLBSConnector::_DelPOIEX(int64 poi_id) {
+int BaiduLBSConnector::DelPOIEX(int64 poi_id, std::string &response, std::string &err_msg) {
 	using namespace std;
 
 	ASSERT(poi_id != 0);
 
-	HttpPost http_post(BD_URL_POIEX);
-	stringstream post;
-	post << "method=delete";
-	post << "&poi_id=" << poi_id;
-	post << "&ak=" << BD_ACCESS_KEY;
-	post << ends;
-	string str_post = post.str();
-	MIG_INFO(USER_LEVEL, "lbs poiex delete request:%s", str_post.c_str());
-	if (!http_post.Post(str_post.c_str())) {
-		MIG_WARN(USER_LEVEL, "lbs poiex delete failed: calling failed");
-		return -1;
+	response.erase();
+	err_msg.erase();
+
+	try {
+		HttpPost http_post(BD_URL_POIEX);
+		stringstream post;
+		post << "method=delete";
+		post << "&poi_id=" << poi_id;
+		post << "&ak=" << BD_ACCESS_KEY;
+		post << ends;
+		string str_post = post.str();
+		MIG_DEBUG(USER_LEVEL, "lbs poiex delete request:%s", str_post.c_str());
+		if (!http_post.Post(str_post.c_str())) {
+			MIG_WARN(USER_LEVEL, "lbs poiex delete failed: calling failed");
+			err_msg = "can not connect baidu lbs";
+			return ERR_CAN_NOT_CONNECT;
+		}
+
+		string content;
+		http_post.GetContent(content);
+		MIG_DEBUG(USER_LEVEL, "lbs poiex delete response:%s", content.c_str());
+
+		Json::Reader jrd;
+		Json::Value val;
+
+		if (!jrd.parse(content, val)) {
+			MIG_WARN(USER_LEVEL,
+					"lbs poiex delete failed: invalid json format");
+			err_msg = "parse baidu lbs response failed";
+			return ERR_PARSE_FAILED;
+		}
+
+		int status = val["status"].asInt();
+		if (0 != status) {
+			//err_msg = val["message"].asCString();
+			MIG_WARN(USER_LEVEL, "lbs poiex delete failed! code:%d, msg:%s",
+					status, err_msg.c_str());
+			return status;
+		}
+	} catch (std::exception &ex) {
+		err_msg = ex.what();
+		return ERR_STD_EXCEPTION;
+	} catch (...) {
+		err_msg = "unknown exception";
+		return ERR_UNKNOWN;
 	}
 
-	string content;
-	http_post.GetContent(content);
-	MIG_INFO(USER_LEVEL, "lbs poiex delete response:%s", content.c_str());
-
-	Json::Reader jrd;
-	Json::Value val;
-
-	if (!jrd.parse(content, val)) {
-		MIG_WARN(USER_LEVEL, "lbs poiex delete failed: invalid json format");
-		return -2;
-	}
-
-	int status = val["status"].asInt();
-	if (0 != status) {
-		MIG_WARN(USER_LEVEL, "lbs poiex delete failed! code:%d, msg:%s", status,
-				val["message"].asCString());
-		return status;
-	}
-
-	return 0;
+	return ERR_SUCCESS;
 }
 
-int BaiduLBSConnector::_SearchNearby(double longitude, double latitude,
-		uint32 radius, const std::string& filter) {
+int BaiduLBSConnector::SearchNearby(double longitude, double latitude, uint32 radius,
+		const std::string& filter, uint32 page_index, uint32 page_size, Json::Value &result,
+		std::string &response, std::string &err_msg) {
 	using namespace std;
 
-	stringstream get;
-	get << BD_URL_SEARCH;
-	get << "?filter=" << "databox:" << BD_DATABOX_ID;
-	if (!filter.empty())
-		get << "|" << filter; // FIXME: 检测filter合法性
-	get << "&location=" << latitude << "," << longitude;
-	get << "&radius=" << radius;
-	get << "&scope=" << 2;
-	get << "&ak=" << BD_ACCESS_KEY;
-	get << ends;
-	string str_get = get.str();
-	MIG_INFO(USER_LEVEL, "lbs search nearby request:%s", str_get.c_str());
+	response.erase();
+	err_msg.erase();
 
-	HttpResponse rsp(str_get);
-	if (!rsp.Get()) {
-		MIG_WARN(USER_LEVEL, "lbs search nearby failed: calling failed");
-		return -1;
+	try {
+		stringstream get;
+		get << BD_URL_SEARCH;
+		get << "?filter=" << "databox:" << BD_DATABOX_ID;
+		if (!filter.empty())
+			get << "|" << filter; // FIXME: 检测filter合法性
+		get << "&location=" << latitude << "," << longitude;
+		get << "&radius=" << radius;
+		get << "&scope=" << 2;
+		get << "&page_index" << page_index;
+		get << "&page_size" << page_size;
+		get << "&ak=" << BD_ACCESS_KEY;
+		get << ends;
+		string str_get = get.str();
+		MIG_DEBUG(USER_LEVEL, "lbs search nearby request:%s", str_get.c_str());
+
+		HttpResponse rsp(str_get);
+		if (!rsp.Get()) {
+			MIG_WARN(USER_LEVEL, "lbs search nearby failed: calling failed");
+			err_msg = "can not connect baidu lbs";
+			return ERR_CAN_NOT_CONNECT;
+		}
+
+		string content;
+		rsp.GetContent(content);
+		MIG_DEBUG(USER_LEVEL, "lbs search nearby response:%s", content.c_str());
+
+		Json::Reader jrd;
+		Json::Value val;
+
+		if (!jrd.parse(content, val)) {
+			MIG_WARN(USER_LEVEL,
+					"lbs search nearby failed: invalid json format");
+			err_msg = "parse baidu lbs response failed";
+			return ERR_PARSE_FAILED;
+		}
+
+		int status = val["status"].asInt();
+		if (0 != status) {
+			//err_msg = val["message"].asCString();
+			MIG_WARN(USER_LEVEL, "lbs search nearby failed! code:%d, msg:%s",
+					status, err_msg.c_str());
+			return status;
+		}
+
+		result = val["content"];
+		//response = content;
+	} catch (std::exception &ex) {
+		err_msg = ex.what();
+		return ERR_STD_EXCEPTION;
+	} catch (...) {
+		err_msg = "unknown exception";
+		return ERR_UNKNOWN;
 	}
-
-	string content;
-	rsp.GetContent(content);
-	MIG_INFO(USER_LEVEL, "lbs search nearby response:%s", content.c_str());
-
-	Json::Reader jrd;
-	Json::Value val;
-
-	if (!jrd.parse(content, val)) {
-		MIG_WARN(USER_LEVEL, "lbs search nearby failed: invalid json format");
-		return -2;
-	}
-
-	int status = val["status"].asInt();
-	if (0 != status) {
-		MIG_WARN(USER_LEVEL, "lbs search nearby failed! code:%d, msg:%s", status,
-				val["message"].asCString());
-		return status;
-	}
-
-	return 0;
+	return ERR_SUCCESS;
 }
 
 } // namespace mig_lbs

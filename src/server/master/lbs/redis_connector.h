@@ -18,10 +18,6 @@ namespace mig_lbs {
 
 class RedisConnector {
 public:
-	static RedisConnector *GetInstance();
-	static void FreeInstance();
-
-public:
 	bool Connect();
 	bool IsConnected() const { return NULL != redis_; }
 
@@ -30,17 +26,10 @@ public:
 	bool DeleteUserPOI(int64 user_id);
 
 public:
+	RedisConnector();
 	~RedisConnector();
 
-private:
-	RedisConnector();
-
 	base_storage::DictionaryStorageEngine *redis_;
-
-private:
-	static RedisConnector *instance_;
-
-	DISALLOW_COPY_AND_ASSIGN(RedisConnector);
 };
 
 } /* namespace mig_lbs */

@@ -3,8 +3,7 @@
 #include<string.h>
 #include"plugins.h"
 #include"log/mig_log.h"
-#include "baidu_lbs_connector.h"
-#include "redis_connector.h"
+#include "lbs_logic.h"
 
 #ifdef __cplusplus 
 extern "C" {
@@ -45,23 +44,27 @@ static void* on_init()
     printf("id:[%s] version[%s] %s\n",pl_data->id,pl_data->version,__FUNCTION__);
 	MIG_INFO(USER_LEVEL, "id:[%s] version[%s] %s\n",pl_data->id,pl_data->version,__FUNCTION__);
 
-	mig_lbs::RedisConnector::GetInstance()->Connect();
+	mig_lbs::LBSLogic::GetInstance()->Init();
 
 	using namespace mig_lbs;
-	BaiduLBSConnector conn;
-//	conn.SetPOI(100001, 120.116506, 30.295979, "data100001");
-//	conn.SetPOI(100002, 120.106506, 30.205979, "data100002");
-//	conn.SetPOI(100003, 120.126506, 30.294979, "data100003");
-//	conn.SetPOI(100004, 120.118506, 30.293979, "data100004");
-//	conn.SetPOI(100005, 120.112506, 30.298979, "data100005");
+	LBSLogic *logic = mig_lbs::LBSLogic::GetInstance();
+	std::string resp, err;
+	logic->SetPOI(100001, 120.116506, 30.295979, "data100001", resp, err);
+	logic->SetPOI(100002, 120.106506, 30.205979, "data100002", resp, err);
+	logic->SetPOI(100003, 120.126506, 30.294979, "data100003", resp, err);
+	logic->SetPOI(100004, 120.118506, 30.293979, "data100004", resp, err);
+	logic->SetPOI(100005, 120.112506, 30.298979, "data100005", resp, err);
 
-	conn.SearchNearby(120.116506, 30.295979, 10000, "");
+//	logic->SearchNearby(120.116506, 30.295979, 10000, "", resp, err);
+
+//	logic->DelPOI(100003, resp, err);
+
     return pl_data;
 }
 
 static handler_t  on_clean_up(struct server *srv,void* pd_t)
 {
-	mig_lbs::RedisConnector::FreeInstance();
+	mig_lbs::LBSLogic::FreeInstance();
     return HANDLER_GO_ON;
 }
 
@@ -75,15 +78,9 @@ static handler_t on_connection(struct server *srv,int fd,void *pd,int len)
 
 static handler_t on_read(struct server *srv,int fd,void *pd,int len)
 {
-	//printf("%*.*s\n",len-4,len-4,(char*)pd+4);
-	//    struct netaio *aio;
-	//    struct socket_adapter *sca;
-	int rc;
+	MIG_DEBUG(USER_LEVEL, "recv data:%s", (char *)pd);
 
-	MIG_INFO(USER_LEVEL, "recv data:%s", (char *)pd);
-	if (-1 == send(fd, pd, len, 0)) {
-		MIG_INFO(USER_LEVEL, "send failed: %s", strerror(errno));
-	}
+
 	return HANDLER_GO_ON;
 }
 

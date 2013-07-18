@@ -11,18 +11,6 @@
 
 namespace mig_lbs {
 
-RedisConnector *RedisConnector::instance_ = NULL;
-
-RedisConnector *RedisConnector::GetInstance() {
-	if (NULL == instance_)
-		instance_ = new RedisConnector();
-	return instance_;
-}
-
-void RedisConnector::FreeInstance() {
-	delete instance_;
-}
-
 bool RedisConnector::BindUserPOI(int64 user_id, int64 poi_id) {
 	ASSERT(IsConnected());
 
