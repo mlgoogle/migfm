@@ -109,7 +109,8 @@ public:
 	virtual bool AddHashRadomElement(const char* hash_name,const char* val,
 									const size_t val_len) = 0;
 
-	virtual bool GetHashRadomElement(const char* hash_name,char** val,size_t *val_len) = 0;
+	virtual bool GetHashRadomElement(const char* hash_name,char** val,size_t *val_len,
+		                              const int radom_num) = 0;
 
 	virtual bool DelHashRadomElement(const char* hash_name) = 0;
 

@@ -172,6 +172,13 @@ MusicCacheManager::MusicCacheManager()
 
 	InitThreadrw(&cache_mgr_lock_);
 	InitMusicChannel();
+	get_song_engine_ = music_logic::GetSongUrl::Create(music_logic::TYPE_SOGOU);
+	if (get_song_engine_==NULL){
+		MIG_ERROR(USER_LEVEL,"get_song create error");
+		return ;
+	}
+	std::string get_song_url = "http://121.199.32.88/getmusicurl.ashx";
+	get_song_engine_->Init(get_song_url);
 }
 
 MusicCacheManager::~MusicCacheManager(){
@@ -308,19 +315,24 @@ bool MusicCacheManager::GetMusicChannelInfos(int channel, std::string &json_cont
     usr_logic::RLockGd lr(cache_mgr_lock_);
 	std::stringstream os;
 	int32 i = 0;
+	bool r = false;
 	ChannelCache* cc = GetChannelCache(channel);
 	if (cc==NULL)
 		return false;
-	os<<"\"channle\":[";
+	os<<"\"channel\":[";
 	while(i<2){
 		std::list<base::MusicInfo>::iterator it =cc->channel_music_infos_.begin();
 
 		if (it!=cc->channel_music_infos_.end()){
+			std::string content_url;
 			base::MusicInfo mi = (*it);
+			r = get_song_engine_->GetSongInfo(mi.artist(),mi.title(),
+				mi.album_title(),content_url,0);
+			//豆瓣不支持html5 故从爬虫获取
 			os<<"{\"id\":\""<<mi.id().c_str()<<"\",\"title\":\""<<mi.title().c_str()
 				<<"\",\"artist\":\""<<mi.artist().c_str()<<"\",\"pub_time\":\""
 				<<mi.pub_time().c_str()<<"\",\"album\":\""<<mi.album_title().c_str()
-				<<"\",\"url\":\""<<mi.url().c_str()
+				<<"\",\"url\":\""<<content_url.c_str()
 				<<"\",\"pic\":\""<<mi.pic_url().c_str()<<"\",\"time\":\""
 				<<mi.music_time()<<"\",\"like\":\"0\"}";
 			if (i==0){

@@ -46,9 +46,11 @@ public:
     
     virtual bool SetListElement(const int index,const char* key,const size_t key_len,const char* val,const size_t val_len);
 
-	virtual bool AddHashRadomElement(const char* hash_name,const char* val,const size_t val_len){}
+	virtual bool AddHashRadomElement(const char* hash_name,const char* val,
+		                             const size_t val_len){}
 
-	virtual bool GetHashRadomElement(const char* hash_name,char** val,size_t *val_len){}
+	virtual bool GetHashRadomElement(const char* hash_name,char** val,
+		                             size_t *val_len,const int radom_num){}
 
 	virtual bool DelHashRadomElement(const char* hash_name){}
 

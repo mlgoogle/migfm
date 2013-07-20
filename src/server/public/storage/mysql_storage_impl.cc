@@ -11,7 +11,7 @@ MysqlStorageEngineImpl::MysqlStorageEngineImpl(){
 }
 
 MysqlStorageEngineImpl::~MysqlStorageEngineImpl(){
-
+	MIG_DEBUG(USER_LEVEL,"============mysql_close======");
 }
 	
 bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
@@ -47,10 +47,13 @@ bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 
 bool MysqlStorageEngineImpl::Release(){
 	MYSQL_RES * result = (MYSQL_RES *)result_.get()->proc;
+	MYSQL* mysql = (MYSQL*)conn_.get()->proc;
     if(result&&connected_){
        mysql_free_result(result);
        result_.get()->proc = NULL;
+	   mysql_close(mysql);
     }
+	delete this;
     return true;
 }
 

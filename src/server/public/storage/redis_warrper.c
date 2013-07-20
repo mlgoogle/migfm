@@ -207,3 +207,7 @@ long long ReidsGetListSize(warrper_redis_context_t* context,
 	 freeReplyObject(reply);
 	 return hash_name_size;
 }
+
+int RedisClose(warrper_redis_context_t* context){
+	redisFree(context->context);
+}

@@ -44,12 +44,13 @@
 #define  DECWORD            "decword"
 #define  MODE               "mode"
 #define  WORDID             "wordid"
+#define  SONGID             "songid"
 
 #define IDENTITY "migfm_identity"
 #define USERINFOS "migfm_user_infos"
 
 
-#define DEFAULT_CONFIG_PATH     "./plugins/user_manager/user_manager_config.xml"
+#define DEFAULT_CONFIG_PATH     "./plugins/music_manager/music_manager_config.xml"
 namespace usr_logic{
 class ThreadKey {
 public:

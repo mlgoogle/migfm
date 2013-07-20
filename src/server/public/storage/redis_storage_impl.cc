@@ -34,7 +34,8 @@ bool RedisStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 }
 
 bool RedisStorageEngineImpl::Release(){
-	
+	RedisClose(c_);
+	delete this;
 	return true;
 }
 
@@ -123,19 +124,24 @@ bool RedisStorageEngineImpl::AddHashRadomElement(const char* hash_name,
 	 return r;
 }
 
-bool RedisStorageEngineImpl::GetHashRadomElement(const char* hash_name,char** val,size_t *val_len){
+bool RedisStorageEngineImpl::GetHashRadomElement(const char* hash_name,char** val,
+												 size_t *val_len,const int radom_num){
 	int32 current_size = RedishHashSize(c_,hash_name);
 	std::stringstream index;
-	//index<<(((time(NULL)+1)%(current_size)))-1;
-	time_t current_time = time(NULL);
-	index<<(((current_time)%(current_size)));
-	MIG_DEBUG(USER_LEVEL,"index[%s] hashname[%s]time[%lld] current[%d]",
-		     index.str().c_str(),hash_name,
-		     current_time,current_size);
-	if(PingRedis()!=1)
-		return false;
-	bool r = RedisGetHashElement(c_,hash_name,index.str().c_str(),
-								index.str().length(),val,val_len);
+	bool r = false;
+	if (current_size>0){
+		//time_t current_time = time(NULL);
+		int tindex= (radom_num)%(current_size);
+		tindex=(tindex>0)?tindex:(0-tindex);
+		index<<((tindex));
+		MIG_DEBUG(USER_LEVEL,"index[%s] hashname[%s] radom_num[%lld] current[%d]",
+				 index.str().c_str(),hash_name,
+				 radom_num,current_size);
+		if(PingRedis()!=1)
+			return false;
+		r = RedisGetHashElement(c_,hash_name,index.str().c_str(),
+									index.str().length(),val,val_len);
+	}
 	return r;
 }
 

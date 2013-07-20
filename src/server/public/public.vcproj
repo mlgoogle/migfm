@@ -176,11 +176,23 @@
 					>
 				</File>
 				<File
+					RelativePath=".\basic\radom_in.h"
+					>
+				</File>
+				<File
 					RelativePath=".\basic\scoped_ptr.h"
 					>
 				</File>
 				<File
 					RelativePath=".\basic\stl_decl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\unzip.h"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\zip.h"
 					>
 				</File>
 			</Filter>
@@ -213,6 +225,18 @@
 				</File>
 				<File
 					RelativePath=".\basic\native_library.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\radom_in.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\unzip.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\zip.cc"
 					>
 				</File>
 			</Filter>

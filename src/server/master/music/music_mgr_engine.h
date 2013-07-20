@@ -50,6 +50,10 @@ private:
 
 	bool GetMoodSceneWordSong(const int socket,const packet::HttpPacket& packet);
 
+	bool GetWXMusicInfo(const int socket,const packet::HttpPacket& packet);
+
+	bool GetMusicInfos(const int socket,const std::string& songid);
+
 	bool GetOneMusicInfo(const std::string& song_id,base::MusicInfo& mi);
 private:
 	music_logic::GetSongUrl*                         get_song_engine_;

@@ -58,6 +58,7 @@ bool MemStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 bool MemStorageEngineImpl::Release(){
     memcached_reset((memcached_st*)cache_);
     memcached_free((memcached_st*)cache_);
+	delete this;
 }
 
 bool MemStorageEngineImpl::SetValue(const char* key,const size_t key_len,const char* val,

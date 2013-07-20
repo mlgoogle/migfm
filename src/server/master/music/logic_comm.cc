@@ -24,6 +24,10 @@ static void keydestdb (void *v)
 	if (tv) {
 		if (tv->conn_)
 			tv->conn_->Release();
+		if (tv->conn_){
+			delete tv->conn_;
+			tv->conn_ = NULL;
+		}
 		free (tv);
 		ThreadkeySet (NULL, ThreadKey::db_key_);
 
@@ -37,10 +41,14 @@ static void keydestdic(void *v)
 	if (tv) {
 		if (tv->conn_)
 			tv->conn_->Release();
+		if (tv->conn_){
+			delete tv->conn_;
+			tv->conn_ = NULL;
+		}
 		free (tv);
 		ThreadkeySet (NULL, ThreadKey::db_key_);
 
-		LOG_DEBUG ("Close database connection");
+		LOG_DEBUG ("Close Dic connection");
 	}
 }
 

@@ -154,7 +154,7 @@ bool UsrMgrEngine::GetUserInfo(const int socket,const packet::HttpPacket& packet
 		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 		return false;
 	}
-	status = "0";
+	status = "1";
 	os<<"\"userid\":\""<<uid<<"\",\"username\":\""<<username.c_str()
 		<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""
 		<<gender.c_str()<<"\",\"type\":\""<<type.c_str()<<"\",\"birthday\":\""
@@ -162,7 +162,7 @@ bool UsrMgrEngine::GetUserInfo(const int socket,const packet::HttpPacket& packet
 		<<"\",\"source\":\""<<source.c_str()<<"\",\"head\":\""<<head.c_str()
 		<<"\"";
 	result = os.str();
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
@@ -244,7 +244,7 @@ bool UsrMgrEngine::UpdateUserinfo(const int socket,const packet::HttpPacket& pac
 		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 		return false;
 	}
-	status = "0";
+	status = "1";
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
@@ -357,10 +357,10 @@ bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string
 		  return false;
 	  }
 
-	  status = "0";
+	  status = "1";
 	  if (flag==0){
 		  os<<"\"username\":\""<<username.c_str()<<"\",\"password\":\""
-			  <<password.c_str()<<"\"}";
+			  <<password.c_str()<<"\"";
 		  result = os.str();
 	  }
 

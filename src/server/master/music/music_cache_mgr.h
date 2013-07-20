@@ -2,6 +2,7 @@
 #define _MASTER_PLUGIN_MUSIC_MGR_ENGINE_H__
 #include "thread_handler.h"
 #include "thread_lock.h"
+#include "get_song.h"
 #include "basic/basic_info.h"
 #include "basic/basictypes.h"
 #include <list>
@@ -44,6 +45,7 @@ private:
 	int                                           channel_num_;
 	std::map<int,ChannelCache*>                   channel_cache_map_; 
 	std::string                                   douban_url_;
+	music_logic::GetSongUrl*                      get_song_engine_;
 };
 
 class CacheManagerOp{

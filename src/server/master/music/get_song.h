@@ -18,7 +18,7 @@ public:
 	~GetSongUrl(void) {}
 	virtual void Init(std::string& song_url) = 0;
 	virtual bool GetSongInfo(const std::string& artist,const std::string& title,
-					const std::string album,std::string& song_url) = 0;
+					const std::string album,std::string& song_url,int flag = 1) = 0; //1 ÐèÒªbase64±àÂë
 };
 
 
@@ -31,7 +31,7 @@ public:
 	void Init(std::string& song_url);
 
 	bool GetSongInfo(const std::string& artist,const std::string& title,
-					 const std::string album,std::string& song_url);
+					 const std::string album,std::string& song_url,int flag = 1);
 private:
 	bool HttpGetSongInfo(const std::string& key,std::string& song_url);
 private:

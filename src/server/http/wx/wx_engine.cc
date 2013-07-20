@@ -194,34 +194,62 @@ WXInfoEngine::ProcessEventText(WXPacket& msg){
 	std::string str_event;
 	std::string to_user;
 	std::string from_user;
+	std::stringstream os;
+	std::string  welnews = "欢迎关注";
 	msg.GetAttrib(ToUserName,to_user);
 	msg.GetAttrib(FromUserName,from_user);
 	msg.GetAttrib(Event,str_event);
 	std::string content;
 	if (str_event=="subscribe"){
 		content="MIG音乐助手是以推荐为主的微信应用,而且在移动设备上不需要装任何音乐app,"
-                "便可想听你想要的音乐:\n"
-			    "1,有20个音乐频道,每个音乐频道将为你推荐不同风格的音乐.按发送字符\"n\"后,"
-				"系统会推荐一首音乐,提供试听."
-			    "如果觉得该频道不对味,可发送字符\"cc\",便可切换音乐频道.系统默认为频道一\n\n"
-			    "2,提供歌曲推荐,歌手推荐.可输入歌曲名.如:如果没有你 "
-				"系统便会自动推荐任意一个演绎改歌曲的歌手的音乐."
-                "若输入歌手名: 张学友 系统便会自动推荐一首该歌手的任意一首歌曲.\n\n"
-                "PS:如果你是苹果用户,那么使用更简便的功能:微信的语音助手插件"
-				"(在设置中,找到功能按钮,点击去便可添加)."
-                "只需对其说:王菲 便可获取到系统推荐的王菲一首歌,省去了手工输入麻烦.\n"
-	            "如有问题和建议可微信直接回复该号码,我们即可马上收到."
-				"感谢大家内测的支持,下个月将发布正式版,并加入心情推荐和场景推荐\n";
-		char* utf_content = NULL;
+		"便可想听你想要的音乐:\n"
+		"1,有20个音乐频道,每个音乐频道将为你推荐不同风格的音乐.按发送字符\"n\"后,"
+		"系统会推荐一首音乐,提供试听."
+		"如果觉得该频道不对味,可发送字符\"cc\",便可切换音乐频道.系统默认为频道一\n\n"
+		"2,提供歌曲推荐,歌手推荐.可输入歌曲名.如:如果没有你 "
+		"系统便会自动推荐任意一个演绎改歌曲的歌手的音乐."
+		"若输入歌手名: 张学友 系统便会自动推荐一首该歌手的任意一首歌曲.\n\n"
+		"PS:如果你是苹果用户,那么使用更简便的功能:微信的语音助手插件"
+		"(在设置中,找到功能按钮,点击去便可添加)."
+		"只需对其说:王菲 便可获取到系统推荐的王菲一首歌,省去了手工输入麻烦.\n"
+		"如有问题和建议可微信直接回复该号码,我们即可马上收到."
+		"感谢大家内测的支持,下个月将发布正式版,并加入心情推荐和场景推荐\n";
+		
+		/*char* utf_content = NULL;
 		size_t utf_content_size = 0;
-		std::string str_utf8_content;
+		std::string str_utf8_content;*/
 		base::BasicUtil::GB2312ToUTF8(content.c_str(),content.length(),&utf_content,&utf_content_size);
 		str_utf8_content.assign(utf_content,utf_content_size);
-		PackageTextMsg(from_user,to_user,str_utf8_content);
+		MIG_DEBUG(USER_LEVEL,"%s",str_utf8_content.c_str());
+		/*PackageTextMsg(from_user,to_user,str_utf8_content);
 		if (utf_content){
-			delete [] utf_content;
-			utf_content = NULL;
-		}
+		delete [] utf_content;
+		utf_content = NULL;
+		}*/
+ 		std::string temp_msg;
+ 		os<<"<ToUserName><![CDATA["<<from_user.c_str()<<"]]></ToUserName>"
+ 		  <<"<FromUserName><![CDATA["<<to_user.c_str()<<"]]></FromUserName>"
+ 		  <<"<CreateTime>"<<time(NULL)<<"</CreateTime>"
+ 		  <<"<MsgType><![CDATA["<<welnews.c_str()<<"]]></MsgType>"
+ 		  <<"<ArticleCount>2</ArticleCount><Articles>";
+ 		os<<"<item>";
+ 		HttpMigMusicWebFM(temp_msg);
+ 		os<<temp_msg.c_str();
+ 		os<<"</item>";
+ 		os<<"</Articles><FuncFlag>1</FuncFlag></xml>";
+ 		content = os.str();
+ 		MIG_DEBUG(USER_LEVEL,"%s",content.c_str());
+ 		char* utf_content = NULL;
+ 		size_t utf_content_size = 0;
+ 		std::string str_utf8_content;
+ 		base::BasicUtil::GB2312ToUTF8(content.c_str(),content.length(),
+ 			                          &utf_content,&utf_content_size);
+ 		str_utf8_content.assign(utf_content,utf_content_size);
+ 		content_ = utf_content;
+ 		if (utf_content){
+ 			delete [] utf_content;
+ 			utf_content = NULL;
+ 		}
 	}
 }
 
@@ -1270,4 +1298,20 @@ WXInfoEngine::HttpGetDoubanMusicInfo(std::string& content,int32 channel){
 	r = http.GetContent(content);
 	return r;
 }
+
+void WXInfoEngine::HttpMigMusicWebFM(std::string& msg){
+	std::stringstream os;
+	std::string title = "Test";
+	std::string description = "test descr";
+	std::string pic = "http://42.121.14.108/wx/1.jpg";
+	std::string url = "http://mp.weixin.qq.com/mp/appmsg/show?__biz=MjM5ODgzNTUyMQ==&appmsgid=10000171&itemidx=1&sign=3f906a66b1655dc8d83227da39b37eee#wechat_redirect";
+
+	os<<"<Title><![CDATA["<<title.c_str()<<"]]></Title>"
+		<<"<Description><![CDATA["
+		<<description.c_str()<<"]]></Description>"
+		<<"<PicUrl><![CDATA["<<pic.c_str()<<"]]></PicUrl>"
+		<<"<Url><![CDATA["<<url.c_str()<<"]]></Url>";
+	msg = os.str();
+}
+
 }

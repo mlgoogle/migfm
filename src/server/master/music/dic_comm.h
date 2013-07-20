@@ -2,6 +2,7 @@
 #define _MASTER_PLUGIN_MUSIC_MGR_DIC_COMM_H__
 #include "storage/storage.h"
 #include "basic/basic_info.h"
+#include "basic/radom_in.h"
 #include <list>
 #include <vector>
 
@@ -21,9 +22,11 @@ public:
 	static bool GetMusicMapRadom(const std::string& art_name,std::string& song_id);
 
 	static bool GetMusicInfos(const std::string& key,std::string& music_infos);
-
 private:
-	static std::list<base::ConnAddr>  addrlist_;
+	static void SetRadomNum();
+private:
+	static std::list<base::ConnAddr>   addrlist_;
+	static base::MigRadomIn*              radom_num_;
 };
 
 class MemComm{

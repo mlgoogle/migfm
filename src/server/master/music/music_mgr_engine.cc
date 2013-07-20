@@ -37,16 +37,6 @@ MusicMgrEngine::MusicMgrEngine(){
 	std::string get_song_url = "http://121.199.32.88/getmusicurl.ashx";
 	get_song_engine_->Init(get_song_url);
 
-	std::string name = "hello world";
-	std::string b64_name;
-	std::string deb64_name;
-
-	Base64Encode(name,&b64_name);
-	LOG_DEBUG2("b64_name[%s]",b64_name.c_str());
-
-	Base64Decode(b64_name,&deb64_name);
-	LOG_DEBUG2("deb64_name[%s]",deb64_name.c_str());
-
 }
 
 MusicMgrEngine::~MusicMgrEngine(){
@@ -113,11 +103,27 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetDescriptionWord(socket,packet);
 	}else if (type=="getmssong"){
 		GetMoodSceneWordSong(socket,packet);
+	}else if (type=="getsongid"){
+		GetWXMusicInfo(socket,packet);
 	}
 
     return true;
 }
 
+
+bool MusicMgrEngine::GetWXMusicInfo(const int socket, 
+									const packet::HttpPacket &packet){
+	packet::HttpPacket pack = packet;
+	std::string songid;
+	bool r = pack.GetAttrib(SONGID,songid);
+	if (!r){
+		LOG_ERROR("get SONGID error");
+		return false;
+	}
+
+	return GetMusicInfos(socket,songid);
+
+}
 
 bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 										  const packet::HttpPacket& packet){
@@ -168,16 +174,21 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	MIG_DEBUG(USER_LEVEL,"artist[%s] title[%s]",smi.artist().c_str(),
 		smi.title().c_str());
 
-	r = get_song_engine_->GetSongInfo(smi.artist(),smi.title(),
-		                          smi.album_title(),content_url);
-	if (!r)
-		return true;
+	//if (mode=="mm"){
+		storage::DBComm::GetMusicUrl(smi.id(),content_url);
+// 	}else{
+// 	    r = get_song_engine_->GetSongInfo(smi.artist(),smi.title(),
+// 	                          smi.album_title(),content_url);
+// 	    if (!r)
+// 		  return true;
+// 	}
+	
 
 	smi.set_url(content_url);
 	Base64Decode(smi.title(),&b64title);
 	Base64Decode(smi.artist(),&b64artist);
 	Base64Decode(smi.album_title(),&b64album);
-	os1<<"\"word\":[{";
+	os1<<"\"song\":[{";
 	os1<<"\"id\":\""<<smi.id().c_str()
 		<<"\",\"title\":\""<<b64title.c_str()
 		<<"\",\"artist\":\""<<b64artist.c_str()
@@ -187,7 +198,7 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 		<<"\",\"pic\":\""<<smi.pic_url().c_str()
 		<<"\",\"like\":\"0\"}]";
 	result = os1.str();
-	status = "0";
+	status = "1";
 	msg = "0";
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
 	LOG_DEBUG2("[%s]",result_out.c_str());
@@ -224,18 +235,24 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 
 	if (word_list.size()==0)
 		return true;
-	status = "0";
+	status = "1";
 	msg = "0";
 	os<<"\"word\":[{";
 	std::list<base::WordAttrInfo>::iterator it = word_list.begin();
-	os<<"\"typeid\":\""<<(*it).id().c_str()
-		<<"\",\"name\":\""<<(*it).name().c_str()<<"\"}";
+	std::string b64word;
+	Base64Decode((*it).name(),&b64word);
+	int32 index = 0;
+	os<<"\"index\":\""<<index<<"\",\"typeid\":\""<<(*it).id().c_str()
+		<<"\",\"name\":\""<<b64word.c_str()<<"\"}";
 	word_list.pop_front();
-  
+	
 	while (word_list.size()>0){
 		base::WordAttrInfo dec_word = word_list.front();
-		os<<",{\"typeid\":\""<<dec_word.id().c_str()
-			<<"\",\"name\":\""<<dec_word.name().c_str()<<"\"}";
+		std::string b64word;
+		index++;
+		Base64Decode(dec_word.name(),&b64word);
+		os<<",{\"index\":\""<<index<<"\",\"typeid\":\""<<dec_word.id().c_str()
+			<<"\",\"name\":\""<<b64word.c_str()<<"\"}";
 		word_list.pop_front();
 	}
 
@@ -266,9 +283,9 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 	 result = "1";
 	 music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
 	 //
-	 status = "0";
+	 status = "1";
 	 msg = "0";
-	 mcm->IsTimeMusiChannelInfos(channel);
+	// mcm->IsTimeMusiChannelInfos(channel);
 	 mcm->IsLessMuciChannelInfos(channel,3);
 	 mcm->GetMusicChannelInfos(atol(channel.c_str()),result);
 	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
@@ -283,7 +300,7 @@ bool MusicMgrEngine::GetMusicChannel(const int socket,
 	 std::string num;
 	 std::stringstream os;
 	 std::string result_out = "0";
-	 std::string status = "0";
+	 std::string status = "1";
 	 std::string msg = "0";
 	 std::string result;
 	 music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
@@ -301,7 +318,63 @@ bool MusicMgrEngine::GetMusicChannel(const int socket,
 	 return true;
 }
 
+bool MusicMgrEngine::GetMusicInfos(const int socket,const std::string& songid){
+	std::stringstream os;
+	std::stringstream os1;
+	std::string result_out;
+	std::string status;
+	std::string msg;
+	std::string result;
+	std::string mode;
+	std::string wordid;
+	std::string dec;
+	std::string dec_id;
+	std::string dec_word;
+	std::string music_info;
+	std::string content_url;
+	base::MusicInfo smi;
+	std::string b64title;
+	std::string b64artist;
+	std::string b64album;
+	bool r = false;
 
+	r = storage::RedisComm::GetMusicInfos(songid,music_info);
+
+	if (!r)
+		return false;
+
+	r = smi.UnserializedJson(music_info);
+	if (!r)
+		return false;
+	MIG_DEBUG(USER_LEVEL,"artist[%s] title[%s]",smi.artist().c_str(),
+		smi.title().c_str());
+
+	storage::DBComm::GetWXMusicUrl(smi.id(),content_url,dec,dec_id,dec_word);
+
+	smi.set_url(content_url);
+	Base64Decode(smi.title(),&b64title);
+	Base64Decode(smi.artist(),&b64artist);
+	Base64Decode(smi.album_title(),&b64album);
+	os1<<"\"song\":[{";
+	os1<<"\"id\":\""<<smi.id().c_str()
+		<<"\",\"title\":\""<<b64title.c_str()
+		<<"\",\"artist\":\""<<b64artist.c_str()
+		<<"\",\"url\":\""<<smi.url().c_str()
+		<<"\",\"pub_time\":\""<<smi.pub_time().c_str()
+		<<"\",\"album\":\""<<b64album.c_str()
+		<<"\",\"pic\":\""<<smi.pic_url().c_str()
+		<<"\",\"like\":\"0\"}]";
+	os1<<",\"mode\":\""<<dec.c_str()
+		<<"\",\"wordid\":\""<<dec_id.c_str()<<"\",\"name\":\""
+		<<dec_word.c_str()<<"\"";
+	result = os1.str();
+	status = "1";
+	msg = "0";
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
 
 
 

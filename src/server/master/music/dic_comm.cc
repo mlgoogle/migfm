@@ -5,12 +5,19 @@
 namespace storage{
 
 std::list<base::ConnAddr>  RedisComm::addrlist_;
+base::MigRadomIn* RedisComm::radom_num_ = NULL;
 void RedisComm::Init(std::list<base::ConnAddr>& addrlist){
 	addrlist_ = addrlist;
+	radom_num_ = new base::MigRadomIn();
+	base::SysRadom::InitRandom();
 }
 
 void RedisComm::Dest(){
-
+	if (radom_num_){
+		delete radom_num_;
+		radom_num_ = NULL;
+	}
+	base::SysRadom::DeinitRandom();
 }
 
 base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
@@ -62,8 +69,9 @@ bool RedisComm::GetMusicMapRadom(const std::string &art_name,
 	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
 	if (redis_engine_==NULL)
 		return true;
-
-	r = redis_engine_->GetHashRadomElement(art_name.c_str(),&value,&value_len);
+	int num = radom_num_->GetPrize();
+	//int num = base::SysRadom::GetRandomID();
+	r = redis_engine_->GetHashRadomElement(art_name.c_str(),&value,&value_len,num);
 	if (r){
 	 song_id.assign(value,value_len-1);
 	 if (value){

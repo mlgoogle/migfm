@@ -13,7 +13,7 @@ typedef GURL            MIG_URL;
 typedef std::string     MIG_URL;
 #endif
 
-namespace music_logic{
+namespace wxinfo{
 class HttpResponse{
 public:
     HttpResponse(const MIG_URL& url);

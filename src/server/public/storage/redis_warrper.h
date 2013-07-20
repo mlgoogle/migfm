@@ -34,6 +34,7 @@ int RedisDelValue(warrper_redis_context_t* context,
 							
 int RedisPingRedis(warrper_redis_context_t* context);
 
+int RedisClose(warrper_redis_context_t* context);
 
 int RedisAddHashElement(warrper_redis_context_t* context,const char* hash_name,
 						const char* key,const size_t key_len,

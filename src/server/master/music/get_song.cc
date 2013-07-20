@@ -30,21 +30,27 @@ void SoGouGetSongImpl::Init(std::string& song_url){
 }
 
 bool SoGouGetSongImpl::GetSongInfo(const std::string& artist,const std::string& title,
-									 const std::string album,std::string& song_url){
+									 const std::string album,std::string& song_url,
+									 int flag/* = 1*/){
 	std::string key;
 	std::stringstream s_key;
 	key = artist+title;
 	bool r = false;
 	std::string b64artist;
 	std::string b64title;
-	Base64Decode(artist,&b64artist);
-	Base64Decode(title,&b64title);
-	LOG_DEBUG2("b64artist[%s]",b64artist.c_str());
-	LOG_DEBUG2("b64title[%s]",b64title.c_str());
-	s_key<<"keys="<<b64artist.c_str()<<b64title.c_str();
+	if(flag){
+	   Base64Decode(artist,&b64artist);
+	   Base64Decode(title,&b64title);
+	   LOG_DEBUG2("b64artist[%s]",b64artist.c_str());
+	   LOG_DEBUG2("b64title[%s]",b64title.c_str());
+	   s_key<<"keys="<<b64artist.c_str()<<" "<<b64title.c_str();
+	}else{
+		s_key<<"keys="<<artist.c_str()<<" "<<title.c_str();
+	}
 	key = s_key.str();
+    LOG_DEBUG2("%s",song_url.c_str());
 	r = HttpGetSongInfo(key,song_url);
-	MIG_DEBUG(USER_LEVEL,"%s",song_url.c_str());
+	
 	if (song_url=="0")
 		r = false;
 	return r;

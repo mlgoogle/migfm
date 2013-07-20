@@ -133,6 +133,8 @@ private:
 
 	bool HttpGetDoubanMusicInfo(std::string& content,int32 channel);
 
+	void HttpMigMusicWebFM(std::string& msg);
+
 public: 
     static WXInfoEngine* GetEngine();
     static void  FreeEngine();
