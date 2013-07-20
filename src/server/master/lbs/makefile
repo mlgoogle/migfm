@@ -24,7 +24,9 @@ INCLUDE_PATHS = -I./ -I../core -I../../public/ -I../../../third_party/hiredis/ \
 
 ## 库
 LINK_PATHS = -L./ -L/usr/lib64/mysql -L/usr/local/lib
-LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil libhiredis.a
+LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil libhiredis.a \
+	-lexpat -lrt -lpthread -ldl -liconv \
+	../../lib/libbreakpad_client.a ../../lib/libhiredis.a
 
 ##3rd
 THIRD_PATH = 
@@ -37,7 +39,8 @@ LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 all: clean output delete-temp-file
 output:	main.o mig_log.o http_response.o baidu_lbs_connector.o redis_connector.o \
 	json_reader.o json_value.o json_writer.o lbs_logic.o \
-	storage.o redis_storage_impl.o redis_warrper.o basic_info.o
+	storage.o redis_storage_impl.o redis_warrper.o basic_info.o constants.o basic_util.o \
+	dic_comm.o logic_comm.o thread_handler.o http_packet.o basictypes.o config.o
 	$(LINK)
 
 clean:
@@ -84,6 +87,30 @@ storage.o:
 
 redis_storage_impl.o:
 	$(COMPILE) ../../public/storage/redis_storage_impl.cc
+
+dic_comm.o:
+	$(COMPILE) ./dic_comm.cc
+
+logic_comm.o:
+	$(COMPILE) ./logic_comm.cc
+
+thread_handler.o:
+	$(COMPILE) ./thread_handler.cc
+
+http_packet.o:
+	$(COMPILE) ./../../public/basic/http_packet.cc
+
+basictypes.o:
+	$(COMPILE) ./../../public/basic/basictypes.cc
+
+config.o:
+	$(COMPILE) ./../../public/config/config.cc
+
+constants.o:
+	$(COMPILE) ./../../public/basic/constants.cc
+
+basic_util.o:
+	$(COMPILE) ./../../public/basic/basic_util.cc
 
 redis_warrper.o:
 	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ../../public/storage/redis_warrper.c

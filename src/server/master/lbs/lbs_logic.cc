@@ -1,15 +1,18 @@
 /*
  * lbs_logic.cc
+
  *
  *  Created on: 2013-7-15
  *      Author: huaiyu
  */
-
+#include <string>
+#include <vector>
 #include "lbs_logic.h"
 #include "json/json.h"
 #include "log/mig_log.h"
-#include <string>
-#include <vector>
+#include "config/config.h"
+#include "logic_comm.h"
+#include "dic_comm.h"
 
 namespace {
 int SplitStringChr( const char *str, const char *char_set,
@@ -115,8 +118,7 @@ int LBSLogic::SearchNearby(double longitude, double latitude, uint32 radius,
 }
 
 bool LBSLogic::Init() {
-	redis_conn_.Connect();
-	return true;
+
 }
 
 bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int len) {
@@ -254,12 +256,21 @@ bool LBSLogic::OnMsgUnknown(packet::HttpPacket& packet, Json::Value &result,
 }
 
 LBSLogic::LBSLogic() {
-	// TODO Auto-generated constructor stub
+	bool r = false;
+	std::string path = DEFAULT_CONFIG_PATH;
+	ThreadKey::InitThreadKey();
+	config::FileConfig* config = config::FileConfig::GetFileConfig();
+	if(config==NULL)
+		return;
 
+	r = config->LoadConfig(path);
+	//storage::DBComm::Init(config->mysql_db_list_);
+	//storage::MemComm::Init(config->mem_list_);
+	storage::RedisComm::Init(config->redis_list_);
 }
 
 LBSLogic::~LBSLogic() {
-	// TODO Auto-generated destructor stub
+	ThreadKey::DeinitThreadKey ();
 }
 
 int LBSLogic::SendFull(int socket, const char *buffer, size_t nbytes){

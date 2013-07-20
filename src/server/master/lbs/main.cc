@@ -79,7 +79,7 @@ static handler_t on_connection(struct server *srv,int fd,void *pd,int len)
 static handler_t on_read(struct server *srv,int fd,void *pd,int len)
 {
 	MIG_DEBUG(USER_LEVEL, "recv data:%s", (char *)pd);
-
+	mig_lbs::LBSLogic::GetInstance()->OnMsgRead(srv, fd, pd, len);
 
 	return HANDLER_GO_ON;
 }

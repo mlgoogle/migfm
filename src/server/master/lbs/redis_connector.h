@@ -18,8 +18,7 @@ namespace mig_lbs {
 
 class RedisConnector {
 public:
-	bool Connect();
-	bool IsConnected() const { return NULL != redis_; }
+	//bool Connect(std::list<base::ConnAddr> &addrlist);
 
 	bool BindUserPOI(int64 user_id, int64 poi_id);
 	int64 FindUserPOIID(int64 user_id);
@@ -28,8 +27,6 @@ public:
 public:
 	RedisConnector();
 	~RedisConnector();
-
-	base_storage::DictionaryStorageEngine *redis_;
 };
 
 } /* namespace mig_lbs */
