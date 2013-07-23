@@ -189,19 +189,40 @@ WXInfoEngine::ProcessMsg(WXPacket& msg){
 </xml>
 */
 
+void
+WXInfoEngine::HttpNewArticle(std::string& to_user,std::string& from_user){
+	std::string temp_msg;
+	std::stringstream os;
+	os<<"<xml><ToUserName><![CDATA["<<from_user.c_str()<<"]]></ToUserName>"
+		<<"<FromUserName><![CDATA["<<to_user.c_str()<<"]]></FromUserName>"
+		<<"<CreateTime>"<<time(NULL)<<"</CreateTime>"
+		<<"<MsgType><![CDATA[news]]></MsgType>"
+		<<"<ArticleCount>2</ArticleCount><Articles>";
+	os<<"<item>";
+	NewArticle(1,temp_msg);
+	os<<temp_msg.c_str();
+	os<<"</item>";
+	os<<"<item>";
+	MigFMShow(temp_msg,0);
+	os<<temp_msg.c_str();
+	os<<"</item>";
+	os<<"</Articles><FuncFlag>1</FuncFlag></xml>";
+	content_ = os.str();
+	MIG_DEBUG(USER_LEVEL,"%s",content_.c_str());
+}
+
 void 
 WXInfoEngine::ProcessEventText(WXPacket& msg){
 	std::string str_event;
 	std::string to_user;
 	std::string from_user;
 	std::stringstream os;
-	std::string  welnews = "欢迎关注";
 	msg.GetAttrib(ToUserName,to_user);
 	msg.GetAttrib(FromUserName,from_user);
 	msg.GetAttrib(Event,str_event);
 	std::string content;
 	if (str_event=="subscribe"){
-		content="MIG音乐助手是以推荐为主的微信应用,而且在移动设备上不需要装任何音乐app,"
+		/*content="MIG音乐助手是以推荐为主的微信应用,而且在移动设备上不需要装任何音乐app,"
 		"便可想听你想要的音乐:\n"
 		"1,有20个音乐频道,每个音乐频道将为你推荐不同风格的音乐.按发送字符\"n\"后,"
 		"系统会推荐一首音乐,提供试听."
@@ -215,9 +236,9 @@ WXInfoEngine::ProcessEventText(WXPacket& msg){
 		"如有问题和建议可微信直接回复该号码,我们即可马上收到."
 		"感谢大家内测的支持,下个月将发布正式版,并加入心情推荐和场景推荐\n";
 		
-		/*char* utf_content = NULL;
+		char* utf_content = NULL;
 		size_t utf_content_size = 0;
-		std::string str_utf8_content;*/
+		std::string str_utf8_content;
 		base::BasicUtil::GB2312ToUTF8(content.c_str(),content.length(),&utf_content,&utf_content_size);
 		str_utf8_content.assign(utf_content,utf_content_size);
 		MIG_DEBUG(USER_LEVEL,"%s",str_utf8_content.c_str());
@@ -227,29 +248,35 @@ WXInfoEngine::ProcessEventText(WXPacket& msg){
 		utf_content = NULL;
 		}*/
  		std::string temp_msg;
- 		os<<"<ToUserName><![CDATA["<<from_user.c_str()<<"]]></ToUserName>"
+ 		os<<"<xml><ToUserName><![CDATA["<<from_user.c_str()<<"]]></ToUserName>"
  		  <<"<FromUserName><![CDATA["<<to_user.c_str()<<"]]></FromUserName>"
  		  <<"<CreateTime>"<<time(NULL)<<"</CreateTime>"
- 		  <<"<MsgType><![CDATA["<<welnews.c_str()<<"]]></MsgType>"
+ 		  <<"<MsgType><![CDATA[news]]></MsgType>"
  		  <<"<ArticleCount>2</ArticleCount><Articles>";
  		os<<"<item>";
- 		HttpMigMusicWebFM(temp_msg);
- 		os<<temp_msg.c_str();
+  		MigFMShow(temp_msg,1);
+  		os<<temp_msg.c_str();
+  		os<<"</item>";
+  		os<<"<item>";
+		NewArticle(0,temp_msg);
+		os<<temp_msg.c_str();
  		os<<"</item>";
+
  		os<<"</Articles><FuncFlag>1</FuncFlag></xml>";
- 		content = os.str();
- 		MIG_DEBUG(USER_LEVEL,"%s",content.c_str());
- 		char* utf_content = NULL;
- 		size_t utf_content_size = 0;
- 		std::string str_utf8_content;
- 		base::BasicUtil::GB2312ToUTF8(content.c_str(),content.length(),
- 			                          &utf_content,&utf_content_size);
- 		str_utf8_content.assign(utf_content,utf_content_size);
- 		content_ = utf_content;
- 		if (utf_content){
- 			delete [] utf_content;
- 			utf_content = NULL;
- 		}
+ 		content_ = os.str();
+		MIG_DEBUG(USER_LEVEL,"%s",content_.c_str());
+//  		size_t utf_content_size = 0;
+//  		std::string str_utf8_content;
+// 		char* utf_content = NULL;
+//  		base::BasicUtil::GB2312ToUTF8(content.c_str(),content.length(),
+//  			                          &utf_content,&utf_content_size);
+//  		str_utf8_content.assign(utf_content,utf_content_size);
+//  		content_ = content;
+// 		MIG_DEBUG(USER_LEVEL,"%s",content_.c_str());
+//  		if (utf_content){
+//  			delete [] utf_content;
+//  			utf_content = NULL;
+//  		}
 	}
 }
 
@@ -275,13 +302,15 @@ WXInfoEngine::ProcessMsgText(WXPacket& msg){
 	}else if (content_s=="my"){
 		SettingChannel(to_user,from_user,7);
 	}else if(content_s=="class"){
-                SettingChannel(to_user,from_user,17);
-        }else if(content_s=="hy"){
-                SettingChannel(to_user,from_user,0);
-        }else if(content_s=="rock"){
-                SettingChannel(to_user,from_user,6);
-        }else if (content_s[0]=='r'){
+        SettingChannel(to_user,from_user,17);
+    }else if(content_s=="hy"){
+        SettingChannel(to_user,from_user,0);
+    }else if(content_s=="rock"){
+        SettingChannel(to_user,from_user,6);
+    }else if (content_s[0]=='r'){
 		RecommendationMusic(to_user,from_user,content_s);
+	}else if (content_s=="m"){
+		HttpNewArticle(to_user,from_user);
 	}else if (content_s=="lp1"||content_s=="lp2"||content_s=="lp3"||
 		      content_s=="lp4"||content_s=="lp5"||content_s=="lp6"||
 			  content_s=="lp7"||content_s=="lp8"){
@@ -1299,19 +1328,63 @@ WXInfoEngine::HttpGetDoubanMusicInfo(std::string& content,int32 channel){
 	return r;
 }
 
-void WXInfoEngine::HttpMigMusicWebFM(std::string& msg){
+void WXInfoEngine::HttpMigPicText(const std::string& title,
+								  const std::string& decs,
+								  const std::string& pic_url,
+								  const std::string&url,
+								  std::string& msg,const int flag){
 	std::stringstream os;
-	std::string title = "Test";
-	std::string description = "test descr";
-	std::string pic = "http://42.121.14.108/wx/1.jpg";
-	std::string url = "http://mp.weixin.qq.com/mp/appmsg/show?__biz=MjM5ODgzNTUyMQ==&appmsgid=10000171&itemidx=1&sign=3f906a66b1655dc8d83227da39b37eee#wechat_redirect";
+// 	std::string title = "Mig.FM 听对的音乐 遇见对的人";
+// 	std::string description = "最懂你的FM,推荐推荐+心情推荐+频道推荐,定格属于你的音乐属性,发现属于你的音乐基因,点击阅读全文,开启你的音乐之旅";
+// 	std::string pic = "http://42.121.14.108/wx/migfm.jpg";
+// 	std::string url = "121.199.32.88";
 
 	os<<"<Title><![CDATA["<<title.c_str()<<"]]></Title>"
 		<<"<Description><![CDATA["
-		<<description.c_str()<<"]]></Description>"
-		<<"<PicUrl><![CDATA["<<pic.c_str()<<"]]></PicUrl>"
+		<<decs.c_str()<<"]]></Description>"
+		<<"<PicUrl><![CDATA["<<pic_url.c_str()<<"]]></PicUrl>"
 		<<"<Url><![CDATA["<<url.c_str()<<"]]></Url>";
-	msg = os.str();
+	if (flag){//UTF8
+		size_t utf_content_size = 0;
+		std::string str_utf8_content;
+		char* utf_content = NULL;
+		base::BasicUtil::GB2312ToUTF8(os.str().c_str(),os.str().length(),
+			&utf_content,&utf_content_size);
+		str_utf8_content.assign(utf_content,utf_content_size);
+		msg = str_utf8_content;
+		if (utf_content){
+			delete [] utf_content;
+			utf_content = NULL;
+		}
+	}else
+		msg = os.str();
+}
+
+void WXInfoEngine::MigFMShow(std::string &msg,const int flag){
+ 	std::string title;
+	if (flag){
+		title = "Mig.FM 听对的音乐 遇见对的人 场景推荐+心情推荐+频道推荐";
+	}else{
+		title = "Mig.FM 听对的音乐 遇见对的人,定格你的音乐属性,发现你的音乐基因 场景推荐+心情推荐+频道推荐";
+	}
+ 	std::string description = "最懂你的FM,听对的音乐 遇见对的人,定格属于你的音乐属性,发现属于你的音乐基因,点击阅读全文,开启你的音乐之旅";
+ 	std::string pic = "http://42.121.14.108/wx/migfm.jpg";
+ 	std::string url = "121.199.32.88";
+	HttpMigPicText(title,description,pic,url,msg);
+}
+
+void WXInfoEngine::NewArticle(const int flag,std::string &msg){
+	std::string title;
+	std::string desc;
+	std::string picurl;
+	std::string url;
+	bool r = false;
+	r = base_storage::MysqlSerial::GetDayRecommend(flag,title,desc,picurl,url);
+	if (!r)
+		return;
+	HttpMigPicText(base64_decode(title),base64_decode(desc),
+		          base64_decode(picurl),base64_decode(url),msg,0);
+
 }
 
 }

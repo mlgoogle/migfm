@@ -354,4 +354,34 @@ bool MysqlSerial::GetMusicInfos(std::list<base::MusicUsrInfo>& music_list){
    return true;
 }
 
+bool MysqlSerial::GetDayRecommend(const int flag,std::string& title,std::string& desc, 
+								  std::string& pic,std::string& url){
+	std::stringstream os;
+	bool r = false;
+	uint32 num;
+	db_row_t* db_rows;
+	MYSQL_ROW rows;
+	if (flag)//1，获取歌曲 0，获取文章地址
+	os<<"select title,description,picurl,url from migfm_wx_dayrecommend order by id desc limit 0,1;";
+	else
+		os<<"select title,description,picurl,article from migfm_wx_dayrecommend order by id desc limit 0,1;";
+	r = mysql_db_engine_->SQLExec(os.str().c_str());
+	if(!r){
+	  MIG_ERROR(USER_LEVEL,"sqlexec error");
+	  return r;
+	}
+
+	num = mysql_db_engine_->RecordCount();
+	if(num>0){
+	  while(rows = (*(MYSQL_ROW*)(mysql_db_engine_->FetchRows())->proc)){
+		  title = rows[0];
+		  desc = rows[1];
+		  pic = rows[2];
+		  url = rows[3];
+		  return true;
+	  }
+	}
+	return false;
+}
+
 }

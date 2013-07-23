@@ -46,8 +46,11 @@ public:
 
 	static bool GetMusicAll(std::list<base::MusicInfo >& music_info);
 
-	static bool GetWXMusicInfo(const std::string& id,std::string& title,std::string& desc,
-		                       std::string& url);
+	static bool GetWXMusicInfo(const std::string& id,std::string& title,
+		                       std::string& desc,std::string& url);
+
+	static bool GetDayRecommend(const int flag,std::string& title,std::string& desc,
+		                        std::string& pic,std::string& url);
 
 #if defined (MIG_SSO)
     static bool CheckUserPassword(const char* username,const char* password);

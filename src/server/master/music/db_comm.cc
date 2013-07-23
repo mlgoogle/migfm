@@ -131,15 +131,19 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 	//mood scens
 	int current = time(NULL)%2;
 
-	if (current==0){//mood
-		dec="mm";
-		os.str("");
-		os<<"select a.name,typeid from migfm_mood_word as a join migfm_mood as b where a.typeid = b.id  ORDER BY RAND() limit 1;";
-	}else{//scens
-		dec="ms";
-		os.str("");
-		os<<"select a.name,typeid from migfm_scene_word as a join migfm_scene as b where a.typeid = b.id  ORDER BY RAND() limit 1;";
-	}
+	//推广用 用于心情1
+	dec = "mm";
+	os.str("");
+	os<<" select name,typeid from migfm_mood_word where typeid=1 ORDER BY RAND() limit 1;";
+// 	if (current==0){//mood
+// 		dec="mm";
+// 		os.str("");
+// 		os<<"select a.name,typeid from migfm_mood_word as a join migfm_mood as b where a.typeid = b.id  ORDER BY RAND() limit 1;";
+// 	}else{//scens
+// 		dec="ms";
+// 		os.str("");
+// 		os<<"select a.name,typeid from migfm_scene_word as a join migfm_scene as b where a.typeid = b.id  ORDER BY RAND() limit 1;";
+// 	}
 
 	MIG_DEBUG(USER_LEVEL,"%s",os.str().c_str());
 	r = engine->SQLExec(os.str().c_str());

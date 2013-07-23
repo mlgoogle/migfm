@@ -185,6 +185,7 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	
 
 	smi.set_url(content_url);
+	smi.set_music_time(0);
 	Base64Decode(smi.title(),&b64title);
 	Base64Decode(smi.artist(),&b64artist);
 	Base64Decode(smi.album_title(),&b64album);
@@ -195,6 +196,7 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 		<<"\",\"url\":\""<<smi.url().c_str()
 		<<"\",\"pub_time\":\""<<smi.pub_time().c_str()
 		<<"\",\"album\":\""<<b64album.c_str()
+		<<"\",\"time\":\""<<smi.music_time()
 		<<"\",\"pic\":\""<<smi.pic_url().c_str()
 		<<"\",\"like\":\"0\"}]";
 	result = os1.str();

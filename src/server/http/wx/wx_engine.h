@@ -58,6 +58,7 @@ private:
 	void PackageTextMsg(std::string& to_user,std::string& from_user,
 		                std::string& content);
 
+	void HttpNewArticle(std::string& to_user,std::string& from_user);
 	void PackageMusicMsg(const std::string& to_user,
 						const std::string& from_user,
 						const std::string& title,
@@ -133,7 +134,17 @@ private:
 
 	bool HttpGetDoubanMusicInfo(std::string& content,int32 channel);
 
-	void HttpMigMusicWebFM(std::string& msg);
+	void HttpMigPicText(const std::string& title,const std::string& decs,
+		                const std::string& pic_url,const std::string&url,
+						std::string& msg,const int flag = 1);
+
+	void MigFMShow(std::string& msg,const int flag);
+
+	void NewArticle(const int flag,std::string& msg);
+
+// 	void UserReadMe(std::string& msg);
+// 
+// 	void NetUserMusic(std::string& msg);
 
 public: 
     static WXInfoEngine* GetEngine();
