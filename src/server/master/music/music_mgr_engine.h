@@ -52,6 +52,10 @@ private:
 
 	bool GetWXMusicInfo(const int socket,const packet::HttpPacket& packet);
 
+	bool GetMoodMap(const int socket,const packet::HttpPacket& packet);
+
+	bool GetMoodParent(const int socket,const packet::HttpPacket& packet);
+
 	bool GetMusicInfos(const int socket,const std::string& songid);
 
 	bool GetOneMusicInfo(const std::string& song_id,base::MusicInfo& mi);

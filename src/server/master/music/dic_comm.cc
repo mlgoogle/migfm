@@ -85,6 +85,36 @@ bool RedisComm::GetMusicMapRadom(const std::string &art_name,
 	return r;
 }
 
+//获取心绪图
+bool RedisComm:: GetUserMoodMap(const std::string uid,std::string& mood_map){
+	char* value;
+	size_t value_len = 0;
+	//key uid_mmp
+	std::string temp_key = uid;
+	temp_key.append("_mmp");
+	//value
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	//value 以协议json格式存储
+	//{"day":"1","typeid:"1"},{"day":"2","typeid:"2"},{"day":"3","typeid:"1"},{"day":"4","typeid:"3"},{"day":"5","typeid:"2"},{"day":"6","typeid:"5"},{"day":"7","typeid:"6"},
+
+	if (redis_engine_==NULL)
+		return true;
+	bool r = redis_engine_->GetValue(temp_key.c_str(),temp_key.length(),
+		                             &value,&value_len);
+	if (r){
+		mood_map.assign(value,value_len-1);
+		if (value){
+			free(value);
+			value = NULL;
+		}
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",temp_key.c_str());
+	}
+	return r;
+}
+
+
 bool RedisComm::GetMusicInfos(const std::string& key,std::string& music_infos){
 	char* value;
 	size_t value_len = 0;

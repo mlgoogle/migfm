@@ -105,11 +105,92 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMoodSceneWordSong(socket,packet);
 	}else if (type=="getsongid"){
 		GetWXMusicInfo(socket,packet);
+	}else if (type=="getmmap"){
+		GetMoodMap(socket,packet);
+	}else if (type=="getmparent"){
+		GetMoodParent(socket,packet);
 	}
-
     return true;
 }
 
+bool MusicMgrEngine::GetMoodParent(const int socket,const packet::HttpPacket& packet){
+	packet::HttpPacket pack = packet;
+	std::string result;
+	std::string result_out;
+	std::string status;
+	std::string msg;
+	bool r =false;
+	std::stringstream os;
+	int32 utf8_flag = 0;
+	int32 index = 0;
+	std::string b64word;
+	std::list<base::WordAttrInfo> word_list;
+	std::list<base::WordAttrInfo>::iterator it;
+	//获取心情词
+	r = storage::DBComm::GetMoodParentWord(word_list);
+	if (!r){
+		status = "1";
+		msg = "心情不存在;";
+		utf8_flag = 1;
+		goto ret;
+	}
+
+	os<<"\"mood\":[{";
+	 it = word_list.begin();
+	Base64Decode((*it).name(),&b64word);
+	os<<"\"typeid\":\""<<(*it).id().c_str()
+		<<"\",\"name\":\""<<b64word.c_str()<<"\"}";
+
+	word_list.pop_front();
+
+	while (word_list.size()>0){
+		base::WordAttrInfo dec_word = word_list.front();
+		index++;
+		Base64Decode(dec_word.name(),&b64word);
+		os<<",{\"typeid\":\""<<dec_word.id().c_str()
+			<<"\",\"name\":\""<<b64word.c_str()<<"\"}";
+		word_list.pop_front();
+	}
+
+	os<<"]";
+	result = os.str();
+	status = "1";
+	msg = "0";
+ret:
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
+
+bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packet){
+	
+	packet::HttpPacket pack = packet;
+	std::string uid;
+	std::string result;
+	std::string result_out;
+	std::string status;
+	std::string msg;
+	int32 utf8_flag = 0;
+	bool r = pack.GetAttrib(UID,uid);
+	if (!r){
+		LOG_ERROR("Get UID Error");
+		status = "1";
+		msg = "用户不存在";
+		utf8_flag = 1;
+	}else{
+		//从redis 里面获取用户心绪图
+		//音乐机器人专门从操作记录里面分析
+		r = storage::RedisComm::GetUserMoodMap(uid,result);
+		status = "1";
+		msg = "0";
+		utf8_flag = 0;
+	}
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
 
 bool MusicMgrEngine::GetWXMusicInfo(const int socket, 
 									const packet::HttpPacket &packet){
@@ -129,6 +210,7 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 										  const packet::HttpPacket& packet){
 	
 	packet::HttpPacket pack = packet;
+	int32 utf8_flag = 0;
 	std::stringstream os;
 	std::stringstream os1;
 	std::string result_out;
@@ -143,20 +225,26 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	std::string b64title;
 	std::string b64artist;
 	std::string b64album;
+	std::string song_id;
 	bool r = pack.GetAttrib(MODE,mode);
 	if (!r){
 		LOG_ERROR("get MODE error");
-		return false;
+		status = "0";
+		msg = "模式不存在";
+		utf8_flag = 1;
+		goto ret;
 	}
 
 	r = pack.GetAttrib(WORDID,wordid);
 	if (!r){
 		LOG_ERROR("get WORDID error");
-		return false;
+		status = "0";
+		msg = "描述不存在";
+		utf8_flag = 1;
+		goto ret;
 	}
 
 	os<<mode<<"_r"<<wordid;
-	std::string song_id;
 	MIG_DEBUG(USER_LEVEL,"map_name:[%s]",os.str().c_str());
 	r = storage::RedisComm::GetMusicMapRadom(os.str(),song_id);
 
@@ -202,7 +290,9 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	result = os1.str();
 	status = "1";
 	msg = "0";
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+	utf8_flag = 0;
+ret:
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
@@ -223,27 +313,37 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 	std::string msg;
 	std::string result;
 	std::string word;
+	int32 utf8_flag = 0;
+	std::string b64word;
+	int32 index = 0;
 	std::list<base::WordAttrInfo> word_list;
+	std::list<base::WordAttrInfo>::iterator it;
 
 	r = pack.GetAttrib(DECWORD,word);
 	if (!r){
 		LOG_ERROR("get DECWORD error");
-		return false;
+		status = "1";
+		msg = "频道不存在";
+		utf8_flag = 1;
+		goto ret;
 	}
 	if (word=="mood")
 		r = storage::DBComm::GetDescriptionWord(word_list,1);
 	else
 		r = storage::DBComm::GetDescriptionWord(word_list,0);
 
-	if (word_list.size()==0)
-		return true;
+	if (word_list.size()==0){
+		status = "1";
+		msg = "没有描述词";
+		utf8_flag = 1;
+		goto ret;
+	}
 	status = "1";
 	msg = "0";
 	os<<"\"word\":[{";
-	std::list<base::WordAttrInfo>::iterator it = word_list.begin();
-	std::string b64word;
+	it = word_list.begin();
+	
 	Base64Decode((*it).name(),&b64word);
-	int32 index = 0;
 	os<<"\"index\":\""<<index<<"\",\"typeid\":\""<<(*it).id().c_str()
 		<<"\",\"name\":\""<<b64word.c_str()<<"\"}";
 	word_list.pop_front();
@@ -261,6 +361,7 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 	os<<"]";
 
 	result = os.str();
+ret:
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
@@ -276,21 +377,25 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 	 std::string msg;
 	 std::string result;
 	 std::string channel;
+	 int32 utf8_flag = 0;
 	 r = pack.GetAttrib(CHANNEL,channel);
 	 if (!r){
 		 LOG_ERROR("get channel error");
-		 return false;
+		 status = "0";
+		 msg = "频道不存在";
+		 utf8_flag = 1;
+	 }else{
+		 status = "1";
+		 result = "1";
+		 music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
+		 msg = "0";
+		 utf8_flag = 0;
+		 // mcm->IsTimeMusiChannelInfos(channel);
+		 mcm->IsLessMuciChannelInfos(channel,3);
+		 mcm->GetMusicChannelInfos(atol(channel.c_str()),result);
 	 }
-	 status = "1";
-	 result = "1";
-	 music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
-	 //
-	 status = "1";
-	 msg = "0";
-	// mcm->IsTimeMusiChannelInfos(channel);
-	 mcm->IsLessMuciChannelInfos(channel,3);
-	 mcm->GetMusicChannelInfos(atol(channel.c_str()),result);
-	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+
+	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	 LOG_DEBUG2("[%s]",result_out.c_str());
 	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
@@ -305,16 +410,21 @@ bool MusicMgrEngine::GetMusicChannel(const int socket,
 	 std::string status = "1";
 	 std::string msg = "0";
 	 std::string result;
+	 int32 utf8_flag = 0;
 	 music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
 	 assert(mcm);
 	 r = pack.GetAttrib(CHANNELNUM,num);
 	 if (!r){
 		 LOG_ERROR("get channel error");
-		 return false;
+		 msg = "频道不存在";
+		 status = "0";
+		 utf8_flag = 1;
+	 }else{
+		 mcm->GetMusicChannel(num,result);
+		 LOG_DEBUG2("[%s]",result.c_str());
+		 utf8_flag = 1;
 	 }
-	 mcm->GetMusicChannel(num,result);
-	 LOG_DEBUG2("[%s]",result.c_str());
- 	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+ 	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
  	 LOG_DEBUG2("[%s]",result_out.c_str());
  	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	 return true;

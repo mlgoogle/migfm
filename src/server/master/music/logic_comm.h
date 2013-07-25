@@ -45,6 +45,7 @@
 #define  MODE               "mode"
 #define  WORDID             "wordid"
 #define  SONGID             "songid"
+#define  UID                "uid"
 
 #define IDENTITY "migfm_identity"
 #define USERINFOS "migfm_user_infos"

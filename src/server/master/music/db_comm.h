@@ -20,7 +20,9 @@ public:
 	static bool GetDescriptionWord(std::list<base::WordAttrInfo>& word_list,int flag);
 	static bool GetMusicUrl(const std::string& song_id,std::string& song_url);
 	static bool GetWXMusicUrl(const std::string& song_id,std::string& song_url,
-		std::string& dec,std::string& dec_id,std::string& dec_word);
+		                      std::string& dec,std::string& dec_id,
+							  std::string& dec_word);
+	static bool GetMoodParentWord(std::list<base::WordAttrInfo>& word_list);
 private:
 #if defined (_DB_POOL_)	
 	static base_storage::DBStorageEngine* CreateConnection(void);

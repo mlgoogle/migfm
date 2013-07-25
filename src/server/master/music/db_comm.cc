@@ -163,6 +163,38 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 	return true;
 }
 
+bool DBComm::GetMoodParentWord(std::list<base::WordAttrInfo>& word_list){
+	std::stringstream os;
+	bool r = false;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	if (engine==NULL){
+		LOG_ERROR("engine error");
+		return true;
+	}
+	base_storage::db_row_t* db_rows;
+	int num;
+	MYSQL_ROW rows = NULL;
+	os<<"select id,name from migfm_mood;";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			//song_url = rows[0];
+			std::string id;
+			std::string name;
+			id = rows[0];
+			name = rows[1];
+			base::WordAttrInfo word_attr(id,name);
+			word_list.push_back(word_attr);
+		}
+	}
+}
+
 bool DBComm::GetMusicUrl(const std::string& song_id,std::string& song_url){
 	std::stringstream os;
 	bool r = false;

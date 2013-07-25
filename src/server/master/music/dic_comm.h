@@ -22,6 +22,9 @@ public:
 	static bool GetMusicMapRadom(const std::string& art_name,std::string& song_id);
 
 	static bool GetMusicInfos(const std::string& key,std::string& music_infos);
+
+	static bool GetUserMoodMap(const std::string uid,std::string& mood_map);
+
 private:
 	static void SetRadomNum();
 private:

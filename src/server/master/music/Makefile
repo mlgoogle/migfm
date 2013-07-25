@@ -38,7 +38,7 @@ LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 all: clean output delete-temp-file
 output:	dic_comm.o logic_comm.o thread_handler.o music_mgr_engine.o \
 	music_mgr_init.o music_cache_mgr.o get_song.o http_response.o thread_lock.o db_comm.o\
-	basic_info.o http_packet.o basictypes.o config.o base64.o \
+	basic_info.o http_packet.o basictypes.o config.o base64.o radom_in.o\
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o storage.o constants.o basic_util.o json_reader.o json_value.o json_writer.o
 	$(LINK)
@@ -86,6 +86,9 @@ basic_info.o:
 
 http_packet.o:
 	$(COMPILE) ./../../public/basic/http_packet.cc
+
+radom_in.o:
+	$(COMPILE) ./../../public/basic/radom_in.cc
 
 basictypes.o:
 	$(COMPILE) ./../../public/basic/basictypes.cc
