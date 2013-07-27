@@ -86,7 +86,7 @@ bool RedisComm::GetMusicMapRadom(const std::string &art_name,
 }
 
 //»ñÈ¡ÐÄÐ÷Í¼
-bool RedisComm:: GetUserMoodMap(const std::string uid,std::string& mood_map){
+bool RedisComm:: GetUserMoodMap(const std::string& uid,std::string& mood_map){
 	char* value;
 	size_t value_len = 0;
 	//key uid_mmp
@@ -136,6 +136,160 @@ bool RedisComm::GetMusicInfos(const std::string& key,std::string& music_infos){
 
 	return r;
 }
+
+bool RedisComm::SetCollectSong(const std::string &uid,const std::string& songid){
+
+	//key:hash-huid_clt
+	//std::stringstream os;
+	std::string os;
+	bool r = false;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	//map
+	//os<<"h"<<uid.c_str()<<"clt";
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+	redis_engine_->AddHashElement(os.c_str(),songid.c_str(),songid.length(),
+		                          songid.c_str(),songid.length());
+	return true;
+}
+
+bool RedisComm::GetCollectSongs(const std::string& uid,std::list<std::string>& song_list){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+	r = redis_engine_->GetHashValues(os.c_str(),os.length(),song_list);
+
+	return r;
+
+}
+
+bool RedisComm::DelCollectSong(const std::string& uid,const std::string& songid){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+
+	return  redis_engine_->DelHashElement(os.c_str(),
+		                                  songid.c_str(),
+										  songid.length());
+}
+
+bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+
+	r = redis_engine_->GetHashElement(os.c_str(),songid.c_str(),songid.length(),
+		&value,&value_len);
+	if (r){
+		if (value){
+			free(value);
+			value = NULL;
+		}
+		return true;
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",songid.c_str());
+	}
+
+	return false;
+}
+
+
+bool RedisComm::SetHateSong(const std::string &uid, const std::string &songid){
+
+	//key: huid_ht
+	std::string os;
+	bool r = false;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+	//map
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("ht");
+
+	redis_engine_->AddHashElement(os.c_str(),songid.c_str(),songid.length(),
+		songid.c_str(),songid.length());
+	return true;
+}
+
+bool RedisComm::DelHateSong(const std::string &uid, const std::string &songid){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("ht");
+
+	return  redis_engine_->DelHashElement(os.c_str(),
+		songid.c_str(),
+		songid.length());
+}
+
+bool RedisComm::IsHateSong(const std::string& uid,const std::string& songid){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	//os<<"h"<<uid.c_str()<<"ht";
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("ht");
+
+	r = redis_engine_->GetHashElement(os.c_str(),songid.c_str(),songid.length(),
+		&value,&value_len);
+	if (r){
+		if (value){
+			free(value);
+			value = NULL;
+		}
+		return true;
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",songid.c_str());
+	}
+
+	return false;
+}
+
 /////////////////////////////////memcahced//////////////////////////////////////
 base_storage::DictionaryStorageEngine* MemComm::engine_ = NULL;
 

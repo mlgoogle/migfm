@@ -45,7 +45,6 @@ static void GetRequestMethod(const char* query){
 	bool r = false;
 	content.assign(query);
 	content.append("&type=getmssong\n");
-	MIG_INFO(USER_LEVEL,"%s",content.c_str());
 	r = net::core_get(0,content.c_str(),content.length(),
 		respone,flag,code);
 	MIG_INFO(USER_LEVEL,"%s",respone.c_str());

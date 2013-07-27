@@ -56,6 +56,14 @@ private:
 
 	bool GetMoodParent(const int socket,const packet::HttpPacket& packet);
 
+	bool PostCollectAndHateSong(const int socket,const packet::HttpPacket& packet,
+		                        const int flag); //1 Collect 0 Hate
+
+	bool DelCollectAndHateSong(const int socket,const packet::HttpPacket& packet,
+		                       const int flag);//1 Collect 0 Hate
+
+	bool GetCllectSongList(const int socket,const packet::HttpPacket& packet);
+
 	bool GetMusicInfos(const int socket,const std::string& songid);
 
 	bool GetOneMusicInfo(const std::string& song_id,base::MusicInfo& mi);

@@ -167,7 +167,6 @@ bool core_get(int /*socket*/, const char *key, size_t key_len,
 			recv_buffer.wunlock(wbuf, 0);
 			return false;
 		}
-
 		recv_buffer.wunlock(wbuf, ret);
 
 		int nread = 0;

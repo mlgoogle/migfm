@@ -46,6 +46,7 @@
 #define  WORDID             "wordid"
 #define  SONGID             "songid"
 #define  UID                "uid"
+#define  NUM                "num"
 
 #define IDENTITY "migfm_identity"
 #define USERINFOS "migfm_user_infos"

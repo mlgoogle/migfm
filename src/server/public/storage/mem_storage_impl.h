@@ -64,6 +64,9 @@ public:
     
     virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list);
 
+	virtual bool GetHashValues(const char* hash_name,const size_t hash_name_len,
+		                       std::list<std::string>& list);
+
 #if defined(MEM_POOL)
 private:
     void MemPoolInit(int32 ini,int32 max);

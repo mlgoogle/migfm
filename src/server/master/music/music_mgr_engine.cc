@@ -109,6 +109,16 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMoodMap(socket,packet);
 	}else if (type=="getmparent"){
 		GetMoodParent(socket,packet);
+	}else if (type=="setcltsong"){
+		PostCollectAndHateSong(socket,packet,1);
+	}else if (type=="getcltsonglist"){
+		GetCllectSongList(socket,packet);
+	}else if (type=="delcltsong"){
+		DelCollectAndHateSong(socket,packet,1);
+	}else if (type=="sethtsong"){
+		PostCollectAndHateSong(socket,packet,0);
+	}else if (type=="delthsong"){
+		DelCollectAndHateSong(socket,packet,0);
 	}
     return true;
 }
@@ -221,11 +231,16 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	std::string wordid;
 	std::string music_info;
 	std::string content_url;
+	std::string num;
 	base::MusicInfo smi;
 	std::string b64title;
 	std::string b64artist;
 	std::string b64album;
 	std::string song_id;
+	int current_num;
+	int flag = 0;
+	std::map<std::string, std::string> songid_map;
+	std::map<std::string, std::string>::iterator it;
 	bool r = pack.GetAttrib(MODE,mode);
 	if (!r){
 		LOG_ERROR("get MODE error");
@@ -244,49 +259,72 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 		goto ret;
 	}
 
+	r = pack.GetAttrib(NUM,num);
+	if (!r){
+		num = "1";
+	}
+
 	os<<mode<<"_r"<<wordid;
 	MIG_DEBUG(USER_LEVEL,"map_name:[%s]",os.str().c_str());
-	r = storage::RedisComm::GetMusicMapRadom(os.str(),song_id);
 
-	if (!r)
-		return false;
+	os1<<"\"song\":[";
+	current_num = atol(num.c_str());
+	/////
+	while(current_num>0){
+		if (flag==0){
+			flag = 1;
+		}else{
+			os1<<",";
+		}
+ret1:
+	    r = storage::RedisComm::GetMusicMapRadom(os.str(),song_id);
+		
+		if (!r)
+			//return false;
+			continue;
 
-	r = storage::RedisComm::GetMusicInfos(song_id,music_info);
+		//是否存在
+		it = songid_map.find(song_id);
+		if (it!=songid_map.end())
+			goto ret1;
 
-	if (!r)
-		return false;
+		songid_map[song_id] = song_id;
+	    r = storage::RedisComm::GetMusicInfos(song_id,music_info);
 
-	r = smi.UnserializedJson(music_info);
-	if (!r)
-		return false;
-	MIG_DEBUG(USER_LEVEL,"artist[%s] title[%s]",smi.artist().c_str(),
-		smi.title().c_str());
+	    if (!r)
+		//return false;
+		    continue;
 
-	//if (mode=="mm"){
-		storage::DBComm::GetMusicUrl(smi.id(),content_url);
-// 	}else{
-// 	    r = get_song_engine_->GetSongInfo(smi.artist(),smi.title(),
-// 	                          smi.album_title(),content_url);
-// 	    if (!r)
-// 		  return true;
-// 	}
+	    r = smi.UnserializedJson(music_info);
+	    if (!r)
+		//return false;
+		    continue;
+
+	    MIG_DEBUG(USER_LEVEL,"artist[%s] title[%s]",smi.artist().c_str(),
+		    smi.title().c_str());
+
+	    storage::DBComm::GetMusicUrl(smi.id(),content_url);
 	
 
-	smi.set_url(content_url);
-	smi.set_music_time(0);
-	Base64Decode(smi.title(),&b64title);
-	Base64Decode(smi.artist(),&b64artist);
-	Base64Decode(smi.album_title(),&b64album);
-	os1<<"\"song\":[{";
-	os1<<"\"id\":\""<<smi.id().c_str()
-		<<"\",\"title\":\""<<b64title.c_str()
-		<<"\",\"artist\":\""<<b64artist.c_str()
-		<<"\",\"url\":\""<<smi.url().c_str()
-		<<"\",\"pub_time\":\""<<smi.pub_time().c_str()
-		<<"\",\"album\":\""<<b64album.c_str()
-		<<"\",\"time\":\""<<smi.music_time()
-		<<"\",\"pic\":\""<<smi.pic_url().c_str()
-		<<"\",\"like\":\"0\"}]";
+	    smi.set_url(content_url);
+	    smi.set_music_time(0);
+	    Base64Decode(smi.title(),&b64title);
+	    Base64Decode(smi.artist(),&b64artist);
+	    Base64Decode(smi.album_title(),&b64album);
+	    os1<<"{\"id\":\""<<smi.id().c_str()
+		    <<"\",\"title\":\""<<b64title.c_str()
+		    <<"\",\"artist\":\""<<b64artist.c_str()
+		    <<"\",\"url\":\""<<smi.url().c_str()
+		    <<"\",\"pub_time\":\""<<smi.pub_time().c_str()
+		    <<"\",\"album\":\""<<b64album.c_str()
+		    <<"\",\"time\":\""<<smi.music_time()
+		    <<"\",\"pic\":\""<<smi.pic_url().c_str()
+		    <<"\",\"like\":\"0\"}";
+		current_num--;
+	}
+	songid_map.clear();
+	flag = 0;
+	os1<<"]";
 	result = os1.str();
 	status = "1";
 	msg = "0";
@@ -400,6 +438,171 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
 
+bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPacket& packet, 
+										   const int flag){
+		packet::HttpPacket pack = packet;
+		bool r = false;
+		std::string uid;
+		std::string songid;
+		std::string result_out;
+		std::string status;
+		std::string msg;
+		std::string result;
+		int32 utf8_flag = 0;
+		r = pack.GetAttrib(UID,uid);
+		if (r){
+		   msg = "用户id不存在";
+		   status = "0";
+		   utf8_flag = 1;
+		   goto ret;
+		}
+		r = pack.GetAttrib(SONGID,songid);
+		if (r){
+		   msg = "歌曲不存在";
+		   status = "0";
+		   utf8_flag = 1;
+		   goto ret;
+		}
+
+		if (flag)
+		   storage::RedisComm::DelCollectSong(uid,songid);
+		else
+		   storage::RedisComm::DelHateSong(uid,songid);
+
+		msg = "0";
+		status = "1";
+		utf8_flag = 0;
+ret:
+		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+		LOG_DEBUG2("[%s]",result_out.c_str());
+		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+		return true;
+}
+
+bool MusicMgrEngine::GetCllectSongList(const int socket,const packet::HttpPacket& packet){
+	std::list<std::string> song_list;
+	packet::HttpPacket pack = packet;
+	bool r = false;
+	std::string content_url;
+	std::string uid;
+	std::string result_out;
+	std::string status;
+	std::string msg;
+	std::string result;
+	int32 utf8_flag = 0;
+	std::string songid;
+	int flag = 0;
+	std::string music_info;
+	base::MusicInfo smi;
+	std::string b64title;
+	std::string b64artist;
+	std::string b64album;
+	std::stringstream os;
+	r = pack.GetAttrib(UID,uid);
+	if (r){
+		msg = "用户id不存在";
+		status = "0";
+		utf8_flag = 1;
+		goto ret;
+	}
+
+	r = storage::RedisComm::GetCollectSongs(uid,song_list);
+	if (r){
+		msg = "未收藏歌曲";
+		status = "0";
+		utf8_flag = 1;
+		goto ret;
+	}
+	os<<"\"song\":[";
+	while(song_list.size()>0){
+		songid = song_list.front();
+		song_list.pop_front();
+		if (flag==0){
+			flag = 1;
+		}else{
+			os<<",";
+		}
+
+		r = storage::RedisComm::GetMusicInfos(songid,music_info);
+
+		if (!r)
+			continue;
+
+		r = smi.UnserializedJson(music_info);
+		if (!r)
+			continue;
+
+		storage::DBComm::GetMusicUrl(smi.id(),content_url);
+		smi.set_url(content_url);
+		smi.set_music_time(0);
+		Base64Decode(smi.title(),&b64title);
+		Base64Decode(smi.artist(),&b64artist);
+		Base64Decode(smi.album_title(),&b64album);
+		os<<"{\"id\":\""<<smi.id().c_str()
+			<<"\",\"title\":\""<<b64title.c_str()
+			<<"\",\"artist\":\""<<b64artist.c_str()
+			<<"\",\"url\":\""<<smi.url().c_str()
+			<<"\",\"pub_time\":\""<<smi.pub_time().c_str()
+			<<"\",\"album\":\""<<b64album.c_str()
+			<<"\",\"time\":\""<<smi.music_time()
+			<<"\",\"pic\":\""<<smi.pic_url().c_str()
+			<<"\",\"like\":\"0\"}";
+	}
+	flag = 0;
+	os<<"]";
+	result = os.str();
+	status = "1";
+	msg = "0";
+	utf8_flag = 0;
+ret:
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+
+}
+
+bool MusicMgrEngine::PostCollectAndHateSong(const int socket,const packet::HttpPacket& packet,
+											const int flag){
+	packet::HttpPacket pack = packet;
+	bool r = false;
+	std::string uid;
+	std::string songid;
+	std::string result_out;
+	std::string status;
+	std::string msg;
+	std::string result;
+	int32 utf8_flag = 0;
+	r = pack.GetAttrib(UID,uid);
+	if (r){
+		msg = "用户id不存在";
+		status = "0";
+		utf8_flag = 1;
+		goto ret;
+	}
+	r = pack.GetAttrib(SONGID,songid);
+	if (r){
+		msg = "歌曲不存在";
+		status = "0";
+		utf8_flag = 1;
+		goto ret;
+	}
+
+	if (flag)
+		storage::RedisComm::SetCollectSong(uid,songid);
+	else
+		storage::RedisComm::SetHateSong(uid,songid);
+
+	msg = "0";
+	status = "1";
+	utf8_flag = 0;
+ret:
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
+
 bool MusicMgrEngine::GetMusicChannel(const int socket,
   									 const packet::HttpPacket& packet){
 	 packet::HttpPacket pack = packet;
@@ -422,7 +625,7 @@ bool MusicMgrEngine::GetMusicChannel(const int socket,
 	 }else{
 		 mcm->GetMusicChannel(num,result);
 		 LOG_DEBUG2("[%s]",result.c_str());
-		 utf8_flag = 1;
+		 utf8_flag = 0;
 	 }
  	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
  	 LOG_DEBUG2("[%s]",result_out.c_str());
