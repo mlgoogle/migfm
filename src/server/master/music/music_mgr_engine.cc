@@ -112,7 +112,7 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMoodParent(socket,packet);
 	}else if (type=="setcltsong"){
 		PostCollectAndHateSong(socket,packet,1);
-	}else if (type=="getcltsonglist"){
+	}else if (type=="getcltsongs"){
 		GetCllectSongList(socket,packet);
 	}else if (type=="delcltsong"){
 		DelCollectAndHateSong(socket,packet,1);
@@ -461,14 +461,14 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 		std::string result;
 		int32 utf8_flag = 0;
 		r = pack.GetAttrib(UID,uid);
-		if (r){
+		if (!r){
 		   msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		   status = "0";
 		   utf8_flag = 1;
 		   goto ret;
 		}
 		r = pack.GetAttrib(SONGID,songid);
-		if (r){
+		if (!r){
 		   msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 		   status = "0";
 		   utf8_flag = 1;
@@ -510,7 +510,7 @@ bool MusicMgrEngine::GetCllectSongList(const int socket,const packet::HttpPacket
 	std::string b64album;
 	std::stringstream os;
 	r = pack.GetAttrib(UID,uid);
-	if (r){
+	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
 		utf8_flag = 1;
@@ -518,7 +518,7 @@ bool MusicMgrEngine::GetCllectSongList(const int socket,const packet::HttpPacket
 	}
 
 	r = storage::RedisComm::GetCollectSongs(uid,song_list);
-	if (r){
+	if (!r){
 		msg = migfm_strerror(MIG_FM_USER_NO_COLLECT_SONG);
 		status = "0";
 		utf8_flag = 1;
@@ -585,14 +585,14 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,const packet::HttpP
 	std::string result;
 	int32 utf8_flag = 0;
 	r = pack.GetAttrib(UID,uid);
-	if (r){
+	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
 		utf8_flag = 1;
 		goto ret;
 	}
 	r = pack.GetAttrib(SONGID,songid);
-	if (r){
+	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 		status = "0";
 		utf8_flag = 1;

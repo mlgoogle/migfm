@@ -164,6 +164,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\basic\errno_comm.h"
+					>
+				</File>
+				<File
 					RelativePath=".\basic\http_packet.h"
 					>
 				</File>
@@ -217,6 +221,10 @@
 				</File>
 				<File
 					RelativePath=".\basic\constants.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\errno_comm.cc"
 					>
 				</File>
 				<File
