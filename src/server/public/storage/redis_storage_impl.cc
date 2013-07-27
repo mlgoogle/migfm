@@ -209,13 +209,11 @@ bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,const size_t ha
 	char** pptr = NULL;
 	int n;
 	warrper_redis_reply_t*  rp = NULL;
-	rp = RedisGetListAll(c_, hash_name,hash_name_len,&pptr,&n);
+	rp = RedisGetHashValueAll(c_, hash_name,hash_name_len,&pptr,&n);
 	for(r =0;r<n;r++){
-		if ((r%2)==1){
-			std::string str;
-			str.assign(pptr[r]);
-			list.push_back(str);
-		}
+		std::string str;
+		str.assign(pptr[r]);
+		list.push_back(str);
 	}
 	if(rp==NULL)
 		return false;
