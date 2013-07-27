@@ -112,8 +112,8 @@ void SomeUtils::GetResultMsg(std::string &status, std::string &msg,
 	char* out;
 	size_t out_len;
 	std::stringstream os;
-	os<<"{\"status\":"<<status.c_str()<<",\"msg\":"
-		<<msg.c_str()<<",\"result\":{"<<result.c_str()
+	os<<"{\"status\":"<<status.c_str()<<",\"msg\":\""
+		<<msg.c_str()<<"\",\"result\":{"<<result.c_str()
 		<<"}}";
 	if (flag){
 		base::BasicUtil::GB2312ToUTF8(os.str().c_str(),os.str().length(),

@@ -40,7 +40,7 @@ output:	dic_comm.o logic_comm.o thread_handler.o music_mgr_engine.o \
 	music_mgr_init.o music_cache_mgr.o get_song.o http_response.o thread_lock.o db_comm.o\
 	basic_info.o http_packet.o basictypes.o config.o base64.o radom_in.o\
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
-	redis_warrper.o storage.o constants.o basic_util.o json_reader.o json_value.o json_writer.o
+	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o json_reader.o json_value.o json_writer.o
 	$(LINK)
 
 clean:
@@ -123,6 +123,8 @@ constants.o:
 basic_util.o:
 	$(COMPILE) ./../../public/basic/basic_util.cc
 
+errno_comm.o:
+	$(COMPILE) ./../../public/basic/errno_comm.cc
 json_reader.o:
 	$(COMPILE) ./../../public/json/json_reader.cpp
 

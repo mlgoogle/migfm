@@ -7,6 +7,7 @@
 #include "basic/basic_util.h"
 #include "config/config.h"
 #include "basic/base64.h"
+#include "basic/errno_comm.h"
 #include <sstream>
 
 #define		TIME_TEST		1025
@@ -140,7 +141,8 @@ bool MusicMgrEngine::GetMoodParent(const int socket,const packet::HttpPacket& pa
 	r = storage::DBComm::GetMoodParentWord(word_list);
 	if (!r){
 		status = "1";
-		msg = "心情不存在;";
+		//msg = "心情不存在;";
+		msg = migfm_strerror(MIG_FM_MOOD_NO_VALID);
 		utf8_flag = 1;
 		goto ret;
 	}
@@ -186,16 +188,25 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 	if (!r){
 		LOG_ERROR("Get UID Error");
 		status = "1";
-		msg = "用户不存在";
+		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		utf8_flag = 1;
-	}else{
-		//从redis 里面获取用户心绪图
-		//音乐机器人专门从操作记录里面分析
-		r = storage::RedisComm::GetUserMoodMap(uid,result);
-		status = "1";
-		msg = "0";
-		utf8_flag = 0;
+		goto ret;
 	}
+
+	//从redis 里面获取用户心绪图
+	//音乐机器人专门从操作记录里面分析
+	r = storage::RedisComm::GetUserMoodMap(uid,result);
+	if (result.empty()){
+		//LOG_ERROR("Get UID Error");
+		status = "1";
+		msg = migfm_strerror(MIG_FM_USER_MOOD_NO_EXITS);
+		utf8_flag = 1;
+		goto ret;
+	}
+	status = "1";
+	msg = "0";
+	utf8_flag = 0;
+ret:
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
@@ -243,9 +254,9 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	std::map<std::string, std::string>::iterator it;
 	bool r = pack.GetAttrib(MODE,mode);
 	if (!r){
-		LOG_ERROR("get MODE error");
+		//LOG_ERROR("get MODE error");
 		status = "0";
-		msg = "模式不存在";
+		msg = migfm_strerror(MIG_FM_HTTP_MODE_NO_VALID);
 		utf8_flag = 1;
 		goto ret;
 	}
@@ -254,7 +265,7 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 	if (!r){
 		LOG_ERROR("get WORDID error");
 		status = "0";
-		msg = "描述不存在";
+		msg = migfm_strerror(MIG_FM_HTTP_DEC_NO_VALID);
 		utf8_flag = 1;
 		goto ret;
 	}
@@ -359,9 +370,9 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 
 	r = pack.GetAttrib(DECWORD,word);
 	if (!r){
-		LOG_ERROR("get DECWORD error");
+		//LOG_ERROR("get DECWORD error");
 		status = "1";
-		msg = "频道不存在";
+		msg = migfm_strerror(MIG_FM_HTTP_MOOD_DEC_NO_EXITS);
 		utf8_flag = 1;
 		goto ret;
 	}
@@ -372,7 +383,7 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 
 	if (word_list.size()==0){
 		status = "1";
-		msg = "没有描述词";
+		msg = migfm_strerror(MIG_FM_SYSTEM_DEC_NO_VALID);
 		utf8_flag = 1;
 		goto ret;
 	}
@@ -420,7 +431,7 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 	 if (!r){
 		 LOG_ERROR("get channel error");
 		 status = "0";
-		 msg = "频道不存在";
+		 msg = migfm_strerror(MIG_FM_HTTP_CHANNLE_NO_VALID);
 		 utf8_flag = 1;
 	 }else{
 		 status = "1";
@@ -451,14 +462,14 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 		int32 utf8_flag = 0;
 		r = pack.GetAttrib(UID,uid);
 		if (r){
-		   msg = "用户id不存在";
+		   msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		   status = "0";
 		   utf8_flag = 1;
 		   goto ret;
 		}
 		r = pack.GetAttrib(SONGID,songid);
 		if (r){
-		   msg = "歌曲不存在";
+		   msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 		   status = "0";
 		   utf8_flag = 1;
 		   goto ret;
@@ -500,7 +511,7 @@ bool MusicMgrEngine::GetCllectSongList(const int socket,const packet::HttpPacket
 	std::stringstream os;
 	r = pack.GetAttrib(UID,uid);
 	if (r){
-		msg = "用户id不存在";
+		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
 		utf8_flag = 1;
 		goto ret;
@@ -508,7 +519,7 @@ bool MusicMgrEngine::GetCllectSongList(const int socket,const packet::HttpPacket
 
 	r = storage::RedisComm::GetCollectSongs(uid,song_list);
 	if (r){
-		msg = "未收藏歌曲";
+		msg = migfm_strerror(MIG_FM_USER_NO_COLLECT_SONG);
 		status = "0";
 		utf8_flag = 1;
 		goto ret;
@@ -575,14 +586,14 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,const packet::HttpP
 	int32 utf8_flag = 0;
 	r = pack.GetAttrib(UID,uid);
 	if (r){
-		msg = "用户id不存在";
+		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
 		utf8_flag = 1;
 		goto ret;
 	}
 	r = pack.GetAttrib(SONGID,songid);
 	if (r){
-		msg = "歌曲不存在";
+		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 		status = "0";
 		utf8_flag = 1;
 		goto ret;
@@ -619,7 +630,7 @@ bool MusicMgrEngine::GetMusicChannel(const int socket,
 	 r = pack.GetAttrib(CHANNELNUM,num);
 	 if (!r){
 		 LOG_ERROR("get channel error");
-		 msg = "频道不存在";
+		 msg = migfm_strerror(MIG_FM_HTTP_CHANNLE_NO_VALID);
 		 status = "0";
 		 utf8_flag = 1;
 	 }else{
