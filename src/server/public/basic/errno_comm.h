@@ -1,0 +1,20 @@
+#ifndef MIG_FM_PUBLIC_BASIC_ERRNO_COMM__H__
+#define MIG_FM_PUBLIC_BASIC_ERRNO_COMM__H__
+
+#define  MIG_FM_HTTP_MOOD_NO_VALID               -1
+#define  MIG_FM_HTTP_USER_NO_EXITS               -2
+#define  MIG_FM_USER_MOOD_NO_EXITS               -3
+#define  MIG_FM_HTTP_MODE_NO_VALID               -4
+#define  MIG_FM_HTTP_MOOD_DEC_NO_EXITS           -5
+#define  MIG_FM_HTTP_DEC_NO_VALID                -6
+#define  MIG_FM_DEC_NO_VALID                     -7
+#define  MIG_FM_HTTP_CHANNLE_NO_VALID            -8
+#define  MIG_FM_HTTP_SONG_ID_NO_VALID            -9
+#define  MIG_FM_USER_NO_COLLECT_SONG             -10
+#define  MIG_FM_MOOD_NO_VALID                    -11
+#define  MIG_FM_SYSTEM_DEC_NO_VALID              -12
+
+
+const char*
+migfm_strerror(int error_code);
+#endif

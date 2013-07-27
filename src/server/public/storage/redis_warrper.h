@@ -71,7 +71,8 @@ long long ReidsGetListSize(warrper_redis_context_t* context,const char* key,
 					  const size_t key_len);
 
 warrper_redis_reply_t* RedisGetListAll(warrper_redis_context_t* context,const char* key,const size_t key_len,char***val,int* val_len);
-							
+
+warrper_redis_reply_t* RedisGetHashValueAll(warrper_redis_context_t* context,const char* key,const size_t key_len,char***val,int* val_len);
 int RedisFreeReply(warrper_redis_reply_t* wa);
 
 #ifdef __cplusplus
