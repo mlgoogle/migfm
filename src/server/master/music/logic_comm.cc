@@ -96,6 +96,7 @@ int SomeUtils::SendFull(int socket, const char *buffer, size_t nbytes){
 
 	do {
 		amt = nbytes;
+		LOG_DEBUG2("(%s)",buf);
 		amt = send (socket, buf, amt, 0);
 		buf = buf + amt;
 		nbytes -= amt;

@@ -53,7 +53,6 @@ bool MysqlStorageEngineImpl::Release(){
        result_.get()->proc = NULL;
 	   mysql_close(mysql);
     }
-	delete this;
     return true;
 }
 

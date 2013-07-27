@@ -252,6 +252,13 @@ bool MemStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 	return true;
 }
 
+bool MemStorageEngineImpl::GetHashValues(const char *hash_name, const size_t hash_name_len,
+										 std::list<std::string> &list){
+
+    return true;
+
+}
+
 #if defined (MEM_POOL)
 bool MemStorageEngineImpl::MemPoolInit(int32 init,int32 max){ 
    cached_pool_ = (mcached_pool_t*)memcached_pool_create((memcached_st*)cache_,ini,max);

@@ -23,7 +23,21 @@ public:
 
 	static bool GetMusicInfos(const std::string& key,std::string& music_infos);
 
-	static bool GetUserMoodMap(const std::string uid,std::string& mood_map);
+	static bool GetUserMoodMap(const std::string& uid,std::string& mood_map);
+
+	static bool SetCollectSong(const std::string& uid,const std::string& songid);
+
+	static bool IsCollectSong(const std::string& uid,const std::string& songid);
+
+	static bool GetCollectSongs(const std::string& uid,std::list<std::string>& song_list);
+
+	static bool DelCollectSong(const std::string& uid,const std::string& songid);
+
+	static bool SetHateSong(const std::string& uid,const std::string& songid);
+
+	static bool IsHateSong(const std::string& uid,const std::string& songid);
+
+	static bool DelHateSong(const std::string& uid,const std::string& songid);
 
 private:
 	static void SetRadomNum();

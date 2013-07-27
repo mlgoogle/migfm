@@ -35,7 +35,6 @@ bool RedisStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 
 bool RedisStorageEngineImpl::Release(){
 	RedisClose(c_);
-	delete this;
 	return true;
 }
 
@@ -200,6 +199,28 @@ bool RedisStorageEngineImpl::SetListElement(const int index,const char* key,
 	 if(PingRedis()!=1)
     	return false;
 	return RedisSetListElement(c_,index,key,key_len,val,val_len)==1?true:false;
+}
+
+bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,const size_t hash_name_len,
+										   std::list<std::string>& list){
+    int r = 0;
+	if (PingRedis()!=1)
+		return false;
+	char** pptr = NULL;
+	int n;
+	warrper_redis_reply_t*  rp = NULL;
+	rp = RedisGetListAll(c_, hash_name,hash_name_len,&pptr,&n);
+	for(r =0;r<n;r++){
+		if ((r%2)==1){
+			std::string str;
+			str.assign(pptr[r]);
+			list.push_back(str);
+		}
+	}
+	if(rp==NULL)
+		return false;
+	RedisFreeReply(rp);
+	return true;
 }
 
 bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
