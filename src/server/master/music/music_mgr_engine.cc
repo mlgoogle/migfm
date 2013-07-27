@@ -196,7 +196,7 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 		msg = "0";
 		utf8_flag = 0;
 	}
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
