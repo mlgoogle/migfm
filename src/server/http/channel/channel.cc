@@ -92,7 +92,7 @@ static void PostRequestMethod(FCGX_Request * request){
         clen = std::cin.gcount();
        // UserMgr::GetInstance()->PostUserInfo(content,clen);
         if(content){
-            delete content;
+            delete []content;
             content = NULL;
         }
     }

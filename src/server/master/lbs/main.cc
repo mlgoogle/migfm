@@ -46,14 +46,14 @@ static void* on_init()
 
 	mig_lbs::LBSLogic::GetInstance()->Init();
 
-	using namespace mig_lbs;
-	LBSLogic *logic = mig_lbs::LBSLogic::GetInstance();
-	std::string resp, err;
-	logic->SetPOI(100001, 120.116506, 30.295979, "data100001", resp, err);
-	logic->SetPOI(100002, 120.106506, 30.205979, "data100002", resp, err);
-	logic->SetPOI(100003, 120.126506, 30.294979, "data100003", resp, err);
-	logic->SetPOI(100004, 120.118506, 30.293979, "data100004", resp, err);
-	logic->SetPOI(100005, 120.112506, 30.298979, "data100005", resp, err);
+//	using namespace mig_lbs;
+//	LBSLogic *logic = mig_lbs::LBSLogic::GetInstance();
+//	std::string resp, err;
+//	logic->SetPOI(100001, 120.116506, 30.295979, "data100001", resp, err);
+//	logic->SetPOI(100002, 120.106506, 30.205979, "data100002", resp, err);
+//	logic->SetPOI(100003, 120.126506, 30.294979, "data100003", resp, err);
+//	logic->SetPOI(100004, 120.118506, 30.293979, "data100004", resp, err);
+//	logic->SetPOI(100005, 120.112506, 30.298979, "data100005", resp, err);
 
 //	logic->SearchNearby(120.116506, 30.295979, 10000, "", resp, err);
 
