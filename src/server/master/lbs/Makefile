@@ -14,7 +14,7 @@ CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SO
 
 ## 链接选项
 ## for debug
-LINK_FLAGS = -g -s -shared -fPIC
+LINK_FLAGS = -g -shared -fPIC
 ## for release
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
