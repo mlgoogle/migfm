@@ -144,20 +144,20 @@ bool MemStorageEngineImpl::MGetValue(const char* const * key_array,
     return true;
 }
 
-bool MemStorageEngineImpl::FetchValue(const char* key,size_t *key_len,
+bool MemStorageEngineImpl::FetchValue(char* key,size_t *key_len,
 									  char** value,size_t *val_len){
-   
-    char* value_;
+   if (NULL == value)
+	   return false;
+
     uint32_t flags = 0;
     memcached_return_t rc;
-    value_ = memcached_fetch((memcached_st*)cache_,const_cast<char*>(key),
-    						  key_len,val_len,&flags,
-                              &rc);
-    if(rc==MEMCACHED_END)
-	return false;
-    else if(memcached_failed(rc))
-	return false;
-   return true;
+    *value = memcached_fetch((memcached_st*)cache_, key,
+    						key_len,val_len,&flags, &rc);
+	if (rc == MEMCACHED_END)
+		return false;
+	else if (memcached_failed(rc))
+		return false;
+	return true;
 }
 
 /*
@@ -213,9 +213,9 @@ int main(int argc, char *argv[])
     memcached_free(memc);
     return 0;
 } 
-±àÒëÔ´´úÂë£º
+ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ë£º
 [root@localhost html]# gcc -o cmultmem cmultmem.c -lmemcached 
-[root@localhost html]# ./cmultmem //Ö´ÐÐ
+[root@localhost html]# ./cmultmem //Ö´ï¿½ï¿½
 Save key:key1 data:"This is c first value" success.
 Save key:key2 data:"This is c second value" success.
 Save key:key3 data:"This is c third value" success.

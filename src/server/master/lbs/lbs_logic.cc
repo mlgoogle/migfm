@@ -141,6 +141,8 @@ bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int le
 	root["status"] = ret_status;
 	if (ret_status != 1)
 		root["msg"] = ret_msg;
+	else
+		root["msg"] = "success";
 
 	Json::FastWriter wr;
 	std::string res = wr.write(root);
@@ -231,6 +233,9 @@ bool LBSLogic::OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result
 
 	Json::Value &users = result["result"]["nearUser"];
 	std::map<std::string, bool> mapExist;
+	std::vector<std::string> vec_users;
+	typedef std::map<std::string, std::string> UserSongMap;
+	UserSongMap map_songs;
 	const Json::Value &items = content["content"];
 	for (Json::Value::iterator it = items.begin();
 		it != items.end();
@@ -251,8 +256,23 @@ bool LBSLogic::OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result
 		val["longitude"] = item["longitude"];
 		val["distance"] = item["distance"];
 
+		vec_users.push_back(uid_str);
+
 		users.append(val);
 	}
+
+	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
+	for (Json::Value::iterator it = users.begin();
+		it != users.end(); ++it) {
+		Json::Value &item = *it;
+		const std::string uid_str = item["userid"].asString();
+		UserSongMap::const_iterator find = map_songs.find(uid_str);
+		if (map_songs.end() != find)
+			item["cur_music"] = ::atoi(find->second.c_str());
+		else
+			item["cur_music"] = 0;
+	}
+
 	result["size"] = users.size();
 	result["total"] = content["total"];
 
@@ -270,7 +290,7 @@ LBSLogic::LBSLogic() {
 
 	r = config->LoadConfig(path);
 	//storage::DBComm::Init(config->mysql_db_list_);
-	//storage::MemComm::Init(config->mem_list_);
+	storage::MemComm::Init(config->mem_list_);
 	storage::RedisComm::Init(config->redis_list_);
 }
 

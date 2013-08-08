@@ -97,7 +97,7 @@ bool RedisStorageEngineImpl::MGetValue(const char* const * key_array,
     return true;
 }
 
-bool RedisStorageEngineImpl::FetchValue(const char* key,size_t *key_len,
+bool RedisStorageEngineImpl::FetchValue(char* key,size_t *key_len,
 	                                    char** value,size_t *val_len){
    
    return true;
