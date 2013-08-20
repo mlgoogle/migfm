@@ -160,6 +160,15 @@ bool MemStorageEngineImpl::FetchValue(const char* key,size_t *key_len,
    return true;
 }
 
+bool MemStorageEngineImpl::IncrValue(const char *key, const size_t key_len, 
+									 const char *val, const size_t val_len){
+    return true;
+} 
+
+bool MemStorageEngineImpl::DecrValue(const char *key, const size_t key_len, 
+									 const char *val, const size_t val_len){
+    return true;
+}
 /*
 int main(int argc, char *argv[]) 
 {

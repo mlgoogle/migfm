@@ -34,7 +34,11 @@ public:
     virtual bool MGetValue(const char* const * key_array,const size_t *key_len_array,size_t element_count);
 
     virtual bool FetchValue(const char* key,size_t *key_len,char** value,size_t *val_len);
-    
+	virtual bool IncrValue(const char* key,const size_t key_len, 
+		                   const char* val,const size_t val_len);
+
+	virtual bool DecrValue(const char* key,const size_t key_len,
+		const char* val,const size_t val_len);
     
         //list
         

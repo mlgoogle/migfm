@@ -26,6 +26,9 @@ public:
     std::string      certificate_path_; 
     std::string      idp_url_;
     std::string      sp_url_; 
+	std::string      mood_path_;
+	std::string      style_path_;
+	std::string      usr_local_music_path_;
 };
 
 }

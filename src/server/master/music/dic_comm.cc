@@ -290,6 +290,45 @@ bool RedisComm::IsHateSong(const std::string& uid,const std::string& songid){
 	return false;
 }
 
+bool RedisComm::GetDefaultSongs(const std::string &uid, 
+								std::list<std::string> &song_list){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	//duidsl(default+uid+songlist)
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	os.append("d");
+	os.append(uid.c_str());
+	os.append("sl");
+	r = redis_engine_->GetHashValues(os.c_str(),os.length(),song_list);
+
+	return r;
+}
+
+bool RedisComm::MgrListenSongsNum(const std::string& songid,const std::string& uid,
+								  const int32 flag){
+	//key num_songid:num_99999
+	std::string os;
+	bool r = false;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+	os.append("num_");
+	os.append(songid.c_str());
+	LOG_DEBUG2("MgrListenSongsNum key[%s]",os.c_str());
+	if (flag)//1
+		//r = redis_engine_->IncrValue(os.c_str(),os.length(),NULL,0);
+		r = redis_engine_->AddHashElement(os.c_str(),uid.c_str(),uid.length(),
+		                                   songid.c_str(),songid.length());
+	else
+		//r = redis_engine_->DecrValue(os.c_str(),os.length(),NULL,0);
+		r = redis_engine_->DelHashElement(os.c_str(),uid.c_str(),uid.length());
+}
+
 /////////////////////////////////memcahced//////////////////////////////////////
 base_storage::DictionaryStorageEngine* MemComm::engine_ = NULL;
 
@@ -305,4 +344,15 @@ void MemComm::Dest(){
 	}
 }
 
+
+bool MemComm::SetUsrCurrentSong(const std::string& uid, 
+								const std::string& songid){
+
+	//key cur+uid cur100000
+	bool r = false;
+	std::string key = "cur";
+	key.append(uid);
+	r = engine_->SetValue(key.c_str(),key.length(),
+							songid.c_str(),songid.length());
+}
 }

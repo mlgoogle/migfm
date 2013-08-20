@@ -15,7 +15,7 @@ public:
 	
 	static void Dest();
 	
-	static bool GetUserIndent(const std::string& username,int32& uid);
+	static bool GetUserIndent(const std::string& username,int64& uid);
 
 	static bool RegeditUser(const std::string& username,const std::string& password,
 		                    const std::string& nickname,const std::string& source);

@@ -48,7 +48,7 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 	}
 }
 
-bool DBComm::GetUserIndent(const std::string& username,int32& uid){
+bool DBComm::GetUserIndent(const std::string& username,int64& uid){
 	base_storage::DBStorageEngine* engine = GetConnection();
 	std::stringstream os;
 	bool r = false;
@@ -72,7 +72,7 @@ bool DBComm::GetUserIndent(const std::string& username,int32& uid){
 	int32 num = engine->RecordCount();
 	if(num>0){
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
-		    uid = atol(rows[0]);
+		    uid = atoll(rows[0]);
 		}
 		return true;
 	}

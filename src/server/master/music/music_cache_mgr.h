@@ -24,11 +24,16 @@ public:
 	virtual ~MusicCacheManager();
 	bool InitMusicChannel();
 	bool AddMusicChannelInfos(int channel,std::list<base::MusicInfo>& list);
-	bool GetMusicChannelInfos(int channel,std::string& json_content);
+	bool GetMusicChannelInfos(int channel,std::string& json_content,
+		                      const int flag =0,const int cur_num = 3);//0:html5 1:ios
+
+	bool GetMusicCahnelTypeInfos(int channel,const std::string& uid,const int nun,
+		                         std::stringstream& os);
+
 	int  GetMusicCHannelNum(int channel);
 	time_t GetMusicTime(int channel);
-	void IsLessMuciChannelInfos(std::string& channel, int num);
-	void IsTimeMusiChannelInfos(std::string& channel);
+	void IsLessMuciChannelInfos(const std::string& channel, int num);
+	void IsTimeMusiChannelInfos(const std::string& channel);
 	bool RequestDoubanMusicInfos(const std::string& channel,
 		                         std::string& content);
 

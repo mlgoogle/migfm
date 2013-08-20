@@ -13,6 +13,15 @@
 #define  MIG_FM_USER_NO_COLLECT_SONG             -10
 #define  MIG_FM_MOOD_NO_VALID                    -11
 #define  MIG_FM_SYSTEM_DEC_NO_VALID              -12
+#define  MIG_FM_MOODID_NO_VALID                  -13
+#define  MIG_FM_MOODINDEX_NO_VALID               -14
+#define  MIG_FM_SCENEID_NO_VALID                 -15
+#define  MIG_FM_SCENEINDEX_NO_VALID              -16
+#define  MIG_FM_CHANNELID_NO_VALID               -17
+#define  MIG_FM_CHANNELINDEX_NO_VALID            -18
+#define  MIG_FM_HTTP_LAST_SONG_ID_NO_VALID       -19
+#define  MIG_FM_SOUCE_NO_VALID                   -20
+#define  MIG_FM_CONTENT_NO_EXITS                 -21
 
 
 const char*

@@ -40,7 +40,8 @@ output:	dic_comm.o logic_comm.o thread_handler.o music_mgr_engine.o \
 	music_mgr_init.o music_cache_mgr.o get_song.o http_response.o thread_lock.o db_comm.o\
 	basic_info.o http_packet.o basictypes.o config.o base64.o radom_in.o\
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
-	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o json_reader.o json_value.o json_writer.o
+	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o json_reader.o\
+	json_value.o json_writer.o music_recording.o file_path.o file_util.o string_serialization.o
 	$(LINK)
 
 clean:
@@ -68,6 +69,9 @@ music_mgr_engine.o:
 
 music_mgr_init.o:
 	$(COMPILE) ./music_mgr_init.cc
+
+music_recording.o:
+	$(COMPILE) ./music_recording.cc
 
 get_song.o:
 	$(COMPILE) ./get_song.cc
@@ -102,6 +106,15 @@ config.o:
 mig_log.o:
 	$(COMPILE) ./../../public/log/mig_log.cc
 
+file_path.o:
+	$(COMPILE) ./../../public/file/file_path.cc
+	
+file_util.o:
+	$(COMPILE) ./../../public/file/file_util.cc
+
+string_serialization.o:
+	$(COMPILE) ./../../public/file/string_serialization.cc
+	
 mem_storage_impl.o:
 	$(COMPILE) ./../../public/storage/mem_storage_impl.cc
 

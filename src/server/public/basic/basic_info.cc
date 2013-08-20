@@ -70,8 +70,9 @@ ChannelInfo::ChannelInfo(){
 ChannelInfo::ChannelInfo(const std::string& index,
 						 const std::string& douban_index, 
 						 const std::string& channel_name,
+						 const std::string& channel_dec,
 						 const std::string pic/* = "http://fm.miglab.com"*/){
-    data_ = new Data(index,douban_index,channel_name,pic);
+    data_ = new Data(index,douban_index,channel_name,pic,channel_dec);
 }
 
 ChannelInfo& ChannelInfo::operator=(const ChannelInfo& mi){
@@ -102,11 +103,11 @@ MusicInfo::MusicInfo(){
 
 MusicInfo::MusicInfo(const std::string id,const std::string& sid,const std::string& ssid,
 					 const std::string& album_title,const std::string& title,
-					 const std::string& url,const std::string& pub_time,
+					 const std::string& hq_url,const std::string& pub_time,
 					 const std::string& artist,const std::string& pic_url,
-					 int32 time){
+					 const std::string& url,int32 time){
 
-		data_ = new Data(id,sid,ssid,album_title,title,url,pub_time,artist,pic_url,time);
+		data_ = new Data(id,sid,ssid,album_title,title,hq_url,pub_time,artist,pic_url,url,time);
 }
 
 MusicInfo& MusicInfo::operator=(const MusicInfo& mi){
@@ -140,7 +141,8 @@ bool MusicInfo::SerializedJson(std::string &json){
 		<<"\""<<album_title().c_str()<<"\",\"titile\":"
 		<<"\""<<title().c_str()<<"\",\"pub_time\":"
 		<<"\""<<pub_time().c_str()<<"\",\"artist\":"
-		<<"\""<<artist().c_str()<<"\",\"pic_url\":"
+		<<"\""<<artist().c_str()<<"\",\"hq_url\":"
+		<<"\""<<hq_url().c_str()<<"\",\"pic_url\":"
 		<<"\""<<pic_url().c_str()<<"\"}";
 	json.assign(os.str().c_str(),os.str().length());
 	return true;
@@ -168,8 +170,10 @@ bool MusicInfo::UnserializedJson(std::string& str){
 	set_pub_time(root["pub_time"].asString());
 	set_artist(root["artist"].asString());
 	set_pic_url(root["pic_url"].asString());
+	set_hq_url(root["hq_url"].asString());
 	return true;
 }
+
 ConnAddr::ConnAddr(){
   
     data_ = new Data();
@@ -200,5 +204,72 @@ ConnAddr::ConnAddr(const ConnAddr& ca)
 	    data_->AddRef();
 	}
 }
+
+
+CompareInfo::CompareInfo(){
+
+	data_ = new Data();
+}
+
+CompareInfo::CompareInfo(const std::string& info_id,const std::string& info_index){
+
+	data_ = new Data(info_id,info_index);
+}
+
+CompareInfo& CompareInfo::operator=(const CompareInfo& ci){
+	if(ci.data_!=NULL){
+		ci.data_->AddRef();
+	}
+	if(data_!=NULL){
+		data_->Release();
+	}
+
+	data_ = ci.data_;
+	return *this;
+}
+
+
+CompareInfo::CompareInfo(const CompareInfo& ci)
+:data_(ci.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+
+
+
+
+RecordingLocalMusic::RecordingLocalMusic(){
+
+	data_ = new Data();
+}
+
+RecordingLocalMusic::RecordingLocalMusic(const std::string& name,const std::string& singer){
+
+	data_ = new Data(name,singer);
+}
+
+RecordingLocalMusic& RecordingLocalMusic::operator=(const RecordingLocalMusic& ci){
+	if(ci.data_!=NULL){
+		ci.data_->AddRef();
+	}
+	if(data_!=NULL){
+		data_->Release();
+	}
+
+	data_ = ci.data_;
+	return *this;
+}
+
+
+RecordingLocalMusic::RecordingLocalMusic(const RecordingLocalMusic& ci)
+:data_(ci.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+
 
 }

@@ -94,6 +94,11 @@ public:
 
     virtual bool FetchValue(const char* key,size_t *key_len,char** value,size_t *val_len) = 0;
     
+	virtual bool IncrValue(const char* key,const size_t key_len,
+		                   const char* val,const size_t val_len) = 0;
+
+	virtual bool DecrValue(const char* key,const size_t key_len,
+		                   const char* val,const size_t val_len) = 0;
         //list
     virtual bool AddListElement(const char* key,const size_t key_len,
     								const char* val,const size_t val_len) = 0;
