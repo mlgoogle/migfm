@@ -7,6 +7,7 @@
  */
 #include <string>
 #include <vector>
+#include <map>
 #include "lbs_logic.h"
 #include "json/json.h"
 #include "log/mig_log.h"
@@ -32,11 +33,11 @@ int SplitStringChr( const char *str, const char *char_set,
 	}
 
 	const char *find_ptr = NULL;
-	str = str + ::strspn(str, char_set);
+	str += ::strspn(str, char_set);
 	while (str && (find_ptr=::strpbrk(str, char_set))) {
 		if (str != find_ptr)
 			out.push_back(string(str, find_ptr));
-		str = str + ::strspn(find_ptr, char_set);
+		str = find_ptr + ::strspn(find_ptr, char_set);
 	}
 	if (str && str[0])
 		out.push_back(str);
@@ -130,13 +131,12 @@ bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int le
 	Json::Value root(Json::objectValue);
 	int ret_status;
 	std::string ret_msg;
-	if (type=="setmypos"){
+	if (type=="setuserpos") {
 		OnMsgSetPoi(packet, root, ret_status, ret_msg);
-	} else if (type=="searchnearby"){
+	} else if (type=="searchnearby") {
 		OnMsgSearchNearby(packet, root, ret_status, ret_msg);
-	} else {
-		OnMsgUnknown(packet, root, ret_status, ret_msg);
-	}
+	} else
+		return true;
 
 	root["status"] = ret_status;
 	if (ret_status != 1)
@@ -144,7 +144,7 @@ bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int le
 
 	Json::FastWriter wr;
 	std::string res = wr.write(root);
-	SendFull(socket, res.c_str(), res.length());
+	SomeUtils::SendFull(socket, res.c_str(), res.length());
 
 	MIG_DEBUG(USER_LEVEL, "lbs request:%s, response:%s", type.c_str(), res.c_str());
 
@@ -230,28 +230,33 @@ bool LBSLogic::OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result
 	}
 
 	Json::Value &users = result["result"]["nearUser"];
-	for (Json::Value::iterator it = content.begin();
-		it != content.end();
+	std::map<std::string, bool> mapExist;
+	const Json::Value &items = content["content"];
+	for (Json::Value::iterator it = items.begin();
+		it != items.end();
 		++it) {
 		const Json::Value &item = *it;
 		Json::Value val;
-		val["userid"] = item["ext"]["user_id"];
+		if (!item.isMember("ext"))
+			continue;
+		std::string uid_str = item["ext"]["user_id"].asString();
+		if (uid_str.empty())
+			continue;
+		if (mapExist.end() != mapExist.find(uid_str))
+			continue;
+
+		mapExist[uid_str] = true;
+		val["userid"] = uid_str;
 		val["latitude"] = item["latitude"];
 		val["longitude"] = item["longitude"];
+		val["distance"] = item["distance"];
+
 		users.append(val);
 	}
+	result["size"] = users.size();
+	result["total"] = content["total"];
 
 	status = 1;
-	return true;
-}
-
-bool LBSLogic::OnMsgUnknown(packet::HttpPacket& packet, Json::Value &result,
-		int &status, std::string &msg) {
-	using namespace Json;
-
-	status = 0;
-	msg = "不支持的接口";
-
 	return true;
 }
 
@@ -271,22 +276,6 @@ LBSLogic::LBSLogic() {
 
 LBSLogic::~LBSLogic() {
 	ThreadKey::DeinitThreadKey ();
-}
-
-int LBSLogic::SendFull(int socket, const char *buffer, size_t nbytes){
-	ssize_t amt = 0;
-	ssize_t total = 0;
-	const char *buf = buffer;
-
-	do {
-		amt = nbytes;
-		amt = send (socket, buf, amt, 0);
-		buf = buf + amt;
-		nbytes -= amt;
-		total += amt;
-	} while (amt != -1 && nbytes > 0);
-
-	return (int)(amt == -1 ? amt : total);
 }
 
 } /* namespace mig_lbs */

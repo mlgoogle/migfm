@@ -14,7 +14,7 @@ CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SO
 
 ## 链接选项
 ## for debug
-LINK_FLAGS = -g -s -shared -fPIC
+LINK_FLAGS = -g -shared -fPIC
 ## for release
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
@@ -24,7 +24,7 @@ INCLUDE_PATHS = -I./ -I../core -I../../public/ -I../../../third_party/hiredis/ \
 
 ## 库
 LINK_PATHS = -L./ -L/usr/lib64/mysql -L/usr/local/lib
-LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil libhiredis.a \
+LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil \
 	-lexpat -lrt -lpthread -ldl -liconv \
 	../../lib/libbreakpad_client.a ../../lib/libhiredis.a
 
@@ -37,7 +37,7 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output:	main.o mig_log.o http_response.o baidu_lbs_connector.o redis_connector.o \
+output: lbs_init.o mig_log.o http_response.o baidu_lbs_connector.o redis_connector.o \
 	json_reader.o json_value.o json_writer.o lbs_logic.o \
 	storage.o redis_storage_impl.o redis_warrper.o basic_info.o constants.o basic_util.o \
 	dic_comm.o logic_comm.o thread_handler.o http_packet.o basictypes.o config.o
@@ -52,8 +52,8 @@ delete-temp-file:
 
 ### 编译
 
-main.o:
-	$(COMPILE) ./main.cc
+lbs_init.o:
+	$(COMPILE) ./lbs_init.cc
 
 mig_log.o:
 	$(COMPILE) ../../public/log/mig_log.cc

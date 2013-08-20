@@ -1,7 +1,9 @@
 
 ###############################################################################
+## 程序名
+PROC_NAME = searchnearby
 ## 输出文件名
-OUTPUT_FILE = /var/www/cgi-bin/userinfo.fcgi
+OUTPUT_FILE = /var/www/cgi-bin/$(PROC_NAME).fcgi
 ## 编译器
 COMPILER = g++
 COMPILERC = gcc
@@ -19,13 +21,13 @@ LINK_FLAGS = -g  -fPIC
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I../../public/ -I /usr/local/libmemcached-1.0.7/include\
-		-I/usr/local/lib -I./../../../third_party/hiredis\
+INCLUDE_PATHS = -I../../public/ -I /usr/local/libmemcached-1.0.7/include \
+		-I/usr/local/lib -I./../../../third_party/hiredis \
 	        -I../../../third_party/breakpad/src -I/usr/include/mysql 
 
 ## 库
 LINK_PATHS =  -L/usr/local/libmemcached-1.0.7/lib/ -L/usr/lib64/mysql
-LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lmysqlclient -lexpat -lcurl\
+LINK_LIBRARYS = -lmemcached -lmemcachedutil -lrt -lpthread  -liconv -lfcgi++ -lmysqlclient -lexpat -lcurl \
 					../../lib/libbreakpad_client.a ../../lib/libhiredis.a $(LINK_CORE_PATH)
 
 # 编译
@@ -36,7 +38,7 @@ LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 
-output: userinfo.o mig_log.o core_interface.o
+output: $(PROC_NAME).o mig_log.o core_interface.o
 	$(LINK)
 
 clean:
@@ -47,8 +49,8 @@ delete-temp-file:
 	-rm -f *.o
 
 ### 编译
-userinfo.o:
-	$(COMPILE) ./userinfo.cc
+$(PROC_NAME).o:
+	$(COMPILE) ./$(PROC_NAME).cc
 
 mig_log.o:
 	$(COMPILE) ./../../public/log/mig_log.cc

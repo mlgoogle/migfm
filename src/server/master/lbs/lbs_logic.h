@@ -37,8 +37,6 @@ public:
 			int &status, std::string &msg);
 	bool OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result,
 			int &status, std::string &msg);
-	bool OnMsgUnknown(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
 
 public:
 	int SetPOI(int64 user_id, double longitude, double latitude, const std::string &data,
@@ -59,8 +57,6 @@ public:
 
 	int SearchDetail(
 			std::string &response, std::string &err_msg);
-
-	int SendFull(int socket, const char *buffer, size_t nbytes);
 
 public:
 	~LBSLogic();

@@ -452,8 +452,8 @@ int BaiduLBSConnector::SearchNearby(double longitude, double latitude, uint32 ra
 		get << "&location=" << latitude << "," << longitude;
 		get << "&radius=" << radius;
 		get << "&scope=" << 2;
-		get << "&page_index" << page_index;
-		get << "&page_size" << page_size;
+		get << "&page_index=" << page_index;
+		get << "&page_size=" << page_size;
 		get << "&ak=" << BD_ACCESS_KEY;
 		get << ends;
 		string str_get = get.str();
@@ -488,7 +488,7 @@ int BaiduLBSConnector::SearchNearby(double longitude, double latitude, uint32 ra
 			return status;
 		}
 
-		result = val["content"];
+		result = val;
 		//response = content;
 	} catch (std::exception &ex) {
 		err_msg = ex.what();
