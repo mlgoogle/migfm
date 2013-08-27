@@ -93,7 +93,9 @@ public:
     						size_t element_count) = 0;
 
     virtual bool FetchValue(char* key,size_t *key_len,char** value,size_t *val_len) = 0;
-    
+
+    virtual bool IncDecValue(const char* key, size_t key_len, int64 incby, int64 &result) = 0;
+
         //list
     virtual bool AddListElement(const char* key,const size_t key_len,
     								const char* val,const size_t val_len) = 0;
@@ -117,6 +119,9 @@ public:
 	virtual bool AddHashElement(const char* hash_name,const char* key,const size_t key_len,
 								const char* val,const size_t val_len) = 0;
 
+	virtual bool SetHashElement(const char* hash_name,const char* key,const size_t key_len,
+								const char* val,const size_t val_len) = 0;
+
 	virtual bool GetHashElement(const char* hash_name,const char* key,const size_t key_len,
 								char** val,size_t *val_len) = 0;
 
@@ -126,6 +131,9 @@ public:
 
 	virtual bool GetHashValues(const char* hash_name,const size_t hash_name_len,
 		                       std::list<std::string>& list) = 0;
+
+	virtual bool GetListRange(const char* key,const size_t key_len,
+				int from, int to, std::list<std::string>& list) = 0;
 };
 
 

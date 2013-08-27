@@ -55,6 +55,39 @@ int RedisDelValue(warrper_redis_context_t* context,
 	return 1;			 
 }
 
+int RedisIncDecValue(warrper_redis_context_t* context, const char* key,
+		size_t key_len, long long incby, long long *result) {
+	redisReply* reply;
+	char *val;
+	size_t val_len;
+	int ret;
+
+	if (0 == incby) {
+		ret = RedisGetValue(context, key, key_len, &val, &val_len);
+		if (NULL != val) {
+			if (NULL != result)
+				*result = strtoll(val, NULL, 10);
+			free(val);
+		}
+		return ret;
+	}
+
+	if (1 == incby)
+		reply = redisCommand(context->context,"INCR %s",key);
+	else if (-1 == incby)
+		reply = redisCommand(context->context,"DECR %s",key);
+	else if (incby > 0)
+		reply = redisCommand(context->context,"INCRBY %s %lld", key, incby);
+	else // (incby < 0)
+		reply = redisCommand(context->context,"DECRBY %s %lld", key, incby);
+
+	if (result)
+		*result = reply->integer;
+
+	freeReplyObject(reply);
+	return 1;
+}
+
 int RedisPingRedis(warrper_redis_context_t* context){
 	redisReply* reply;
 	reply = redisCommand(context->context,"PING");
@@ -78,6 +111,15 @@ int RedisAddHashElement(warrper_redis_context_t* context,const char* hash_name,
 	return 1;
 } 
 
+int RedisSetHashElement(warrper_redis_context_t* context, const char* hash_name,
+		const char* key, const size_t key_len, const char* val,
+		const size_t val_len) {
+	redisReply* reply;
+	reply = redisCommand(context->context,"hset %s %s %s",hash_name,
+							key,val);
+	freeReplyObject(reply);
+	return 1;
+}
 
 int RedisGetHashElement(warrper_redis_context_t* context,const char* hash_name, 
 						const char* key,const size_t key_len, char** val,size_t* val_len){
@@ -228,4 +270,24 @@ long long ReidsGetListSize(warrper_redis_context_t* context,
 
 int RedisClose(warrper_redis_context_t* context){
 	redisFree(context->context);
+}
+
+warrper_redis_reply_t *RedisGetListRange(warrper_redis_context_t* context, const char* key,
+		const size_t key_len, int from, int to, char*** val, int* val_len) {
+	redisReply* reply;
+	int j =0;
+	warrper_redis_reply_t* wa_re = NULL;
+	reply = redisCommand(context->context,"LRANGE %s %d %d", key, from, to);
+	if(reply->type==REDIS_REPLY_ARRAY){
+		wa_re = (warrper_redis_reply_t*)malloc(sizeof(warrper_redis_reply_t));
+		wa_re->reply = reply;
+		(*val_len) = wa_re->reply->elements;
+		(*val) = (char**)malloc(sizeof(char*)*(wa_re->reply->elements));
+		for(j =0;j<reply->elements;j++){
+			(*val)[j] = reply->element[j]->str;
+		}
+		return wa_re;
+	}
+	freeReplyObject(reply);
+	return NULL;
 }

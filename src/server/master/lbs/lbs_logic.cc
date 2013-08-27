@@ -14,6 +14,7 @@
 #include "config/config.h"
 #include "logic_comm.h"
 #include "dic_comm.h"
+#include "db_comm.h"
 
 namespace {
 int SplitStringChr( const char *str, const char *char_set,
@@ -168,6 +169,12 @@ bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 		return false;
 	}
 
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+		msg = "无效uid";
+		return false;
+	}
+
 	std::vector<std::string> location_pair;
 	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
 		msg = "location参数格式错误";
@@ -177,7 +184,6 @@ bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 	double latitude = atof(location_pair[0].c_str());
 	double longitude = atof(location_pair[1].c_str());
 
-	int64 uid = atoll(uid_str.c_str());
 	std::string response;
 	if (0 != SetPOI(uid, longitude, latitude, "", response, msg)) {
 		return false;
@@ -211,6 +217,12 @@ bool LBSLogic::OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result
 		page_size_str = "10";
 	}
 
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+		msg = "无效uid";
+		return false;
+	}
+
 	std::vector<std::string> location_pair;
 	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
 		msg = "location参数格式错误";
@@ -223,7 +235,6 @@ bool LBSLogic::OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result
 	int page_index = atoi(page_index_str.c_str());
 	int page_size = atoi(page_size_str.c_str());
 
-	int64 uid = atoll(uid_str.c_str());
 	std::string response;
 	Json::Value content;
 	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
@@ -236,6 +247,7 @@ bool LBSLogic::OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result
 	std::vector<std::string> vec_users;
 	typedef std::map<std::string, std::string> UserSongMap;
 	UserSongMap map_songs;
+	std::string nick_name, sex;
 	const Json::Value &items = content["content"];
 	for (Json::Value::iterator it = items.begin();
 		it != items.end();
@@ -255,6 +267,10 @@ bool LBSLogic::OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result
 		val["latitude"] = item["latitude"];
 		val["longitude"] = item["longitude"];
 		val["distance"] = item["distance"];
+
+		storage::DBComm::GetUserInfos(uid_str, nick_name, sex);
+		val["nickname"] = nick_name;
+		val["sex"] = sex;
 
 		vec_users.push_back(uid_str);
 
@@ -289,12 +305,16 @@ LBSLogic::LBSLogic() {
 		return;
 
 	r = config->LoadConfig(path);
-	//storage::DBComm::Init(config->mysql_db_list_);
+	storage::DBComm::Init(config->mysql_db_list_);
 	storage::MemComm::Init(config->mem_list_);
 	storage::RedisComm::Init(config->redis_list_);
 }
 
 LBSLogic::~LBSLogic() {
+	storage::DBComm::Dest();
+	storage::MemComm::Dest();
+	storage::RedisComm::Dest();
+
 	ThreadKey::DeinitThreadKey ();
 }
 

@@ -103,6 +103,14 @@ bool RedisStorageEngineImpl::FetchValue(char* key,size_t *key_len,
    return true;
 }
 
+bool RedisStorageEngineImpl::IncDecValue(const char* key, size_t key_len, int64 incby,
+		int64& result) {
+    if(PingRedis()!=1)
+    	return false;
+	MIG_DEBUG(USER_LEVEL,"key[%s] key_len[%d]",key,key_len);
+    return RedisIncDecValue(c_, key, key_len, incby, (long long *)&result)==1?true:false;
+}
+
 bool RedisStorageEngineImpl::PingRedis(){
 	
 	return (RedisPingRedis(c_)==1)?true:false;
@@ -156,6 +164,14 @@ bool RedisStorageEngineImpl::AddHashElement(const char* hash_name,const char* ke
 	if(PingRedis()!=1)
 		return false;
     return RedisAddHashElement(c_,hash_name,key,key_len,val,val_len);
+}
+
+bool RedisStorageEngineImpl::SetHashElement(const char* hash_name,
+		const char* key, const size_t key_len, const char* val,
+		const size_t val_len) {
+	if(PingRedis()!=1)
+		return false;
+    return RedisSetHashElement(c_,hash_name,key,key_len,val,val_len);
 }
 
 bool RedisStorageEngineImpl::GetHashElement(const char* hash_name,const char* key,
@@ -215,6 +231,7 @@ bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,const size_t ha
 		str.assign(pptr[r]);
 		list.push_back(str);
 	}
+	free(*pptr);
 	if(rp==NULL)
 		return false;
 	RedisFreeReply(rp);
@@ -236,8 +253,30 @@ bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 		str.assign(pptr[r]);
 		list.push_back(str);
 	}
+	free(*pptr);
 	if(rp==NULL)
 		return false;
+	RedisFreeReply(rp);
+	return true;
+}
+
+bool RedisStorageEngineImpl::GetListRange(const char* key, const size_t key_len,
+		int from, int to, std::list<std::string>& list) {
+    int i = 0;
+	if(PingRedis()!=1)
+    	return false;
+
+    char** pptr = NULL;
+    int n;
+	warrper_redis_reply_t*  rp = RedisGetListRange(c_, key,key_len,from,to,&pptr,&n);
+	if (NULL == rp)
+		return false;
+	for(i =0;i<n;i++){
+		std::string str;
+		str.assign(pptr[i]);
+		list.push_back(str);
+		free(pptr[i]);
+	}
 	RedisFreeReply(rp);
 	return true;
 }

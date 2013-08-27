@@ -137,11 +137,11 @@ bool MusicMgrEngine::GetMoodParent(const int socket,const packet::HttpPacket& pa
 	std::string b64word;
 	std::list<base::WordAttrInfo> word_list;
 	std::list<base::WordAttrInfo>::iterator it;
-	//»ñÈ¡ÐÄÇé´Ê
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½
 	r = storage::DBComm::GetMoodParentWord(word_list);
 	if (!r){
 		status = "1";
-		//msg = "ÐÄÇé²»´æÔÚ;";
+		//msg = "ï¿½ï¿½ï¿½é²»ï¿½ï¿½ï¿½ï¿½;";
 		msg = migfm_strerror(MIG_FM_MOOD_NO_VALID);
 		utf8_flag = 1;
 		goto ret;
@@ -193,8 +193,8 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 		goto ret;
 	}
 
-	//´Óredis ÀïÃæ»ñÈ¡ÓÃ»§ÐÄÐ÷Í¼
-	//ÒôÀÖ»úÆ÷ÈË×¨ÃÅ´Ó²Ù×÷¼ÇÂ¼ÀïÃæ·ÖÎö
+	//ï¿½ï¿½redis ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+	//ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½×¨ï¿½Å´Ó²ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	r = storage::RedisComm::GetUserMoodMap(uid,result);
 	if (result.empty()){
 		//LOG_ERROR("Get UID Error");
@@ -294,7 +294,7 @@ ret1:
 			//return false;
 			continue;
 
-		//ÊÇ·ñ´æÔÚ
+		//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 		it = songid_map.find(song_id);
 		if (it!=songid_map.end())
 			goto ret1;
