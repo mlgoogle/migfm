@@ -13,6 +13,10 @@
 
 #define		TIME_TEST		1025
 
+#define		LOGIC_PROLOG()	\
+		status = 0;	\
+		msg.clear()
+
 namespace mig_sociality{
 
 
@@ -138,8 +142,7 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 
 bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
-	status = 0;
-	msg.clear();
+	LOGIC_PROLOG();
 
 	std::string user_id, device_token, is_receive, begin_time, end_time;
 	if (!packet.GetAttrib("uid", user_id)) {
@@ -189,8 +192,7 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 
 bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
-	status = 0;
-	msg.clear();
+	LOGIC_PROLOG();
 
 	std::string user_id, to_user_id, song_id_str, ext_msg;
 	if (!packet.GetAttrib("uid", user_id)) {
@@ -282,8 +284,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 
 bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
-	status = 0;
-	msg.clear();
+	LOGIC_PROLOG();
 
 	std::string user_id, page_index_str, page_size_str;
 	if (!packet.GetAttrib("uid", user_id)) {
@@ -318,7 +319,6 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 		return false;
 	}
 
-
 	Json::Value &content = result["result"];
 	for (MsgList::iterator it=msg_list.begin(); it!=msg_list.end(); ++it) {
 		Json::Value item;
@@ -332,35 +332,61 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 
 bool SocialityMgrEngine::OnMsgGetPushMsgSummary(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgGetFriendList(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
+	return true;
 }
 
 bool SocialityMgrEngine::OnMsgSendFriendMsg(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
+	return true;
 }
 
 bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
+	return true;
 }
 
 bool SocialityMgrEngine::OnMsgAddUserBacklist(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
+	return true;
 }
 
 bool SocialityMgrEngine::OnMsgAddFriend(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
+
+	std::string user_id, to_user_id, song_id_str, ext_msg;
+	if (!packet.GetAttrib("uid", user_id)) {
+		msg = "uid未指定";
+		return false;
+	}
+	if (!packet.GetAttrib("touid", to_user_id)) {
+		msg = "touid未指定";
+		return false;
+	}
+
+	return true;
 }
 
 bool SocialityMgrEngine::OnMsgImportSongList(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
+	return true;
 }
 
 bool SocialityMgrEngine::OnMsgImportFriend(packet::HttpPacket& packet,
 		Json::Value& result, int& status, std::string& msg) {
+	LOGIC_PROLOG();
+	return true;
 }
 
 bool SocialityMgrEngine::CheckAndTransHMTime(const std::string &str, unsigned &time) {

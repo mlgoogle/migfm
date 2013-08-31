@@ -134,6 +134,22 @@ public:
 
 	virtual bool GetListRange(const char* key,const size_t key_len,
 				int from, int to, std::list<std::string>& list) = 0;
+
+	typedef std::string StoreEntity;
+	typedef std::pair<StoreEntity, double> MemberScorePair;
+
+	virtual bool SSet_Add(const char* key, size_t key_len,
+				const StoreEntity &member, const StoreEntity &score,
+				int &added) = 0;
+
+	virtual bool SSet_Adds(const char* key, size_t key_len,
+			const std::vector<MemberScorePair> &mem_score,
+			int &added) = 0;
+
+	virtual bool SSet_GetCount(const char* key, size_t key_len,
+			int &count) = 0;
+	virtual bool SSet_GetCountRange(const char* key, size_t key_len) = 0;
+	virtual bool SSet_Add(const char* key, size_t key_len) = 0;
 };
 
 
