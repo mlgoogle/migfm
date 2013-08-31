@@ -2,6 +2,7 @@
 #define MIG_FM_PUBLIC_BASIC_HTTP_PACKET_H__
 
 #include "basictypes.h"
+#include "log/mig_log.h"
 #include <map>
 #include <string>
 namespace packet{
@@ -18,6 +19,8 @@ public:
 	bool GetAttrib(const std::string& strName,std::string& strValue);
 
 	bool GetPacketType(std::string& strValue);
+
+	void HttpPacketDump();
 private:
 	void SetData(const char* data,const int32 len);
 public:

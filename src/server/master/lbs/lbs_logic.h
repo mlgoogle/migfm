@@ -49,6 +49,9 @@ public:
 			uint32 page_index, uint32 page_size, Json::Value &result,
 			std::string &response, std::string &err_msg);
 
+	bool OnMsgNearCollect(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg);
+
 	int SearchRegin(double longitude, double latitude,
 			std::string &response, std::string &err_msg);
 

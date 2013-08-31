@@ -96,6 +96,11 @@ public:
 
     virtual bool IncDecValue(const char* key, size_t key_len, int64 incby, int64 &result) = 0;
 
+	virtual bool IncrValue(const char* key,const size_t key_len,
+		                   const char* val,const size_t val_len) = 0;
+
+	virtual bool DecrValue(const char* key,const size_t key_len,
+		                   const char* val,const size_t val_len) = 0;
         //list
     virtual bool AddListElement(const char* key,const size_t key_len,
     								const char* val,const size_t val_len) = 0;
@@ -126,6 +131,8 @@ public:
 								char** val,size_t *val_len) = 0;
 
 	virtual bool DelHashElement(const char* hash_name,const char* key,const size_t key_len) =0;
+
+	virtual int  GetHashSize(const char* hash_name) = 0;
 
 	virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list) = 0;
 

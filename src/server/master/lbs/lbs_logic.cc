@@ -136,7 +136,9 @@ bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int le
 		OnMsgSetPoi(packet, root, ret_status, ret_msg);
 	} else if (type=="searchnearby") {
 		OnMsgSearchNearby(packet, root, ret_status, ret_msg);
-	} else
+	} else if (type=="searchcollect"){
+		OnMsgNearCollect(packet,root,ret_status,ret_msg);
+	}else
 		return true;
 
 	root["status"] = ret_status;
@@ -152,6 +154,87 @@ bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int le
 	MIG_DEBUG(USER_LEVEL, "lbs request:%s, response:%s", type.c_str(), res.c_str());
 
     return true;
+}
+
+bool LBSLogic::OnMsgNearCollect(packet::HttpPacket &packet, Json::Value &result, int &status, std::string &msg)
+{
+
+	status = 0;
+
+	msg.clear();
+	std::string uid_str, taruid_str,location_str, radius_str, page_index_str, page_size_str;
+	if (!packet.GetAttrib("uid", uid_str)) {
+		msg = "uid未指定";
+		return false;
+	}
+
+	if (!packet.GetAttrib("taruid", taruid_str)) {
+		msg = "taruid未指定";
+		return false;
+	}
+
+	if (!packet.GetAttrib("location", location_str)) {
+		msg = "location未指定";
+		return false;
+	}
+	if (!packet.GetAttrib("radius", radius_str)) {
+		radius_str = "1000";
+	}
+	if (!packet.GetAttrib("page_index", page_index_str)) {
+		page_index_str = "0";
+	}
+	if (!packet.GetAttrib("page_size", page_size_str)) {
+		page_size_str = "10";
+	}
+
+	std::vector<std::string> location_pair;
+	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
+		msg = "location参数格式错误";
+		return false;
+	}
+
+	double latitude = atof(location_pair[0].c_str());
+	double longitude = atof(location_pair[1].c_str());
+	uint32 radius = atoi(radius_str.c_str());
+	int page_index = atoi(page_index_str.c_str());
+	int page_size = atoi(page_size_str.c_str());
+
+	int64 uid = atoll(uid_str.c_str());
+	int64 taruid = atoll(taruid_str.c_str());
+	std::string response;
+	Json::Value content;
+	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
+		content, response, msg)) {
+			return false;
+	}
+
+	//Json::Value &users = result["result"]["nearUser"];
+	std::map<std::string, bool> mapExist;
+	const Json::Value &items = content["content"];//多少用户即多少歌曲
+	//获取收藏列表大小
+	int32 collect_num = redis_conn_.GetCollect(taruid);
+
+	for (Json::Value::iterator it = items.begin();//获取每个用户收藏列表
+		it != items.end();
+		++it) {
+			const Json::Value &item = *it;
+			Json::Value val;
+			if (!item.isMember("ext"))
+				continue;
+			std::string uid_str = item["ext"]["user_id"].asString();
+			if (uid_str.empty())
+				continue;
+			if (mapExist.end() != mapExist.find(uid_str))
+				continue;
+			if (atoll(uid_str.c_str())!=taruid)
+			    collect_num +=redis_conn_.GetCollect(atoll(uid_str.c_str()));
+	}
+
+	result["result"]["mynum"] = collect_num;
+	result["result"]["nearnum"] = items.size();
+
+	status = 1;
+	return true;
 }
 
 bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,

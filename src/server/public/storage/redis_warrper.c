@@ -24,6 +24,36 @@ int RedisAddValue(warrper_redis_context_t* context,
 	return 1;
 }
 
+int RedisIncr(warrper_redis_context_t* context,const char* key,const size_t key_len){
+	redisReply* reply;
+	reply = redisCommand(context->context,"incr %b",key,key_len);
+	freeReplyObject(reply);
+	return 1;
+}
+
+int RedisDecr(warrper_redis_context_t* context, const char* key,const size_t key_len){
+	redisReply* reply;
+	reply = redisCommand(context->context,"decr %b",key,key_len);
+	freeReplyObject(reply);
+	return 1;
+}
+
+int ReidsIsExist(warrper_redis_context_t* context,
+				 const char* key,const size_t key_len){
+	redisReply* reply;
+	reply = redisCommand(context->context,"GET %s",key);
+	if(reply->len!=0){
+	 if (strlen(reply->str)<=0){
+		 printf("########%d#########",strlen(reply->str));
+		 return 0;
+	 }
+	 freeReplyObject(reply);
+	 return 1;
+	}
+	freeReplyObject(reply);
+	return 0;
+}
+
 int RedisGetValue(warrper_redis_context_t* context,
 				const char* key,const size_t key_len,
 				char** val,size_t *val_len){

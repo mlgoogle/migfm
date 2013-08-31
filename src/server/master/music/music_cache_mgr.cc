@@ -1,6 +1,7 @@
 #include "music_cache_mgr.h"
 #include "http_response.h"
 #include "db_comm.h"
+#include "dic_comm.h"
 #include "logic_comm.h"
 #include "json/json.h"
 #include <vector>
@@ -224,22 +225,59 @@ bool MusicCacheManager::PutJsonMusicChannel(int channel,
 		std::string ssid;
 		std::string aid;
 		std::string durl;
+		std::string hq_url;
 		std::string titile;
 		std::string pub_time;
 		std::string album;
 		std::string pic_url;
 		int music_time = 0;
-		artist = song[i]["artist"].asString();
-		durl = song[i]["url"].asString();
-		titile = song[i]["title"].asString();
-		pub_time = song[i]["public_time"].asString();
-		album = song[i]["albumtitle"].asString();
-		music_time = song[i]["length"].asInt();
-		id = song[i]["sid"].asString();
-		ssid = song[i]["ssid"].asString();
-		aid = song[i]["aid"].asString();
-		pic_url = song[i]["picture"].asString();
-		base::MusicInfo mi(id,ssid,aid,album,titile,durl,pub_time,artist,pic_url,music_time);
+		if (song[i].isMember("artist")){
+			artist = song[i]["artist"].asString();
+		}
+
+		if (song[i].isMember("url")){
+			durl = song[i]["url"].asString();
+		}
+		
+		if(song[i].isMember("title")){
+			titile = song[i]["title"].asString();
+		}
+
+		if (song[i].isMember("public_time")){
+			pub_time = song[i]["public_time"].asString();
+		}
+
+		if (song[i].isMember("albumtitle")){
+			album = song[i]["albumtitle"].asString();
+		}
+		
+		if (song[i].isMember("length")){
+			music_time = song[i]["length"].asInt();
+		}
+
+		if (song[i].isMember("sid")){
+			id = song[i]["sid"].asString();
+		}
+		
+		if (song[i].isMember("ssid")){
+			ssid = song[i]["ssid"].asString();
+		}
+		
+		if (song[i].isMember("aid")){
+			aid = song[i]["aid"].asString();
+		}
+		
+		if (song[i].isMember("picture")){
+			pic_url = song[i]["picture"].asString();
+		}
+		
+		if (song[i].isMember("hq_url")){
+			hq_url = song[i]["picture"].asString();
+		}else{
+			hq_url = durl;
+		}
+
+		base::MusicInfo mi(id,ssid,aid,album,titile,hq_url,pub_time,artist,pic_url,durl,music_time);
 		music_list.push_back(mi);
 	}
 
@@ -279,7 +317,7 @@ time_t MusicCacheManager::GetMusicTime(int channel){
 	return music_time;
 }
 
-void MusicCacheManager::IsTimeMusiChannelInfos(std::string& channel){
+void MusicCacheManager::IsTimeMusiChannelInfos(const std::string& channel){
 	time_t music_time = GetMusicTime(atol(channel.c_str()));
 	std::string content;
 	bool r = false;
@@ -294,7 +332,7 @@ void MusicCacheManager::IsTimeMusiChannelInfos(std::string& channel){
 	}
 }
 
-void MusicCacheManager::IsLessMuciChannelInfos(std::string& channel, int num){
+void MusicCacheManager::IsLessMuciChannelInfos(const std::string& channel, int num){
 	int current_num = GetMusicCHannelNum(atol(channel.c_str()));
 	std::string content;
 	bool r = false;
@@ -310,35 +348,103 @@ void MusicCacheManager::IsLessMuciChannelInfos(std::string& channel, int num){
 }
 
 
+bool MusicCacheManager::GetMusicCahnelTypeInfos(int channel,const std::string& uid,const int nun,
+												std::stringstream& os){
+	usr_logic::RLockGd lr(cache_mgr_lock_);
+	int32 i = 0;
+	int32 max_num = 0;
+	bool r = false;
+	ChannelCache* cc = GetChannelCache(channel);
+	if (cc==NULL)
+		return false;
+	max_num = nun;
+	while(i<max_num){
+		std::list<base::MusicInfo>::iterator it =cc->channel_music_infos_.begin();
 
-bool MusicCacheManager::GetMusicChannelInfos(int channel, std::string &json_content){
+		if (it!=cc->channel_music_infos_.end()){
+			std::string songid;
+			base::MusicInfo mi = (*it);
+			int32 is_like = 0;
+
+			//id转化
+			storage::DBComm::GetSongidFromDoubanId(mi.id(),songid);
+			mi.set_id(songid);
+			//是否拉黑
+			r = storage::RedisComm::IsHateSong(uid,mi.id());
+			if (r){
+				cc->channel_music_infos_.pop_front();
+				continue;
+			}
+			//是否收藏
+			r = storage::RedisComm::IsCollectSong(uid,mi.id());
+			if (r)
+				is_like = 1;
+			else 
+				is_like = 0;
+
+			if (r)//拉黑
+				continue;
+			os<<"{\"id\":\""<<mi.id().c_str()
+				<<"\",\"title\":\""<<mi.title().c_str()
+				<<"\",\"artist\":\""<<mi.artist().c_str()
+				<<"\",\"pub_time\":\""<<mi.pub_time().c_str()
+				<<"\",\"album\":\""<<mi.album_title().c_str()
+				<<"\",\"hq_url\":\""<<mi.hq_url().c_str()
+				<<"\",\"url\":\""<<mi.url().c_str()
+				<<"\",\"pic\":\""<<mi.pic_url().c_str()<<"\",\"time\":\""
+				<<mi.music_time()<<"\",\""
+				<<is_like<<"\":\"0\"}";
+			if (i!=0){
+				os<<",";
+			}
+			cc->channel_music_infos_.pop_front();
+		}
+		i++;
+	}
+}
+
+bool MusicCacheManager::GetMusicChannelInfos(int channel, 
+											 std::string &json_content,
+											 const int flag,const int cur_num){
     usr_logic::RLockGd lr(cache_mgr_lock_);
 	std::stringstream os;
 	int32 i = 0;
+	int32 max_num = 0;
 	bool r = false;
 	ChannelCache* cc = GetChannelCache(channel);
 	if (cc==NULL)
 		return false;
 	os<<"\"channel\":[";
-	while(i<2){
+	if (flag==0)
+		max_num = 1;
+	else
+		max_num = cur_num;
+	while(i<max_num){
 		std::list<base::MusicInfo>::iterator it =cc->channel_music_infos_.begin();
 
 		if (it!=cc->channel_music_infos_.end()){
 			std::string content_url;
 			base::MusicInfo mi = (*it);
-			r = get_song_engine_->GetSongInfo(mi.artist(),mi.title(),
-				mi.album_title(),content_url,0);
+			if (flag==0){
+			    r = get_song_engine_->GetSongInfo(mi.artist(),mi.title(),
+				   mi.album_title(),content_url,0);
 			//豆瓣不支持html5 故从爬虫获取
-			os<<"{\"id\":\""<<mi.id().c_str()<<"\",\"title\":\""<<mi.title().c_str()
-				<<"\",\"artist\":\""<<mi.artist().c_str()<<"\",\"pub_time\":\""
-				<<mi.pub_time().c_str()<<"\",\"album\":\""<<mi.album_title().c_str()
+			}else{
+				content_url = mi.url();
+			}
+			os<<"{\"id\":\""<<mi.id().c_str()
+				<<"\",\"title\":\""<<mi.title().c_str()
+				<<"\",\"artist\":\""<<mi.artist().c_str()
+				<<"\",\"pub_time\":\""<<mi.pub_time().c_str()
+				<<"\",\"album\":\""<<mi.album_title().c_str()
+				<<"\",\"hq_url\":\""<<mi.hq_url().c_str()
 				<<"\",\"url\":\""<<content_url.c_str()
 				<<"\",\"pic\":\""<<mi.pic_url().c_str()<<"\",\"time\":\""
 				<<mi.music_time()<<"\",\"like\":\"0\"}";
 			if (i==0){
 				os<<",";
-				cc->channel_music_infos_.pop_front();
 			}
+			cc->channel_music_infos_.pop_front();
 		}
 		i++;
 	}
@@ -365,7 +471,7 @@ bool MusicCacheManager::InitMusicChannel(){
 			channel_cache_map_[channel] = cc;
 		}
 		std::string content;
-		r = RequestDoubanMusicInfos(ci.douban_index(),content);
+		//r = RequestDoubanMusicInfos(ci.douban_index(),content);
 		PutJsonMusicChannel(channel,content);
 		cc->current_time = time(NULL);
 	}

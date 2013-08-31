@@ -581,6 +581,54 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="file"
+			>
+			<Filter
+				Name="include"
+				>
+				<File
+					RelativePath=".\file\file_path.h"
+					>
+				</File>
+				<File
+					RelativePath=".\file\file_util.h"
+					>
+				</File>
+				<File
+					RelativePath=".\file\string_serialization.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="source"
+				>
+				<File
+					RelativePath=".\file\file_path.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\file\file_util.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\file\string_serialization.cc"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="algorithm"
+			>
+			<File
+				RelativePath=".\algorithm\algorithm_base.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\algorithm\algorithm_base.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

@@ -232,8 +232,8 @@ bool UsrMgrEngine::UpdateUserinfo(const int socket,const packet::HttpPacket& pac
 		return false;
 	}
 
-	int iuid = atol(uid.c_str());
-	r = storage::DBComm::UpDateUserInfos(atol(uid.c_str()),username,nickname,gender,type,
+	int iuid = atoll(uid.c_str());
+	r = storage::DBComm::UpDateUserInfos(atoll(uid.c_str()),username,nickname,gender,type,
 		                                 birthday,location,source,head);
 	if (!r){ //vailed.
 		status = "0";
@@ -295,7 +295,7 @@ bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string
 							  const std::string location,const std::string head){
 	  //check user Exist
 	  bool r = false;
-	  int uid  = 0;
+	  int64 uid  = 0;
 	  std::string result_out;
 	  std::string status = "0";
 	  std::string msg = "0";

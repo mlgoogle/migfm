@@ -39,6 +39,15 @@ public:
 
 	static bool DelHateSong(const std::string& uid,const std::string& songid);
 
+	static bool GetDefaultSongs(const std::string& uid,std::list<std::string>& song_list);
+
+	static bool MgrListenSongsNum(const std::string& songid,const std::string& uid,
+		                          const int32 flag);
+
+	static bool GetUpdateConfig(const std::string& key,std::string& content);
+
+	static int  GetHashSize(const std::string& key);
+
 private:
 	static void SetRadomNum();
 private:
@@ -58,6 +67,12 @@ public:
 
 	static bool GetString(const char* key,const size_t key_len,
 		                  char** data,size_t* len);
+
+	static bool SetUsrCurrentSong(const std::string& uid,
+		                          const std::string& songid,
+								  const std::string& name,
+								  const std::string& singer,
+								  const std::string& netstat);
 private:
 	static base_storage::DictionaryStorageEngine* engine_;
 };

@@ -14,6 +14,9 @@ public:
 	static void FreeInstance(void);
 public:
 	static RobotEngine*  engine_;
+
+public:
+	bool Init();
 };
 
 }

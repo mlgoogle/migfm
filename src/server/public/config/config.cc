@@ -26,11 +26,15 @@ static char idprovider[] = "idprovider";
 static char cert_path[] = "cert_path";
 static char sp_url[] = "sp_url";
 static char idp_url[] = "idp_url";
+static char record[] = "record";
+static char mood_path[] = "mood_path";
+static char sytle_path[] = "sytle_path";
 static int32 config_flag = 0;
 static int32 data_flag = 0;
 static int32 cached_flag = 0;
 static int32 memcached_flag = 0;
 static int32 sso_flag = 0;
+static int32 record_flag = 0;
 
 FileConfig*  FileConfig::config_ = NULL;
 
@@ -126,52 +130,25 @@ static void XMLCALL OnConfigStart(void* usrData,const char* name,const char** at
         for(i=0;atts[i]!=0;i+=2){
             file_config->idp_url_.assign(atts[i+1]);
         }
-    }
-/*	if(strcmp(name,database)==0){//mysql
-		for(i=0;atts[i]!=0;i+=2){
-		    if(strcmp(atts[i],host)==0)
-		    	shost.assign(atts[i+1]);
-		    else if(strcmp(atts[i],port)==0)
-		    	sport.assign(atts[i+1]);
-		    else if(strcmp(atts[i],user)==0)
-		    	suser.assign(atts[i+1]);
-		    else if(strcmp(atts[i],pass)==0)
-		    	spass.assign(atts[i+1]);
-		    else if(strcmp(atts[i],source)==0)
-		    	sname.assign(atts[i+1]);
+    }else if ((strcmp(name,record))){
+		record_flag = 1;
+    }else if ((strcmp(name,mood_path))&&record_flag==1){
+		for (i=0;atts[i]!=0;i+=2){
+			if(strcmp(atts[i],path)==0){
+			    file_config->mood_path_.assign(atts[i+1]);
+			    MIG_INFO(USER_LEVEL,"mood_path[%s]",
+				     file_config->mood_path_.c_str());
+			}
 		}
-		base::ConnAddr addr(shost.c_str(),atoi(sport.c_str()),
-					suser.c_str(),spass.c_str(),sname.c_str());
-		file_config->db_list_.push_back(addr);
-		
-	}else if(strcmp(name,redis)==0){//redis
-		std::string shost;
-		std::string sport;
-		for(i=0;atts[i]!=0;i+=2){
-			if(strcmp(atts[i],host)==0)
-				shost.assign(atts[i+1]);
-			else if(strcmp(atts[i],port)==0)
-				sport.assign(atts[i+1]);
+	}else if ((strcmp(name,sytle_path))&&record_flag==1){
+		for (i=0;atts[i]!=0;i+=2){
+			if(strcmp(atts[i],path)==0){
+			  file_config->style_path_.assign(atts[i+1]);
+			   MIG_INFO(USER_LEVEL,"style_path_[%s]",
+				file_config->mood_path_.c_str());
+			}
 		}
-		base::ConnAddr addr(shost.c_str(),atoi(sport.c_str()));
-		file_config->redis_list_.push_back(addr);
-		
-	}else if(strcmp(name,memcached)==0){//memcached
-		flag = 1;
-	}else if((strcmp(name,config)==0)&&flag){
-		std::string shost;
-		std::string sport;
-		for(i=0;atts[i]!=0;i+=2){
-			if(strcmp(atts[i],host)==0)
-				shost.assign(atts[i+1]);
-			else if(strcmp(atts[i],port)==0)
-				sport.assign(atts[i+1]);
-		}
-		if((shost.empty()!=true)&&(sport.empty()!=true)){
-			base::ConnAddr addr(shost.c_str(),atoi(sport.c_str()));
-			file_config->mem_list_.push_back(addr);
-		}
-	}*/
+	}
 }
 
 static void XMLCALL OnConfigEnd(void* usrData,const char* name){

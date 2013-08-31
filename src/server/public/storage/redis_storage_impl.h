@@ -40,6 +40,12 @@ public:
 
     virtual bool FetchValue(char* key,size_t *key_len,
                             char** value,size_t *val_len);
+
+	virtual bool IncrValue(const char* key,const size_t key_len,
+		const char* val,const size_t val_len);
+
+	virtual bool DecrValue(const char* key,const size_t key_len,
+		const char* val,const size_t val_len);
     
     virtual bool IncDecValue(const char* key, size_t key_len, int64 incby, int64 &result);
 
@@ -75,6 +81,8 @@ public:
 		char** val,size_t *val_len);
 
 	virtual bool DelHashElement(const char* hash_name,const char* key,const size_t key_len);
+
+	virtual int  GetHashSize(const char* hash_name);
 
 	virtual bool GetHashValues(const char* hash_name,const size_t hash_name_len,
 		                       std::list<std::string>& list);

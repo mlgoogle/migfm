@@ -4,6 +4,7 @@
 #include "get_song.h"
 #include "basic/http_packet.h"
 #include "basic/basic_info.h"
+#include "music_recording.h"
 
 namespace music_logic{
 
@@ -19,6 +20,7 @@ private:
 	static MusicMgrEngine   *instance_;
 
 public:
+	bool Init();
 	bool OnMusicMgrConnect(struct server* srv,int socket);
 
     bool OnMusicMgrMessage(struct server *srv, int socket, 
@@ -44,6 +46,8 @@ public:
 private:
 	bool GetMusicChannel(const int socket,const packet::HttpPacket& packet);
 
+	bool GetDoubanMusicChannelSong(const int socket,const packet::HttpPacket& packet);
+
 	bool GetMusicChannelSong(const int socket,const packet::HttpPacket& packet);
 
 	bool GetDescriptionWord(const int socket,const packet::HttpPacket& packet);
@@ -62,13 +66,28 @@ private:
 	bool DelCollectAndHateSong(const int socket,const packet::HttpPacket& packet,
 		                       const int flag);//1 Collect 0 Hate
 
-	bool GetCllectSongList(const int socket,const packet::HttpPacket& packet);
+	bool PostUserLocalMusicinfos(const int socket,const packet::HttpPacket& packet);
 
+	bool UpdateConfigFile(const int socket,const packet::HttpPacket& packet);
+
+	bool GetSongList(const int socket,const packet::HttpPacket& packet,const int type);
+
+	 //0 default 1 collect
+
+	bool GetTypeSongs(const int socket,const packet::HttpPacket& packet);
+
+    bool SetMoodRecording(const int socket,const packet::HttpPacket& packet);
+private:
 	bool GetMusicInfos(const int socket,const std::string& songid);
 
 	bool GetOneMusicInfo(const std::string& song_id,base::MusicInfo& mi);
+
+	bool GetMoodScensChannelSongs(const std::string& uid,const std::string mode,const int32 num,
+		const std::string wordid,std::stringstream& result);
 private:
 	music_logic::GetSongUrl*                         get_song_engine_;
+	music_record::MoodRecordingEngine*               mood_record_engine_;
+	music_record::UserLocalMusicRecodingEngine*      user_local_music_engine_;
 
 };
 

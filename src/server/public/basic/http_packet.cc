@@ -46,6 +46,13 @@ bool HttpPacket::GetAttrib(const std::string &strName,
 	return false;
 }
 
+void HttpPacket::HttpPacketDump(){
+	for(std::map<std::string,std::string>::iterator it = data_->map_value_.begin();
+		it!=data_->map_value_.end();++it){
+			MIG_DEBUG(USER_LEVEL,"key[%s]:::value[%s]",it->first.c_str(),
+				      it->second.c_str());
+	}
+}
 
 bool HttpPacket::GetPacketType(std::string &strValue){
 	return GetAttrib(type_,strValue);

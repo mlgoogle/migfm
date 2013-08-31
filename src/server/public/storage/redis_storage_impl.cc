@@ -90,6 +90,33 @@ bool RedisStorageEngineImpl::DelValue(const char* key,const size_t key_len){
     return RedisDelValue(c_,key,key_len)==1?true:false;
 }
 
+bool RedisStorageEngineImpl::IncrValue(const char* key,const size_t key_len, 
+									   const char* val,const size_t val_len){
+	bool r = false;
+	char* default_value = "1";
+	size_t default_size = 1;
+	if (PingRedis()!=1)
+		return false;
+
+	//是否存在
+	if((ReidsIsExist(c_,key,key_len))==1)
+		return RedisIncr(c_,key,key_len);
+	else
+		return RedisAddValue(c_,key,key_len,default_value,default_size);
+}
+
+bool RedisStorageEngineImpl::DecrValue(const char* key,const size_t key_len, 
+									   const char* val,const size_t val_len){
+	char** sval;
+	size_t* sval_len;
+	if (PingRedis()!=1)
+		return false;
+	//是否存在
+	if((ReidsIsExist(c_,key,key_len))==1)
+	    return RedisDecr(c_,key,key_len);
+	return false;
+}
+
 bool RedisStorageEngineImpl::MGetValue(const char* const * key_array,
 	                                   const size_t* key_len_array,
 	                                   size_t element_count){
@@ -164,6 +191,13 @@ bool RedisStorageEngineImpl::AddHashElement(const char* hash_name,const char* ke
 	if(PingRedis()!=1)
 		return false;
     return RedisAddHashElement(c_,hash_name,key,key_len,val,val_len);
+}
+
+int RedisStorageEngineImpl::GetHashSize(const char* hash_name){
+
+	if (PingRedis()!=1)
+		return 0;
+	return RedishHashSize(c_,hash_name);
 }
 
 bool RedisStorageEngineImpl::SetHashElement(const char* hash_name,
