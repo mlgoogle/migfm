@@ -23,6 +23,7 @@ public:
 	bool BindUserPOI(int64 user_id, int64 poi_id);
 	int64 FindUserPOIID(int64 user_id);
 	bool DeleteUserPOI(int64 user_id);
+	int32 GetCollect(const int64 user_id);
 
 public:
 	RedisConnector();

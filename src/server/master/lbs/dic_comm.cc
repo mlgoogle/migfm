@@ -1,6 +1,7 @@
 #include "dic_comm.h"
 #include "logic_comm.h"
 #include <assert.h>
+#include <sstream>
 
 namespace storage{
 
@@ -66,6 +67,45 @@ bool MemComm::GetString(const char* key,const size_t key_len,
 						char** data,size_t* len){
 
      return engine_->GetValue(key,key_len,data,len);
+}
+
+bool MemComm::GetUserCurrentSong(const std::vector<std::string> &vec_user,
+		std::map<std::string, std::string> &map_songs) {
+	using namespace std;
+
+	map_songs.clear();
+
+	if (vec_user.empty())
+		return true;
+
+	typedef std::map<std::string, std::string> KeyUserMap;
+	KeyUserMap map_key_users;
+	std::vector<const char *> vec_keys;
+	std::vector<size_t> vec_key_lens;
+	std::stringstream ss;
+	for (vector<string>::const_iterator it=vec_user.begin(); it!=vec_user.end(); ++it) {
+		ss.str("");
+		ss << "cur" << it->c_str();
+		const string &key = map_key_users.insert(KeyUserMap::value_type(ss.str(), *it)).first->first;
+		vec_keys.push_back(key.c_str());
+		vec_key_lens.push_back(key.size());
+	}
+
+	engine_->MGetValue(&vec_keys[0], &vec_key_lens[0], vec_keys.size());
+
+	char return_key[MEMCACHED_MAX_KEY] = {0};
+	size_t return_key_length = MEMCACHED_MAX_KEY;
+	char *return_value = NULL;
+	size_t return_value_length = 0;
+
+	while (engine_->FetchValue(return_key, &return_key_length, &return_value,
+	                                      &return_value_length)) {
+		if (return_key && return_value)
+			map_songs[map_key_users[return_key]] = return_value;
+		if (return_value)
+			free(return_value);
+	}
+	return true;
 }
 
 }

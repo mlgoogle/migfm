@@ -16,6 +16,11 @@ static const char *POI_HASH_KEY = "lbs:poi";
 bool RedisConnector::BindUserPOI(int64 user_id, int64 poi_id) {
 	//ASSERT(IsConnected());
 
+	base_storage::DictionaryStorageEngine *redis =
+			storage::RedisComm::GetConnection();
+	if (NULL == redis)
+		return false;
+
 	if (0==user_id || 0==poi_id)
 		return false;
 
@@ -24,13 +29,16 @@ bool RedisConnector::BindUserPOI(int64 user_id, int64 poi_id) {
 	snprintf(field, arraysize(field), "%lld", user_id);
 	snprintf(val, arraysize(val), "%lld", poi_id);
 
-	base_storage::DictionaryStorageEngine *redis =
-			storage::RedisComm::GetConnection();
 	return redis->AddHashElement(POI_HASH_KEY, field, strlen(field), val, strlen(val));
 }
 
 int64 RedisConnector::FindUserPOIID(int64 user_id) {
 	//ASSERT(IsConnected());
+
+	base_storage::DictionaryStorageEngine *redis =
+			storage::RedisComm::GetConnection();
+	if (NULL == redis)
+		return false;
 
 	if (0 == user_id)
 		return 0;
@@ -40,17 +48,30 @@ int64 RedisConnector::FindUserPOIID(int64 user_id) {
 	snprintf(key, arraysize(key), "%lld", user_id);
 	size_t val_len = 0;
 
-	base_storage::DictionaryStorageEngine *redis =
-			storage::RedisComm::GetConnection();
 	redis->GetHashElement(POI_HASH_KEY, key, strlen(key), &val, &val_len);
 	if (NULL==val || 0==val_len)
 		return 0;
-	else
-		return atoll(val);
+
+	int64 poi_id = atoll(val);
+	free(val);
+	return poi_id;
+}
+
+int32 RedisConnector::GetCollect(const int64 user_id){
+	base_storage::DictionaryStorageEngine *redis =
+		storage::RedisComm::GetConnection();
+	char field[256] = {0};
+	snprintf(field, arraysize(field), "h%lldclt", user_id);
+	return redis->GetHashSize(field);
 }
 
 bool RedisConnector::DeleteUserPOI(int64 user_id) {
 	//ASSERT(IsConnected());
+
+	base_storage::DictionaryStorageEngine *redis =
+			storage::RedisComm::GetConnection();
+	if (NULL == redis)
+		return false;
 
 	if (0 == user_id)
 		return false;
@@ -58,8 +79,6 @@ bool RedisConnector::DeleteUserPOI(int64 user_id) {
 	char key[256] = {0};
 	snprintf(key, arraysize(key), "user:%lld:pos.id", user_id);
 
-	base_storage::DictionaryStorageEngine *redis =
-			storage::RedisComm::GetConnection();
 	return redis->DelHashElement(POI_HASH_KEY, key, strlen(key));
 }
 
