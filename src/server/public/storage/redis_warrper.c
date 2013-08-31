@@ -108,6 +108,15 @@ int RedisAddHashElement(warrper_redis_context_t* context,const char* hash_name,
 	return 1;
 } 
 
+int RedisSetHashElement(warrper_redis_context_t* context, const char* hash_name,
+		const char* key, const size_t key_len, const char* val,
+		const size_t val_len) {
+	redisReply* reply;
+	reply = redisCommand(context->context,"hset %s %s %s",hash_name,
+							key,val);
+	freeReplyObject(reply);
+	return 1;
+}
 
 int RedisGetHashElement(warrper_redis_context_t* context,const char* hash_name, 
 						const char* key,const size_t key_len, char** val,size_t* val_len){

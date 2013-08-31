@@ -49,6 +49,10 @@ int RedisAddHashElement(warrper_redis_context_t* context,const char* hash_name,
 						const char* key,const size_t key_len,
 						const char* val,const size_t val_len);
 
+int RedisSetHashElement(warrper_redis_context_t* context,const char* hash_name,
+						const char* key,const size_t key_len,
+						const char* val,const size_t val_len);
+
 int RedisGetHashElement(warrper_redis_context_t* context,const char* hash_name,
 						const char* key,const size_t key_len,
 						char** val,size_t* val_len);

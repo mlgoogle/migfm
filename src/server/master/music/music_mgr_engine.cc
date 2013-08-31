@@ -133,7 +133,7 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMoodMap(socket,packet);
 	}else if (type=="getmparent"){
 		GetMoodParent(socket,packet);
-	}else if (type=="setcltsong"){
+	}else if (type=="setcltsong"){//记录收藏度
 		PostCollectAndHateSong(socket,packet,1);
 	}else if (type=="getcltsongs"){
 		GetSongList(socket,packet,1);
@@ -143,7 +143,7 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		PostCollectAndHateSong(socket,packet,0);
 	}else if (type=="delthsong"){
 		DelCollectAndHateSong(socket,packet,0);
-	}else if (type=="recordcursong"){
+	}else if (type=="recordcursong"){//记录热度
 		SetMoodRecording(socket,packet);
 	}else if (type=="getdefsongs"){
 		GetSongList(socket,packet,0);
@@ -589,6 +589,10 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	std::string result;
 	int32 utf8_flag = 0;
 	std::string songid;
+	std::string mood_type;
+	std::string tid;
+	std::string tar_uid;
+	std::string content;
 	int flag = 0;
 	std::string music_info;
 	base::MusicInfo smi;
@@ -596,7 +600,21 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	std::string b64artist;
 	std::string b64album;
 	std::stringstream os;
+	Json::Reader reader;
+	Json::Value  root;
+	Json::Value songinfo;
+	std::string hot_num;
+	std::string clt_num;
+	std::string cmt_num;
 	r = pack.GetAttrib(UID,uid);
+	if (!r){
+		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
+		status = "0";
+		utf8_flag = 1;
+		goto ret;
+	}
+
+	r = pack.GetAttrib(TARID,tar_uid);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
@@ -617,7 +635,7 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	}
 	os<<"\"song\":[";
 	while(song_list.size()>0){
-		songid = song_list.front();
+		content = song_list.front();
 		song_list.pop_front();
 		if (flag==0){
 			flag = 1;
@@ -625,14 +643,41 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 			os<<",";
 		}
 
-		r = storage::RedisComm::GetMusicInfos(songid,music_info);
+		//解析json
+		//{"songid":"100001","type":"1","typeid":"12"}
 
+		//收藏歌曲属性
+		r = reader.parse(content.c_str(),root);
+		if (!r)
+			continue;
+		if (root.isMember("songid"))
+			songid = root["songid"].asString();
+		else
+			continue;
+
+		if (root.isMember("type"))
+			mood_type = root["type"].asString();
+		else
+			mood_type = "1";
+
+		if (root.isMember("typeid"))
+			tid = root["typeid"].asString();
+		else
+			tid = "1";
+
+		r = storage::RedisComm::GetMusicInfos(songid,music_info);
 		if (!r)
 			continue;
 
 		r = smi.UnserializedJson(music_info);
 		if (!r)
 			continue;
+
+		//获取收藏数//获取评论数//热度
+		GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
+		smi.set_music_clt(clt_num);
+		smi.set_music_cmt(cmt_num);
+		smi.set_music_hot(hot_num);
 
 		storage::DBComm::GetMusicUrl(smi.id(),hq_content_url,content_url);
 		smi.set_hq_url(hq_content_url);
@@ -650,6 +695,9 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 			<<"\",\"album\":\""<<b64album.c_str()
 			<<"\",\"time\":\""<<smi.music_time()
 			<<"\",\"pic\":\""<<smi.pic_url().c_str()
+			<<"\",\"type\":\""<<mood_type.c_str()
+			<<"\",\"typeid\":\""<<tid.c_str()
+			<<""
 			<<"\",\"like\":\"0\"}";
 	}
 	flag = 0;
@@ -912,6 +960,9 @@ ret:
 			if (atol(lastsongid.c_str())!=0)
 				storage::RedisComm::MgrListenSongsNum(lastsongid,uid,0);
 		}
+		if (songid!="0")
+			//记录热度
+			SetMusicHostCltCmt(songid,1);
 	}
 	return true;
 
@@ -924,10 +975,15 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 	bool r = false;
 	std::string uid;
 	std::string songid;
+	std::string moodtype;
+	std::string tid;
+	std::stringstream os;
+	std::stringstream collect;
 	std::string result_out;
 	std::string status;
 	std::string msg;
 	std::string result;
+	std::string content;
 	int32 utf8_flag = 0;
 	r = pack.GetAttrib(UID,uid);
 	if (!r){
@@ -944,11 +1000,41 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 		goto ret;
 	}
 
+	if (flag){
+		r = pack.GetAttrib(MODETYPE,moodtype);
+		if (!r){
+			moodtype = "1";
+			/*msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
+			status = "0";
+			utf8_flag = 1;
+			goto ret;*/
+		}
+
+		r = pack.GetAttrib(TYPEID,tid);
+		if (!r){
+			tid = "1";
+			/*msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
+			status = "0";
+			utf8_flag = 1;
+			goto ret;*/
+		}
+
+		//{"songid":"100001","type":"1","typeid":"12"}
+
+		os<<"{\"songid\":\""<<songid.c_str()
+			<<"\",\"type\":\""<<moodtype.c_str()
+			<<"\",\"typeid\":\""<<tid.c_str()
+			<<"\"}";
+	}
+
+	content = os.str();
 	if (flag)
-		storage::RedisComm::SetCollectSong(uid,songid);
+		storage::RedisComm::SetCollectSong(uid,songid,content);
 	else
 		storage::RedisComm::SetHateSong(uid,songid);
 
+	//记录收藏数
+	SetMusicHostCltCmt(songid,2);
 	msg = "0";
 	status = "1";
 	utf8_flag = 0;
@@ -1077,6 +1163,9 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 		std::string music_info;
 		std::string hq_content_url;
 		std::string content_url;
+		std::string hot_num;
+		std::string clt_num;
+		std::string cmt_num;
 		base::MusicInfo smi;
 		r = storage::RedisComm::GetMusicMapRadom(os.str(),songid);
 		if (!r){
@@ -1120,6 +1209,12 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 		else
 			is_like = 0;
 
+		//获取收藏数//获取评论数//热度
+		GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
+		smi.set_music_clt(clt_num);
+		smi.set_music_cmt(cmt_num);
+		smi.set_music_hot(hot_num);
+		
 		result<<"{\"id\":\""<<smi.id().c_str()
 			<<"\",\"title\":\""<<b64title.c_str()
 			<<"\",\"artist\":\""<<b64artist.c_str()
@@ -1130,6 +1225,9 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 			<<"\",\"time\":\""<<smi.music_time()
 			<<"\",\"pic\":\""<<smi.pic_url().c_str()
 			<<"\",\"type\":\""<<mode.c_str()
+			<<"\",\"clt\":\""<<smi.clt_num().c_str()
+			<<"\",\"cmt\":\""<<smi.cmt_num().c_str()
+			<<"\",\"hot\":\""<<smi.hot_num().c_str()
 			<<"\",\"like\":\""<<is_like<<"\"}";
 		if (temp_index!=1)
 			result<<",";
@@ -1285,6 +1383,94 @@ ret:
 	if (rlm_list.size()>0)
 		user_local_music_engine_->RecordingLocalMusic(uid,source,rlm_list);
 	return true;
+}
+
+bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,const int32 flag)
+{
+	std::string hot_num;
+	std::string cmt_num;
+	std::string clt_num;
+	std::stringstream os;
+	int64 refcount;
+	bool r = false;
+	r = this->GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
+	if (!r){//第一次添加
+		switch (flag){
+		  case 1:
+			 hot_num = "1";
+			 cmt_num = clt_num= "0";
+		     break;  
+		  case 2:
+			  cmt_num = "1";
+			  hot_num = clt_num= "0";
+			 break;
+		  case 3:
+			  clt_num = "1";
+			  cmt_num = hot_num= "0";
+			  break;
+		  default:
+			  clt_num = cmt_num = hot_num = "0";
+		}
+	}else{//累计累加
+		switch (flag){
+		  case 1:
+			  refcount = atoll(cmt_num.c_str());
+			  refcount++;
+			  os<<refcount;
+			  cmt_num = os.str();
+			  break;  
+		  case 2:
+			  refcount = atoll(hot_num.c_str());
+			  refcount++;
+			  os<<refcount;
+			  hot_num = os.str();
+			  break;
+		  case 3:
+			  refcount = atoll(clt_num.c_str());
+			  refcount++;
+			  os<<refcount;
+			  clt_num = os.str();
+			  break;
+		}
+	}
+
+	storage::RedisComm::SetMusicAboutUser(songid,hot_num,cmt_num,clt_num);
+}
+bool MusicMgrEngine::GetMusicHotCltCmt(const std::string &songid, 
+									   std::string &hot_num, 
+									   std::string &cmt_num, 
+									   std::string &clt_num){
+	std::string content;
+	bool r = false;
+	Json::Reader reader;
+	Json::Value  root;
+	Json::Value songinfo;
+	//test 
+	std::string temp_songid = "9913";
+	r = storage::RedisComm::GetMusicAboutUser(temp_songid,content);
+	if (!r){
+		hot_num = clt_num = cmt_num = "0";
+		return false;
+	}
+
+	//value {"hot":"123","cmt":"231",clt:"2312"}
+	r = reader.parse(content.c_str(),root);
+	if (!r)
+		return false;
+	if (root.isMember("hot"))
+		hot_num = root["hot"].asString();
+	else
+		hot_num = "0";
+
+	if (root.isMember("cmt"))
+		cmt_num = root["cmt"].asString();
+	else
+		cmt_num = "0";
+
+	if (root.isMember("clt"))
+		clt_num = root["typeid"].asString();
+	else
+		clt_num = "0";
 }
 
 }

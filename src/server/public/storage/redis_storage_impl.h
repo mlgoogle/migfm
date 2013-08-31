@@ -72,6 +72,9 @@ public:
 	virtual bool AddHashElement(const char* hash_name,const char* key,const size_t key_len,
 		const char* val,const size_t val_len);
 
+	virtual bool SetHashElement(const char* hash_name,const char* key,const size_t key_len,
+		const char* val,const size_t val_len);
+
 	virtual bool GetHashElement(const char* hash_name,const char* key,const size_t key_len,
 		char** val,size_t *val_len);
 

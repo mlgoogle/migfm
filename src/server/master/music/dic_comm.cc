@@ -137,7 +137,8 @@ bool RedisComm::GetMusicInfos(const std::string& key,std::string& music_infos){
 	return r;
 }
 
-bool RedisComm::SetCollectSong(const std::string &uid,const std::string& songid){
+bool RedisComm::SetCollectSong(const std::string &uid,const std::string& songid,
+							   const std::string& content){
 
 	//key:hash-huid_clt
 	//std::stringstream os;
@@ -152,10 +153,13 @@ bool RedisComm::SetCollectSong(const std::string &uid,const std::string& songid)
 	os.append("h");
 	os.append(uid.c_str());
 	os.append("clt");
-	redis_engine_->AddHashElement(os.c_str(),songid.c_str(),songid.length(),
-		                          songid.c_str(),songid.length());
+	LOG_DEBUG2("#####key[%s]#######",os.c_str());
+	LOG_DEBUG2("#####value[%s]#######",content.c_str());
+	redis_engine_->SetHashElement(os.c_str(),songid.c_str(),songid.length(),
+		                          content.c_str(),content.length());
 	return true;
 }
+
 
 bool RedisComm::GetCollectSongs(const std::string& uid,std::list<std::string>& song_list){
 	std::string os;
@@ -164,7 +168,7 @@ bool RedisComm::GetCollectSongs(const std::string& uid,std::list<std::string>& s
 	size_t value_len = 0;
 	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
 	if (redis_engine_==NULL)
-		return true;
+		return false;
 
 	os.append("h");
 	os.append(uid.c_str());
@@ -191,6 +195,38 @@ bool RedisComm::DelCollectSong(const std::string& uid,const std::string& songid)
 	return  redis_engine_->DelHashElement(os.c_str(),
 		                                  songid.c_str(),
 										  songid.length());
+}
+
+
+bool RedisComm::GetCollectSong(const std::string& uid,const std::string& songid, 
+							   std::string& content){
+	   std::string os;
+	   bool r = false;
+	   char* value;
+	   size_t value_len = 0;
+	   base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	   if (redis_engine_==NULL)
+		   return true;
+
+	   os.append("h");
+	   os.append(uid.c_str());
+	   os.append("clt");
+
+	   r = redis_engine_->GetHashElement(os.c_str(),songid.c_str(),songid.length(),
+		   &value,&value_len);
+	   if (r){
+		   content.assign(value,value_len);
+		   if (value){
+			   free(value);
+			   value = NULL;
+		   }
+		   return true;
+
+	   }else{
+		   MIG_ERROR(USER_LEVEL,"GetValue error[%s]",songid.c_str());
+	   }
+
+	   return false;
 }
 
 bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid){
@@ -237,7 +273,7 @@ bool RedisComm::SetHateSong(const std::string &uid, const std::string &songid){
 	os.append(uid.c_str());
 	os.append("ht");
 
-	redis_engine_->AddHashElement(os.c_str(),songid.c_str(),songid.length(),
+	redis_engine_->SetHashElement(os.c_str(),songid.c_str(),songid.length(),
 		songid.c_str(),songid.length());
 	return true;
 }
@@ -309,6 +345,61 @@ bool RedisComm::GetDefaultSongs(const std::string &uid,
 	return r;
 }
 
+void RedisComm::SetMusicAboutUser(const std::string& songid,const std::string& hot_num, 
+								  const std::string& cmt_num,const std::string& clt_num){
+ 
+   std::string os;
+   std::string key;
+   base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+   if (redis_engine_==NULL)
+	   return;
+   //key: a10000t
+   key.append("a");
+   key.append(songid.c_str());
+   key.append("t");
+
+   //value {"hot":"123","cmt":"231",clt:"2312"}
+   os.append("{\"hot\":\"");
+   os.append(hot_num.c_str());
+   os.append("\",\"cmt\":\"");
+   os.append(cmt_num.c_str());
+   os.append("\",\"clt\":\"");
+   os.append(clt_num.c_str());
+   os.append("\"}");
+
+   LOG_DEBUG2("key[%s]",key.c_str());
+   LOG_DEBUG2("value[%s]",os.c_str());
+   redis_engine_->SetValue(key.c_str(),key.length(),os.c_str(),os.length());
+}
+
+bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content)
+{
+	char* value;
+	size_t value_len = 0;
+	std::string key;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+	key.append("a");
+	key.append(songid.c_str());
+	key.append("t");
+	LOG_DEBUG2("%%%%%key[%s]%%%%%%",key.c_str());
+	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
+		&value,&value_len);
+	if (r){
+		content.assign(value,value_len-1);
+		if (value){
+			free(value);
+			value = NULL;
+		}
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	}
+	return r;
+}
+
+
 int RedisComm::GetHashSize(const std::string& key){
 	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
 	if (redis_engine_==NULL)
@@ -348,7 +439,7 @@ bool RedisComm::MgrListenSongsNum(const std::string& songid,const std::string& u
 	LOG_DEBUG2("MgrListenSongsNum key[%s]",os.c_str());
 	if (flag)//1
 		//r = redis_engine_->IncrValue(os.c_str(),os.length(),NULL,0);
-		r = redis_engine_->AddHashElement(os.c_str(),uid.c_str(),uid.length(),
+		r = redis_engine_->SetHashElement(os.c_str(),uid.c_str(),uid.length(),
 		                                   songid.c_str(),songid.length());
 	else
 		//r = redis_engine_->DecrValue(os.c_str(),os.length(),NULL,0);

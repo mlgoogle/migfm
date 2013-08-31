@@ -192,6 +192,14 @@ int RedisStorageEngineImpl::GetHashSize(const char* hash_name){
 	return RedishHashSize(c_,hash_name);
 }
 
+bool RedisStorageEngineImpl::SetHashElement(const char* hash_name,
+		const char* key, const size_t key_len, const char* val,
+		const size_t val_len) {
+	if(PingRedis()!=1)
+		return false;
+    return RedisSetHashElement(c_,hash_name,key,key_len,val,val_len);
+}
+
 bool RedisStorageEngineImpl::GetHashElement(const char* hash_name,const char* key,
 											const size_t key_len, char** val,size_t *val_len){
 	if(PingRedis()!=1)
@@ -249,6 +257,7 @@ bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,const size_t ha
 		str.assign(pptr[r]);
 		list.push_back(str);
 	}
+	free(pptr);
 	if(rp==NULL)
 		return false;
 	RedisFreeReply(rp);
@@ -270,6 +279,7 @@ bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 		str.assign(pptr[r]);
 		list.push_back(str);
 	}
+	free(*pptr);
 	if(rp==NULL)
 		return false;
 	RedisFreeReply(rp);
