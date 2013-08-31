@@ -122,6 +122,7 @@ basic_util.o:
 
 errno_comm.o:
 	$(COMPILE) ./../../public/basic/errno_comm.cc
+
 json_reader.o:
 	$(COMPILE) ./../../public/json/json_reader.cpp
 

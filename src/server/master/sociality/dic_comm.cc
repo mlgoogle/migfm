@@ -16,6 +16,8 @@ static const char *HKEY_PUSH_CFG_ETIME = "soc:push.cfg:etime";
 static const char *KEY_PUSH_ID_GEN = "soc:%lld:push.id:next";
 static const char *KEY_PUSH_MSG_STAGE = "soc:%lld:push.msg";
 
+static const char *KEY_FRIEND_LIST = "soc:friends:%lld";
+
 std::list<base::ConnAddr>  RedisComm::addrlist_;
 base::MigRadomIn* RedisComm::radom_num_ = NULL;
 void RedisComm::Init(std::list<base::ConnAddr>& addrlist){
@@ -198,6 +200,29 @@ bool RedisComm::GetStagedPushMsg(int64 uid, int page_index, int page_size, std::
 	int from = page_index * page_size;
 	int to = from + page_size;
 	return redis->GetListRange(key, strlen(key), from, to, msgs);
+}
+
+bool RedisComm::AddFriend(int64 uid, int64 touid) {
+	REDIS_PROC_PROLOG(redis);
+
+	char key[256] = {0};
+	char val[256] = {0};
+	snprintf(key, arraysize(key), KEY_FRIEND_LIST, uid);
+	size_t key_len = strlen(key);
+	snprintf(val, arraysize(val), "%lld", touid);
+	size_t val_len = strlen(val);
+	return redis->AddListElement(key, strlen(key), val, val_len);
+}
+
+bool RedisComm::GetFriensList(int64 uid, std::list<std::string>& friends) {
+	REDIS_PROC_PROLOG(redis);
+
+	friends.clear();
+
+	char key[256] = {0};
+	snprintf(key, arraysize(key), KEY_FRIEND_LIST, uid);
+	size_t key_len = strlen(key);
+	return redis->GetListAll(key, key_len, friends);
 }
 
 /////////////////////////////////memcahced//////////////////////////////////////

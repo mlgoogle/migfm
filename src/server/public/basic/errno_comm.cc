@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 *
 * Returns: a static string.
 */
@@ -6,31 +6,51 @@
 const char*
 migfm_strerror(int error_code){
 	
-	switch (error_code){
-		case MIG_FM_HTTP_MOOD_NO_VALID:
-			return "ÇëÇóÖĞÎ´°üº¬ĞÄÇéĞÅÏ¢";
-		case MIG_FM_HTTP_USER_NO_EXITS:
-			return "ÇëÇóÖĞÎ´°üº¬ÓÃ»§ĞÅÏ¢";
-		case MIG_FM_USER_MOOD_NO_EXITS:
-			return "ÓÃ»§ĞÄÇéÎ´Éú³É";
-		case MIG_FM_HTTP_MODE_NO_VALID:
-			return "ÇëÇóÖĞÎ´°üº¬Ä£Ê½ĞÅÏ¢";
-		case MIG_FM_HTTP_MOOD_DEC_NO_EXITS:
-			return "ÇëÇóÖĞÎ´°üº¬ĞÄÇéÃèÊöĞÅÏ¢";
-		case MIG_FM_HTTP_DEC_NO_VALID:
-			return "ÇëÇóÖĞÎ´°üº¬Ä£Ê½ÃèÊöĞÅÏ¢";
-		case MIG_FM_HTTP_CHANNLE_NO_VALID:
-			return "ÇëÇóÖĞÎ´°üº¬ÆµµÀĞÅÏ¢";
-		case MIG_FM_HTTP_SONG_ID_NO_VALID:
-			return "ÇëÇóÖĞÎ´°üº¬¸èÇúĞÅÏ¢";
-		case MIG_FM_USER_NO_COLLECT_SONG:
-			return "ÓÃ»§Î´ÊÕ²Ø¸èÇú";
-		case MIG_FM_MOOD_NO_VALID:
-			return "ÏµÍ³ÖĞĞÄÇé²»´æÔÚ";
-		case MIG_FM_SYSTEM_DEC_NO_VALID:
-			return "ÏµÍ³ÖĞÃèÊö´Ê²»´æÔÚ";
-		default:
-			return "Î´Öª´íÎóÂë";
+	switch (error_code) {
+	case MIG_FM_HTTP_MOOD_NO_VALID:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«å¿ƒæƒ…ä¿¡æ¯";
+	case MIG_FM_HTTP_USER_NO_EXITS:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«ç”¨æˆ·ä¿¡æ¯";
+	case MIG_FM_USER_MOOD_NO_EXITS:
+		return "ç”¨æˆ·å¿ƒæƒ…æœªç”Ÿæˆ";
+	case MIG_FM_HTTP_MODE_NO_VALID:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«æ¨¡å¼ä¿¡æ¯";
+	case MIG_FM_HTTP_MOOD_DEC_NO_EXITS:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«å¿ƒæƒ…æè¿°ä¿¡æ¯";
+	case MIG_FM_HTTP_DEC_NO_VALID:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«æ¨¡å¼æè¿°ä¿¡æ¯";
+	case MIG_FM_HTTP_CHANNLE_NO_VALID:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«é¢‘é“ä¿¡æ¯";
+	case MIG_FM_HTTP_SONG_ID_NO_VALID:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«æ­Œæ›²ä¿¡æ¯";
+	case MIG_FM_USER_NO_COLLECT_SONG:
+		return "ç”¨æˆ·æœªæ”¶è—æ­Œæ›²";
+	case MIG_FM_MOOD_NO_VALID:
+		return "ç³»ç»Ÿä¸­å¿ƒæƒ…ä¸å­˜åœ¨";
+	case MIG_FM_SYSTEM_DEC_NO_VALID:
+		return "ç³»ç»Ÿä¸­æè¿°è¯ä¸å­˜åœ¨";
 
+	case MIG_FM_HTTP_INVALID_USER_ID:
+		return "è¯·æ±‚ä¸­IDå­—æ®µéæ³•";
+	case MIG_FM_HTTP_DEVICE_TOKEN_NOT_EXIST:
+		return "è¯·æ±‚ä¸­æœªåŒ…å«devicetokenå­—æ®µ";
+	case MIG_FM_HTTP_INVALID_TIME_FORMAT:
+		return "è¯·æ±‚ä¸­æ—¶é—´æ ¼å¼éæ³•";
+	case MIG_FM_DB_SAVE_PUSH_CONFIG_FAILED:
+		return "æ•°æ®åº“ä¿å­˜æ¨é€è®¾ç½®å¤±è´¥";
+	case MIG_FM_DB_READ_PUSH_CONFIG_FAILED:
+		return "æ•°æ®åº“è¯»å–æ¨é€è®¾ç½®å¤±è´¥";
+	case MIG_FM_OTHER_PUSH_SERVICE_CLOSED:
+		return "å¯¹æ–¹æ¨é€æœåŠ¡å…³é—­";
+	case MIG_FM_OTHER_ANTI_HARASSMENT:
+		return "å¯¹æ–¹å¼€å¯é˜²æ‰“æ‰°";
+	case MIG_FM_DB_ACCESS_FAILED:
+		return "æ•°æ®åº“è®¿é—®å¤±è´¥";
+	case MIG_FM_PUSH_MSG_FAILED:
+		return "æ¨é€æ¶ˆæ¯å¤±è´¥";
+	case MIG_FM_MSG_LIST_EMPTY:
+		return "æ¶ˆæ¯åˆ—è¡¨ä¸ºç©º";
+	default:
+		return "æœªçŸ¥é”™è¯¯ç ";
 	}
 }

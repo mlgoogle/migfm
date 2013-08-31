@@ -43,27 +43,27 @@ public:
 
 private:
 	bool OnMsgSetUserConfigOfPush(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgPresentSong(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgGetPushMsg(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgGetPushMsgSummary(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgGetFriendList(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgSendFriendMsg(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgSayHello(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgAddUserBacklist(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgAddFriend(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgImportSongList(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 	bool OnMsgImportFriend(packet::HttpPacket& packet, Json::Value &result,
-			int &status, std::string &msg);
+			int &status, int &err_code);
 
 private:
 	bool CheckAndTransHMTime(const std::string &str, unsigned &time);

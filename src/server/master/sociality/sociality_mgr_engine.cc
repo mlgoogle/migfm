@@ -15,7 +15,7 @@
 
 #define		LOGIC_PROLOG()	\
 		status = 0;	\
-		msg.clear()
+		err_code = 0
 
 namespace mig_sociality{
 
@@ -97,39 +97,39 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 	packet.GetPacketType(type);
 
 	Json::Value root(Json::objectValue);
-	int ret_status;
-	std::string ret_msg;
+	int ret_status = 0;
+	int err_code = 0;
 	if (type == "setuserconfigofpush") {
-		OnMsgSetUserConfigOfPush(packet, root, ret_status, ret_msg);
+		OnMsgSetUserConfigOfPush(packet, root, ret_status, err_code);
 	} else if (type == "presentsong") {
-		OnMsgPresentSong(packet, root, ret_status, ret_msg);
+		OnMsgPresentSong(packet, root, ret_status, err_code);
 	} else if (type == "getpushmsg") {
-		OnMsgGetPushMsg(packet, root, ret_status, ret_msg);
+		OnMsgGetPushMsg(packet, root, ret_status, err_code);
 	} else if (type == "getpushmsgsummary") {
-		OnMsgGetPushMsgSummary(packet, root, ret_status, ret_msg);
+		OnMsgGetPushMsgSummary(packet, root, ret_status, err_code);
 	} else if (type == "getfriendlist") {
-		OnMsgGetFriendList(packet, root, ret_status, ret_msg);
+		OnMsgGetFriendList(packet, root, ret_status, err_code);
 	} else if (type == "sendfriendmsg") {
-		OnMsgSendFriendMsg(packet, root, ret_status, ret_msg);
+		OnMsgSendFriendMsg(packet, root, ret_status, err_code);
 	} else if (type == "sayhello") {
-		OnMsgSayHello(packet, root, ret_status, ret_msg);
+		OnMsgSayHello(packet, root, ret_status, err_code);
 	} else if (type == "adduserbacklist") {
-		OnMsgAddUserBacklist(packet, root, ret_status, ret_msg);
+		OnMsgAddUserBacklist(packet, root, ret_status, err_code);
 	} else if (type == "addfriend") {
-		OnMsgAddFriend(packet, root, ret_status, ret_msg);
+		OnMsgAddFriend(packet, root, ret_status, err_code);
 	} else if (type == "importsonglist") {
-		OnMsgImportSongList(packet, root, ret_status, ret_msg);
+		OnMsgImportSongList(packet, root, ret_status, err_code);
 	} else if (type == "importfriend") {
-		OnMsgImportFriend(packet, root, ret_status, ret_msg);
+		OnMsgImportFriend(packet, root, ret_status, err_code);
 	} else {
 		return true;
 	}
 
 	root["status"] = ret_status;
 	if (ret_status != 1)
-		root["msg"] = ret_msg;
+		root["msg"] = migfm_strerror(err_code);
 	else
-		root["msg"] = "success";
+		root["msg"] = "";
 
 	Json::FastWriter wr;
 	std::string res = wr.write(root);
@@ -141,16 +141,16 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 }
 
 bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 
 	std::string user_id, device_token, is_receive, begin_time, end_time;
 	if (!packet.GetAttrib("uid", user_id)) {
-		msg = "uid未指定";
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
 	}
 	if (!packet.GetAttrib("devicetoken", device_token)) {
-		msg = "devicetoken未指定";
+		err_code = MIG_FM_HTTP_DEVICE_TOKEN_NOT_EXIST;
 		return false;
 	}
 	if (!packet.GetAttrib("isreceive", is_receive)) {
@@ -165,23 +165,23 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 
 	int64 uid = atoll(user_id.c_str());
 	if (0 == uid) {
-		msg = "无效uid";
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
 		return false;
 	}
 
 	unsigned btime = 0, etime = 0;
 	if (!CheckAndTransHMTime(begin_time, btime)) {
-		msg = "无效的时间格式:begintime";
+		err_code = MIG_FM_HTTP_INVALID_TIME_FORMAT;
 		return false;
 	}
 	if (!CheckAndTransHMTime(end_time, etime)) {
-		msg = "无效的时间格式:endtime";
+		err_code = MIG_FM_HTTP_INVALID_TIME_FORMAT;
 		return false;
 	}
 
 	if (!storage::RedisComm::SetUserPushConfig(uid, device_token,
 		atoi(is_receive.c_str()), btime, etime)) {
-		msg = "存储异常";
+		err_code = MIG_FM_DB_SAVE_PUSH_CONFIG_FAILED;
 		status = -1;
 		return false;
 	}
@@ -191,20 +191,20 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 }
 
 bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 
 	std::string user_id, to_user_id, song_id_str, ext_msg;
 	if (!packet.GetAttrib("uid", user_id)) {
-		msg = "uid未指定";
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
 	}
 	if (!packet.GetAttrib("touid", to_user_id)) {
-		msg = "touid未指定";
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
 	}
 	if (!packet.GetAttrib("songid", song_id_str)) {
-		msg = "songid未指定";
+		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
 		return false;
 	}
 	if (!packet.GetAttrib("msg", ext_msg)) {
@@ -212,18 +212,18 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 
 	int64 uid = atoll(user_id.c_str());
 	if (0 == uid) {
-		msg = "无效uid";
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
 		return false;
 	}
 	int64 to_uid = atoll(to_user_id.c_str());
 	if (0 == to_uid) {
-		msg = "无效touid";
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
 		return false;
 	}
 
 	int64 song_id = strtoll(song_id_str.c_str(), NULL, 10);
 	if (0 == song_id) {
-		msg = "无效的songid";
+		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
 		return false;
 	}
 
@@ -232,13 +232,13 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	unsigned btime=0, etime=0;
 	if (!storage::RedisComm::GetUserPushConfig(to_uid, device_token,
 		is_recv, btime, etime)) {
-		msg = "存储异常";
+		err_code = MIG_FM_DB_READ_PUSH_CONFIG_FAILED;
 		status = -1;
 		return false;
 	}
 
 	if (!is_recv) {
-		msg = "对方已关闭推送服务";
+		err_code = MIG_FM_OTHER_PUSH_SERVICE_CLOSED;
 		return false;
 	}
 
@@ -251,30 +251,34 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	else
 		enable = (ct<=etime) || (btime<=ct);
 	if (!enable) {
-		msg = "对方在此时段不接受推送";
+		err_code = MIG_FM_OTHER_ANTI_HARASSMENT;
 		return false;
 	}
 
 	int64 msg_id = 0;
 	if (!storage::RedisComm::GenaratePushMsgID(uid, msg_id)) {
-		msg = "存储错误";
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
 		return false;
 	}
 
 	std::string detail, summary;
 	if (!MakePresentSongContent(user_id, to_user_id, song_id, msg_id, ext_msg,
 			detail, summary)) {
-		msg = "存储错误";
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
 		return false;
 	}
 
 	if (!storage::RedisComm::StagePushMsg(to_uid, msg_id, detail)) {
-		msg = "存储错误";
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
 		return false;
 	}
 
 	if (!HttpComm::PushMessage(device_token, summary)) {
-		msg = "推送失败";
+		err_code = MIG_FM_PUSH_MSG_FAILED;
+		status = -1;
 		return false;
 	}
 
@@ -283,12 +287,12 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 }
 
 bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 
 	std::string user_id, page_index_str, page_size_str;
 	if (!packet.GetAttrib("uid", user_id)) {
-		msg = "uid未指定";
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
 	}
 	if (!packet.GetAttrib("page_index", page_index_str)) {
@@ -300,7 +304,7 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 
 	int64 uid = atoll(user_id.c_str());
 	if (0 == uid) {
-		msg = "无效uid";
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
 		return false;
 	}
 
@@ -310,12 +314,13 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 	typedef std::list<std::string> MsgList;
 	MsgList msg_list;
 	if (!storage::RedisComm::GetStagedPushMsg(uid, page_index, page_size, msg_list)) {
-		msg = "存储错误";
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
 		return false;
 	}
 
 	if (msg_list.empty()) {
-		msg = "记录为空";
+		err_code = MIG_FM_MSG_LIST_EMPTY;
 		return false;
 	}
 
@@ -331,60 +336,110 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 }
 
 bool SocialityMgrEngine::OnMsgGetPushMsgSummary(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgGetFriendList(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
+
+	std::string uid_str, page_index_str, page_size_str;
+	if (!packet.GetAttrib("uid", uid_str)) {
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+//	if (!packet.GetAttrib("page_index", page_index_str)) {
+//		page_index_str = "0";
+//	}
+//	if (!packet.GetAttrib("page_size", page_size_str)) {
+//		page_size_str = "10";
+//	}
+
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
+		return false;
+	}
+
+//	int page_index = atoi(page_index_str.c_str());
+//	int page_size = atoi(page_size_str.c_str());
+
+	typedef std::list<std::string> FriendList;
+	FriendList friends;
+	if (!storage::RedisComm::GetFriensList(uid, friends)) {
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	status = 1;
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgSendFriendMsg(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgAddUserBacklist(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgAddFriend(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 
-	std::string user_id, to_user_id, song_id_str, ext_msg;
-	if (!packet.GetAttrib("uid", user_id)) {
-		msg = "uid未指定";
+	std::string uid_str, touid_str;
+	if (!packet.GetAttrib("uid", uid_str)) {
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
 	}
-	if (!packet.GetAttrib("touid", to_user_id)) {
-		msg = "touid未指定";
+	if (!packet.GetAttrib("touid", touid_str)) {
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
 	}
 
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
+		return false;
+	}
+
+	int64 to_uid = atoll(touid_str.c_str());
+	if (0 == to_uid) {
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
+		return false;
+	}
+
+	if (storage::RedisComm::AddFriend(uid, to_uid)) {
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	status = 1;
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgImportSongList(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 	return true;
 }
 
 bool SocialityMgrEngine::OnMsgImportFriend(packet::HttpPacket& packet,
-		Json::Value& result, int& status, std::string& msg) {
+		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
 	return true;
 }
@@ -484,7 +539,7 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& msg,
 		// do nothing
 	}
 
-
+	return true;
 }
 
 bool SocialityMgrEngine::GetMusicInfos(const std::string& songid, Json::Value &info) {

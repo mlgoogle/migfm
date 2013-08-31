@@ -32,6 +32,10 @@ public:
 
 	static bool GetStagedPushMsg(int64 uid, int page_index, int page_size, std::list<std::string> &msgs);
 
+	static bool AddFriend(int64 uid, int64 touid);
+
+	static bool GetFriensList(int64 uid, std::list<std::string> &friends);
+
 private:
 	static std::list<base::ConnAddr>   addrlist_;
 	static base::MigRadomIn*              radom_num_;

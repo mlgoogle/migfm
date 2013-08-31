@@ -14,6 +14,17 @@
 #define  MIG_FM_MOOD_NO_VALID                    -11
 #define  MIG_FM_SYSTEM_DEC_NO_VALID              -12
 
+#define  MIG_FM_HTTP_INVALID_USER_ID           -24		// "请求中ID字段非法";
+#define  MIG_FM_HTTP_DEVICE_TOKEN_NOT_EXIST   	-25		// "请求中未包含devicetoken字段";
+#define  MIG_FM_HTTP_INVALID_TIME_FORMAT    	-26		// "请求中时间格式非法";
+#define  MIG_FM_DB_SAVE_PUSH_CONFIG_FAILED 		-27		// "数据库保存推送设置失败";
+#define  MIG_FM_DB_READ_PUSH_CONFIG_FAILED 		-28		// "数据库读取推送设置失败";
+#define  MIG_FM_OTHER_PUSH_SERVICE_CLOSED 		-29		// "对方推送服务关闭"
+#define  MIG_FM_OTHER_ANTI_HARASSMENT 			-30		// "对方开启防打扰"
+#define  MIG_FM_DB_ACCESS_FAILED    			-31		// "数据库访问失败"
+#define  MIG_FM_PUSH_MSG_FAILED   				-32		// "推送消息失败"
+#define  MIG_FM_MSG_LIST_EMPTY     				-33 	// "消息列表为空"
+
 
 const char*
 migfm_strerror(int error_code);
