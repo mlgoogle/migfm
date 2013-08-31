@@ -22,6 +22,8 @@
 #define  MIG_FM_HTTP_LAST_SONG_ID_NO_VALID       -19
 #define  MIG_FM_SOUCE_NO_VALID                   -20
 #define  MIG_FM_CONTENT_NO_EXITS                 -21
+#define  MIG_FM_VERSION_NO_EXITS                 -22
+#define  MIG_FM_NET_STATE_NO_EXITS               -23
 
 
 const char*

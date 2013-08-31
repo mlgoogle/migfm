@@ -9,6 +9,7 @@
 #include "json/json.h"
 #include "basic/base64.h"
 #include "basic/errno_comm.h"
+#include "algorithm/algorithm_base.h"
 #include <sstream>
 
 #define		TIME_TEST		1025
@@ -152,6 +153,8 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetTypeSongs(socket,packet);
 	}else if (type=="recordlocalsongs"){
 		PostUserLocalMusicinfos(socket,packet);
+	}else if (type=="updateconfigfile"){
+		UpdateConfigFile(socket,packet);
 	}
     return true;
 }
@@ -675,6 +678,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	std::string scens_index;
 	std::string channel_id;
 	std::string channel_index;
+	std::string num;
 	std::string result_out;
 	std::string result;
 	std::string status;
@@ -685,6 +689,9 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	base::CompareInfo moodci;
 	base::CompareInfo scensci;
 	base::CompareInfo channelci;
+	int32 mood_num;
+	int32 scens_num;
+	int32 channel_num;
 	music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
 	r = pack.GetAttrib(MOODID,mood_id);
 	if (!r){
@@ -744,6 +751,17 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 		utf8_flag = 1;
 		goto ret;
 	}
+	r = pack.GetAttrib(NUM,num);
+	if (!r)//若没提交个数 默认10首
+		num = "10";
+
+	//判断提交序号三个不能同时为0
+	if((mood_index=="0")&&(scens_index=="0")&&(channel_index=="0"))
+		mood_index = scens_index = channel_index ="1";
+	//判断提交个数不能为0
+	if (num=="0")
+		num = "10";
+
 	moodci.set_info_id(mood_id);
 	moodci.set_info_index(mood_index);
 	scensci.set_info_id(scene_id);
@@ -752,31 +770,45 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	channelci.set_info_index(channel_index);
 
 	os1<<"\"song\":[";
-	//test
-	moodci.set_info_num(3);
-	scensci.set_info_num(2);
-	channelci.set_info_num(1);
+
+	algorithm::AlgorithmBase::AllocationLatitudeMusicNum(atol(mood_index.c_str()),
+		mood_num,atol(scens_index.c_str()),scens_num,atol(channel_index.c_str()),
+		channel_num,atol(num.c_str()));
+
+	
+	moodci.set_info_num(mood_num);
+	scensci.set_info_num(scens_num);
+	channelci.set_info_num(channel_num);
+
+
 	mode = "mm";
-	GetMoodScensSongs(uid,mode,moodci.info_num(),moodci.info_id(),os1);//心情
-	LOG_DEBUG2("%s",os1.str().c_str());
-	os1<<",";
+	r = GetMoodScensChannelSongs(uid,mode,moodci.info_num(),moodci.info_id(),os1);//心情
+	if (r)
+	  os1<<",";
+
 	mode = "ms";
-	GetMoodScensSongs(uid,mode,scensci.info_num(),scensci.info_id(),os1);//场景
-	LOG_DEBUG2("%s",os1.str().c_str());
-
-	//fix 频道还未自建
-
-	os1<<"]";
+	GetMoodScensChannelSongs(uid,mode,scensci.info_num(),scensci.info_id(),os1);//场景
+	if (r)
+	  os1<<",";
+	
+	mode = "chl";
+	r = GetMoodScensChannelSongs(uid,mode,channelci.info_num(),channelci.info_id(),os1);//频道
+	if (!r){
+		result = os1.str().erase(os1.str().length()-1,1);
+	}else{
+		result = os1.str();
+	}
+	//os1<<"]";
+	result.append("]");
 
 	msg = "0";
 	utf8_flag = 0;
 	status = "1";
 	
 
-	result = os1.str();
+	//result = os1.str();
 ret:
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
-	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 }
@@ -793,6 +825,9 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	std::string result;
 	std::string songid;
 	std::string lastsongid;
+	std::string name;
+	std::string singer;
+	std::string state;
 	int32 utf8_flag = 0;
 	int32 recording_flag = 1;
 
@@ -843,6 +878,23 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		goto ret;
 	}
 
+	r = pack.GetAttrib(NAME,name);
+	if (!r)
+		name = "未知歌曲";
+
+	r = pack.GetAttrib(SINGER,singer);
+	if (!r)
+		singer = "佚名";
+
+	r = pack.GetAttrib(STATE,state);
+	if(!r){
+		status = "0";
+		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
+		utf8_flag = 1;
+		recording_flag = 0;
+		goto ret;
+	}
+
 	msg = "0";
 	status = "1";
 	utf8_flag = 0;
@@ -854,10 +906,12 @@ ret:
 	if (recording_flag){
 		mood_record_engine_->RecordingMood(atoll(uid.c_str()),
 		                                   atol(wordid.c_str()));
-		storage::MemComm::SetUsrCurrentSong(uid,songid);
-		storage::RedisComm::MgrListenSongsNum(songid,uid,1);
-		if (atol(lastsongid.c_str())!=0)
-		   storage::RedisComm::MgrListenSongsNum(lastsongid,uid,0);
+		storage::MemComm::SetUsrCurrentSong(uid,songid,name,singer,state);
+		if (state!="2"){//本地手机歌曲不记录
+			storage::RedisComm::MgrListenSongsNum(songid,uid,1);
+			if (atol(lastsongid.c_str())!=0)
+				storage::RedisComm::MgrListenSongsNum(lastsongid,uid,0);
+		}
 	}
 	return true;
 
@@ -997,44 +1051,61 @@ bool MusicMgrEngine::GetMusicInfos(const int socket,const std::string& songid){
 	return true;
 }
 
-bool MusicMgrEngine::GetMoodScensSongs(const std::string& uid,
+bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 									   const std::string mode, 
 									   const int32 num, const std::string wordid,
 									   std::stringstream& result){
 	std::stringstream os;
 	bool r = false;
 	os<<mode.c_str()<<"_r"<<wordid.c_str();
-	int32 temp_index = num;
+	int32 temp_index = 0;
+	int32 temp_total = 0;
 	std::string b64title;
 	std::string b64artist;
 	std::string b64album;
 	int is_like = 0;
 	std::map<std::string, std::string> songid_map;
 	std::map<std::string, std::string>::iterator it;
-	while(temp_index>0){
+	//先获取整个hash 值
+	int hash_size = storage::RedisComm::GetHashSize(os.str());
+	if (hash_size==0)
+		return false;
+	temp_index = num>hash_size?hash_size:num;
+	temp_total = algorithm::AlgorithmBase::GetTotalForNum(temp_index,3);
+	while(temp_index>0&&temp_total>0){
 		std::string songid;
 		std::string music_info;
 		std::string hq_content_url;
 		std::string content_url;
 		base::MusicInfo smi;
 		r = storage::RedisComm::GetMusicMapRadom(os.str(),songid);
-		if (!r)
+		if (!r){
+			temp_total--;
 			continue;
+		}
 		//是否拉黑
 		r = storage::RedisComm::IsHateSong(uid,songid);
-		if (r)
+		if (r){
+			temp_total--;
 			continue;
+		}
 		//是否已经存在
 		it = songid_map.find(songid);
-		if (it!=songid_map.end())
+		if (it!=songid_map.end()){
+			temp_total--;
 			continue;
+		}
 		songid_map[songid] = songid;
 		r = storage::RedisComm::GetMusicInfos(songid,music_info);
-		if (!r)
+		if (!r){
+			temp_total--;
 			continue;
+		}
 		r =smi.UnserializedJson(music_info);
-		if (!r)
+		if (!r){
+			temp_total--;
 			continue;
+		}
 		storage::DBComm::GetMusicUrl(smi.id(),hq_content_url,content_url);
 		smi.set_hq_url(hq_content_url);
 		smi.set_url(content_url);
@@ -1058,16 +1129,76 @@ bool MusicMgrEngine::GetMoodScensSongs(const std::string& uid,
 			<<"\",\"album\":\""<<b64album.c_str()
 			<<"\",\"time\":\""<<smi.music_time()
 			<<"\",\"pic\":\""<<smi.pic_url().c_str()
+			<<"\",\"type\":\""<<mode.c_str()
 			<<"\",\"like\":\""<<is_like<<"\"}";
 		if (temp_index!=1)
 			result<<",";
 
 		temp_index--;
+		temp_total--;
 	}
 	return true;
 }
 
-bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,const packet::HttpPacket& packet){
+bool MusicMgrEngine:: UpdateConfigFile(const int socket,
+									   const packet::HttpPacket& packet){
+	packet::HttpPacket pack = packet;
+	std::string version;
+	std::string result_out;
+	std::string status;
+	std::string msg;
+	std::string result;
+	std::string content;
+	std::string key;
+	int32 utf8_flag = 0;
+	bool r = false;
+	Json::Reader reader;
+	Json::Value  root;
+	Json::Value music;
+	std::string json_version;
+
+	r = pack.GetAttrib(VERSION,version);
+	if (!r){
+		msg = migfm_strerror(MIG_FM_VERSION_NO_EXITS);
+		status = "0";
+		utf8_flag =1;
+		goto ret;
+	}
+	//key clic
+	key = "clic";
+	r = storage::RedisComm::GetUpdateConfig(key,content);
+	if (!r){
+		msg = migfm_strerror(MIG_FM_VERSION_NO_EXITS);
+		status = "0";
+		utf8_flag =1;
+		goto ret;
+	}
+
+	LOG_DEBUG2("[%s]",content.c_str());
+	//解析json
+	r = reader.parse(content.c_str(),root);
+	if (!r){
+		LOG_ERROR("parser json error");
+		return false;
+	}
+	LOG_DEBUG2("%s",content.c_str());
+	if (root.isMember("version")){
+		json_version = root["version"].asString();
+	}
+	if (json_version!=version){
+		msg = "0";
+		status = "1";
+		result = content;
+		goto ret;
+	}
+ret:
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+}
+
+bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
+											 const packet::HttpPacket& packet){
 
 	packet::HttpPacket pack = packet;
 	std::string source;

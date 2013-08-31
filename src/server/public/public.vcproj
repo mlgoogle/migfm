@@ -617,6 +617,18 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="algorithm"
+			>
+			<File
+				RelativePath=".\algorithm\algorithm_base.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\algorithm\algorithm_base.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

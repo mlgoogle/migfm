@@ -68,6 +68,8 @@ private:
 
 	bool PostUserLocalMusicinfos(const int socket,const packet::HttpPacket& packet);
 
+	bool UpdateConfigFile(const int socket,const packet::HttpPacket& packet);
+
 	bool GetSongList(const int socket,const packet::HttpPacket& packet,const int type);
 
 	 //0 default 1 collect
@@ -80,7 +82,7 @@ private:
 
 	bool GetOneMusicInfo(const std::string& song_id,base::MusicInfo& mi);
 
-	bool GetMoodScensSongs(const std::string& uid,const std::string mode,const int32 num,
+	bool GetMoodScensChannelSongs(const std::string& uid,const std::string mode,const int32 num,
 		const std::string wordid,std::stringstream& result);
 private:
 	music_logic::GetSongUrl*                         get_song_engine_;

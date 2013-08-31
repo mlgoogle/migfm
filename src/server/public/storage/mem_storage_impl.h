@@ -65,6 +65,8 @@ public:
 		char** val,size_t *val_len){}
 
 	virtual bool DelHashElement(const char* hash_name,const char* key,const size_t key_len){}
+
+	virtual int  GetHashSize(const char* hash_name){}
     
     virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list);
 

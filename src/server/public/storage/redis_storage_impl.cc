@@ -185,6 +185,13 @@ bool RedisStorageEngineImpl::AddHashElement(const char* hash_name,const char* ke
     return RedisAddHashElement(c_,hash_name,key,key_len,val,val_len);
 }
 
+int RedisStorageEngineImpl::GetHashSize(const char* hash_name){
+
+	if (PingRedis()!=1)
+		return 0;
+	return RedishHashSize(c_,hash_name);
+}
+
 bool RedisStorageEngineImpl::GetHashElement(const char* hash_name,const char* key,
 											const size_t key_len, char** val,size_t *val_len){
 	if(PingRedis()!=1)

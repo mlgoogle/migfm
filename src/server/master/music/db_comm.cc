@@ -236,7 +236,7 @@ bool DBComm::GetMusicUrl(const std::string& song_id,std::string& hq_url,
 	base_storage::db_row_t* db_rows;
 	int num;
 	MYSQL_ROW rows = NULL;
-	os<<"select song_url from migfm_music_url where song_id =\'"
+	os<<"select song_hifi_url,song_url from migfm_music_url where song_id =\'"
 		<<song_id.c_str()<<"\';";
 	r = engine->SQLExec(os.str().c_str());
 	if(!r){
@@ -247,8 +247,20 @@ bool DBComm::GetMusicUrl(const std::string& song_id,std::string& hq_url,
 	num = engine->RecordCount();
 	if(num>0){
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
-			hq_url = song_url = rows[0];
+			if (rows[0] ==NULL)
+				hq_url = DEFAULT_URL;
+			else
+				hq_url = rows[0];
+
+			if (rows[1] ==NULL)
+				song_url = DEFAULT_URL;
+			else
+				song_url = rows[1];
 		}
+		return true;
+	}else{
+		hq_url = song_url = DEFAULT_URL;
+		return false;
 	}
 	return true;
 }
@@ -295,7 +307,7 @@ bool DBComm::GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& num){
 	base_storage::DBStorageEngine* engine = GetConnection();
 	base_storage::db_row_t* db_rows;
 	MYSQL_ROW rows = NULL;
-	os<<"select id,channel_id,channel_name,channel_pic,channel_dec from migfm_channel";
+	os<<"select id,channel_id,channel_name,channel_pic,description from migfm_channel";
 	r = engine->SQLExec(os.str().c_str());
 	if(!r){
 		MIG_ERROR(USER_LEVEL,"sqlexec error ");

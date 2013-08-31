@@ -77,6 +77,8 @@ public:
 
 	virtual bool DelHashElement(const char* hash_name,const char* key,const size_t key_len);
 
+	virtual int  GetHashSize(const char* hash_name);
+
 	virtual bool GetHashValues(const char* hash_name,const size_t hash_name_len,
 		                       std::list<std::string>& list);
 

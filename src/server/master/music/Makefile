@@ -41,7 +41,8 @@ output:	dic_comm.o logic_comm.o thread_handler.o music_mgr_engine.o \
 	basic_info.o http_packet.o basictypes.o config.o base64.o radom_in.o\
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o json_reader.o\
-	json_value.o json_writer.o music_recording.o file_path.o file_util.o string_serialization.o
+	json_value.o json_writer.o music_recording.o file_path.o file_util.o\
+	string_serialization.o algorithm_base.o
 	$(LINK)
 
 clean:
@@ -129,6 +130,9 @@ redis_warrper.o:
 
 storage.o:
 	$(COMPILE) ./../../public/storage/storage.cc
+
+algorithm_base.o:
+	$(COMPILE) ./../../public/algorithm/algorithm_base.cc
 
 constants.o:
 	$(COMPILE) ./../../public/basic/constants.cc

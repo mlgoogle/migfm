@@ -45,6 +45,10 @@ migfm_strerror(int error_code){
 			return "请求中未包含来源";
 		case MIG_FM_CONTENT_NO_EXITS:
 			return "请求中未包含歌曲信息";
+		case MIG_FM_VERSION_NO_EXITS:
+			return "请求中未包含版本信息";
+		case MIG_FM_NET_STATE_NO_EXITS:
+			return "请求中未包含网络状态";
 		default:
 			return "未知错误码";
 

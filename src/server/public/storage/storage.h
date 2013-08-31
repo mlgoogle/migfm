@@ -127,6 +127,8 @@ public:
 
 	virtual bool DelHashElement(const char* hash_name,const char* key,const size_t key_len) =0;
 
+	virtual int  GetHashSize(const char* hash_name) = 0;
+
 	virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list) = 0;
 
 	virtual bool GetHashValues(const char* hash_name,const size_t hash_name_len,
