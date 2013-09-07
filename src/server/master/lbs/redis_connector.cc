@@ -55,8 +55,6 @@ int64 RedisConnector::FindUserPOIID(int64 user_id) {
 	int64 poi_id = atoll(val);
 	free(val);
 	return poi_id;
-<<<<<<< HEAD
-=======
 }
 
 int32 RedisConnector::GetCollect(const int64 user_id){
@@ -65,7 +63,6 @@ int32 RedisConnector::GetCollect(const int64 user_id){
 	char field[256] = {0};
 	snprintf(field, arraysize(field), "h%lldclt", user_id);
 	return redis->GetHashSize(field);
->>>>>>> master
 }
 
 bool RedisConnector::DeleteUserPOI(int64 user_id) {

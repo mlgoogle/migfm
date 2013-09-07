@@ -40,6 +40,7 @@ public:
 	virtual bool DecrValue(const char* key,const size_t key_len,
 		const char* val,const size_t val_len);
     
+	virtual bool IncDecValue(const char* key, size_t key_len, int64 incby, int64 &result);
         //list
         
     virtual bool AddListElement(const char* key,const size_t key_len,const char* val,const size_t val_len);

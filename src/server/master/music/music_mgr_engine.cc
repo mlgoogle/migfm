@@ -178,7 +178,7 @@ bool MusicMgrEngine::GetMoodParent(const int socket,const packet::HttpPacket& pa
 		status = "1";
 		//msg = "心情不存在;";
 		msg = migfm_strerror(MIG_FM_MOOD_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -224,7 +224,7 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 		LOG_ERROR("Get UID Error");
 		status = "1";
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -235,7 +235,7 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 		//LOG_ERROR("Get UID Error");
 		status = "1";
 		msg = migfm_strerror(MIG_FM_USER_MOOD_NO_EXITS);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	status = "1";
@@ -295,7 +295,7 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 		//LOG_ERROR("get MODE error");
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_MODE_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -304,7 +304,7 @@ bool MusicMgrEngine::GetMoodSceneWordSong(const int socket,
 		LOG_ERROR("get WORDID error");
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_DEC_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -425,7 +425,7 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 		//LOG_ERROR("get DECWORD error");
 		status = "1";
 		msg = migfm_strerror(MIG_FM_HTTP_MOOD_DEC_NO_EXITS);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	if (word=="mood")
@@ -436,7 +436,7 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 	if (word_list.size()==0){
 		status = "1";
 		msg = migfm_strerror(MIG_FM_SYSTEM_DEC_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	status = "1";
@@ -484,7 +484,7 @@ bool MusicMgrEngine::GetDoubanMusicChannelSong(const int socket,
 		 LOG_ERROR("get channel error");
 		 status = "0";
 		 msg = migfm_strerror(MIG_FM_HTTP_CHANNLE_NO_VALID);
-		 utf8_flag = 1;
+		 utf8_flag = 0;
 	 }else{
 		 status = "1";
 		 result = "1";
@@ -517,7 +517,7 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 		 LOG_ERROR("get channel error");
 		 status = "0";
 		 msg = migfm_strerror(MIG_FM_HTTP_CHANNLE_NO_VALID);
-		 utf8_flag = 1;
+		 utf8_flag = 0;
 	 }else{
 		 status = "1";
 		 result = "1";
@@ -549,14 +549,14 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 		if (!r){
 		   msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		   status = "0";
-		   utf8_flag = 1;
+		   utf8_flag = 0;
 		   goto ret;
 		}
 		r = pack.GetAttrib(SONGID,songid);
 		if (!r){
 		   msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 		   status = "0";
-		   utf8_flag = 1;
+		   utf8_flag = 0;
 		   goto ret;
 		}
 
@@ -610,7 +610,7 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -618,7 +618,7 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -630,7 +630,7 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	if (!r){
 		msg = migfm_strerror(MIG_FM_USER_NO_COLLECT_SONG);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	os<<"\"song\":[";
@@ -745,42 +745,42 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if (!r){
 		msg = migfm_strerror(MIG_FM_MOODID_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	r = pack.GetAttrib(MOODID,mood_id);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_MOODID_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	r = pack.GetAttrib(MOODID,mood_id);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_MOODID_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	r = pack.GetAttrib(MOODINDEX,mood_index);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_MOODINDEX_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	r = pack.GetAttrib(SCENEID,scene_id);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_SCENEID_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	r = pack.GetAttrib(SCENEINDEX,scens_index);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_SCENEINDEX_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -788,7 +788,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if (!r){
 		msg = migfm_strerror(MIG_FM_SCENEID_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -796,7 +796,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if (!r){
 		msg = migfm_strerror(MIG_FM_CHANNELINDEX_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	r = pack.GetAttrib(NUM,num);
@@ -887,7 +887,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		recording_flag = 0;
 		goto ret;
 	}
@@ -897,7 +897,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		LOG_ERROR("get MOOD error");
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_DEC_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		recording_flag = 0;
 		goto ret;
 	}
@@ -907,7 +907,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		LOG_ERROR("get MOOD error");
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_DEC_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		recording_flag = 0;
 		goto ret;
 	}
@@ -917,7 +917,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		LOG_ERROR("get uid error");
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		recording_flag = 0;
 		goto ret;
 	}
@@ -927,7 +927,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		LOG_ERROR("get songid error");
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		recording_flag = 0;
 		goto ret;
 	}
@@ -936,7 +936,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	if (!r){
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		recording_flag = 0;
 		goto ret;
 	}
@@ -953,7 +953,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	if(!r){
 		status = "0";
 		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
-		utf8_flag = 1;
+		utf8_flag = 0;
 		recording_flag = 0;
 		goto ret;
 	}
@@ -1008,14 +1008,14 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	r = pack.GetAttrib(SONGID,songid);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -1025,7 +1025,7 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 			moodtype = "1";
 			/*msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 			status = "0";
-			utf8_flag = 1;
+			utf8_flag = 0;
 			goto ret;*/
 		}
 
@@ -1034,7 +1034,7 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 			tid = "1";
 			/*msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 			status = "0";
-			utf8_flag = 1;
+			utf8_flag = 0;
 			goto ret;*/
 		}
 
@@ -1084,7 +1084,7 @@ bool MusicMgrEngine::GetMusicChannel(const int socket,
 		 LOG_ERROR("get channel error");
 		 msg = migfm_strerror(MIG_FM_HTTP_CHANNLE_NO_VALID);
 		 status = "0";
-		 utf8_flag = 1;
+		 utf8_flag = 0;
 	 }else{
 		 mcm->GetMusicChannel(num,result);
 		 LOG_DEBUG2("[%s]",result.c_str());
@@ -1340,7 +1340,7 @@ bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 	
@@ -1348,7 +1348,7 @@ bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
 	if (!r){
 		msg = migfm_strerror(MIG_FM_SOUCE_NO_VALID);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -1358,7 +1358,7 @@ bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
 	if (!r){
 		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
@@ -1366,7 +1366,7 @@ bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
 	if (!r){
 		msg = migfm_strerror(MIG_FM_CONTENT_NO_EXITS);
 		status = "0";
-		utf8_flag = 1;
+		utf8_flag = 0;
 		goto ret;
 	}
 
