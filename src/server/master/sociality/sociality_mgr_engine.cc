@@ -366,13 +366,15 @@ bool SocialityMgrEngine::OnMsgGetFriendList(packet::HttpPacket& packet,
 //	int page_index = atoi(page_index_str.c_str());
 //	int page_size = atoi(page_size_str.c_str());
 
-	typedef std::list<std::string> FriendList;
+	typedef storage::DBComm::FriendInfoList FriendList;
 	FriendList friends;
-	if (!storage::RedisComm::GetFriensList(uid, friends)) {
+	if (!storage::DBComm::GetFriendList(uid_str, friends)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
 		return false;
 	}
+
+
 
 	status = 1;
 	return true;
@@ -422,7 +424,13 @@ bool SocialityMgrEngine::OnMsgAddFriend(packet::HttpPacket& packet,
 		return false;
 	}
 
-	if (storage::RedisComm::AddFriend(uid, to_uid)) {
+//	if (!storage::RedisComm::AddFriend(uid, to_uid)) {
+//		err_code = MIG_FM_DB_ACCESS_FAILED;
+//		status = -1;
+//		return false;
+//	}
+
+	if (!storage::DBComm::AddFriend(uid_str, touid_str)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
 		return false;

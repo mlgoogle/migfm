@@ -24,6 +24,16 @@ public:
 	static bool GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 			std::string& dec,std::string& dec_id,std::string& dec_word);
 
+	static bool AddFriend(const std::string &uid, const std::string &touid);
+
+	struct FriendInfo {
+		std::string uid;
+		std::string name;
+		uint32		type;
+	};
+	typedef std::vector<FriendInfo> FriendInfoList;
+	static bool GetFriendList(const std::string &uid, FriendInfoList &friends);
+
 private:
 #if defined (_DB_POOL_)	
 	static base_storage::DBStorageEngine* CreateConnection(void);

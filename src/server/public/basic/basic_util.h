@@ -44,6 +44,7 @@ public:
 
 	static bool UTF8ToGB2312 (const char *input, size_t inlen, char **output /* free */, size_t *outlen);
 
+	static double CalcGEODistance(double latitude1, double longitude1, double latitude2, double longitude2);
 };
 
 }

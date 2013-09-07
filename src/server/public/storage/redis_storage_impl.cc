@@ -98,7 +98,7 @@ bool RedisStorageEngineImpl::IncrValue(const char* key,const size_t key_len,
 	if (PingRedis()!=1)
 		return false;
 
-	//ÊÇ·ñ´æÔÚ
+	//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 	if((ReidsIsExist(c_,key,key_len))==1)
 		return RedisIncr(c_,key,key_len);
 	else
@@ -111,7 +111,7 @@ bool RedisStorageEngineImpl::DecrValue(const char* key,const size_t key_len,
 	size_t* sval_len;
 	if (PingRedis()!=1)
 		return false;
-	//ÊÇ·ñ´æÔÚ
+	//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 	if((ReidsIsExist(c_,key,key_len))==1)
 	    return RedisDecr(c_,key,key_len);
 	return false;
@@ -287,7 +287,7 @@ bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 		str.assign(pptr[r]);
 		list.push_back(str);
 	}
-	free(*pptr);
+	free(pptr);
 	if(rp==NULL)
 		return false;
 	RedisFreeReply(rp);
@@ -309,8 +309,8 @@ bool RedisStorageEngineImpl::GetListRange(const char* key, const size_t key_len,
 		std::string str;
 		str.assign(pptr[i]);
 		list.push_back(str);
-		free(pptr[i]);
 	}
+	free(pptr);
 	RedisFreeReply(rp);
 	return true;
 }

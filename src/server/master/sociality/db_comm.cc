@@ -199,4 +199,66 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 	return true;
 }
 
+bool DBComm::AddFriend(const std::string& uid, const std::string& touid) {
+	base_storage::DBStorageEngine* engine = GetConnection();
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+	// proc_AddFriend
+	os	<< "call proc_AddFriend("
+		<< uid.c_str() << ","
+		<< touid.c_str() << ")";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+	return true;
+}
+
+bool DBComm::GetFriendList(const std::string& uid, FriendInfoList& friends) {
+	base_storage::DBStorageEngine* engine = GetConnection();
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+	// proc_GetUserFriends
+	os	<< "call proc_GetUserFriends("
+		<< uid.c_str() << ")";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+	int num = engine->RecordCount();
+ 	if(num > 0){
+ 		friends.reserve(num);
+ 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+ 			FriendInfo finfo;
+ 			finfo.uid = rows[0];
+ 			finfo.name = rows[1];
+ 			finfo.type = atoi(rows[2]);
+ 			friends.push_back(finfo);
+ 		}
+ 	}
+
+	return true;
+}
+
 }

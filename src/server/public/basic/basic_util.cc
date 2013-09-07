@@ -4,6 +4,8 @@
 #include "basic/basic_util.h"
 #include "basic/base64.h"
 #include <sstream>
+#include <math.h>
+
 namespace base{
 
  void BasicUtil::GetHttpParamElement(const char* query,const char* name,
@@ -246,6 +248,22 @@ bool BasicUtil::UTF8ToGB2312 (const char *input, size_t inlen, char **output, si
 	*ob = 0;
 	iconv_close (cd);
 	return rc == -1 ? false : true;
+}
+
+double BasicUtil::CalcGEODistance(double latitude1, double longitude1,
+		double latitude2, double longitude2) {
+    double dd = M_PI/180;
+    double x1 = latitude1 * dd;
+    double y1 = longitude1 * dd;
+
+    double x2 = latitude2 * dd;
+    double y2 = longitude1 * dd;
+
+    double R = 6371004;
+
+    double runDistance = (2*R*asin(sqrt(2-2*cos(x1)*cos(x2)*cos(y1-y2) - 2*sin(x1)*sin(x2))/2));
+    runDistance = (runDistance < 0) ? (-runDistance) : runDistance;
+	return runDistance;
 }
 
 }

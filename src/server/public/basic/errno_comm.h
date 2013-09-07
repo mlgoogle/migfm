@@ -24,7 +24,6 @@
 #define  MIG_FM_CONTENT_NO_EXITS                 -21
 #define  MIG_FM_VERSION_NO_EXITS                 -22
 #define  MIG_FM_NET_STATE_NO_EXITS               -23
-
 #define  MIG_FM_HTTP_INVALID_USER_ID           -24		// "请求中ID字段非法";
 #define  MIG_FM_HTTP_DEVICE_TOKEN_NOT_EXIST   	-25		// "请求中未包含devicetoken字段";
 #define  MIG_FM_HTTP_INVALID_TIME_FORMAT    	-26		// "请求中时间格式非法";
