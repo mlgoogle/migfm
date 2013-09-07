@@ -17,6 +17,9 @@ public:
 public:
 	static void Init(std::list<base::ConnAddr>& addrlist);
 	static void Dest();
+	static bool GetMusicInfos(const std::string& key,std::string& music_infos);
+	static bool IsCollectSong(const std::string& uid,const std::string& songid);
+	static bool GetMusicAboutUser(const std::string &songid,std::string& content);
 private:
 	static std::list<base::ConnAddr>  addrlist_;
 };

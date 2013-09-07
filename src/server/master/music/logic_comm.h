@@ -46,6 +46,7 @@
 #define  WORDID             "wordid"
 #define  SONGID             "songid"
 #define  UID                "uid"
+#define  TARID              "taruid"
 #define  NUM                "num"
 #define  MOODID             "moodid"
 #define  MOODINDEX          "moodindex"
@@ -63,10 +64,12 @@
 #define  CONTENT            "content"
 #define  VERSION            "version"
 #define  STATE              "state"
+#define  MODETYPE           "modetype"
+#define  TYPEID             "typeid"
 
 #define IDENTITY "migfm_identity"
 #define USERINFOS "migfm_user_infos"
-#define DEFAULT_URL "http://42.121.14.108/wx/r3.mp3"
+#define DEFAULT_URL "http://42.121.14.108/wx/lp5.mp3"
 
 #define DEFAULT_CONFIG_PATH     "./plugins/music_manager/music_manager_config.xml"
 namespace usr_logic{

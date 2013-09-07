@@ -17,7 +17,12 @@ public:
 	static void Dest();
 
 	static bool GetUserInfos(const std::string& uid,
-							std::string& nickname,std::string& gender);
+							std::string& nickname,std::string& gender,
+							std::string& pic);
+
+	static bool GetMusicUrl(const std::string& song_id,std::string& hq_url,
+		std::string& song_url);
+
 private:
 	static std::list<base::ConnAddr>  addrlist_;
 };

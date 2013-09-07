@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="lbs"
-	ProjectGUID="{1CD3CEBE-E431-4A79-BE80-0355BE880464}"
+	Name="collectandnearnum"
+	ProjectGUID="{461DA80D-FDC1-45CF-93FA-CDC1A203A33E}"
 	>
 	<Platforms>
 		<Platform
@@ -140,80 +140,12 @@
 		<Filter
 			Name="include"
 			>
-			<File
-				RelativePath=".\baidu_lbs_connector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\db_comm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dic_comm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\http_response.h"
-				>
-			</File>
-			<File
-				RelativePath=".\lbs_logic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\logic_comm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\redis_connector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\thread_handler.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="source"
 			>
 			<File
-				RelativePath=".\baidu_lbs_connector.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\db_comm.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\defines.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dic_comm.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\http_response.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\lbs_init.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\lbs_logic.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\logic_comm.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\redis_connector.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\thread_handler.cc"
+				RelativePath=".\collectandnearnum.cc"
 				>
 			</File>
 		</Filter>

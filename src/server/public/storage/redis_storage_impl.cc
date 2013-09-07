@@ -98,7 +98,7 @@ bool RedisStorageEngineImpl::IncrValue(const char* key,const size_t key_len,
 	if (PingRedis()!=1)
 		return false;
 
-	//�Ƿ����
+	//??????
 	if((ReidsIsExist(c_,key,key_len))==1)
 		return RedisIncr(c_,key,key_len);
 	else
@@ -111,7 +111,7 @@ bool RedisStorageEngineImpl::DecrValue(const char* key,const size_t key_len,
 	size_t* sval_len;
 	if (PingRedis()!=1)
 		return false;
-	//�Ƿ����
+	//??????
 	if((ReidsIsExist(c_,key,key_len))==1)
 	    return RedisDecr(c_,key,key_len);
 	return false;
@@ -265,7 +265,7 @@ bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,const size_t ha
 		str.assign(pptr[r]);
 		list.push_back(str);
 	}
-	free(*pptr);
+	free(pptr);
 	if(rp==NULL)
 		return false;
 	RedisFreeReply(rp);

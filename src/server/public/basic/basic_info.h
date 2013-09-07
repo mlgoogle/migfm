@@ -73,6 +73,9 @@ public:
 	void set_artist(const std::string& artist) {data_->artist_ = artist;}
 	void set_pic_url(const std::string& pic_url) {data_->pic_url_ = pic_url;}
 	void set_music_time(const int32 music_time) {data_->music_time_ = music_time;}
+	void set_music_clt(const std::string& clt_num){data_->clt_num_ = clt_num;}
+	void set_music_cmt(const std::string& cmt_num) {data_->cmt_num_ = cmt_num;}
+	void set_music_hot(const std::string& hot_num){data_->hot_num_ = hot_num;}
 
 	const std::string& id() const {return !data_?STR_EMPTY:data_->id_;}
 	const std::string& sid() const {return !data_?STR_EMPTY:data_->sid_;}
@@ -85,6 +88,9 @@ public:
 	const std::string& pic_url() const {return !data_?STR_EMPTY:data_->pic_url_;}
 	const std::string& hq_url() const {return !data_?STR_EMPTY:data_->hq_url_;}
 	const int32 music_time() const {return !data_?0:data_->music_time_;}
+	const std::string& clt_num() const {return !data_?STR_EMPTY:data_->clt_num_;}
+	const std::string& cmt_num() const {return !data_?STR_EMPTY:data_->cmt_num_;}
+	const std::string& hot_num() const {return !data_?STR_EMPTY:data_->hot_num_;}
 
 	bool SerializedJson(std::string& json);
  	bool UnserializedJson(std::string& str);
@@ -111,7 +117,12 @@ private:
 			,pic_url_(pic_url)
 			,url_(url)
 			,music_time_(time)
-			,refcount_(1){}
+			,refcount_(1){
+				hot_num_ = "0";
+				clt_num_ = "0";
+				cmt_num_ = "0";
+		}
+
 		void AddRef(){refcount_++;}
 		void Release(){if(!--refcount_) delete this;}
 		std::string id_;
@@ -124,6 +135,9 @@ private:
 		std::string pub_time_;
 		std::string artist_;
 		std::string pic_url_;
+		std::string clt_num_;
+		std::string cmt_num_;
+		std::string hot_num_;
 		int32       music_time_;
 	private:
 		int refcount_;

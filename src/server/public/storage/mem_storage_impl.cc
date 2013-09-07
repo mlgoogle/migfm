@@ -138,9 +138,9 @@ bool MemStorageEngineImpl::MGetValue(const char* const * key_array,
     rc = memcached_mget((memcached_st*)cache_,key_array,key_len_array,
 			element_count);
     if(rc==MEMCACHED_END)
-	return false;
+	  return false;
     else if(memcached_failed(rc))
-	return false;
+	  return false;
     return true;
 }
 
@@ -227,9 +227,9 @@ int main(int argc, char *argv[])
     memcached_free(memc);
     return 0;
 } 
-����Դ���룺
+?????????
 [root@localhost html]# gcc -o cmultmem cmultmem.c -lmemcached 
-[root@localhost html]# ./cmultmem //ִ��
+[root@localhost html]# ./cmultmem //???
 Save key:key1 data:"This is c first value" success.
 Save key:key2 data:"This is c second value" success.
 Save key:key3 data:"This is c third value" success.

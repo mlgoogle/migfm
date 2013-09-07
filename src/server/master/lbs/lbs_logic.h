@@ -52,15 +52,22 @@ public:
 	bool OnMsgNearCollect(packet::HttpPacket& packet, Json::Value &result,
 		int &status, std::string &msg);
 
+	bool OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg);
+
 	int SearchRegin(double longitude, double latitude,
 			std::string &response, std::string &err_msg);
 
 	int SearchBounds(double longitude1, double latitude1, double longitude2, double latitude2,
 			std::string &response, std::string &err_msg);
 
-	int SearchDetail(
-			std::string &response, std::string &err_msg);
+	int SearchDetail(std::string &response, std::string &err_msg);
 
+	void GetUserCurrentMusic(const std::string& content,Json::Value& item);
+
+	bool GetMusicHotCltCmt(const std::string &songid,std::string &hot_num, 
+		                   std::string &cmt_num, 
+		                   std::string &clt_num);
 public:
 	~LBSLogic();
 
