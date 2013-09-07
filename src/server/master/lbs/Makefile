@@ -37,7 +37,7 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output: lbs_init.o mig_log.o http_response.o baidu_lbs_connector.o redis_connector.o \
+output: lbs_init.o mig_log.o http_response.o base64.o baidu_lbs_connector.o redis_connector.o \
 	json_reader.o json_value.o json_writer.o lbs_logic.o mem_storage_impl.o mysql_storage_impl.o \
 	storage.o redis_storage_impl.o redis_warrper.o basic_info.o constants.o basic_util.o \
 	db_comm.o dic_comm.o logic_comm.o thread_handler.o http_packet.o basictypes.o config.o
@@ -120,6 +120,10 @@ constants.o:
 
 basic_util.o:
 	$(COMPILE) ./../../public/basic/basic_util.cc
+
+base64.o:
+	$(COMPILE) ./../../public/basic/base64.cc
+
 
 redis_warrper.o:
 	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ../../public/storage/redis_warrper.c

@@ -81,7 +81,9 @@ public:
 		                          const std::string& songid,
 								  const std::string& name,
 								  const std::string& singer,
-								  const std::string& netstat);
+								  const std::string& netstat,
+								  const std::string& mode,
+								  const std::string& tid);
 private:
 	static base_storage::DictionaryStorageEngine* engine_;
 };

@@ -88,9 +88,9 @@ public:
 	const std::string& pic_url() const {return !data_?STR_EMPTY:data_->pic_url_;}
 	const std::string& hq_url() const {return !data_?STR_EMPTY:data_->hq_url_;}
 	const int32 music_time() const {return !data_?0:data_->music_time_;}
-	const std::string& clt_num() const {return !data_?0:data_->clt_num_;}
-	const std::string& cmt_num() const {return !data_?0:data_->cmt_num_;}
-	const std::string& hot_num() const {return !data_?0:data_->hot_num_;}
+	const std::string& clt_num() const {return !data_?STR_EMPTY:data_->clt_num_;}
+	const std::string& cmt_num() const {return !data_?STR_EMPTY:data_->cmt_num_;}
+	const std::string& hot_num() const {return !data_?STR_EMPTY:data_->hot_num_;}
 
 	bool SerializedJson(std::string& json);
  	bool UnserializedJson(std::string& str);

@@ -40,7 +40,84 @@ base_storage::DictionaryStorageEngine* RedisComm::GetConnection() {
 	}
 }
 
+bool RedisComm::GetMusicInfos(const std::string &key, std::string &music_infos){
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
+		&value,&value_len);
+	if (r){
+		music_infos.assign(value,value_len-1);
+		if (value){
+			free(value);
+			value = NULL;
+		}
 
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	}
+
+	return r;
+}
+
+bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid)
+{
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+
+	r = redis_engine_->GetHashElement(os.c_str(),songid.c_str(),songid.length(),
+		&value,&value_len);
+	if (r){
+		if (value){
+			free(value);
+			value = NULL;
+		}
+		return true;
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",songid.c_str());
+	}
+
+	return false;
+}
+
+bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content)
+{
+	char* value;
+	size_t value_len = 0;
+	std::string key;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+	key.append("a");
+	key.append(songid.c_str());
+	key.append("t");
+	LOG_DEBUG2("%%%%%key[%s]%%%%%%",key.c_str());
+	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
+		&value,&value_len);
+	if (r){
+		content.assign(value,value_len-1);
+		if (value){
+			free(value);
+			value = NULL;
+		}
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
+	}
+	return r;
+}
 
 
 /////////////////////////////////memcahced//////////////////////////////////////
@@ -87,6 +164,7 @@ bool MemComm::GetUserCurrentSong(const std::vector<std::string> &vec_user,
 		ss.str("");
 		ss << "cur" << it->c_str();
 		const string &key = map_key_users.insert(KeyUserMap::value_type(ss.str(), *it)).first->first;
+		LOG_DEBUG2("key [%s]",key.c_str());
 		vec_keys.push_back(key.c_str());
 		vec_key_lens.push_back(key.size());
 	}
@@ -100,12 +178,14 @@ bool MemComm::GetUserCurrentSong(const std::vector<std::string> &vec_user,
 
 	while (engine_->FetchValue(return_key, &return_key_length, &return_value,
 	                                      &return_value_length)) {
-		if (return_key && return_value)
+		if (return_key && return_value){
 			map_songs[map_key_users[return_key]] = return_value;
+			MIG_DEBUG(USER_LEVEL,"key[%s] value[%s]",return_key,return_value);
+		}
 		if (return_value)
 			free(return_value);
 	}
 	return true;
 }
-
 }
+

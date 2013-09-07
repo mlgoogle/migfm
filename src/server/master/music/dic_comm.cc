@@ -466,14 +466,16 @@ bool MemComm::SetUsrCurrentSong(const std::string& uid,
 								const std::string& songid,
 								const std::string& name,
 								const std::string& singer,
-								const std::string& netstat){
+								const std::string& netstat,
+								const std::string& mode,
+								const std::string& tid){
 
 	//key cur+uid cur100000
 	bool r = false;
 	std::string key = "cur";
 	std::string value;
 	key.append(uid);
-	//value {"songid":"10000","state":"1","name":"ÑÞÑôÌì","singer":"ñ¼Î¨"}
+	//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"ÑÞÑôÌì","singer":"ñ¼Î¨"}
 	value.append("{\"songid\":\"");
 	value.append(songid);
 	value.append("\",\"state\":\"");
@@ -482,6 +484,10 @@ bool MemComm::SetUsrCurrentSong(const std::string& uid,
 	value.append(name);
 	value.append("\",\"singer\":\"");
 	value.append(singer);
+	value.append("\",\"type\":\"");
+	value.append(mode);
+	value.append("\",\"tid\":\"");
+	value.append(tid);
 	value.append("\"}");
 	r = engine_->SetValue(key.c_str(),key.length(),
 							value.c_str(),value.length());

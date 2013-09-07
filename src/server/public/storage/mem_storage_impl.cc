@@ -138,21 +138,21 @@ bool MemStorageEngineImpl::MGetValue(const char* const * key_array,
     rc = memcached_mget((memcached_st*)cache_,key_array,key_len_array,
 			element_count);
     if(rc==MEMCACHED_END)
-	return false;
+	  return false;
     else if(memcached_failed(rc))
-	return false;
+	  return false;
     return true;
 }
 
-bool MemStorageEngineImpl::FetchValue(const char* key,size_t *key_len,
+bool MemStorageEngineImpl::FetchValue(char* key,size_t *key_len,
 									  char** value,size_t *val_len){
-   
-    char* value_;
+   if (NULL == value)
+	   return false;
+
     uint32_t flags = 0;
     memcached_return_t rc;
-    value_ = memcached_fetch((memcached_st*)cache_,const_cast<char*>(key),
-    						  key_len,val_len,&flags,
-                              &rc);
+    *value = memcached_fetch((memcached_st*)cache_, key,
+    						key_len,val_len,&flags, &rc);
     if(rc==MEMCACHED_END)
 	return false;
     else if(memcached_failed(rc))

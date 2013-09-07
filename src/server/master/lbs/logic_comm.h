@@ -36,6 +36,7 @@
 #endif
 
 #define DEFAULT_CONFIG_PATH		"./plugins/lbs/config.xml"
+#define DEFAULT_URL "http://42.121.14.108/wx/lp5.mp3"
 
 namespace mig_lbs {
 

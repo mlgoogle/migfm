@@ -51,7 +51,8 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 }
 
 bool DBComm::GetUserInfos(const std::string& uid,
-		std::string& nickname,std::string& gender) {
+						  std::string& nickname,std::string& gender,
+						  std::string& pic) {
 	nickname.clear();
 	gender.clear();
 
@@ -63,7 +64,7 @@ bool DBComm::GetUserInfos(const std::string& uid,
 		LOG_ERROR("GetConnection Error");
 		return false;
 	}
-	os	<< "select nickname,sex from " << USERINFOS
+	os	<< "select nickname,sex,head from " << USERINFOS
 		<< " where usrid=\'" << uid.c_str() << "\';";
 	const char* sql = os.str().c_str();
 	LOG_DEBUG2("[%s]",os.str().c_str());
@@ -78,10 +79,52 @@ bool DBComm::GetUserInfos(const std::string& uid,
 		if (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
 			nickname = rows[0];
 			gender = rows[1];
+			pic = rows[2];
 		}
 		return true;
 	}
 	return false;
 }
+
+bool DBComm::GetMusicUrl(const std::string &song_id, std::string &hq_url, std::string &song_url){
+	std::stringstream os;
+	bool r = false;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	if (engine==NULL){
+		LOG_ERROR("engine error");
+		return true;
+	}
+	base_storage::db_row_t* db_rows;
+	int num;
+	MYSQL_ROW rows = NULL;
+	os<<"select song_hifi_url,song_url from migfm_music_url where song_id =\'"
+		<<song_id.c_str()<<"\';";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			if (rows[0] ==NULL)
+				hq_url = DEFAULT_URL;
+			else
+				hq_url = rows[0];
+
+			if (rows[1] ==NULL)
+				song_url = DEFAULT_URL;
+			else
+				song_url = rows[1];
+		}
+		return true;
+	}else{
+		hq_url = song_url = DEFAULT_URL;
+		return false;
+	}
+	return true;
+}
+
 
 }

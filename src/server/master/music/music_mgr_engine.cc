@@ -376,7 +376,7 @@ ret1:
 	    os1<<"{\"id\":\""<<smi.id().c_str()
 		    <<"\",\"title\":\""<<b64title.c_str()
 		    <<"\",\"artist\":\""<<b64artist.c_str()
-		    <<"\",\"url\":\""<<smi.url().c_str()
+		    <<"\",\"url\":\""<</*smi.url().c_str()*/smi.hq_url().c_str()
 			<<"\",\"hqurl\":\""<<smi.hq_url().c_str()
 		    <<"\",\"pub_time\":\""<<smi.pub_time().c_str()
 		    <<"\",\"album\":\""<<b64album.c_str()
@@ -807,8 +807,11 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if((mood_index=="0")&&(scens_index=="0")&&(channel_index=="0"))
 		mood_index = scens_index = channel_index ="1";
 	//判断提交个数不能为0
-	if (num=="0")
-		num = "10";
+	
+	//test
+	/*if (num=="0")
+		num = "10";*/
+	num = "10";
 
 	moodci.set_info_id(mood_id);
 	moodci.set_info_index(mood_index);
@@ -866,6 +869,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	packet::HttpPacket pack = packet;
 	bool r = false;
 	std::string uid;
+	std::string mode;
 	std::string wordid;
 	std::string result_out;
 	std::string status;
@@ -887,7 +891,18 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		recording_flag = 0;
 		goto ret;
 	}
-	r = pack.GetAttrib(MOOD,wordid);
+
+	r = pack.GetAttrib(MODE,mode);
+	if (!r){
+		LOG_ERROR("get MOOD error");
+		status = "0";
+		msg = migfm_strerror(MIG_FM_HTTP_DEC_NO_VALID);
+		utf8_flag = 1;
+		recording_flag = 0;
+		goto ret;
+	}
+
+	r = pack.GetAttrib(TYPEID,wordid);
 	if (!r){
 		LOG_ERROR("get MOOD error");
 		status = "0";
@@ -952,9 +967,13 @@ ret:
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	//recording mood and current songid
 	if (recording_flag){
-		mood_record_engine_->RecordingMood(atoll(uid.c_str()),
+		//只记录心情
+		if(mode=="mm")
+		   mood_record_engine_->RecordingMood(atoll(uid.c_str()),
 		                                   atol(wordid.c_str()));
-		storage::MemComm::SetUsrCurrentSong(uid,songid,name,singer,state);
+		//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"艳阳天","singer":"窦唯"}
+
+		storage::MemComm::SetUsrCurrentSong(uid,songid,name,singer,state,mode,wordid);
 		if (state!="2"){//本地手机歌曲不记录
 			storage::RedisComm::MgrListenSongsNum(songid,uid,1);
 			if (atol(lastsongid.c_str())!=0)
@@ -1125,7 +1144,7 @@ bool MusicMgrEngine::GetMusicInfos(const int socket,const std::string& songid){
 		<<"\",\"album\":\""<<b64album.c_str()
 		<<"\",\"pic\":\""<<smi.pic_url().c_str()
 		<<"\",\"like\":\"0\"}]";
-	os1<<",\"mode\":\""<<dec.c_str()
+	    os1<<",\"mode\":\""<<dec.c_str()
 		<<"\",\"wordid\":\""<<dec_id.c_str()<<"\",\"name\":\""
 		<<dec_word.c_str()<<"\"";
 	result = os1.str();
@@ -1225,6 +1244,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 			<<"\",\"time\":\""<<smi.music_time()
 			<<"\",\"pic\":\""<<smi.pic_url().c_str()
 			<<"\",\"type\":\""<<mode.c_str()
+			<<"\",\"tid\":\""<<wordid.c_str()
 			<<"\",\"clt\":\""<<smi.clt_num().c_str()
 			<<"\",\"cmt\":\""<<smi.cmt_num().c_str()
 			<<"\",\"hot\":\""<<smi.hot_num().c_str()
@@ -1273,6 +1293,7 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 	}
 
 	LOG_DEBUG2("[%s]",content.c_str());
+	content = "{\"filename\":\"channelinfo.xml\",\"version\":\"1.0.0\",\"url\":\"http://www.baidu.com/migfm\"}";
 	//解析json
 	r = reader.parse(content.c_str(),root);
 	if (!r){
@@ -1445,9 +1466,7 @@ bool MusicMgrEngine::GetMusicHotCltCmt(const std::string &songid,
 	Json::Reader reader;
 	Json::Value  root;
 	Json::Value songinfo;
-	//test 
-	std::string temp_songid = "9913";
-	r = storage::RedisComm::GetMusicAboutUser(temp_songid,content);
+	r = storage::RedisComm::GetMusicAboutUser(songid,content);
 	if (!r){
 		hot_num = clt_num = cmt_num = "0";
 		return false;
@@ -1472,5 +1491,6 @@ bool MusicMgrEngine::GetMusicHotCltCmt(const std::string &songid,
 	else
 		clt_num = "0";
 }
+
 
 }
