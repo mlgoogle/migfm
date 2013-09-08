@@ -147,10 +147,11 @@ bool DBComm::UpDateUserInfos(const int uid,const std::string& username,
 	 return true;
 }
 
-bool DBComm::AddUserInfos(const int uid,const std::string& username,const std::string& nickname, 
-							 const std::string& gender,const std::string& type, 
-							 const std::string& birthday,const std::string& location, 
-							 const std::string& source,const std::string& head){
+bool DBComm::AddUserInfos(const int uid,const std::string& username,
+						  const std::string& nickname, const std::string& gender,
+						  const std::string& type, const std::string& birthday,
+						  const std::string& location, const std::string& source,
+						  const std::string& head){
 	base_storage::DBStorageEngine* engine = GetConnection();
 	std::stringstream os;
 	bool r = false;
@@ -197,6 +198,71 @@ bool DBComm::RegeditUser(const std::string &username, const std::string &passwor
 		LOG_ERROR2("exec sql error");
 	}
 	return r;
+}
+
+
+bool DBComm::RegistUser(const char* plat_id, const char* plat_session, 
+						const char* password, int &sex, std::string &username, 
+						std::string &nickname, int64 &userid, int64& type, 
+						std::string &location, std::string &birthday, 
+						std::string &head){
+	base_storage::DBStorageEngine* engine = GetConnection();
+	std::stringstream os;
+	bool r = false;
+	int return_code;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+	//call proc_RegisterUser('1','eweqwewqe','dasd',1,'flaght','oldk',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);
+
+    os<<"call proc_RegisterUser(\'"
+	  <<plat_id<<"\',\'"<<plat_session
+	  <<"\',\'"<<password<<"\',"
+	  <<sex<<",\'"<<username.c_str()<<"\',\'"
+	  <<nickname.c_str()<<"\',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+	//ªÒ»°÷µ
+	os.str("");
+	sql.c_str();
+	os<<"select @usrid,@sex,@type,@ctry,@birthday,"
+		<<"@head,@username,@nickname,@return_code,@return_str";
+	sql = os.str();
+	r = engine->SQLExec(sql.c_str());
+	LOG_DEBUG2("[%s]", sql.c_str());
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+	int num = engine->RecordCount();
+	if (num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			return_code = atoi(rows[8]);
+			if (return_code!=0){
+				LOG_ERROR2("error code [%s]",rows[9]);
+				return false;
+			}
+			userid = atoll(rows[0]);
+			sex = atol(rows[1]);
+			type = atoll(rows[2]);
+			location = rows[3];
+			birthday = rows[4];
+			head = rows[5];
+			username = rows[6];
+			nickname = rows[7];
+		}
+	}
+	return true;
 }
 
 }

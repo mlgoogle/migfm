@@ -41,6 +41,8 @@ public:
 private:
 	bool RegeditUsr(const int socket,const packet::HttpPacket& packet);
 
+	bool RegistUser(const int socket,const packet::HttpPacket& packet);
+
 	bool UpdateUserinfo(const int socket,const packet::HttpPacket& packet);
 
 	bool GetUserInfo(const int socket,const packet::HttpPacket& packet);

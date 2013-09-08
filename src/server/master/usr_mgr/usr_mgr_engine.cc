@@ -4,6 +4,7 @@
 #include "logic_comm.h"
 #include "basic/constants.h"
 #include "basic/basic_util.h"
+#include "basic/errno_comm.h"
 #include "config/config.h"
 #include <sstream>
 
@@ -87,7 +88,8 @@ bool UsrMgrEngine::OnUsrMgrMessage(struct server *srv, int socket,
 	packet.GetPacketType(type);
 
 	if (type=="regedit"){
-		RegeditUsr(socket,packet);
+		//RegeditUsr(socket,packet);
+		RegistUser(socket,packet);
 	}else if (type=="update"){
 		UpdateUserinfo(socket,packet);
 	}else if (type=="get"){
@@ -112,7 +114,7 @@ bool UsrMgrEngine::CreateGuest(const int socket, const packet::HttpPacket &packe
 	int32 random_num = usr_logic::SomeUtils::GetRandomID();
 	os<<random_num<<"@miglab.com";
 	os1<<random_num;
-	os2<<"�ο�"<<random_num;
+	os2<<"游客"<<random_num;
 	base::BasicUtil::GB2312ToUTF8(os2.str().c_str(),os2.str().length(),
 		&utf_nickname,&utf_nickname_size);
 	nickname.assign(utf_nickname,utf_nickname_size);
@@ -147,7 +149,7 @@ bool UsrMgrEngine::GetUserInfo(const int socket,const packet::HttpPacket& packet
 		birthday,location,source,head);
 	if (!r){ //vailed.
 		status = "0";
-		msg = "��ȡ��Ϣʧ��";
+		msg = "获取信息失败";
 		//msg = "1";
 		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 		LOG_DEBUG2("[%s]",result_out.c_str());
@@ -237,7 +239,7 @@ bool UsrMgrEngine::UpdateUserinfo(const int socket,const packet::HttpPacket& pac
 		                                 birthday,location,source,head);
 	if (!r){ //vailed.
 		status = "0";
-		msg = "����ʧ��";
+		msg = "更新失败";
 		//msg = "1";
 		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 		LOG_DEBUG2("[%s]",result_out.c_str());
@@ -248,6 +250,117 @@ bool UsrMgrEngine::UpdateUserinfo(const int socket,const packet::HttpPacket& pac
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+}
+
+
+bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet){
+	bool r = false;
+	packet::HttpPacket pack = packet;
+	std::string result;
+	std::string result_out;
+	std::string status;
+	std::string msg;
+	std::string username;
+	std::string password;
+	std::string nickname;
+	std::string source;
+	std::string session;
+	std::string s_sex;
+	std::string location;
+	std::string birthday;
+	std::string head;
+	int64 usrid;
+	int sex;
+	int64 type;
+	int32 utf8_flag = 0;
+	std::stringstream os;
+
+	r = pack.GetAttrib(SOURCE,source);
+	if (!r){
+		status = "0";
+		msg = migfm_strerror(MIG_FM_SOURCE_NO_VAILED);
+		utf8_flag = 0;
+		goto ret;
+	}
+
+	r = pack.GetAttrib(SESSION,session);
+	if (!r){
+		if(source!="0"){
+			status = "0";
+			msg = migfm_strerror(MIG_FM_SOURCE_SESSION_NO_VAILED);
+			utf8_flag = 0;
+			goto ret;
+		}else{
+			session = "1";
+		}
+	}
+
+	//第三方平卿用户名为秿密码为空 设置默认用户县密码 
+	//本平卿昵称为空
+
+	r = pack.GetAttrib(USERNAME,username);
+	if (!r){
+		if(source=="0"){
+			status = "0";
+			msg = migfm_strerror(MIG_FM_USERNAME_NO_VAILED);
+			utf8_flag = 0;
+			goto ret;
+		}
+		else{
+			username = "default@miglab.com";
+		}
+	}
+
+	r = pack.GetAttrib(PASSWORD,password);
+	if (!r){
+		if(source=="0"){
+			status = "0";
+			msg = migfm_strerror(MIG_FM_PASSWORD_NO_VAILED);
+			utf8_flag = 0;
+			goto ret;
+		}
+		else{
+			password = "123456";
+		}
+	}
+
+	r = pack.GetAttrib(NICKNAME,nickname);
+	if (!r){
+		nickname = "米格用户";
+	}
+	//性别
+	r = pack.GetAttrib(SEX,s_sex);
+	if(!r){
+		if(source=="0"){
+			s_sex = "1";
+		}
+	}
+    sex = atoi(s_sex.c_str());
+	r = storage::DBComm::RegistUser(source.c_str(),session.c_str(),
+		           password.c_str(),sex,
+		                        username,nickname,usrid,type,location,birthday,head);
+	if (!r){//用户存在
+		status = "0";
+		msg = migfm_strerror(MIG_FM_USER_EXITS);
+		utf8_flag = 0;
+		goto ret;
+	}
+
+	//
+	os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
+		<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<sex
+		<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
+		<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
+		<<head.c_str()<<"\","<<"\"token\":\"miglab\"";
+
+	result = os.str();
+	status = "1";
+
+ret:
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
 }
 
 bool UsrMgrEngine::RegeditUsr(const int socket,const packet::HttpPacket& packet){
@@ -267,12 +380,6 @@ bool UsrMgrEngine::RegeditUsr(const int socket,const packet::HttpPacket& packet)
 	r = pack.GetAttrib(PASSWORD,password);
 	if (!r){
 		LOG_ERROR("get password error");
-		return false;
-	}
-
-	r = pack.GetAttrib(NICKNAME,nickname);
-	if (!r){
-		LOG_ERROR("get nickname error");
 		return false;
 	}
 
@@ -309,7 +416,7 @@ bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string
 		  if (r){//exist
 			  //
 			  status = "0";
-			  msg = "�˺��Ѵ���";
+			  msg = "账号已存";
 			  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 			  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 			  return false;
@@ -319,7 +426,7 @@ bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string
 	  r = storage::DBComm::RegeditUser(username,password,nickname,source);
 	  if (!r){//regedit
 		  status = "0";
-		  msg = "ע��ʧ��";
+		  msg = "注册失败";
 		  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 		  LOG_DEBUG2("[%s]",result_out.c_str());
 		  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
@@ -329,7 +436,7 @@ bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string
 	  r = storage::DBComm::GetUserIndent(username,uid);
 	  if (!r){ //vailed.
 		  status = "0";
-		  msg = "�˺Ų�����";
+		  msg = "账号不存";
 		  //msg = "1";
 		  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 		  LOG_DEBUG2("[%s]",result_out.c_str());
@@ -350,7 +457,7 @@ bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string
 		  birthday,str_utf8_location,source,head);
 	  if (!r){//init error
 		  status = "0";
-		  msg = "�����û���Ϣʧ��";
+		  msg = "更新用户信息失败";
 		  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 		  LOG_DEBUG2("[%s]",result_out);
 		  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());

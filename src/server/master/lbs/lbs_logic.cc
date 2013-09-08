@@ -205,6 +205,13 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 		content, response, msg)) {
 			return false;
 	}
+	const Json::Value &items = content["content"];
+	if (items.empty()){
+		//Json::Value &usersmusic = result["result"];
+		result["result"] = "";
+		status = 1;
+		return true;
+	}
 
 	Json::Value &usersmusic = result["result"]["nearUser"];
 	std::map<std::string, bool> mapExist;
@@ -212,7 +219,6 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 	typedef std::map<std::string, std::string> UserSongMap;
 	UserSongMap map_songs;
 	std::string nick_name, sex,pic;
-	const Json::Value &items = content["content"];
 	//test 100000 100001 100002
 	int jk = 0;
 	for (Json::Value::iterator it = items.begin();
@@ -224,14 +230,15 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 				continue;
 			std::string uid_str = item["ext"]["user_id"].asString();
 			//test
-			/*
+		//////////////////////////////////////////////////////////////////////////
 			if (jk==0){
 				uid_str = "100000";
 			}else if (jk==1){
 				uid_str = "100001";
 			}else{
 				uid_str = "100002";
-			}*/
+			}
+			//////////////////////////////////////////////////////////////////////////
 			if (uid_str.empty())
 				continue;
 			if (mapExist.end() != mapExist.find(uid_str))

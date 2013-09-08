@@ -20,6 +20,11 @@ public:
 	static bool RegeditUser(const std::string& username,const std::string& password,
 		                    const std::string& nickname,const std::string& source);
 
+	static bool RegistUser(const char* plat_id,const char* plat_session,
+		             const char* password,int& sex,std::string& username,
+					 std::string& nickname, int64& userid, int64& type, 
+					 std::string& location,std::string& birthday,std::string& head);
+
 	static bool AddUserInfos(const int uid,const std::string& username,
 		                        const std::string& nickname,const std::string& gender,
 								const std::string& type,const std::string& birthday,

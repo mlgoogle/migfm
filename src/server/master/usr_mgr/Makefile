@@ -39,7 +39,7 @@ all: clean output delete-temp-file
 output:	db_comm.o dic_comm.o logic_comm.o thread_handler.o usr_mgr_engine.o \
 	usr_mgr_init.o basic_info.o http_packet.o basictypes.o config.o \
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
-	redis_warrper.o storage.o constants.o basic_util.o
+	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o
 	$(LINK)
 
 clean:
@@ -103,3 +103,8 @@ constants.o:
 
 basic_util.o:
 	$(COMPILE) ./../../public/basic/basic_util.cc
+
+errno_comm.o:
+	$(COMPILE) ./../../public/basic/errno_comm.cc
+
+

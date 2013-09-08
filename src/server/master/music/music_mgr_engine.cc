@@ -538,12 +538,15 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 										   const int flag){
 		packet::HttpPacket pack = packet;
 		bool r = false;
+		int32 j = 0;
 		std::string uid;
 		std::string songid;
+		std::string song;
 		std::string result_out;
 		std::string status;
 		std::string msg;
 		std::string result;
+		std::vector<std::string> song_pair;
 		int32 utf8_flag = 0;
 		r = pack.GetAttrib(UID,uid);
 		if (!r){
@@ -560,10 +563,22 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 		   goto ret;
 		}
 
-		if (flag)
-		   storage::RedisComm::DelCollectSong(uid,songid);
-		else
-		   storage::RedisComm::DelHateSong(uid,songid);
+
+		
+		if (base::BasicUtil::SplitStringChr(songid.c_str(),",",song_pair)==0){
+			msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
+			status = "0";
+			utf8_flag = 0;
+			goto ret;
+		}
+
+		//ÅúÁ¿É¾³ý
+		for (j=0;j<song_pair.size();j++){
+			if (flag)
+				storage::RedisComm::DelCollectSong(uid,song_pair[j]);
+			else
+				storage::RedisComm::DelHateSong(uid,song_pair[j]);
+		}
 
 		msg = "0";
 		status = "1";

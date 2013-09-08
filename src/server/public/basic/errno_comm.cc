@@ -1,4 +1,4 @@
-﻿/*
+/*
 *
 * Returns: a static string.
 */
@@ -69,6 +69,14 @@ migfm_strerror(int error_code){
 		return "推送消息失败";
 	case MIG_FM_MSG_LIST_EMPTY:
 		return "消息列表为空";
+	case MIG_FM_SOURCE_SESSION_NO_VAILED:
+		return "请求中未包含第三方标示符";
+	case MIG_FM_USERNAME_NO_VAILED:
+		return "请求中未包含用户名";
+	case MIG_FM_PASSWORD_NO_VAILED:
+		return "请求中未包含密码";
+	case MIG_FM_USER_EXITS:
+		return "用户已经存在";
 	default:
 		return "未知错误码";
 	}

@@ -8,6 +8,36 @@
 
 namespace base{
 
+int BasicUtil::SplitStringChr( const char *str, const char *char_set,
+	std::vector<std::string> &out )
+{
+	using std::string;
+
+	assert(str != NULL);
+	assert(char_set != NULL);
+
+	out.clear();
+
+	if (0 == char_set[0]) {
+		if (str[0])
+			out.push_back(str);
+		return (int)out.size();
+	}
+
+	const char *find_ptr = NULL;
+	str += ::strspn(str, char_set);
+	while (str && (find_ptr=::strpbrk(str, char_set))) {
+		if (str != find_ptr)
+			out.push_back(string(str, find_ptr));
+		str = find_ptr + ::strspn(find_ptr, char_set);
+	}
+	if (str && str[0])
+		out.push_back(str);
+
+	return (int)out.size();
+}
+
+
  void BasicUtil::GetHttpParamElement(const char* query,const char* name,
                          std::string& value){
 

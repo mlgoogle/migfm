@@ -34,7 +34,12 @@
 #define  MIG_FM_DB_ACCESS_FAILED    			-31		// "数据库访问失败"
 #define  MIG_FM_PUSH_MSG_FAILED   				-32		// "推送消息失败"
 #define  MIG_FM_MSG_LIST_EMPTY     				-33 	// "消息列表为空"
-
+#define  MIG_FM_SOURCE_NO_VAILED                -34  //"请求中未包含来源";
+#define  MIG_FM_SOURCE_SESSION_NO_VAILED        -35  //"请求中未包含第三方标示符";
+#define  MIG_FM_USERNAME_NO_VAILED              -36  //"请求中未包含用户名";
+#define  MIG_FM_PASSWORD_NO_VAILED              -37  //"请求中未包含密码";
+#define  MIG_FM_USER_EXITS                      -38   //用户存在
+ 
 
 const char*
 migfm_strerror(int error_code);

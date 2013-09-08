@@ -39,7 +39,9 @@
 #define  PASSWORD           "password"
 #define  NICKNAME           "nickname"
 #define  SOURCE             "source"
+#define  SESSION            "session"
 #define  UID                "uid"
+#define  SEX                "sex"
 #define  GENDER             "gender"
 #define  BIRTHDAY           "birthday"
 #define  LOCATION           "location"
@@ -48,6 +50,13 @@
 
 #define IDENTITY "migfm_identity"
 #define USERINFOS "migfm_user_infos"
+
+#define MIGLAB_PLAT   "0"
+#define WEIBO_PLAT    "1"
+#define WEIXIN_PLAT   "2"
+#define QZONE_PLAT    "3"
+#define DOUBAN_PALT   "4"
+
 
 
 #define DEFAULT_CONFIG_PATH     "./plugins/user_manager/user_manager_config.xml"
