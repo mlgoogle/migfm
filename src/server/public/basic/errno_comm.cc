@@ -83,6 +83,12 @@ migfm_strerror(int error_code){
 		return "请求中起始ID无效";
 	case MIG_FM_HTTP_COUNT_INVALID:
 		return "请求中分页数量无效";
+	case MIG_FM_HTTP_PLAT_INVALID:
+		return "登录平台信息错误";
+	case MIG_FM_HTTP_USERCHECK_INVALID:
+		return "用户名或密码错误";
+	case MIG_FM_HTTP_USERINFO_INVALID:
+		return "无效用户信息";
 	default:
 		return "未知错误码";
 	}

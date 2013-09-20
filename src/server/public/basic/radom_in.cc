@@ -8,15 +8,33 @@
 
 namespace base{
 
+SysRadom* SysRadom::instance_ = NULL;
+SysRadom* SysRadom::GetInstance(){
+	if (instance_==NULL){
+		instance_ = new SysRadom();
+	}
 
-FILE* SysRadom::m_urandomfp = NULL;
+	return instance_;
+}
+
+void SysRadom::FreeInstance(){
+	delete instance_;
+}
+
+SysRadom::SysRadom(){
+	InitRandom();
+}
+
+SysRadom::~SysRadom(){
+	DeinitRandom();
+}
+
 bool SysRadom::InitRandom(){
 	m_urandomfp = fopen ("/dev/urandom", "rb");
 	if (m_urandomfp == NULL) {
 		assert (0);
 		return false;
 	}
-
 	setvbuf (m_urandomfp, NULL, _IONBF, 0);
 }
 
@@ -36,8 +54,6 @@ bool SysRadom::DeinitRandom(){
 
 MigRadomIn::MigRadomIn(void)
 {
-	
-
     SetRateTable();
     gN=0;
     gM=0;

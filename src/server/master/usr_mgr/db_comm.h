@@ -42,6 +42,14 @@ public:
 		                        std::string& type,std::string& birthday,
 		                        std::string& location, std::string& source,
 		                        std::string& head);
+
+	static bool CheckUserInfo(const std::string& clientid,const std::string& token,
+		                      const std::string& username,const std::string& password,
+		                      std::string& uid,std::string& nickname,
+							  std::string& gender,std::string& type,
+							  std::string& birthday,std::string& location, 
+							  std::string& source,std::string& head,int& return_code);
+
 private:
 	static std::list<base::ConnAddr>  addrlist_;
 };

@@ -42,6 +42,9 @@
 #define  MIG_FM_HTTP_COMMENT_INVALID			-39		// "请求中评论字段无效"
 #define  MIG_FM_HTTP_FROMID_INVALID				-40		// "请求中起始ID无效"
 #define  MIG_FM_HTTP_COUNT_INVALID				-41		// "请求中分页数量无效" 
+#define  MIG_FM_HTTP_PLAT_INVALID				-42		// "登录平台信息错误" 
+#define  MIG_FM_HTTP_USERCHECK_INVALID				-43		// "用户名，密码错误" 
+#define  MIG_FM_HTTP_USERINFO_INVALID				-44		// "无效用户信息" 
 
 const char*
 migfm_strerror(int error_code);

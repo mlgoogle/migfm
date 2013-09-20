@@ -1,8 +1,12 @@
 #include "basic_util.h"
 #include "basic/basictypes.h"
 #include "storage/dic_serialization.h"
+#include "storage/dic_storage.h"
 #include "basic/basic_util.h"
 #include "basic/base64.h"
+#include "storage/storage.h"
+#include "basic/radom_in.h"
+#include "log/mig_log.h"
 #include <sstream>
 #include <math.h>
 
@@ -294,6 +298,39 @@ double BasicUtil::CalcGEODistance(double latitude1, double longitude1,
     double runDistance = (2*R*asin(sqrt(2-2*cos(x1)*cos(x2)*cos(y1-y2) - 2*sin(x1)*sin(x2))/2));
     runDistance = (runDistance < 0) ? (-runDistance) : runDistance;
 	return runDistance;
+}
+
+
+bool BasicUtil::GetUserToken(const std::string &uid, std::string &token){
+	//create token
+	int32 random_num = base::SysRadom::GetInstance()->GetRandomID();
+	//md5
+	token="miglab";
+	std::stringstream os;
+	std::string key;
+	os<<random_num;
+	MD5Sum md5(os.str());
+	token = md5.GetHash();
+	key.append(uid);
+	key.append("token");
+	base_storage::MemDic::SetString(key.c_str(),key.length(),
+		                            token.c_str(),token.length());
+	MIG_DEBUG(USER_LEVEL,"key[%s] token[%s]",key.c_str(),token.c_str());
+	return true;
+}
+
+bool BasicUtil::CheckUserToken(const std::string& uid,const std::string& token){
+	std::string key;
+	char* mem_value = NULL;
+	size_t mem_value_length = 0;
+	bool r = false;
+	key.append(uid);
+	key.append("token");
+	r = base_storage::MemDic::GetString(key.c_str(),key.length(),
+		                            &mem_value,&mem_value_length);
+	if (r)
+		r = (strcmp(mem_value,token.c_str())==0)?true:false;
+	return false;
 }
 
 }

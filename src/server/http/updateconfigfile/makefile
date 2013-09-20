@@ -36,7 +36,7 @@ LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 
-output: getcltsongs.o mig_log.o core_interface.o
+output: updateconfigfile.o mig_log.o core_interface.o
 	$(LINK)
 
 clean:

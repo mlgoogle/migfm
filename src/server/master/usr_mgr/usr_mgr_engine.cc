@@ -6,6 +6,8 @@
 #include "basic/basic_util.h"
 #include "basic/errno_comm.h"
 #include "config/config.h"
+#include "basic/radom_in.h"
+#include "storage/dic_storage.h"
 #include <sstream>
 
 #define		TIME_TEST		1025
@@ -18,7 +20,6 @@ UsrMgrEngine::UsrMgrEngine(){
 	bool r = false;
 	std::string path = DEFAULT_CONFIG_PATH;
 	usr_logic::ThreadKey::InitThreadKey();
-	usr_logic::SomeUtils::InitRandom();
 	config::FileConfig* config = config::FileConfig::GetFileConfig();
 	if(config==NULL){
 		return;
@@ -27,12 +28,13 @@ UsrMgrEngine::UsrMgrEngine(){
 	storage::DBComm::Init(config->mysql_db_list_);
 	storage::MemComm::Init(config->mem_list_);
 	storage::RedisComm::Init(config->redis_list_);
+	base_storage::MemDic::Init(config->mem_list_);
+	base::SysRadom::GetInstance();
 
 }
 
 UsrMgrEngine::~UsrMgrEngine(){
 	ThreadKey::DeinitThreadKey ();
-	SomeUtils::DeinitRandom ();
 }
 
 UsrMgrEngine* UsrMgrEngine::instance_ = NULL;
@@ -96,6 +98,8 @@ bool UsrMgrEngine::OnUsrMgrMessage(struct server *srv, int socket,
 		GetUserInfo(socket,packet);
 	}else if (type=="guest"){
 		CreateGuest(socket,packet);
+	}else if (type=="login"){
+		UserLogin(socket,packet); 
 	}
     return true;
 }
@@ -111,7 +115,7 @@ bool UsrMgrEngine::CreateGuest(const int socket, const packet::HttpPacket &packe
 	char* utf_nickname;
 	size_t utf_nickname_size;
 	std::string source = "0";
-	int32 random_num = usr_logic::SomeUtils::GetRandomID();
+	int32 random_num = base::SysRadom::GetInstance()->GetRandomID();
 	os<<random_num<<"@miglab.com";
 	os1<<random_num;
 	os2<<"游客"<<random_num;
@@ -269,6 +273,8 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	std::string location;
 	std::string birthday;
 	std::string head;
+	std::string token;
+	std::stringstream ssuid;
 	int64 usrid;
 	int sex;
 	int64 type;
@@ -372,17 +378,88 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 		goto ret;
 	}
 
-	//
+	//获取token
+	ssuid<<usrid;
+	base::BasicUtil::GetUserToken(ssuid.str(),token);
 	os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
 		<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<sex
 		<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
 		<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
-		<<head.c_str()<<"\","<<"\"token\":\"miglab\"";
+		<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\"";
 
 	result = os.str();
 	status = "1";
 
 ret:
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
+
+bool UsrMgrEngine::UserLogin(const int socket,const packet::HttpPacket& packet){
+	bool  r = false;
+	std::stringstream os;
+	packet::HttpPacket pack = packet;
+	std::string clientid;
+	std::string token;
+	std::string username;
+	std::string password;
+	std::string userid;
+	std::string nickname;
+	std::string status;
+	std::string msg;
+	std::string result;
+	std::string source;
+	std::string session;
+	std::string s_sex;
+	std::string location;
+	std::string birthday;
+	std::string head;
+	std::string type;
+	int32 return_code;
+	std::string result_out;
+	int32 utf8_flag = 0;
+
+	r = pack.GetAttrib(USERNAME,username);
+	if (!r){
+		LOG_ERROR("get username error");
+		return false;
+	}
+
+	r = pack.GetAttrib(PASSWORD,password);
+	if (!r){
+		LOG_ERROR("get password error");
+		return false;
+	}
+
+	//check 
+	r = storage::DBComm::CheckUserInfo(clientid,token,username,password,userid,nickname,s_sex,type,birthday,location,source,head,return_code);
+	if (r&&(return_code==0)){
+		//获取token
+		base::BasicUtil::GetUserToken(userid,token);
+		os<<"\"userid\":\""<<userid<<"\",\"username\":\""<<username.c_str()
+			<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<s_sex
+			<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
+			<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
+			<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\"";
+		result = os.str();
+		status = "1";
+	}else{
+		//错误判断
+		switch (return_code){
+			case 1:
+				msg = migfm_strerror(MIG_FM_HTTP_PLAT_INVALID);
+				break;
+			case 2:
+				msg = migfm_strerror(MIG_FM_HTTP_USERCHECK_INVALID);
+				break;
+			case 3:
+				msg = migfm_strerror(MIG_FM_HTTP_USERINFO_INVALID);
+				break;
+		}
+		status = "0";
+	}
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
@@ -515,4 +592,5 @@ void UsrMgrEngine::GetResultMsg(std::string &status, std::string &msg,
 	 out_str.assign(out,out_len);
 	 LOG_DEBUG2("%s",out_str.c_str());
 }
+
 }

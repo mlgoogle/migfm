@@ -12,13 +12,23 @@ namespace base{
 
 class SysRadom{
 public:
-	static bool InitRandom ();
+public:
+	SysRadom();
+	virtual ~SysRadom();
 
-	static int GetRandomID ();
+	static SysRadom *GetInstance();
+	static void FreeInstance();
 
-	static bool DeinitRandom ();
 private:
-	static FILE *m_urandomfp;
+	static SysRadom   *instance_;
+public:
+	bool InitRandom ();
+
+	int GetRandomID ();
+
+	bool DeinitRandom ();
+private:
+	FILE *m_urandomfp;
 };
 
 class MigRadomIn

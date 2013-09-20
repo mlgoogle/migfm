@@ -5,7 +5,7 @@
 #include <sstream>
 #include <lasso/lasso.h>
 #include <glib.h>
-#include "client/linux/handler/exception_handler.h"
+//#include "client/linux/handler/exception_handler.h"
 
 #if defined (FCGI_STD)
 #include "fcgi_stdio.h"
@@ -105,7 +105,7 @@ static void DeleteRequestMethod(FCGX_Request * request){
 
 int main(int agrc,char* argv[]){
     
-    google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true); 
+    //google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true); 
     lasso_init();
     std::string path = "./sso_config.xml";
     

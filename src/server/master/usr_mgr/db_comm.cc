@@ -200,6 +200,68 @@ bool DBComm::RegeditUser(const std::string &username, const std::string &passwor
 	return r;
 }
 
+bool DBComm::CheckUserInfo(const std::string& clientid,const std::string& token,
+						   const std::string& username,const std::string& password, 
+						   std::string& uid,std::string& nickname, std::string& gender,
+						   std::string& type, std::string& birthday,
+						   std::string& location,std::string& source,
+						   std::string& head,int& return_code){
+
+	base_storage::DBStorageEngine* engine = GetConnection();
+	std::stringstream os;
+	bool r =false;
+	MYSQL_ROW rows;
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+	//call proc_CheckUser('1','eweqwewqe','988965442@miglab.com','988965442',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code);
+	os<<"call proc_CheckUser(\'"
+		<<clientid.c_str()<<"\',\'"<<token.c_str()
+		<<"\',\'"<<username.c_str()<<"\',\'"
+		<<password.c_str()<<"\',"
+		<<"@usrid,@sex,@type,@ctry,@birthday,"
+		<<"@head,@username,@nickname,@return_code);";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+	//ªÒ»°÷µ
+	os.str("");
+	sql.c_str();
+	os<<"select @usrid,@sex,@type,@ctry,@birthday,"
+		<<"@head,@username,@nickname,@return_code,@return_str";
+	sql = os.str();
+	r = engine->SQLExec(sql.c_str());
+	LOG_DEBUG2("[%s]", sql.c_str());
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+	int num = engine->RecordCount();
+	if (num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			return_code = atoi(rows[8]);
+			if (return_code!=0){
+				LOG_ERROR2("error code [%s]",rows[9]);
+				return false;
+			}
+			uid = rows[0];
+			gender = rows[1];
+			type = rows[2];
+			location = rows[3];
+			birthday = rows[4];
+			head = rows[5];
+			nickname = rows[7];
+		}
+	}
+	return true;
+}
 
 bool DBComm::RegistUser(const char* plat_id, const char* plat_session, 
 						const char* password, int &sex, std::string &username, 

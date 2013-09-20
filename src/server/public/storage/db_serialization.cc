@@ -320,8 +320,8 @@ bool MysqlSerial::GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& nu
 			std::string channel_name = rows[2];
 			MIG_INFO(USER_LEVEL,"id[%s] channel[%s] channel_name[%s]",
 				      id.c_str(),channel_id.c_str(),channel_name.c_str());
-			base::ChannelInfo ci(id,channel_id,channel_name);
-			channel.push_back(ci);
+			//base::ChannelInfo ci(id,channel_id,channel_name);
+			//channel.push_back(ci);
 		}
 	}
 	 return true;

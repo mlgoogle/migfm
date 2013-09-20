@@ -1,7 +1,9 @@
 #include "logic_comm.h"
 #include "storage/storage.h"
 #include "basic/basic_util.h"
+#include "basic/md5sum.h"
 #include "log/mig_log.h"
+#include "dic_comm.h"
 #include <sstream>
 #include <sys/socket.h>
 #include <time.h>
@@ -133,36 +135,5 @@ void SomeUtils::GetCurrntTimeFormat(std::string& current_time){
 	  <<local->tm_sec;
 	current_time = os.str();
 } 
-
-
-FILE *SomeUtils::m_urandomfp = NULL;
-
-bool SomeUtils::InitRandom (){
-
-	m_urandomfp = fopen ("/dev/urandom", "rb");
-	if (m_urandomfp == NULL) {
-		assert (0);
-		return false;
-	}
-
-	setvbuf (m_urandomfp, NULL, _IONBF, 0);
-	return true;
-}
-
-int SomeUtils::GetRandomID (){
-	int rd = 0;
-	do {
-		errno = 0;
-		fread (&rd, sizeof (rd), 1, m_urandomfp);
-	} while (errno == EINTR);
-	LOG_DEBUG2("m_urandomfp rd[%d]",rd);
-	return rd;
-}
-
-bool SomeUtils::DeinitRandom (){
-	fclose (m_urandomfp);
-
-	return true;
-}
 
 }

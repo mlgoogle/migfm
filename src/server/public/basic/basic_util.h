@@ -8,6 +8,7 @@
 #include <vector>
 #include <assert.h>
 #include "basic/basictypes.h"
+#include "basic/md5sum.h"
 namespace base{
 
 class BasicUtil{
@@ -50,6 +51,10 @@ public:
 
 	static int SplitStringChr( const char *str, const char *char_set,
 		std::vector<std::string> &out );
+
+	static bool GetUserToken(const std::string& uid,std::string& token);
+	
+	static bool CheckUserToken(const std::string& uid,const std::string& token);
 };
 
 }

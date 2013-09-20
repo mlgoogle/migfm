@@ -176,7 +176,7 @@ bool RedisDicSerial::GetMusicMapRadom(const std::string& art_name,std::string& s
 	char* value;
 	size_t value_len = 0;
 	bool r = false;
-	r = redis_engine_->GetHashRadomElement(art_name.c_str(),&value,&value_len);
+	r = redis_engine_->GetHashRadomElement(art_name.c_str(),&value,&value_len,10);
 	if (r){
 		song_id.assign(value,value_len-1);
 		if (value){

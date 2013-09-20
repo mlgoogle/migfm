@@ -39,7 +39,7 @@ all: clean output delete-temp-file
 output:	db_comm.o dic_comm.o logic_comm.o thread_handler.o usr_mgr_engine.o \
 	usr_mgr_init.o basic_info.o http_packet.o basictypes.o config.o \
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
-	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o
+	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o md5sum.o dic_storage.o radom_in.o
 	$(LINK)
 
 clean:
@@ -92,6 +92,9 @@ mysql_storage_impl.o:
 redis_storage_impl.o:
 	$(COMPILE) ./../../public/storage/redis_storage_impl.cc
 
+dic_storage.o:
+	$(COMPILE) ./../../public/storage/dic_storage.cc
+
 redis_warrper.o:
 	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ./../../public/storage/redis_warrper.c
 
@@ -103,8 +106,12 @@ constants.o:
 
 basic_util.o:
 	$(COMPILE) ./../../public/basic/basic_util.cc
+	
+radom_in.o:
+	$(COMPILE) ./../../public/basic/radom_in.cc
 
 errno_comm.o:
 	$(COMPILE) ./../../public/basic/errno_comm.cc
 
-
+md5sum.o:
+	$(COMPILE) ./../../public/basic/md5sum.cc
