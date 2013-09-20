@@ -77,6 +77,12 @@ migfm_strerror(int error_code){
 		return "请求中未包含密码";
 	case MIG_FM_USER_EXITS:
 		return "用户已经存在";
+	case MIG_FM_HTTP_COMMENT_INVALID:
+		return "请求中评论字段无效";
+	case MIG_FM_HTTP_FROMID_INVALID:
+		return "请求中起始ID无效";
+	case MIG_FM_HTTP_COUNT_INVALID:
+		return "请求中分页数量无效";
 	default:
 		return "未知错误码";
 	}

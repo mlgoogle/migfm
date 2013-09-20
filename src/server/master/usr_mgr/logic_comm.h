@@ -79,7 +79,7 @@ public:
 
 	static void GetResultMsg(std::string &status, std::string &msg,
 		                     std::string &result,std::string &out_str,
-		                     int32 flag = 1);
+		                     int32 flag = 0);
 	
 	static bool InitRandom ();
 

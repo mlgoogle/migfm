@@ -95,6 +95,9 @@ int RedisFreeReply(warrper_redis_reply_t* wa);
 warrper_redis_reply_t *RedisGetListRange(warrper_redis_context_t* context,const char* key,const size_t key_len,
 		int from, int to, char***val, int* val_len);
 
+warrper_redis_reply_t *RedisDoCommand(warrper_redis_context_t* context, const char *format/*, ...*/);
+warrper_redis_reply_t *RedisDoCommandV(warrper_redis_context_t* context, const char *format, va_list ap);
+
 #ifdef __cplusplus
 }
 #endif

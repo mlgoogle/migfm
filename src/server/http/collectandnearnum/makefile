@@ -1,7 +1,7 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = /var/www/cgi-bin/getcltsongs.fcgi
+OUTPUT_FILE = /var/www/cgi-bin/collectandnearnum.fcgi
 ## 编译器
 COMPILER = g++
 COMPILERC = gcc
@@ -36,7 +36,7 @@ LINK = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 
-output: getcltsongs.o mig_log.o core_interface.o
+output: collectandnearnum.o mig_log.o core_interface.o
 	$(LINK)
 
 clean:
@@ -47,8 +47,8 @@ delete-temp-file:
 	-rm -f *.o
 
 ### 编译
-getcltsongs.o:
-	$(COMPILE) ./getcltsongs.cc
+collectandnearnum.o:
+	$(COMPILE) ./collectandnearnum.cc
 
 mig_log.o:
 	$(COMPILE) ./../../public/log/mig_log.cc

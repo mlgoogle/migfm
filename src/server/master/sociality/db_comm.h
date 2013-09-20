@@ -5,7 +5,7 @@
 #include <list>
 #include <vector>
 
-namespace storage{
+namespace mig_sociality {
 
 class DBComm{
 public:
@@ -34,6 +34,12 @@ public:
 	typedef std::vector<FriendInfo> FriendInfoList;
 	static bool GetFriendList(const std::string &uid, FriendInfoList &friends);
 
+	static bool GetUserInfos(int64 uid,
+			std::string& nickname, std::string& gender,
+			std::string& type, std::string& birthday,
+			std::string& location, std::string& source,
+			std::string& head);
+
 private:
 #if defined (_DB_POOL_)	
 	static base_storage::DBStorageEngine* CreateConnection(void);
@@ -50,4 +56,4 @@ private:
 };
 
 }
-#endif
+#endif // mig_sociality

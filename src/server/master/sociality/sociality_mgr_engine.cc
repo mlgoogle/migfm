@@ -30,15 +30,15 @@ SocialityMgrEngine::SocialityMgrEngine(){
 		return;
 	}
 	r = config->LoadConfig(path);
-	storage::DBComm::Init(config->mysql_db_list_);
-	storage::MemComm::Init(config->mem_list_);
-	storage::RedisComm::Init(config->redis_list_);
+	DBComm::Init(config->mysql_db_list_);
+	MemComm::Init(config->mem_list_);
+	RedisComm::Init(config->redis_list_);
 }
 
 SocialityMgrEngine::~SocialityMgrEngine(){
-	storage::DBComm::Dest();
-	storage::MemComm::Dest();
-	storage::RedisComm::Dest();
+	DBComm::Dest();
+	MemComm::Dest();
+	RedisComm::Dest();
 
 	mig_sociality::ThreadKey::DeinitThreadKey();
 }
@@ -121,6 +121,10 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 		OnMsgImportSongList(packet, root, ret_status, err_code);
 	} else if (type == "importfriend") {
 		OnMsgImportFriend(packet, root, ret_status, err_code);
+	} else if (type == "commentsong") {
+		OnMsgCommentSong(packet, root, ret_status, err_code);
+	} else if (type == "get_comment") {
+		OnMsgGetComment(packet, root, ret_status, err_code);
 	} else {
 		return true;
 	}
@@ -179,7 +183,7 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 		return false;
 	}
 
-	if (!storage::RedisComm::SetUserPushConfig(uid, device_token,
+	if (!RedisComm::SetUserPushConfig(uid, device_token,
 		atoi(is_receive.c_str()), btime, etime)) {
 		err_code = MIG_FM_DB_SAVE_PUSH_CONFIG_FAILED;
 		status = -1;
@@ -230,7 +234,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	std::string device_token;
 	bool is_recv = false;
 	unsigned btime=0, etime=0;
-	if (!storage::RedisComm::GetUserPushConfig(to_uid, device_token,
+	if (!RedisComm::GetUserPushConfig(to_uid, device_token,
 		is_recv, btime, etime)) {
 		err_code = MIG_FM_DB_READ_PUSH_CONFIG_FAILED;
 		status = -1;
@@ -256,7 +260,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	}
 
 	int64 msg_id = 0;
-	if (!storage::RedisComm::GenaratePushMsgID(uid, msg_id)) {
+	if (!RedisComm::GenaratePushMsgID(uid, msg_id)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
 		return false;
@@ -270,7 +274,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	if (!storage::RedisComm::StagePushMsg(to_uid, msg_id, detail)) {
+	if (!RedisComm::StagePushMsg(to_uid, msg_id, detail)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
 		return false;
@@ -313,7 +317,7 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 
 	typedef std::list<std::string> MsgList;
 	MsgList msg_list;
-	if (!storage::RedisComm::GetStagedPushMsg(uid, page_index, page_size, msg_list)) {
+	if (!RedisComm::GetStagedPushMsg(uid, page_index, page_size, msg_list)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
 		return false;
@@ -366,9 +370,9 @@ bool SocialityMgrEngine::OnMsgGetFriendList(packet::HttpPacket& packet,
 //	int page_index = atoi(page_index_str.c_str());
 //	int page_size = atoi(page_size_str.c_str());
 
-	typedef storage::DBComm::FriendInfoList FriendList;
+	typedef DBComm::FriendInfoList FriendList;
 	FriendList friends;
-	if (!storage::DBComm::GetFriendList(uid_str, friends)) {
+	if (!DBComm::GetFriendList(uid_str, friends)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
 		return false;
@@ -430,7 +434,7 @@ bool SocialityMgrEngine::OnMsgAddFriend(packet::HttpPacket& packet,
 //		return false;
 //	}
 
-	if (!storage::DBComm::AddFriend(uid_str, touid_str)) {
+	if (!DBComm::AddFriend(uid_str, touid_str)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
 		return false;
@@ -449,6 +453,127 @@ bool SocialityMgrEngine::OnMsgImportSongList(packet::HttpPacket& packet,
 bool SocialityMgrEngine::OnMsgImportFriend(packet::HttpPacket& packet,
 		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
+	return true;
+}
+
+bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
+		Json::Value& result, int& status, int& err_code) {
+	LOGIC_PROLOG();
+
+	std::string uid_str, songid_str, comment,curjson;
+	if (!packet.GetAttrib("uid", uid_str)) {
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+	if (!packet.GetAttrib("songid", songid_str)) {
+		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
+		return false;
+	}
+	if (!packet.GetAttrib("comment", comment)) {
+		err_code = MIG_FM_HTTP_COMMENT_INVALID;
+		return false;
+	}
+
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
+		return false;
+	}
+
+	int64 songid = atoll(songid_str.c_str());
+	if (0 == songid) {
+		err_code = MIG_FM_HTTP_COMMENT_INVALID;
+		return false;
+	}
+
+	//获取这首歌评论数
+	this->SetMusicHostCltCmt(songid_str,3,curjson);
+	LOG_DEBUG2("%s",curjson.c_str());
+	if (!RedisComm::SaveSongComment(songid, uid, comment,curjson)) {
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	status = 1;
+	return true;
+}
+
+bool SocialityMgrEngine::OnMsgGetComment(packet::HttpPacket& packet,
+		Json::Value& result, int& status, int& err_code) {
+	LOGIC_PROLOG();
+
+	std::string uid_str, songid_str, count_str, fromid_str;
+	if (!packet.GetAttrib("uid", uid_str)) {
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+	if (!packet.GetAttrib("songid", songid_str)) {
+		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
+		return false;
+	}
+	if (!packet.GetAttrib("fromid", fromid_str)) {
+		fromid_str = "0";
+	}
+	if (!packet.GetAttrib("count", count_str)) {
+		count_str = "10";
+	}
+
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
+		return false;
+	}
+
+	int64 songid = atoll(songid_str.c_str());
+	if (0 == songid) {
+		err_code = MIG_FM_HTTP_COMMENT_INVALID;
+		return false;
+	}
+
+	int64 fromid = atoll(fromid_str.c_str());
+	if (fromid < 0) {
+		err_code = MIG_FM_HTTP_FROMID_INVALID;
+		return false;
+	}
+
+	int64 count = atoll(count_str.c_str());
+	if (count <= 0) {
+		err_code = MIG_FM_HTTP_COUNT_INVALID;
+		return false;
+	}
+
+	Json::Value &content = result["result"];
+	content["songid"] = songid_str;
+	Json::Value &comments = content["comments"];
+	int64 total = 0;
+	if (!RedisComm::ReadSongComment(songid, fromid, count, total, comments)) {
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	std::string nickname, gender, type, birthday, location, source, head;
+	if (comments.size()!=0){
+		for (Json::Value::iterator it = comments.begin(); it!=comments.end(); ++it) {
+			Json::Value &item = *it;
+			Json::Value &uinfo = item["user"];
+			std::string item_uid = item["uid"].asString();
+			item.removeMember("uid");
+			if (DBComm::GetUserInfos(atoll(item_uid.c_str()), nickname, gender, type, birthday, location, source, head)) {
+				uinfo["userid"] = item_uid;
+				uinfo["nickname"] = nickname;
+				uinfo["gender"] = gender;
+				uinfo["pic"] = head;
+			}
+		}
+	}else{
+		content["comments"] = 0;
+	}
+
+	result["size"] = (unsigned)comments.size();
+	result["total"] = (unsigned)total;
+	status = 1;
 	return true;
 }
 
@@ -485,9 +610,9 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 	std::string sd_nick, sd_sex, sd_head;
 	std::string to_nick, to_sex, to_head;
 
-	if (!storage::DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head))
+	if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head))
 		return false;
-	if (!storage::DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head))
+	if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head))
 		return false;
 
 	std::stringstream ss;
@@ -570,7 +695,7 @@ bool SocialityMgrEngine::GetMusicInfos(const std::string& songid, Json::Value &i
 	std::string b64album;
 	bool r = false;
 
-	r = storage::RedisComm::GetMusicInfos(songid,music_info);
+	r = RedisComm::GetMusicInfos(songid,music_info);
 
 	if (!r)
 		return false;
@@ -581,7 +706,7 @@ bool SocialityMgrEngine::GetMusicInfos(const std::string& songid, Json::Value &i
 	MIG_DEBUG(USER_LEVEL,"artist[%s] title[%s]",smi.artist().c_str(),
 		smi.title().c_str());
 
-	storage::DBComm::GetWXMusicUrl(smi.id(),content_url,dec,dec_id,dec_word);
+	DBComm::GetWXMusicUrl(smi.id(),content_url,dec,dec_id,dec_word);
 
 	smi.set_url(content_url);
 	Base64Decode(smi.title(),&b64title);
@@ -599,6 +724,113 @@ bool SocialityMgrEngine::GetMusicInfos(const std::string& songid, Json::Value &i
 	info["id"] = smi.id();
 
 	return true;
+}
+
+bool SocialityMgrEngine::SetMusicHostCltCmt(const std::string &songid, const int32 flag, 
+											std::string &json)
+{
+	std::string hot_num;
+	std::string cmt_num;
+	std::string clt_num;
+	std::stringstream os;
+	int64 refcount;
+	bool r = false;
+	r = this->GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
+
+	//意外情况
+	if (hot_num.empty())
+		hot_num="0";
+	if (cmt_num.empty())
+		cmt_num="0";
+	if (clt_num.empty())
+		clt_num="0";
+
+	if (!r){//第一次添加
+		switch (flag){
+		  case 1:
+			  hot_num = "1";
+			  cmt_num = clt_num= "0";
+			  break;  
+		  case 2:
+			  clt_num = "1";
+			  hot_num = cmt_num= "0";
+			  break;
+		  case 3:
+			  cmt_num = "1";
+			  clt_num = hot_num= "0";
+			  break;
+		  default:
+			  clt_num = cmt_num = hot_num = "0";
+		}
+	}else{//累计累加
+		switch (flag){
+		  case 1:
+			  refcount = atoll(hot_num.c_str());
+			  refcount++;
+			  os<<refcount;
+			  hot_num = os.str();
+			  break;  
+		  case 2:
+			  refcount = atoll(clt_num.c_str());
+			  refcount++;
+			  os<<refcount;
+			  clt_num = os.str();
+			  break;
+		  case 3:
+			  refcount = atoll(cmt_num.c_str());
+			  refcount++;
+			  os<<refcount;
+			  cmt_num = os.str();
+			  break;
+		}
+	}
+
+	json.append("{\"hot\":\"");
+	json.append(hot_num.c_str());
+	json.append("\",\"cmt\":\"");
+	json.append(cmt_num.c_str());
+	json.append("\",\"clt\":\"");
+	json.append(clt_num.c_str());
+	json.append("\"}");
+
+	return true;
+}
+
+
+bool SocialityMgrEngine::GetMusicHotCltCmt(const std::string &songid, 
+									   std::string &hot_num, 
+									   std::string &cmt_num, 
+									   std::string &clt_num){
+	   std::string content;
+	   bool r = false;
+	   Json::Reader reader;
+	   Json::Value  root;
+	   Json::Value songinfo;
+	   r = mig_sociality::RedisComm::GetMusicAboutUser(songid,content);
+	   if (!r){
+		   hot_num = clt_num = cmt_num = "0";
+		   return false;
+	   }
+
+	   //value {"hot":"123","cmt":"231",clt:"2312"}
+	   r = reader.parse(content.c_str(),root);
+	   if (!r)
+		   return false;
+	   if (root.isMember("hot"))
+		   hot_num = root["hot"].asString();
+	   else
+		   hot_num = "0";
+
+	   if (root.isMember("cmt"))
+		   cmt_num = root["cmt"].asString();
+	   else
+		   cmt_num = "0";
+
+	   if (root.isMember("clt"))
+		   clt_num = root["typeid"].asString();
+	   else
+		   clt_num = "0";
+	   return true;
 }
 
 }

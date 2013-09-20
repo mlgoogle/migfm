@@ -2,6 +2,7 @@
 #define MIG_FM_PUBLIC_STORAGE_STORAGE_H__
 #include <string>
 #include <list>
+#include <vector>
 #include "basic/basictypes.h"
 #include "basic/basic_info.h"
 
@@ -34,6 +35,62 @@ typedef struct db_res_t{
 typedef struct db_row_t{
     void *proc;
 }db_row_t;
+
+struct CommandReply {
+	enum ReplyType {
+		REPLY_UNKNOWN,
+		REPLY_STRING,
+		REPLY_ARRAY,
+		REPLY_INTEGER,
+		REPLY_NIL,
+		REPLY_STATUS,
+		REPLY_ERROR,
+	};
+
+	int		type; // see enum ReplyType
+
+	bool IsError() const { return REPLY_ERROR==type; }
+	bool IsNil() const { return REPLY_NIL==type; }
+
+	CommandReply(int _type = REPLY_UNKNOWN)
+		: type(_type) {}
+	virtual ~CommandReply() {}
+	virtual void Release() { delete this; }
+};
+
+template <class InnerType, int rpl>
+struct TypedCommandReply : public CommandReply {
+	typedef InnerType value_type;
+
+	value_type value;
+
+	TypedCommandReply(const value_type &val=value_type())
+		: CommandReply(rpl), value(val) {}
+	virtual void Release() { delete this; }
+};
+
+typedef TypedCommandReply<int64, CommandReply::REPLY_INTEGER> IntegerReply;
+typedef TypedCommandReply<std::string, CommandReply::REPLY_STRING> StringReply;
+typedef TypedCommandReply<std::string, CommandReply::REPLY_ERROR> ErrorReply;
+typedef TypedCommandReply<std::string, CommandReply::REPLY_STATUS> StatusReply;
+
+struct ArrayReply : public CommandReply {
+	typedef std::vector<CommandReply *> value_type;
+	typedef value_type::iterator iterator;
+	typedef value_type::const_iterator const_iterator;
+
+	value_type value;
+
+	ArrayReply() : CommandReply(REPLY_ARRAY) {}
+
+	virtual void Release() { Clear(); delete this; }
+	void Clear() {
+		for (iterator it=value.begin(); it!=value.end(); ++it) {
+			(*it)->Release();
+		}
+		value.clear();
+	}
+};
 
 class StorageEngine{
 public:
@@ -142,23 +199,10 @@ public:
 	virtual bool GetListRange(const char* key,const size_t key_len,
 				int from, int to, std::list<std::string>& list) = 0;
 
-//	typedef std::string StoreEntity;
-//	typedef std::pair<StoreEntity, double> MemberScorePair;
-//
-//	virtual bool SSet_Add(const char* key, size_t key_len,
-//				const StoreEntity &member, const StoreEntity &score,
-//				int &added) = 0;
-//
-//	virtual bool SSet_Adds(const char* key, size_t key_len,
-//			const std::vector<MemberScorePair> &mem_score,
-//			int &added) = 0;
-//
-//	virtual bool SSet_GetCount(const char* key, size_t key_len,
-//			int &count) = 0;
-//	virtual bool SSet_GetCountRange(const char* key, size_t key_len) = 0;
-//	virtual bool SSet_Add(const char* key, size_t key_len) = 0;
-};
+	virtual CommandReply *DoCommand(const char *format/*, ...*/) = 0;
 
+	virtual void *GetContext() {}
+};
 
 }
 #endif

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <sstream>
 #include "log/mig_log.h"
+#include "hiredis.h"
+
 namespace base_storage{
 	
 RedisStorageEngineImpl::RedisStorageEngineImpl(){
@@ -313,6 +315,46 @@ bool RedisStorageEngineImpl::GetListRange(const char* key, const size_t key_len,
 	free(pptr);
 	RedisFreeReply(rp);
 	return true;
+}
+
+CommandReply *RedisStorageEngineImpl::DoCommand(const char *format/*, ...*/) {
+	//va_list ap;
+	//va_start(ap, format);
+	//warrper_redis_reply_t *rp = RedisDoCommandV(c_, format, ap);
+	warrper_redis_reply_t *rp = RedisDoCommand(c_, format);
+	//va_end(ap);
+	if (NULL == rp)
+		return false;
+
+	CommandReply *reply = _CreateReply(rp->reply);
+	RedisFreeReply(rp);
+	return reply;
+}
+
+CommandReply* RedisStorageEngineImpl::_CreateReply(redisReply* reply) {
+	switch (reply->type) {
+	case REDIS_REPLY_ERROR:
+		return new ErrorReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_NIL:
+		return new CommandReply(CommandReply::REPLY_NIL);
+	case REDIS_REPLY_STATUS:
+		return new StatusReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_INTEGER:
+		return new IntegerReply(reply->integer);
+	case REDIS_REPLY_STRING:
+		return new StringReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_ARRAY: {
+		ArrayReply *rep = new ArrayReply();
+		for (size_t i = 0; i < reply->elements; ++i) {
+			if (CommandReply *cr = _CreateReply(reply->element[i]))
+				rep->value.push_back(cr);
+		}
+		return rep;
+	}
+	default:
+		break;
+	}
+	return NULL;
 }
 
 }

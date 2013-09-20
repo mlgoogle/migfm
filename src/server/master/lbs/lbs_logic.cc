@@ -163,6 +163,7 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 							  int &status, std::string &msg){
 	status = 0;
 	msg.clear();
+	bool r = false;
 
 	std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
 	if (!packet.GetAttrib("uid", uid_str)) {
@@ -219,7 +220,6 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 	typedef std::map<std::string, std::string> UserSongMap;
 	UserSongMap map_songs;
 	std::string nick_name, sex,pic;
-	//test 100000 100001 100002
 	int jk = 0;
 	for (Json::Value::iterator it = items.begin();
 		it != items.end();
@@ -231,13 +231,13 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 			std::string uid_str = item["ext"]["user_id"].asString();
 			//test
 		//////////////////////////////////////////////////////////////////////////
-			if (jk==0){
+		/*	if (jk==0){
 				uid_str = "100000";
 			}else if (jk==1){
 				uid_str = "100001";
 			}else{
 				uid_str = "100002";
-			}
+			}*/
 			//////////////////////////////////////////////////////////////////////////
 			if (uid_str.empty())
 				continue;
@@ -246,15 +246,18 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 
 			mapExist[uid_str] = true;
 			val["users"]["userid"] = uid_str;
-			val["users"]["latitude"] = item["latitude"];
-			val["users"]["longitude"] = item["longitude"];
-			val["users"]["distance"] = item["distance"];
-			storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
-			val["users"]["nickname"] = nick_name;
-			val["users"]["sex"] = sex;
-			vec_users.push_back(uid_str);
-			//users.append(val)
-			usersmusic.append(val);
+			//判断用户后是否存在
+			r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
+			if (r){
+				val["users"]["latitude"] = item["latitude"];
+				val["users"]["longitude"] = item["longitude"];
+				val["users"]["distance"] = item["distance"];
+				val["users"]["nickname"] = nick_name;
+				val["users"]["sex"] = sex;
+				vec_users.push_back(uid_str);
+				//users.append(val)
+				usersmusic.append(val);
+			}
 	}
 
 
@@ -268,7 +271,7 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 				//item["cur_music"] = ::atoi(find->second.c_str());
 				GetUserCurrentMusic(find->second,item);
 			}
- 			else
+			else
  				item["music"] = 0;
 	}
 	status = 1;
@@ -614,7 +617,7 @@ void LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 
 		item["music"]["id"] = smi.id();
 		item["music"]["title"] = b64title;
-		item["music"]["artis"] = b64artist;
+		item["music"]["artist"] = b64artist;
 		item["music"]["url"] = smi.url();
 		item["music"]["hq_url"] = smi.hq_url();
 		item["music"]["pub_time"] = smi.pub_time();

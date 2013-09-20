@@ -222,7 +222,9 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 	  <<plat_id<<"\',\'"<<plat_session
 	  <<"\',\'"<<password<<"\',"
 	  <<sex<<",\'"<<username.c_str()<<"\',\'"
-	  <<nickname.c_str()<<"\',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);";
+	  <<nickname.c_str()<<"\',\'"<<birthday.c_str()<<"\',\'"
+	  <<location.c_str()<<"\',\'"<<head.c_str()<<"\',"
+	  <<"@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);";
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());

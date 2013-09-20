@@ -115,11 +115,12 @@ void SomeUtils::GetResultMsg(std::string &status, std::string &msg,
 	os<<"{\"status\":"<<status.c_str()<<",\"msg\":\""
 		<<msg.c_str()<<"\",\"result\":{"<<result.c_str()
 		<<"}}";
-	if (flag){
+	if (0){
 		base::BasicUtil::GB2312ToUTF8(os.str().c_str(),os.str().length(),
 			&out,&out_len);
 		out_str.assign(out,out_len);
 	}else{
+		LOG_DEBUG("===========================================");
 		out_str = os.str();
 	}
 

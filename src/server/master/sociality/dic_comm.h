@@ -7,7 +7,9 @@
 #include <vector>
 #include "json/json.h"
 
-namespace storage{
+struct redisReply;
+
+namespace mig_sociality {
 
 class RedisComm{
 public:
@@ -36,6 +38,18 @@ public:
 
 	static bool GetFriensList(int64 uid, std::list<std::string> &friends);
 
+	static bool SaveSongComment(int64 songid, int64 uid, const std::string &comment,
+		                        const std::string& curjson);
+
+	static bool ReadSongComment(int64 songid, int64 from_id, int count, int64 &total, Json::Value &result);
+
+	static void SetMusicAboutUser(const std::string& songid,const std::string& hot_num,
+		const std::string& cmt_num,const std::string& clt_num);
+
+	static bool GetMusicAboutUser(const std::string &songid,std::string& content);
+
+	static base_storage::CommandReply* _CreateReply(redisReply* reply);
+
 private:
 	static std::list<base::ConnAddr>   addrlist_;
 	static base::MigRadomIn*              radom_num_;
@@ -58,4 +72,4 @@ private:
 };
 
 }
-#endif
+#endif // mig_sociality

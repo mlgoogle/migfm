@@ -147,7 +147,7 @@
 			Name="source"
 			>
 			<File
-				RelativePath=".\db_channel_song.cc"
+				RelativePath=".\channel_song.cc"
 				>
 			</File>
 		</Filter>

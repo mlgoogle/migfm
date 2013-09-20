@@ -19,8 +19,9 @@
 namespace mig_lbs {
 
 const std::string BD_ACCESS_KEY = "A63c7ee45648535fa6144615846e7b13";
-
+//const std::string BD_ACCESS_KEY = "167ea3bbddf6d8f9a51dcdba73b53fef";
 const std::string BD_DATABOX_ID = "13699";
+//const std::string BD_DATABOX_ID = "21077";
 const std::string BD_URL_POI = "http://api.map.baidu.com/geodata/poi";
 const std::string BD_URL_POIEX = "http://api.map.baidu.com/geodata/poiext";
 const std::string BD_URL_SEARCH = "http://api.map.baidu.com/geosearch/poi";

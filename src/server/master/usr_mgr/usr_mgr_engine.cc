@@ -335,10 +335,36 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 			s_sex = "1";
 		}
 	}
-    sex = atoi(s_sex.c_str());
+	sex = atoi(s_sex.c_str());
+
+	//生日
+	r = pack.GetAttrib(BIRTHDAY,birthday);
+	if(!r){
+		if(source=="0"){
+			birthday = "1986-10-01";
+		}
+	}
+
+	//地区
+	r = pack.GetAttrib(LOCATION,location);
+	if(!r){
+		if(source=="0"){
+			location = "浙江杭州";
+		}
+	}
+
+	//头像
+	r = pack.GetAttrib(HEAD,head);
+	if(!r){
+		if(source=="0"){
+			head = "http://fm.miglab.com/default.jpg";
+		}
+	}
 	r = storage::DBComm::RegistUser(source.c_str(),session.c_str(),
 		           password.c_str(),sex,
 		                        username,nickname,usrid,type,location,birthday,head);
+
+
 	if (!r){//用户存在
 		status = "0";
 		msg = migfm_strerror(MIG_FM_USER_EXITS);
@@ -457,7 +483,7 @@ bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string
 		  birthday,str_utf8_location,source,head);
 	  if (!r){//init error
 		  status = "0";
-		  msg = "更新用户信息失败";
+		  msg = "更新用户信息失败失败失败！！";
 		  usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 		  LOG_DEBUG2("[%s]",result_out);
 		  usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());

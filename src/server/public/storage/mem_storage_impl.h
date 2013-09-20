@@ -34,13 +34,15 @@ public:
     virtual bool MGetValue(const char* const * key_array,const size_t *key_len_array,size_t element_count);
 
     virtual bool FetchValue(char* key,size_t *key_len,char** value,size_t *val_len);
-	virtual bool IncrValue(const char* key,const size_t key_len, 
+
+    virtual bool IncDecValue(const char* key, size_t key_len, int64 incby, int64 &result);
+
+    virtual bool IncrValue(const char* key,const size_t key_len,
 		                   const char* val,const size_t val_len);
 
 	virtual bool DecrValue(const char* key,const size_t key_len,
 		const char* val,const size_t val_len);
     
-	virtual bool IncDecValue(const char* key, size_t key_len, int64 incby, int64 &result);
         //list
         
     virtual bool AddListElement(const char* key,const size_t key_len,const char* val,const size_t val_len);
@@ -77,6 +79,8 @@ public:
 
 	virtual bool GetListRange(const char* key,const size_t key_len,
 				int from, int to, std::list<std::string>& list) {}
+
+	virtual CommandReply *DoCommand(const char *format/*, ...*/) { return NULL; }
 
 #if defined(MEM_POOL)
 private:

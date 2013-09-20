@@ -755,6 +755,9 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	int32 mood_num;
 	int32 scens_num;
 	int32 channel_num;
+	int32 mood_flag;
+	int32 scens_flag;
+	int32 channel_flag;
 	music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
 	r = pack.GetAttrib(MOODID,mood_id);
 	if (!r){
@@ -818,6 +821,30 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if (!r)//若没提交个数 默认10首
 		num = "10";
 
+	if (atoi(mood_id.c_str())<0){
+		mood_flag = 0;
+		mood_id = "0";
+		mood_index = "0";
+	}
+	else
+		mood_flag = 1;
+
+	if (atoi(scene_id.c_str())<0){
+		scens_flag = 0;
+		scene_id = "0";
+		scens_index = "0";
+	}
+	else
+		scens_flag = 1;
+
+	if (atoi(channel_id.c_str())<0){
+		channel_flag = 0;
+		channel_id = "0";
+		channel_index = "0";
+	}
+	else
+		channel_flag = 1;
+
 	//判断提交序号三个不能同时为0
 	if((mood_index=="0")&&(scens_index=="0")&&(channel_index=="0"))
 		mood_index = scens_index = channel_index ="1";
@@ -847,18 +874,31 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	channelci.set_info_num(channel_num);
 
 
-	mode = "mm";
-	r = GetMoodScensChannelSongs(uid,mode,moodci.info_num(),moodci.info_id(),os1);//心情
-	if (r)
-	  os1<<",";
+	if (mood_flag){
+		mode = "mm";
+		r = GetMoodScensChannelSongs(uid,mode,moodci.info_num(),moodci.info_id(),os1);//心情
+		if (r){
+			if (scens_flag!=0||channel_flag!=0)
+				os1<<",";
+		}
+	}
 
-	mode = "ms";
-	GetMoodScensChannelSongs(uid,mode,scensci.info_num(),scensci.info_id(),os1);//场景
-	if (r)
-	  os1<<",";
-	
-	mode = "chl";
-	r = GetMoodScensChannelSongs(uid,mode,channelci.info_num(),channelci.info_id(),os1);//频道
+
+	if (scens_flag){
+		mode = "ms";
+		r = GetMoodScensChannelSongs(uid,mode,scensci.info_num(),scensci.info_id(),os1);//场景
+		if (r){
+			if (mood_flag!=0||channel_flag!=0)
+				os1<<",";
+		}
+		LOG_DEBUG2("OS1[%s]",os1.str().c_str());
+	}
+
+	if (channel_flag){
+		mode = "chl";
+		r = GetMoodScensChannelSongs(uid,mode,channelci.info_num(),channelci.info_id(),os1);//频道
+	}
+
 	if (!r){
 		result = os1.str().erase(os1.str().length()-1,1);
 	}else{
@@ -1430,6 +1470,15 @@ bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,const int32 fl
 	int64 refcount;
 	bool r = false;
 	r = this->GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
+
+	//意外情况
+	if (hot_num.empty())
+		hot_num="0";
+	if (cmt_num.empty())
+		cmt_num="0";
+	if (clt_num.empty())
+		clt_num="0";
+
 	if (!r){//第一次添加
 		switch (flag){
 		  case 1:
@@ -1437,12 +1486,12 @@ bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,const int32 fl
 			 cmt_num = clt_num= "0";
 		     break;  
 		  case 2:
-			  cmt_num = "1";
-			  hot_num = clt_num= "0";
+			  clt_num = "1";
+			  hot_num = cmt_num= "0";
 			 break;
 		  case 3:
-			  clt_num = "1";
-			  cmt_num = hot_num= "0";
+			  cmt_num = "1";
+			  clt_num = hot_num= "0";
 			  break;
 		  default:
 			  clt_num = cmt_num = hot_num = "0";
@@ -1450,28 +1499,30 @@ bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,const int32 fl
 	}else{//累计累加
 		switch (flag){
 		  case 1:
-			  refcount = atoll(cmt_num.c_str());
-			  refcount++;
-			  os<<refcount;
-			  cmt_num = os.str();
-			  break;  
-		  case 2:
 			  refcount = atoll(hot_num.c_str());
 			  refcount++;
 			  os<<refcount;
 			  hot_num = os.str();
-			  break;
-		  case 3:
+			  break;  
+		  case 2:
 			  refcount = atoll(clt_num.c_str());
 			  refcount++;
 			  os<<refcount;
 			  clt_num = os.str();
+			  break;
+		  case 3:
+			  refcount = atoll(cmt_num.c_str());
+			  refcount++;
+			  os<<refcount;
+			  cmt_num = os.str();
 			  break;
 		}
 	}
 
 	storage::RedisComm::SetMusicAboutUser(songid,hot_num,cmt_num,clt_num);
 }
+
+
 bool MusicMgrEngine::GetMusicHotCltCmt(const std::string &songid, 
 									   std::string &hot_num, 
 									   std::string &cmt_num, 
@@ -1505,6 +1556,7 @@ bool MusicMgrEngine::GetMusicHotCltCmt(const std::string &songid,
 		clt_num = root["typeid"].asString();
 	else
 		clt_num = "0";
+	return true;
 }
 
 

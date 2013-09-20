@@ -7,7 +7,7 @@
 #include <mysql.h>
 #include <sstream>
 
-namespace storage{
+namespace mig_sociality {
 
 #if defined (_STORAGE_POOL_)
 base_storage::DBStorageEngine** DBComm::db_conn_pool_;
@@ -261,4 +261,52 @@ bool DBComm::GetFriendList(const std::string& uid, FriendInfoList& friends) {
 	return true;
 }
 
+bool DBComm::GetUserInfos(int64 uid,
+						  std::string& nickname,std::string& gender,
+						  std::string& type,std::string& birthday,
+						  std::string& location,std::string& source,
+						  std::string& head){
+	nickname.clear();
+	gender.clear();
+	type.clear();
+	birthday.clear();
+	location.clear();
+	source.clear();
+	head.clear();
+
+	  base_storage::DBStorageEngine* engine = GetConnection();
+	  std::stringstream os;
+	  bool r = false;
+	  MYSQL_ROW rows;
+	  if (engine==NULL){
+		  LOG_ERROR("GetConnection Error");
+		  return false;
+	  }
+	  os<<"select sex,type,ctry,birthday,nickname,source,head from "
+		  <<USERINFOS<<" where usrid=" << uid << ";";
+	  const char* sql = os.str().c_str();
+	  LOG_DEBUG2("[%s]",os.str().c_str());
+	  r = engine->SQLExec(os.str().c_str());
+
+	  if (!r){
+		  LOG_ERROR2("exec sql error");
+		  return false;
+	  }
+	  int32 num = engine->RecordCount();
+	  if(num>0){
+		  while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			  gender = rows[0];
+			  type = rows[1];
+			  location = rows[2];
+			  birthday = rows[3];
+			  nickname = rows[4];
+			  source = rows[5];
+			  head = rows[6];
+		  }
+		  return true;
+	  }
+	  return false;
+
 }
+
+} // mig_sociality

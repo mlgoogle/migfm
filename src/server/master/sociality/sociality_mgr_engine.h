@@ -64,6 +64,10 @@ private:
 			int &status, int &err_code);
 	bool OnMsgImportFriend(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+	bool OnMsgCommentSong(packet::HttpPacket& packet, Json::Value &result,
+			int &status, int &err_code);
+	bool OnMsgGetComment(packet::HttpPacket& packet, Json::Value &result,
+			int &status, int &err_code);
 
 private:
 	bool CheckAndTransHMTime(const std::string &str, unsigned &time);
@@ -77,6 +81,12 @@ private:
 	bool GetPresentSongDetail(Json::Value &content);
 
 	bool GetMusicInfos(const std::string& songid, Json::Value &info);
+
+	bool SetMusicHostCltCmt(const std::string& songid,const int32 flag,
+		                    std::string& json);//1 热度 2 收藏数 3评论数 
+
+	bool GetMusicHotCltCmt(const std::string &songid, std::string &hot_num, 
+		std::string &cmt_num, std::string &clt_num);
 };
 
 }

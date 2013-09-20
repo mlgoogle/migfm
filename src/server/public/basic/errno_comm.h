@@ -39,7 +39,9 @@
 #define  MIG_FM_USERNAME_NO_VAILED              -36  //"请求中未包含用户名";
 #define  MIG_FM_PASSWORD_NO_VAILED              -37  //"请求中未包含密码";
 #define  MIG_FM_USER_EXITS                      -38   //用户存在
- 
+#define  MIG_FM_HTTP_COMMENT_INVALID			-39		// "请求中评论字段无效"
+#define  MIG_FM_HTTP_FROMID_INVALID				-40		// "请求中起始ID无效"
+#define  MIG_FM_HTTP_COUNT_INVALID				-41		// "请求中分页数量无效" 
 
 const char*
 migfm_strerror(int error_code);

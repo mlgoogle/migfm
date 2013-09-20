@@ -321,3 +321,36 @@ warrper_redis_reply_t *RedisGetListRange(warrper_redis_context_t* context, const
 	freeReplyObject(reply);
 	return NULL;
 }
+
+warrper_redis_reply_t* RedisDoCommand(warrper_redis_context_t* context,
+		const char* format/*, ...*/) {
+	redisReply *reply;
+	warrper_redis_reply_t *wa_re;
+	//va_list ap;
+
+	//va_start(ap, format);
+	reply = redisCommand(context, format/*, ap*/);
+	//va_end(ap);
+
+	if (NULL == reply)
+		return NULL;
+
+	wa_re = (warrper_redis_reply_t*)malloc(sizeof(warrper_redis_reply_t));
+	wa_re->reply = reply;
+	return wa_re;
+}
+
+warrper_redis_reply_t* RedisDoCommandV(warrper_redis_context_t* context,
+		const char *format, va_list ap) {
+	redisReply *reply;
+	warrper_redis_reply_t *wa_re;
+
+	reply = redisvCommand(context, format, ap);
+
+	if (NULL == reply)
+		return NULL;
+
+	wa_re = (warrper_redis_reply_t*)malloc(sizeof(warrper_redis_reply_t));
+	wa_re->reply = reply;
+	return wa_re;
+}

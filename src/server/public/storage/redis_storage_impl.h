@@ -9,6 +9,8 @@
 #include "storage/storage.h"
 #include "storage/redis_warrper.h"
 
+struct redisReply;
+
 namespace base_storage{
 	
 class RedisStorageEngineImpl:public DictionaryStorageEngine{
@@ -90,9 +92,16 @@ public:
 	virtual bool GetListRange(const char* key,const size_t key_len,
 				int from, int to, std::list<std::string>& list);
 
+	virtual CommandReply *DoCommand(const char *format/*, ...*/);
+
+	virtual void *GetContext() {
+		if(PingRedis()!=1) return NULL;
+		else return c_->context; }
 private:
 	bool PingRedis();
 	void Init();
+
+	CommandReply *_CreateReply(redisReply *reply);
 private:
 	warrper_redis_context_t*    c_;
 }; 
