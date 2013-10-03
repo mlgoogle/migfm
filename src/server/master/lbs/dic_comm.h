@@ -20,6 +20,8 @@ public:
 	static bool GetMusicInfos(const std::string& key,std::string& music_infos);
 	static bool IsCollectSong(const std::string& uid,const std::string& songid);
 	static bool GetMusicAboutUser(const std::string &songid,std::string& content);
+	static bool GetCollectSongs(const std::string& uid,std::map<std::string,std::string>& collect);
+	static bool RecordCommect(const std::string& uid);
 private:
 	static std::list<base::ConnAddr>  addrlist_;
 };

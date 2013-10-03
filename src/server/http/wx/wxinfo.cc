@@ -52,7 +52,8 @@ static void PostRequestMethod(std::string& content){
 	printf("Content-type: text/html\r\n"
 		  "\r\n"
 		"%s",respone.c_str());
-  MIG_DEBUG(USER_LEVEL,"+++++++++++++++++++++++++++++++++++\n\n\n");
+    MIG_DEBUG(USER_LEVEL,"+++++++++++++++++++++++++++++++++++\n\n\n");
+    wxinfo::WXInfoEngine::GetEngine()->ClearProcessContent();
 }
 
 static void PutRequestMethod(std::string& content){

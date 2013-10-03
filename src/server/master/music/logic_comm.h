@@ -54,6 +54,8 @@
 #define  SCENEINDEX         "sceneindex"
 #define  CHANNELID          "channelid"
 #define  CHANNELINDEX       "channelindex"
+#define  TYPEID             "typeid"
+#define  TYPEINDEX          "typeindex"
 #define  MOOD               "mood"
 #define  CURSONG            "cursong"
 #define  LASTSONG           "lastsong"

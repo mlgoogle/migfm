@@ -40,7 +40,7 @@ all: clean output delete-temp-file
 output: lbs_init.o mig_log.o http_response.o base64.o baidu_lbs_connector.o redis_connector.o \
 	json_reader.o json_value.o json_writer.o lbs_logic.o mem_storage_impl.o mysql_storage_impl.o \
 	storage.o redis_storage_impl.o redis_warrper.o basic_info.o constants.o basic_util.o \
-	db_comm.o dic_comm.o logic_comm.o thread_handler.o http_packet.o basictypes.o config.o
+	db_comm.o dic_comm.o logic_comm.o thread_handler.o http_packet.o basictypes.o config.o db_storage.o dic_storage.o
 	$(LINK)
 
 clean:
@@ -93,7 +93,13 @@ mem_storage_impl.o:
 
 redis_storage_impl.o:
 	$(COMPILE) ../../public/storage/redis_storage_impl.cc
-	
+
+db_storage.o:
+	$(COMPILE) ../../public/storage/db_storage.cc
+
+dic_storage.o:
+	$(COMPILE) ../../public/storage/dic_storage.cc
+
 db_comm.o:
 	$(COMPILE) ./db_comm.cc
 

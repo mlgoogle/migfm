@@ -460,7 +460,7 @@ bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
 		Json::Value& result, int& status, int& err_code) {
 	LOGIC_PROLOG();
 
-	std::string uid_str, songid_str, comment,curjson;
+	std::string uid_str, songid_str, comment,curjson,tar_uid;
 	if (!packet.GetAttrib("uid", uid_str)) {
 		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
@@ -473,6 +473,9 @@ bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
 		err_code = MIG_FM_HTTP_COMMENT_INVALID;
 		return false;
 	}
+
+	packet.GetAttrib("tarid",tar_uid);
+
 
 	int64 uid = atoll(uid_str.c_str());
 	if (0 == uid) {
@@ -494,6 +497,9 @@ bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
 		status = -1;
 		return false;
 	}
+
+	//写入同意消息库
+	//base::NormalMsgInfo commect_msg(uid_str,comment,base::CONTENT,);
 
 	status = 1;
 	return true;

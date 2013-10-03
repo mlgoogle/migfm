@@ -38,8 +38,8 @@ bool SysRadom::InitRandom(){
 	setvbuf (m_urandomfp, NULL, _IONBF, 0);
 }
 
-int SysRadom::GetRandomID(){
-	int rd = 0;
+int64 SysRadom::GetRandomID(){
+	int64 rd = 0;
 	do {
 		errno = 0;
 		fread (&rd, sizeof (rd), 1, m_urandomfp);

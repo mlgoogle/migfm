@@ -176,6 +176,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\basic\logic_token.h"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\md5sum.h"
+					>
+				</File>
+				<File
 					RelativePath=".\basic\native_library.h"
 					>
 				</File>
@@ -229,6 +237,14 @@
 				</File>
 				<File
 					RelativePath=".\basic\http_packet.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\logic_token.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\basic\md5sum.cc"
 					>
 				</File>
 				<File
@@ -372,7 +388,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\storage\db_storage.h"
+					>
+				</File>
+				<File
 					RelativePath=".\storage\dic_serialization.h"
+					>
+				</File>
+				<File
+					RelativePath=".\storage\dic_storage.h"
 					>
 				</File>
 				<File
@@ -408,7 +432,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\storage\db_storage.cc"
+					>
+				</File>
+				<File
 					RelativePath=".\storage\dic_serialization.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\storage\dic_storage.cc"
 					>
 				</File>
 				<File

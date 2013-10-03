@@ -9,6 +9,7 @@
 #include <assert.h>
 #include "basic/basictypes.h"
 #include "basic/md5sum.h"
+#include "basic/basic_info.h"
 namespace base{
 
 class BasicUtil{
@@ -55,6 +56,8 @@ public:
 	static bool GetUserToken(const std::string& uid,std::string& token);
 	
 	static bool CheckUserToken(const std::string& uid,const std::string& token);
+
+	static bool GetUserInfo(const std::string& uid,UserInfo& usrinfo);
 };
 
 }

@@ -25,7 +25,8 @@ public:
     bool GetMusicInfosFromStroage();
 
 	void PostContent(const std::string& content);
-	std::string& GetProcessContent(){return content_;}
+	inline std::string& GetProcessContent(){return content_;}
+    inline void ClearProcessContent(){content_ = "";}
 private:
 	bool InitChannelAndMode(void);
 	bool StorageOneWords(std::string &reponse_msg);
@@ -141,6 +142,34 @@ private:
 	void MigFMShow(std::string& msg,const int flag);
 
 	void NewArticle(const int flag,std::string& msg);
+    
+    void HttpShowWebFM(std::string& to_user,std::string& from_user);
+    
+    void GetMenuChannelMusic(std::string& from_user,
+                             std::string& to_user,
+                             const std::string& envent_key);
+    
+    bool GetMemMusicInfos(std::string& from_user,
+                          const std::string& key,
+                          const int current_channel,
+                          std::string& durl,
+                          std::string& hq_url,
+                          std::string& title,
+                          std::string& decs,
+                          time_t& json_time);
+    
+    bool SetMemMusicInfos(const std::string& key,
+                          const int32 num, std::string& json,
+                          time_t json_time);
+    
+    bool GetMoodSceneWordSongMenu(std::string& from_user,std::string& to_user,
+                              std::string& content);
+    
+    bool GetHistroyNews(std::string& from_user,std::string& to_user);
+    
+    void GetWxToken();
+    
+    void CreateMenu();
 
 // 	void UserReadMe(std::string& msg);
 // 
@@ -167,6 +196,8 @@ private:
 	std::vector<base::ChannelInfo>                channel_mode_;
 	int                                           channel_num_;
 	std::string                                   channel_desc_;
+    std::string                                   wx_token_;
+    int                                           expires_in_token_time_;
 
 };
 }

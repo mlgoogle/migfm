@@ -123,7 +123,7 @@ bool UsrMgrEngine::CreateGuest(const int socket, const packet::HttpPacket &packe
 		&utf_nickname,&utf_nickname_size);
 	nickname.assign(utf_nickname,utf_nickname_size);
 
-	RegeditUsr(socket,0,os.str(),os1.str(),nickname,source);
+	CreateGuest(socket,0,os.str(),os1.str(),utf_nickname,source,"1","0");
 
 }
 
@@ -367,8 +367,8 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 		}
 	}
 	r = storage::DBComm::RegistUser(source.c_str(),session.c_str(),
-		           password.c_str(),sex,
-		                        username,nickname,usrid,type,location,birthday,head);
+		           password.c_str(),sex,username,nickname,usrid,
+				   type,location,birthday,head);
 
 
 	if (!r){//用户存在
@@ -492,9 +492,29 @@ bool UsrMgrEngine::RegeditUsr(const int socket,const packet::HttpPacket& packet)
 		return false;
 	}
 
-	RegeditUsr(socket,1,username,password,nickname,source);
-
+	//RegeditUsr(socket,1,username,password,nickname,source);
+	CreateGuest(socket,1,username,password,nickname,source);
 	return true;
+}
+
+bool UsrMgrEngine::CreateGuest(const int socket,const int flag,const std::string username, 
+							   const std::string password,const std::string nickname, 
+							   const std::string source,const std::string gender /* =  */, 
+							   const std::string type /* =  */,const std::string birthday /* =  */,
+							   const std::string location /* =  */, const std::string head /* = */ ){
+	  
+	   std::string result_out;
+	   std::string status = "0";
+	   std::string msg = "0";
+	   std::string result;
+	   std::stringstream os;
+	   os<<"\"username\":\""<<username.c_str()<<"\",\"password\":\""
+		   <<password.c_str()<<"\"";
+	   result = os.str();
+	   usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+	   LOG_DEBUG2("[%s]",result_out.c_str());
+	   usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+    
 }
 
 bool UsrMgrEngine::RegeditUsr(const int socket, const int flag,const std::string username, 

@@ -35,10 +35,39 @@ public:
 public:
 	bool OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 			int &status, std::string &msg);
+
 	bool OnMsgSearchNearby(packet::HttpPacket& packet, Json::Value &result,
 			int &status, std::string &msg);
 
+	bool OnMsgNearCollect(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg);
+
+	bool OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg);
+
+	bool OnMsgMusicFri(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg);
+
+	bool OnMsgSearchNearbyV2(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg);
+
+	bool OnMsgSameMusic(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg);
+
+
 public:
+
+	//fix me 宏定义 或者模板优化 
+	 bool OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
+		int &status, std::string &msg,int flag);  
+	/*
+	flag 1 获取周围的用户               OnMsgSearchNearbyV2
+	     2 获取周围在听你红心歌曲的用户 OnMsgSameMusic
+		 3 获取周围总数                 OnMsgMusicFri
+		 4 获取周围音乐                 OnMsgNearMusic
+	*/ 
+
+	
 	int SetPOI(int64 user_id, double longitude, double latitude, const std::string &data,
 			std::string &response, std::string &err_msg);
 
@@ -49,11 +78,6 @@ public:
 			uint32 page_index, uint32 page_size, Json::Value &result,
 			std::string &response, std::string &err_msg);
 
-	bool OnMsgNearCollect(packet::HttpPacket& packet, Json::Value &result,
-		int &status, std::string &msg);
-
-	bool OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
-		int &status, std::string &msg);
 
 	int SearchRegin(double longitude, double latitude,
 			std::string &response, std::string &err_msg);
@@ -63,7 +87,10 @@ public:
 
 	int SearchDetail(std::string &response, std::string &err_msg);
 
-	void GetUserCurrentMusic(const std::string& content,Json::Value& item);
+	bool GetUserCurrentMusic(const std::string& content,Json::Value& item,
+		                    bool& is_user_like,
+							std::map<std::string,std::string>* collect_musices=NULL,
+							bool is_collect = false);
 
 	bool GetMusicHotCltCmt(const std::string &songid,std::string &hot_num, 
 		                   std::string &cmt_num, 

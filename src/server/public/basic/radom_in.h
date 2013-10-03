@@ -1,10 +1,10 @@
 #ifndef __MIG_FM_PUBLIC_BASIC_RADOM_IN__
 #define __MIG_FM_PUBLIC_BASIC_RADOM_IN__
+#include "basic/basictypes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-
 #define RATE_SIZE 100
 #define TABLE_SIZE (RATE_SIZE*RATE_SIZE)
 
@@ -24,7 +24,7 @@ private:
 public:
 	bool InitRandom ();
 
-	int GetRandomID ();
+	int64 GetRandomID ();
 
 	bool DeinitRandom ();
 private:

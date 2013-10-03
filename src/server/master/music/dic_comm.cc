@@ -9,7 +9,6 @@ base::MigRadomIn* RedisComm::radom_num_ = NULL;
 void RedisComm::Init(std::list<base::ConnAddr>& addrlist){
 	addrlist_ = addrlist;
 	radom_num_ = new base::MigRadomIn();
-	base::SysRadom::InitRandom();
 }
 
 void RedisComm::Dest(){
@@ -17,7 +16,6 @@ void RedisComm::Dest(){
 		delete radom_num_;
 		radom_num_ = NULL;
 	}
-	base::SysRadom::DeinitRandom();
 }
 
 base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){

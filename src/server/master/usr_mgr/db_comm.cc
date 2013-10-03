@@ -278,14 +278,14 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 		return false;
 	}
 
-	//call proc_RegisterUser('1','eweqwewqe','dasd',1,'flaght','oldk',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);
+	//call proc_RegisterUser('2','eweqwewqe','dasd',1,'flaght','oldk','±±¾©','1986-09-03','http://fm.miglab.com/1.jpg',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);
 
     os<<"call proc_RegisterUser(\'"
 	  <<plat_id<<"\',\'"<<plat_session
 	  <<"\',\'"<<password<<"\',"
 	  <<sex<<",\'"<<username.c_str()<<"\',\'"
-	  <<nickname.c_str()<<"\',\'"<<birthday.c_str()<<"\',\'"
-	  <<location.c_str()<<"\',\'"<<head.c_str()<<"\',"
+	  <<nickname.c_str()<<"\',\'"<<location.c_str()<<"\',\'"
+	  <<birthday.c_str()<<"\',\'"<<head.c_str()<<"\',"
 	  <<"@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);";
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());

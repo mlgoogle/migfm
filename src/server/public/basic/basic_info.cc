@@ -1,6 +1,7 @@
 #include "basic_info.h"
 #include "json/json.h"
 #include "log/mig_log.h"
+#include "basic/radom_in.h"
 #include <sstream>
 
 namespace base{
@@ -170,7 +171,7 @@ bool MusicInfo::UnserializedJson(std::string& str){
 	set_pub_time(root["pub_time"].asString());
 	set_artist(root["artist"].asString());
 	set_pic_url(root["pic_url"].asString());
-	set_hq_url(root["hq_url"].asString());
+	set_hq_url(root["hqurl"].asString());
 	return true;
 }
 
@@ -270,6 +271,131 @@ RecordingLocalMusic::RecordingLocalMusic(const RecordingLocalMusic& ci)
 	}
 }
 
+UserInfo& UserInfo::operator =(const base::UserInfo &usr){
+	if(usr.data_!=NULL){
+		usr.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = usr.data_;
+}
 
+UserInfo::UserInfo(const base::UserInfo &userinfo)
+:data_(userinfo.data_){
+	if (data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+UserInfo::UserInfo(){
+	data_ = new Data();
+}
+
+UserInfo::UserInfo(const std::string& uid,const std::string& username, 
+				   const std::string& sex,const std::string& type, 
+				   const std::string& crty,const std::string& head, 
+				   const std::string& birthday,const std::string& nickname, 
+				   const std::string& source){
+	 data_ = new Data(uid,username,sex,type,crty,head,birthday, nickname, source);
+
+}
+
+bool UserInfo::SerializedJson(std::string& json){
+	std::stringstream os;
+	os<<"{\"uid\":"
+		<<"\""<<uid().c_str()<<"\",\"username\":"
+		<<"\""<<username().c_str()<<"\",\"sex\":"
+		<<"\""<<sex().c_str()<<"\",\"type\":"
+		<<"\""<<type()<<"\",\"crty\":"
+		<<"\""<<crty()<<"\",\"head\":"
+		<<"\""<<head()<<"\",\"birthday\":"
+		<<"\""<<birthday()<<"\",\"nickname\":"
+		<<"\""<<nickname()<<"\",\"source\":"
+		<<"\""<<source()<<"\"}";
+	json.assign(os.str().c_str(),os.str().length());
+	return true;
+}
+
+bool UserInfo::UnserializedJson(const char* str){
+	Json::Reader reader;
+	Json::Value root;
+	bool r = false;
+	r = reader.parse(str,root);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"json parser error");
+		return false;
+	}
+
+	set_uid(root["uid"].asString());
+	set_username(root["username"].asString());
+	set_sex(root["sex"].asString());
+	set_type(root["type"].asString());
+	set_crty(root["crty"].asString());
+	set_head(root["head"].asString());
+	set_birthday(root["birthday"].asString());
+	set_nickname(root["nickname"].asString());
+	set_source(root["source"].asString());
+	return true;
+}
+
+NormalMsgInfo& NormalMsgInfo::operator =(const base::NormalMsgInfo &nmi){
+	if (nmi.data_!=NULL){
+		nmi.data_->AddRef();
+	}
+
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = nmi.data_;
+}
+
+NormalMsgInfo::NormalMsgInfo(const NormalMsgInfo& nmi)
+:data_(nmi.data_){
+	if (data_!=NULL){
+		data_->AddRef();
+	}
+
+}
+
+NormalMsgInfo::NormalMsgInfo(){
+	data_ = new Data();
+}
+
+NormalMsgInfo::NormalMsgInfo(const std::string &uid, const std::string &content, 
+						 const std::string &type, const std::string &param){
+	data_ = new Data(uid,content,type,base::SysRadom::GetInstance()->GetRandomID(),param);
+}
+
+bool NormalMsgInfo::SerializedJson(std::string& json){
+	std::stringstream os;
+	os<<"{\"uid\":"
+		<<"\""<<uid().c_str()<<"\",\"content\":"
+		<<"\""<<content().c_str()<<"\",\"type\":"
+		<<"\""<<type().c_str()<<"\",\"msg_id\":"
+		<<"\""<<msg_id()<<"\"}";
+
+	json.assign(os.str().c_str(),os.str().length());
+	return true;
+}
+
+bool NormalMsgInfo::UnserializedJson(std::string &str){
+	Json::Reader reader;
+	Json::Value root;
+	bool r = false;
+	r = reader.parse(str.c_str(),root);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"json parser error");
+		return false;
+	}
+
+	set_uid(root["uid"].asString());
+	set_content(root["content"].asString());
+	set_type(root["type"].asString());
+	set_param(root["param"].asString());
+	set_msg_id(root["msg_id"].asInt());
+	return true;
+
+}
 
 }

@@ -15,6 +15,8 @@ public:
 	
     static bool Init(std::list<base::ConnAddr>& addrlist);
     
+	static bool RecordingPacket(const std::string& type);
+
     static bool GetUserInfo(const std::string& username,std::string& userid,int32& sex,std::string& extadd,
 	                        std::string& street,std::string& locality,std::string& regin,
 	                        int32& pcode,std::string& ctry,std::string& head,

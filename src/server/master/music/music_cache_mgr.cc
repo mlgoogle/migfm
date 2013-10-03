@@ -271,7 +271,7 @@ bool MusicCacheManager::PutJsonMusicChannel(int channel,
 			pic_url = song[i]["picture"].asString();
 		}
 		
-		if (song[i].isMember("hq_url")){
+		if (song[i].isMember("hqurl")){
 			hq_url = song[i]["picture"].asString();
 		}else{
 			hq_url = durl;

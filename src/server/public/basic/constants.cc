@@ -10,6 +10,10 @@ const std::string& ConStants::str_empty(){
    return str_empty;
 }
 
+const std::string& ConStants::str_zone(){
+	static const std::string str_zone = "0";
+	return str_zone;
+}
 
 void ConStants::fcgi_http_head(){
 	char* header = "Content-type: text/html\r\n\r\n";

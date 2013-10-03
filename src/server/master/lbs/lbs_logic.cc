@@ -13,6 +13,9 @@
 #include "log/mig_log.h"
 #include "config/config.h"
 #include "basic/base64.h"
+#include "basic/basic_util.h"
+#include "storage/db_storage.h"
+#include "storage/dic_storage.h"
 #include "logic_comm.h"
 #include "dic_comm.h"
 #include "db_comm.h"
@@ -137,18 +140,25 @@ bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int le
 		OnMsgSetPoi(packet, root, ret_status, ret_msg);
 	} else if (type=="searchnearby") {
 		OnMsgSearchNearby(packet, root, ret_status, ret_msg);
-	} else if (type=="searchcollect"){
+	} else if (type=="nearuser"){
+		OnMsgSearchNearbyV2(packet, root, ret_status, ret_msg);
+	}else if (type=="searchcollect"){
 		OnMsgNearCollect(packet,root,ret_status,ret_msg);
 	}else if (type=="nearmusic"){
 		OnMsgNearMusic(packet,root,ret_status,ret_msg);
-	}else
+	}else if (type=="musicfri"){
+		OnMsgMusicFri(packet,root,ret_status,ret_msg);
+	}else if (type=="samemusic"){
+		OnMsgSameMusic(packet,root,ret_status,ret_msg);
+	}
+	else
 		return true;
 
 	root["status"] = ret_status;
 	if (ret_status != 1)
 		root["msg"] = ret_msg;
 	else
-		root["msg"] = "success";
+		root["msg"] = "";
 
 	Json::FastWriter wr;
 	std::string res = wr.write(root);
@@ -159,9 +169,132 @@ bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int le
     return true;
 }
 
-bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result, 
-							  int &status, std::string &msg){
+
+bool LBSLogic::OnMsgSearchNearbyV2(packet::HttpPacket& packet, Json::Value &result, 
+								   int &status, std::string &msg){
+
+    return OnMsgPublicLbs(packet,result,status,msg,1);
+
+	/*
 	status = 0;
+	msg.clear();
+	bool r = false;
+
+	std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
+	if (!packet.GetAttrib("uid", uid_str)) {
+	   msg = "uid未指定";
+	   return false;
+	}
+	if (!packet.GetAttrib("location", location_str)) {
+	   msg = "location未指定";
+	   return false;
+	}
+
+	//if (!packet.GetAttrib("radius", radius_str)) {
+	radius_str = DEFAULT_MAX_RADIUS;
+	//}
+
+	if (!packet.GetAttrib("page_index", page_index_str)) {
+	   page_index_str = "0";
+	}
+
+	if (!packet.GetAttrib("page_size", page_size_str)) {
+	   page_size_str = "10";
+	}
+
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+	   msg = "无效uid";
+	   return false;
+	}
+	std::vector<std::string> location_pair;
+	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
+	   msg = "location参数格式错误";
+	   return false;
+	}
+
+	double latitude = atof(location_pair[0].c_str());
+	double longitude = atof(location_pair[1].c_str());
+	uint32 radius = atoi(radius_str.c_str());
+	int page_index = atoi(page_index_str.c_str());
+	int page_size = atoi(page_size_str.c_str());
+	std::string response;
+	Json::Value content;
+	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
+	   content, response, msg)) {
+		   return false;
+	}
+	const Json::Value &items = content["content"];
+	if (items.empty()){
+	   result["result"] = "";
+	   status = 1;
+	   return true;
+	}
+
+	Json::Value &usersmusic = result["result"]["nearUser"];
+	std::map<std::string, bool> mapExist;
+	std::vector<std::string> vec_users;
+	typedef std::map<std::string, std::string> UserSongMap;
+	UserSongMap map_songs;
+	std::string nick_name, sex,pic;
+	int jk = 0;
+	Json::Value temp_users;
+	std::map<std::string,std::string> collect_musices;
+	for (Json::Value::iterator it = items.begin();
+	   it != items.end();
+	   ++it,jk++) {
+		   const Json::Value &item = *it;
+		   Json::Value val;
+		   if (!item.isMember("ext"))
+			   continue;
+		   std::string uid_str = item["ext"]["user_id"].asString();
+		   if (uid_str.empty())
+			   continue;
+		   if (mapExist.end() != mapExist.find(uid_str))
+			   continue;
+
+		   mapExist[uid_str] = true;
+		   val["users"]["userid"] = uid_str;
+		   //判断用户后是否存在
+		   r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
+		   if (r){
+			   val["users"]["latitude"] = item["latitude"];
+			   val["users"]["longitude"] = item["longitude"];
+			   val["users"]["distance"] = item["distance"];
+			   val["users"]["nickname"] = nick_name;
+			   val["users"]["sex"] = sex;
+			   val["users"]["plat"] = 5;
+			   val["users"]["head"] = "http://fm.miglab.com/head.jpg";
+			   vec_users.push_back(uid_str);
+			   //users.append(val)
+			   //usersmusic.append(val);
+			   temp_users.append(val);
+		   }
+	}
+
+	LOG_DEBUG2("temp_users size [%d]",temp_users.size());
+	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
+
+	for (Json::Value::iterator it = temp_users.begin();
+	   it != temp_users.end(); ++it) {
+		   Json::Value &item = *it;
+		   const std::string uid_str = item["users"]["userid"].asString();
+		   UserSongMap::const_iterator find = map_songs.find(uid_str);
+		   if (map_songs.end() != find){
+			   bool is_user_like = false;
+			   r = GetUserCurrentMusic(find->second,item,is_user_like,&collect_musices,true);
+			   usersmusic.append(item);
+		   }
+		   else
+			   item["music"] = 0;
+	}
+	return true;*/
+}
+
+
+bool LBSLogic::OnMsgSameMusic(packet::HttpPacket& packet, Json::Value &result, 
+							  int &status, std::string &msg){
+	/*status = 0;
 	msg.clear();
 	bool r = false;
 
@@ -174,14 +307,274 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 	  msg = "location未指定";
 	  return false;
 	}
-	if (!packet.GetAttrib("radius", radius_str)) {
-	  radius_str = "1000";
-	}
+
+	//if (!packet.GetAttrib("radius", radius_str)) {
+	radius_str = DEFAULT_MAX_RADIUS;
+	//}
+
 	if (!packet.GetAttrib("page_index", page_index_str)) {
 	  page_index_str = "0";
 	}
+
 	if (!packet.GetAttrib("page_size", page_size_str)) {
 	  page_size_str = "10";
+	}
+
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+	  msg = "无效uid";
+	  return false;
+	}
+	std::vector<std::string> location_pair;
+	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
+	  msg = "location参数格式错误";
+	  return false;
+	}
+
+	double latitude = atof(location_pair[0].c_str());
+	double longitude = atof(location_pair[1].c_str());
+	uint32 radius = atoi(radius_str.c_str());
+	int page_index = atoi(page_index_str.c_str());
+	int page_size = atoi(page_size_str.c_str());
+	std::string response;
+	Json::Value content;
+	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
+	  content, response, msg)) {
+		  return false;
+	}
+	const Json::Value &items = content["content"];
+	if (items.empty()){
+	  result["result"] = "";
+	  status = 1;
+	  return true;
+	}
+
+	Json::Value &usersmusic = result["result"]["nearUser"];
+	std::map<std::string, bool> mapExist;
+	std::vector<std::string> vec_users;
+	typedef std::map<std::string, std::string> UserSongMap;
+	UserSongMap map_songs;
+	std::string nick_name, sex,pic;
+	int jk = 0;
+	Json::Value temp_users;
+	std::map<std::string,std::string> collect_musices;
+	for (Json::Value::iterator it = items.begin();
+	  it != items.end();
+	  ++it,jk++) {
+		  const Json::Value &item = *it;
+		  Json::Value val;
+		  if (!item.isMember("ext"))
+			  continue;
+		  std::string uid_str = item["ext"]["user_id"].asString();
+		  if (uid_str.empty())
+			  continue;
+		  if (mapExist.end() != mapExist.find(uid_str))
+			  continue;
+
+		  mapExist[uid_str] = true;
+		  val["users"]["userid"] = uid_str;
+		  //判断用户后是否存在
+		  r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
+		  if (r){
+			  val["users"]["latitude"] = item["latitude"];
+			  val["users"]["longitude"] = item["longitude"];
+			  val["users"]["distance"] = item["distance"];
+			  val["users"]["nickname"] = nick_name;
+			  val["users"]["sex"] = sex;
+			  val["users"]["plat"] = 5;
+			  val["users"]["head"] = "http://fm.miglab.com/head.jpg";
+			  vec_users.push_back(uid_str);
+			  temp_users.append(val);
+		  }
+	}
+
+	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
+
+	//获取用户红心歌曲名单
+	r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
+	if (!r)
+	  return true;
+	for (Json::Value::iterator it = temp_users.begin();
+	  it != temp_users.end(); ++it) {
+		  Json::Value &item = *it;
+		  const std::string uid_str = item["users"]["userid"].asString();
+		  UserSongMap::const_iterator find = map_songs.find(uid_str);
+		  if (map_songs.end() != find){
+			  bool is_user_like = false;
+			  r = GetUserCurrentMusic(find->second,item,is_user_like,&collect_musices,true);
+			  //添加用户
+			  if (r){
+				  if (is_user_like)
+					  usersmusic.append(item);
+			  }
+		  }
+		  else
+			  item["music"] = 0;
+	}
+	status = 1;
+	return true;*/
+    return OnMsgPublicLbs(packet,result,status,msg,2);
+}
+
+bool LBSLogic::OnMsgMusicFri(packet::HttpPacket& packet, Json::Value &result, 
+							 int &status, std::string &msg){
+	 /*status = 0;
+	 msg.clear();
+	 bool r = false;
+
+	 std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
+	 if (!packet.GetAttrib("uid", uid_str)) {
+		 msg = "uid未指定";
+		 return false;
+	 }
+	 if (!packet.GetAttrib("location", location_str)) {
+		 msg = "location未指定";
+		 return false;
+	 }
+	
+	 //if (!packet.GetAttrib("radius", radius_str)) {
+		 radius_str = DEFAULT_MAX_RADIUS;
+	 //}
+
+	 if (!packet.GetAttrib("page_index", page_index_str)) {
+		 page_index_str = "0";
+	 }
+
+	 if (!packet.GetAttrib("page_size", page_size_str)) {
+		 page_size_str = "10";
+	 }
+
+	 int64 uid = atoll(uid_str.c_str());
+	 if (0 == uid) {
+		 msg = "无效uid";
+		 return false;
+	 }
+	 std::vector<std::string> location_pair;
+	 if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
+		 msg = "location参数格式错误";
+		 return false;
+	 }
+
+	 double latitude = atof(location_pair[0].c_str());
+	 double longitude = atof(location_pair[1].c_str());
+	 uint32 radius = atoi(radius_str.c_str());
+	 int page_index = atoi(page_index_str.c_str());
+	 int page_size = atoi(page_size_str.c_str());
+	 std::string response;
+	 Json::Value content;
+	 if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
+		 content, response, msg)) {
+			 return false;
+	 }
+	 const Json::Value &items = content["content"];
+	 if (items.empty()){
+		 result["result"] = "";
+		 status = 1;
+		 return true;
+	 }
+
+	 //Json::Value &usersmusic = result["result"]["nearUser"];
+	 Json::Value usersmusic;
+	 std::map<std::string, bool> mapExist;
+	 std::vector<std::string> vec_users;
+	 typedef std::map<std::string, std::string> UserSongMap;
+	 UserSongMap map_songs;
+	 std::string nick_name, sex,pic;
+	 int jk = 0;
+	 Json::Value temp_users;
+	 std::map<std::string,std::string> collect_musices;
+	 for (Json::Value::iterator it = items.begin();
+		 it != items.end();
+		 ++it,jk++) {
+			 const Json::Value &item = *it;
+			 Json::Value val;
+			 if (!item.isMember("ext"))
+				 continue;
+			 std::string uid_str = item["ext"]["user_id"].asString();
+			 if (uid_str.empty())
+				 continue;
+			 if (mapExist.end() != mapExist.find(uid_str))
+				 continue;
+
+			 mapExist[uid_str] = true;
+			 val["users"]["userid"] = uid_str;
+			 //判断用户后是否存在
+			 r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
+			 if (r){
+				 val["users"]["latitude"] = item["latitude"];
+				 val["users"]["longitude"] = item["longitude"];
+				 val["users"]["distance"] = item["distance"];
+				 val["users"]["nickname"] = nick_name;
+				 val["users"]["sex"] = sex;
+				 val["users"]["plat"] = 5;
+				 val["users"]["head"] = "http://fm.miglab.com/head.jpg";
+				 vec_users.push_back(uid_str);
+				 //users.append(val)
+				 //usersmusic.append(val);
+				 temp_users.append(val);
+			 }
+	 }
+
+	 LOG_DEBUG2("temp_users size [%d]",temp_users.size());
+	 storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
+
+	 //获取用户红心歌曲名单
+	 r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
+	 if (!r)
+		 return true;
+	 for (Json::Value::iterator it = temp_users.begin();
+		 it != temp_users.end(); ++it) {
+			 Json::Value &item = *it;
+			 const std::string uid_str = item["users"]["userid"].asString();
+			 UserSongMap::const_iterator find = map_songs.find(uid_str);
+			 if (map_songs.end() != find){
+				 bool is_user_like = false;
+				   r = GetUserCurrentMusic(find->second,item,is_user_like,&collect_musices,true);
+					//添加用户
+				   if (r){
+					   if (is_user_like)
+					    usersmusic.append(item);
+				  }
+			 }
+			 else
+				 item["music"] = 0;
+	 }
+
+	 result["result"]["music_num"] = usersmusic.size();
+
+	 result["result"]["msg_num"] = 0;
+	 status = 1;
+	 return true;*/
+     return OnMsgPublicLbs(packet,result,status,msg,3);
+}
+
+bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result, 
+							  int &status, std::string &msg){
+	
+    return OnMsgPublicLbs(packet,result,status,msg,4);
+	/*status = 0;
+	msg.clear();
+	bool r = false;
+
+	std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
+	if (!packet.GetAttrib("uid", uid_str)) {
+	  msg = "uid未指定";
+	  return false;
+	}
+	if (!packet.GetAttrib("location", location_str)) {
+	  msg = "location未指定";
+	  return false;
+	}
+	//if (!packet.GetAttrib("radius", radius_str)) {
+	  radius_str = DEFAULT_MAX_RADIUS;
+	//}
+
+	if (!packet.GetAttrib("page_index", page_index_str)) {
+		page_index_str = "0";
+	}
+	
+	if (!packet.GetAttrib("page_size", page_size_str)) {
+		page_size_str = "10";
 	}
 
 	int64 uid = atoll(uid_str.c_str());
@@ -210,7 +603,8 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 	if (items.empty()){
 		//Json::Value &usersmusic = result["result"];
 		result["result"] = "";
-		status = 1;
+		msg = "周围没有用户";
+		status = 0;
 		return true;
 	}
 
@@ -219,6 +613,7 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 	std::vector<std::string> vec_users;
 	typedef std::map<std::string, std::string> UserSongMap;
 	UserSongMap map_songs;
+	Json::Value temp_users;
 	std::string nick_name, sex,pic;
 	int jk = 0;
 	for (Json::Value::iterator it = items.begin();
@@ -229,16 +624,6 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 			if (!item.isMember("ext"))
 				continue;
 			std::string uid_str = item["ext"]["user_id"].asString();
-			//test
-		//////////////////////////////////////////////////////////////////////////
-		/*	if (jk==0){
-				uid_str = "100000";
-			}else if (jk==1){
-				uid_str = "100001";
-			}else{
-				uid_str = "100002";
-			}*/
-			//////////////////////////////////////////////////////////////////////////
 			if (uid_str.empty())
 				continue;
 			if (mapExist.end() != mapExist.find(uid_str))
@@ -255,28 +640,31 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 				val["users"]["nickname"] = nick_name;
 				val["users"]["sex"] = sex;
 				vec_users.push_back(uid_str);
-				//users.append(val)
-				usersmusic.append(val);
+				temp_users.append(val);
 			}
 	}
-
 
 	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
-	for (Json::Value::iterator it = usersmusic.begin();
-		it != usersmusic.end(); ++it) {
-			Json::Value &item = *it;
-			const std::string uid_str = item["users"]["userid"].asString();
-			UserSongMap::const_iterator find = map_songs.find(uid_str);
-			if (map_songs.end() != find){
-				//item["cur_music"] = ::atoi(find->second.c_str());
-				GetUserCurrentMusic(find->second,item);
-			}
-			else
- 				item["music"] = 0;
+
+	//
+	LOG_DEBUG2("temp_users size [%d]",temp_users.size());
+	for (Json::Value::iterator it = temp_users.begin();
+		it != temp_users.end(); ++it) {
+		Json::Value &item = *it;
+		const std::string uid_str = item["users"]["userid"].asString();
+		UserSongMap::const_iterator find = map_songs.find(uid_str);
+		if (map_songs.end() != find){
+			//item["cur_music"] = ::atoi(find->second.c_str());
+			bool is_user_like = false;
+			r = GetUserCurrentMusic(find->second,item,is_user_like);
+			if (r)
+				usersmusic.append(item);
+		}
 	}
 	status = 1;
-	return true;
+	return true;*/
 }
+
 
 bool LBSLogic::OnMsgNearCollect(packet::HttpPacket &packet, Json::Value &result, int &status, std::string &msg)
 {
@@ -284,6 +672,7 @@ bool LBSLogic::OnMsgNearCollect(packet::HttpPacket &packet, Json::Value &result,
 	status = 0;
 
 	msg.clear();
+	bool r = false;
 	std::string uid_str, taruid_str,location_str, radius_str, page_index_str, page_size_str;
 	if (!packet.GetAttrib("uid", uid_str)) {
 		msg = "uid未指定";
@@ -299,9 +688,9 @@ bool LBSLogic::OnMsgNearCollect(packet::HttpPacket &packet, Json::Value &result,
 		msg = "location未指定";
 		return false;
 	}
-	if (!packet.GetAttrib("radius", radius_str)) {
-		radius_str = "1000";
-	}
+	//if (!packet.GetAttrib("radius", radius_str)) {
+		radius_str = DEFAULT_MAX_RADIUS;
+	//}
 	if (!packet.GetAttrib("page_index", page_index_str)) {
 		page_index_str = "0";
 	}
@@ -335,8 +724,11 @@ bool LBSLogic::OnMsgNearCollect(packet::HttpPacket &packet, Json::Value &result,
 	const Json::Value &items = content["content"];//多少用户即多少歌曲
 	//获取收藏列表大小
 	int32 collect_num = redis_conn_.GetCollect(taruid);
+	std::vector<std::string> vec_users;
+	typedef std::map<std::string, std::string> UserSongMap;
+	UserSongMap map_songs;
 
-	for (Json::Value::iterator it = items.begin();//获取每个用户收藏列表
+	for (Json::Value::iterator it = items.begin();
 		it != items.end();
 		++it) {
 			const Json::Value &item = *it;
@@ -348,16 +740,174 @@ bool LBSLogic::OnMsgNearCollect(packet::HttpPacket &packet, Json::Value &result,
 				continue;
 			if (mapExist.end() != mapExist.find(uid_str))
 				continue;
-			if (atoll(uid_str.c_str())!=taruid)
-			    collect_num +=redis_conn_.GetCollect(atoll(uid_str.c_str()));
+			mapExist[uid_str] = true;
+			val["users"]["userid"] = uid_str;
+			std::string nick_name;
+			std::string sex;
+			std::string pic;
+			//判断用户后是否存在
+			r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
+			if (r){
+				val["users"]["latitude"] = item["latitude"];
+				val["users"]["longitude"] = item["longitude"];
+				val["users"]["distance"] = item["distance"];
+				val["users"]["nickname"] = nick_name;
+				val["users"]["sex"] = sex;
+				vec_users.push_back(uid_str);
+			}
 	}
+	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
 
+	int nearnum = map_songs.size();
 	result["result"]["mynum"] = collect_num;
-	result["result"]["nearnum"] = items.size();
+	result["result"]["nearnum"] = nearnum;
 
 	status = 1;
 	return true;
 }
+
+bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result, 
+							  int &status, std::string &msg,int flag){
+	status = 0;
+	msg.clear();
+	bool r = false;
+
+	std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
+	if (!packet.GetAttrib("uid", uid_str)) {
+	  msg = "uid未指定";
+	  return false;
+	}
+	if (!packet.GetAttrib("location", location_str)) {
+	  msg = "location未指定";
+	  return false;
+	}
+	//if (!packet.GetAttrib("radius", radius_str)) {
+	radius_str = DEFAULT_MAX_RADIUS;
+	//}
+
+	if (!packet.GetAttrib("page_index", page_index_str)) {
+	  page_index_str = "0";
+	}
+
+	if (!packet.GetAttrib("page_size", page_size_str)) {
+	  page_size_str = "10";
+	}
+
+	int64 uid = atoll(uid_str.c_str());
+	if (0 == uid) {
+	  msg = "无效uid";
+	  return false;
+	}
+	std::vector<std::string> location_pair;
+	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
+	  msg = "location参数格式错误";
+	  return false;
+	}
+
+	double latitude = atof(location_pair[0].c_str());
+	double longitude = atof(location_pair[1].c_str());
+	uint32 radius = atoi(radius_str.c_str());
+	int page_index = atoi(page_index_str.c_str());
+	int page_size = atoi(page_size_str.c_str());
+	std::string response;
+	Json::Value content;
+	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
+	  content, response, msg)) {
+		  return false;
+	}
+	const Json::Value &items = content["content"];
+	if (items.empty()){
+	  //Json::Value &usersmusic = result["result"];
+	  result["result"] = "";
+	  msg = "周围没有用户";
+	  status = 0;
+	  return true;
+	}
+
+	Json::Value usersmusic;
+	std::map<std::string, bool> mapExist;
+	std::vector<std::string> vec_users;
+	typedef std::map<std::string, std::string> UserSongMap;
+	UserSongMap map_songs;
+	Json::Value temp_users;
+	std::map<std::string,std::string> collect_musices;
+	std::string nick_name, sex,pic;
+	int jk = 0;
+	for (Json::Value::iterator it = items.begin();
+	  it != items.end();
+	  ++it,jk++) {
+		  const Json::Value &item = *it;
+		  Json::Value val;
+		  if (!item.isMember("ext"))
+			  continue;
+		  std::string uid_str = item["ext"]["user_id"].asString();
+		  if (uid_str.empty())
+			  continue;
+		  if (mapExist.end() != mapExist.find(uid_str))
+			  continue;
+
+		  mapExist[uid_str] = true;
+		  val["users"]["userid"] = uid_str;
+		  //判断用户后是否存在
+		  base::UserInfo usrinfo;
+		  r = base::BasicUtil::GetUserInfo(uid_str,usrinfo);
+		  //r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
+		  if (r){
+			  val["users"]["latitude"] = item["latitude"];
+			  val["users"]["longitude"] = item["longitude"];
+			  val["users"]["distance"] = item["distance"];
+			  val["users"]["nickname"] = usrinfo.nickname();
+			  val["users"]["sex"] = usrinfo.sex();
+			  val["users"]["head"] = usrinfo.head();
+			  vec_users.push_back(uid_str);
+			  temp_users.append(val);
+		  }
+	}
+
+	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
+
+	//获取用户红心歌曲名单
+	if ((flag==2)||(flag==3)){
+		r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
+		if (!r)
+			return r;
+	}
+
+	for (Json::Value::iterator it = temp_users.begin();
+	  it != temp_users.end(); ++it) {
+		  Json::Value &item = *it;
+		  const std::string uid_str = item["users"]["userid"].asString();
+		  UserSongMap::const_iterator find = map_songs.find(uid_str);
+		  if (map_songs.end() != find){
+			  bool is_user_like = false;
+			  if ((flag==2)||(flag==3))
+				  r = GetUserCurrentMusic(find->second,item,is_user_like,
+										 &collect_musices,true);
+			  else
+				  r = GetUserCurrentMusic(find->second,item,is_user_like);
+			  if (r)
+				  if (flag==2||flag==3){
+					  if (is_user_like)
+						  usersmusic.append(item);
+				  }else{
+					  usersmusic.append(item);
+				  }
+		  }
+		  else
+			  item["music"] = 0;
+	}
+
+	if (flag==3){
+		result["result"]["music_num"] = usersmusic.size();
+		result["result"]["msg_num"] = 0;
+	}else{
+		result["result"]["nearUser"] = usersmusic;
+	}
+
+	status = 1;
+	return true;
+}
+
 
 bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 		int &status, std::string &msg) {
@@ -515,6 +1065,8 @@ LBSLogic::LBSLogic() {
 	storage::DBComm::Init(config->mysql_db_list_);
 	storage::MemComm::Init(config->mem_list_);
 	storage::RedisComm::Init(config->redis_list_);
+	base_storage::MYSQLDB::Init(config->mysql_db_list_);
+	base_storage::MemDic::Init(config->mem_list_);
 }
 
 LBSLogic::~LBSLogic() {
@@ -525,7 +1077,10 @@ LBSLogic::~LBSLogic() {
 	ThreadKey::DeinitThreadKey ();
 }
 
-void LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item){
+bool LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item,
+								   bool& is_user_like,
+								   std::map<std::string,std::string>* collect_musices,
+								   bool is_collect){
 //value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"艳阳天","singer":"窦唯"}
 	bool r = false;
 	Json::Reader reader;
@@ -554,7 +1109,7 @@ void LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 	r = reader.parse(content.c_str(),root);
 	if (!r){
 		LOG_ERROR("parser json error");
-		return;
+		return false;
 	}
 	LOG_DEBUG2("%s",content.c_str());
 	if (root.isMember("songid")){
@@ -581,16 +1136,27 @@ void LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 		tid = root["tid"].asString(); 
 	}
 
+	//是否是用户红心歌曲
+	if (is_collect){
+		std::map<std::string,std::string>::const_iterator itr 
+				 = (*collect_musices).find(songid);
+
+		if(itr == (*collect_musices).end())
+			is_user_like = false;
+		else
+			is_user_like = true;
+	}
+
 	if (state!="2"){//非本地缓存歌曲
 		r = storage::RedisComm::GetMusicInfos(songid,music_info);
 		if (!r){
 			LOG_ERROR("song no vailed");
-			return;
+			return false;
 		}
 		r =smi.UnserializedJson(music_info);
 		if (!r){
 			LOG_ERROR("song parser error");
-			return;
+			return false;
 		}
 		//获取URL
 		storage::DBComm::GetMusicUrl(smi.id(),hq_content_url,content_url);
@@ -619,21 +1185,22 @@ void LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 		item["music"]["title"] = b64title;
 		item["music"]["artist"] = b64artist;
 		item["music"]["url"] = smi.url();
-		item["music"]["hq_url"] = smi.hq_url();
+		item["music"]["hqurl"] = smi.hq_url();
 		item["music"]["pub_time"] = smi.pub_time();
 		item["music"]["album"] = b64album;
 		item["music"]["pic"] = smi.pic_url();
 		item["music"]["type"] = mode;
 		item["music"]["tid"] = tid;
 		item["music"]["like"] = is_like;
-		item["music"]["host"] = smi.hot_num();
+		item["music"]["hot"] = smi.hot_num();
 		item["music"]["clt"] = smi.clt_num();
-		item["music"]["comment"] = smi.cmt_num();
+		item["music"]["cmt"] = smi.cmt_num();
 	}else{//本地缓存音乐
 		item["music"]["arits"] = singer;
 		item["music"]["title"] = name;
 	}
 	item["songstat"] = state;
+	return true;
 }
 
 bool LBSLogic::GetMusicHotCltCmt(const std::string &songid, 

@@ -183,6 +183,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="packet_count"
+			>
+			<File
+				RelativePath="..\packet_count\packet_count.cc"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\makefile"
 			>

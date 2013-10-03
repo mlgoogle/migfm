@@ -43,10 +43,13 @@ public:
 
 	static bool ReadSongComment(int64 songid, int64 from_id, int count, int64 &total, Json::Value &result);
 
-	static void SetMusicAboutUser(const std::string& songid,const std::string& hot_num,
-		const std::string& cmt_num,const std::string& clt_num);
+	static void SetMusicAboutUser(const std::string& songid,
+		const std::string& hot_num,const std::string& cmt_num,
+		const std::string& clt_num);
 
 	static bool GetMusicAboutUser(const std::string &songid,std::string& content);
+
+	static bool RecordingMsg(const std::string& uid,const base::NormalMsgInfo& msg);
 
 	static base_storage::CommandReply* _CreateReply(redisReply* reply);
 

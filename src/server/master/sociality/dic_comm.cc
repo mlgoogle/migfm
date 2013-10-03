@@ -229,6 +229,22 @@ bool RedisComm::GetFriensList(int64 uid, std::list<std::string>& friends) {
 	return redis->GetListAll(key, key_len, friends);
 }
 
+
+bool RedisComm::RecordingMsg(const std::string& uid,const base::NormalMsgInfo& msg){
+	REDIS_PROC_PROLOG(redis);
+	//hash name:uid_msg key:msg id 
+	std::string name;
+	std::stringstream os;
+	std::string str;
+	name.append(uid);
+	name.append("_msg");
+	os<<msg.msg_id();
+	msg.SerializedJson(str);
+	redis->AddHashElement(name.c_str(),os.str().c_str(),os.str().length(),
+		str.c_str(),str.length());
+}
+
+
 bool RedisComm::SaveSongComment(int64 songid, int64 uid,
 								const std::string &comment,
 								const std::string& curjson) {

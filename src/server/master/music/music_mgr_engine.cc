@@ -759,27 +759,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	int32 scens_flag;
 	int32 channel_flag;
 	music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
-	r = pack.GetAttrib(MOODID,mood_id);
-	if (!r){
-		msg = migfm_strerror(MIG_FM_MOODID_NO_VALID);
-		status = "0";
-		utf8_flag = 0;
-		goto ret;
-	}
-	r = pack.GetAttrib(MOODID,mood_id);
-	if (!r){
-		msg = migfm_strerror(MIG_FM_MOODID_NO_VALID);
-		status = "0";
-		utf8_flag = 0;
-		goto ret;
-	}
-	r = pack.GetAttrib(MOODID,mood_id);
-	if (!r){
-		msg = migfm_strerror(MIG_FM_MOODID_NO_VALID);
-		status = "0";
-		utf8_flag = 0;
-		goto ret;
-	}
+
 	r = pack.GetAttrib(MOODINDEX,mood_index);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_MOODINDEX_NO_VALID);
@@ -787,13 +767,18 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 		utf8_flag = 0;
 		goto ret;
 	}
-	r = pack.GetAttrib(SCENEID,scene_id);
+
+
+	r = pack.GetAttrib(MOODID,mood_id);
 	if (!r){
-		msg = migfm_strerror(MIG_FM_SCENEID_NO_VALID);
-		status = "0";
-		utf8_flag = 0;
-		goto ret;
+		if (mood_index!="-1"){
+			msg = migfm_strerror(MIG_FM_MOODID_NO_VALID);
+			status = "0";
+			utf8_flag = 0;
+			goto ret;
+		}
 	}
+
 	r = pack.GetAttrib(SCENEINDEX,scens_index);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_SCENEINDEX_NO_VALID);
@@ -802,26 +787,41 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 		goto ret;
 	}
 
-	r = pack.GetAttrib(CHANNELID,channel_id);
+	r = pack.GetAttrib(SCENEID,scene_id);
 	if (!r){
-		msg = migfm_strerror(MIG_FM_SCENEID_NO_VALID);
-		status = "0";
-		utf8_flag = 0;
-		goto ret;
+		if (scens_index!="-1"){
+			msg = migfm_strerror(MIG_FM_SCENEID_NO_VALID);
+			status = "0";
+			utf8_flag = 0;
+			goto ret;
+		}
 	}
 
-	r = pack.GetAttrib(CHANNELINDEX,channel_index);
+	r = pack.GetAttrib(TYPEINDEX,channel_index);
 	if (!r){
 		msg = migfm_strerror(MIG_FM_CHANNELINDEX_NO_VALID);
 		status = "0";
 		utf8_flag = 0;
 		goto ret;
 	}
+
+	r = pack.GetAttrib(TYPEID,channel_id);
+	if (!r){
+		if (channel_index!="-1"){
+			msg = migfm_strerror(MIG_FM_CHANNELID_NO_VALID);
+			status = "0";
+			utf8_flag = 0;
+			goto ret;
+		}
+	}
+
+
 	r = pack.GetAttrib(NUM,num);
-	if (!r)//若没提交个数 默认10首
+	//fix me
+	//if (!r)//若没提交个数 默认10首
 		num = "10";
 
-	if (atoi(mood_id.c_str())<0){
+	if (atoi(mood_index.c_str())<0){
 		mood_flag = 0;
 		mood_id = "0";
 		mood_index = "0";
@@ -829,7 +829,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	else
 		mood_flag = 1;
 
-	if (atoi(scene_id.c_str())<0){
+	if (atoi(scens_index.c_str())<0){
 		scens_flag = 0;
 		scene_id = "0";
 		scens_index = "0";
@@ -837,7 +837,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	else
 		scens_flag = 1;
 
-	if (atoi(channel_id.c_str())<0){
+	if (atoi(channel_index.c_str())<0){
 		channel_flag = 0;
 		channel_id = "0";
 		channel_index = "0";

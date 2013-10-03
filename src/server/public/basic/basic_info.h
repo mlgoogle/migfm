@@ -88,9 +88,9 @@ public:
 	const std::string& pic_url() const {return !data_?STR_EMPTY:data_->pic_url_;}
 	const std::string& hq_url() const {return !data_?STR_EMPTY:data_->hq_url_;}
 	const int32 music_time() const {return !data_?0:data_->music_time_;}
-	const std::string& clt_num() const {return !data_?STR_EMPTY:data_->clt_num_;}
-	const std::string& cmt_num() const {return !data_?STR_EMPTY:data_->cmt_num_;}
-	const std::string& hot_num() const {return !data_?STR_EMPTY:data_->hot_num_;}
+	const std::string& clt_num() const {return (!data_||data_->clt_num_.empty())?STR_ZONE:data_->clt_num_;}
+	const std::string& cmt_num() const {return !(!data_||data_->cmt_num_.empty())?STR_ZONE:data_->cmt_num_;}
+	const std::string& hot_num() const {return !(!data_||data_->hot_num_.empty())?STR_ZONE:data_->hot_num_;}
 
 	bool SerializedJson(std::string& json);
  	bool UnserializedJson(std::string& str);
@@ -319,6 +319,144 @@ private:
 	Data*      data_;
 };
 
+class UserInfo{
+public:
+	explicit UserInfo();
+	explicit UserInfo(const std::string& uid,const std::string& username,
+		const std::string& sex,const std::string& type,
+		const std::string& crty,const std::string& head,
+		const std::string& birthday,const std::string& nickname,
+		const std::string& source);
+
+	UserInfo(const UserInfo& userinfo);
+	UserInfo& operator=(const UserInfo& usr);
+	~UserInfo(){
+		if (data_!=NULL){
+			data_->Release();
+		}
+	}
+	
+
+	bool SerializedJson(std::string& json);
+	bool UnserializedJson(const char* str);
+    
+	const std::string& uid() const {return data_->uid_;}
+	const std::string& username() const {return data_->username_;}
+	const std::string& sex() const {return data_->sex_;}
+	const std::string& type() const {return data_->type_;}
+	const std::string& crty() const {return data_->crty_;}
+	const std::string& head() const {return data_->head_;}
+	const std::string& birthday() const {return data_->birthday_;}
+	const std::string& nickname() const {return data_->nickname_;}
+	const std::string& source() const {return data_->source_;}
+
+	void set_uid(const std::string& uid){data_->uid_ = uid;}
+	void set_username(const std::string& username){data_->username_ = username;}
+	void set_sex(const std::string& sex){data_->sex_ = sex;}
+	void set_type(const std::string& type){data_->type_ = type;}
+	void set_crty(const std::string& crty){data_->crty_ = crty;}
+	void set_head(const std::string& head){data_->head_ = head;}
+	void set_birthday(const std::string& birthday){data_->birthday_ = birthday;}
+	void set_nickname(const std::string& nickname){data_->nickname_ = nickname;}
+	void set_source(const std::string& source){data_->source_ = source;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(1){}
+		Data(const std::string& uid,const std::string& username,
+			 const std::string& sex,const std::string& type,
+			 const std::string& ctry,const std::string& head,
+			 const std::string& birthday,const std::string& nickname,
+			 const std::string& source)
+			:uid_(uid)
+			,username_(username)
+			,sex_(sex)
+			,type_(type)
+			,crty_(ctry)
+			,head_(head)
+			,birthday_(birthday)
+			,nickname_(nickname)
+			,source_(source)
+			,refcount_(1){}
+		void AddRef(){refcount_++;}
+		void Release(){if(!--refcount_) delete this;}
+		std::string uid_;
+		std::string username_;
+		std::string sex_;
+		std::string type_;
+		std::string crty_;
+		std::string head_;
+		std::string birthday_;
+		std::string nickname_;
+		std::string source_;
+	private:
+		int refcount_;
+	};
+	Data*      data_;
+
+
+};
+
+
+class NormalMsgInfo{
+public:
+	explicit NormalMsgInfo();
+	explicit NormalMsgInfo(const std::string& uid,const std::string& content,
+						   const std::string& type,const std::string& param);
+
+	NormalMsgInfo(const NormalMsgInfo& cmt);
+
+	NormalMsgInfo& operator=(const NormalMsgInfo& cmt);
+	~NormalMsgInfo(){
+		if (data_!=NULL){
+			data_->Release();
+		}
+	}
+
+	bool SerializedJson(std::string& json);
+	bool UnserializedJson(std::string& str);
+
+	const std::string& uid() const {return data_->uid_;}
+	const std::string& content() const {return data_->content_;}
+	const std::string& type() const {return data_->type_;}
+	const std::string& param() const {return data_->param_;}
+	const int64 msg_id() const {return data_->msg_id_;}
+
+	void set_uid(const std::string& uid){data_->uid_ = uid;}
+	void set_content(const std::string& content) {data_->content_ = content;}
+	void set_type(const std::string& type) {data_->type_ = type;}
+	void set_param(const std::string& param) {data_->param_ = param;}
+	void set_msg_id(const int64 msg_id) {data_->msg_id_ = msg_id;}
+
+private:
+	class Data{
+	public:
+		Data():msg_id_(0)
+		  ,refcount_(1){}
+		Data(const std::string& uid,const std::string& content,
+			 const std::string& type,int64 msg_id,
+			 const std::string& param)
+			:uid_(uid)
+			,content_(content)
+			,type_(type)
+			,msg_id_(msg_id)
+			,param_(param)
+			,refcount_(1){}
+		void AddRef(){refcount_++;}
+		void Release(){if(!--refcount_) delete this;}
+		std::string uid_;
+		std::string content_;
+		std::string type_;
+		int64 msg_id_;
+		std::string param_;
+	private:
+		int refcount_;
+	};
+	Data*      data_;
+};
+
+
 class RecordingLocalMusic{
 public:
 	explicit RecordingLocalMusic();
@@ -330,6 +468,7 @@ public:
 			data_->Release();
 		}
 	}
+
 
 	const std::string name() const {return data_->name_;}
 	const std::string singer() const {return data_->singer_;}
@@ -353,6 +492,8 @@ private:
 
 	Data*      data_;
 };
+
+
 
 }
 

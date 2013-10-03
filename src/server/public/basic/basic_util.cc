@@ -2,6 +2,7 @@
 #include "basic/basictypes.h"
 #include "storage/dic_serialization.h"
 #include "storage/dic_storage.h"
+#include "storage/db_storage.h"
 #include "basic/basic_util.h"
 #include "basic/base64.h"
 #include "storage/storage.h"
@@ -330,7 +331,40 @@ bool BasicUtil::CheckUserToken(const std::string& uid,const std::string& token){
 		                            &mem_value,&mem_value_length);
 	if (r)
 		r = (strcmp(mem_value,token.c_str())==0)?true:false;
+	if (mem_value){
+		delete [] mem_value;
+		mem_value = NULL;
+	}
 	return false;
+}
+
+bool BasicUtil::GetUserInfo(const std::string& uid,UserInfo& usrinfo){
+	//memcached
+	//key uidinfo 10000info
+	std::string key;
+	bool r = false;
+	char* mem_value = NULL;
+	size_t mem_value_length = 0;
+	key.append(uid);
+	key.append("info");
+	r = base_storage::MemDic::GetString(key.c_str(),key.length(),
+										&mem_value,&mem_value_length);
+	if (r){
+		r = usrinfo.UnserializedJson(mem_value);
+		return r;
+	}
+
+	//≤ª¥Ê‘⁄
+	r = base_storage::MYSQLDB::GetUserInfo(uid,usrinfo);
+	if(!r){
+		return r;
+	}
+
+	//–¥»Îª∫¥Ê
+	std::string json;
+	usrinfo.SerializedJson(json);
+	base_storage::MemDic::SetString(key.c_str(),key.length(),json.c_str(),json.length());
+	return r;
 }
 
 }

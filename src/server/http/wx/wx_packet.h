@@ -10,6 +10,7 @@
 #define  Content       "Content"
 #define  MsgId         "MsgId"
 #define  Event         "Event"
+#define  EventKey      "EventKey"
 
 namespace wxinfo{
 

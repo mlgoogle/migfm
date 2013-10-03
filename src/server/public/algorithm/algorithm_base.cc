@@ -2,6 +2,18 @@
 #include "log/mig_log.h"
 namespace algorithm{
 
+void AlgorithmBase::Init(){
+	//radom_num_ = new base::MigRadomIn();
+}
+
+void AlgorithmBase::Dest(){
+	/*if (radom_num_){
+		delete radom_num_;
+		radom_num_ = NULL;
+	}*/
+}
+
+
 int32 AlgorithmBase::GetTotalForNum(int32 num,int32 n){
     return num*n;
 }
@@ -110,5 +122,13 @@ void AlgorithmBase::AllocationLatitudeMusicNum(const int32 mood_index, int32 &mo
 
    MIG_DEBUG(USER_LEVEL,"mood_num[%d] scenes_num[%d] channel_mum[%d]",
 	           mood_num,scenes_num,channel_num);
+}
+
+void AlgorithmBase::NotRepeatedNum(int total_num,int* num,int& n){
+	int ticket = 0;
+	int m = 0;
+	/*while(m<n){
+		int temp_num = radom_num_->GetPrize()%total_num;
+	}*/
 }
 }

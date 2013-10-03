@@ -1,5 +1,6 @@
 #include "dic_comm.h"
 #include "logic_comm.h"
+#include "json/json.h"
 #include <assert.h>
 #include <sstream>
 
@@ -119,6 +120,41 @@ bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content
 	return r;
 }
 
+
+bool RedisComm::GetCollectSongs(const std::string &uid, 
+								std::map<std::string,std::string> &collect){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	Json::Reader reader;
+	Json::Value  root;
+	std::list<std::string> song_list;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return false;
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+	r = redis_engine_->GetHashValues(os.c_str(),os.length(),song_list);
+	if (song_list.size()<=0)
+		return false;
+
+	while(song_list.size()>0){
+		std::string songinfo = song_list.front();
+		song_list.pop_front();
+		//½âÎöjson;
+		r = reader.parse(songinfo.c_str(),root);
+		if (!r)
+			continue;
+		if (root.isMember("songid")){
+			std::string songid = root["songid"].asString();
+			collect[songid] = songinfo;
+		}
+	}
+	return r;
+}
 
 /////////////////////////////////memcahced//////////////////////////////////////
 base_storage::DictionaryStorageEngine* MemComm::engine_ = NULL;

@@ -19,6 +19,33 @@ bool MysqlSerial::Init(std::list<base::ConnAddr>& addrlist){
     return mysql_db_engine_->Connections(addrlist);
 }
 
+bool MysqlSerial::RecordingPacket(const std::string& type){
+	bool r = false;
+	std::stringstream sql;
+	db_row_t* db_rows;
+	uint32 num;
+	MYSQL_ROW rows;
+	sql<<"select count from billing_packet_count where type=\'"<<type.c_str()<<"\'";
+	MIG_DEBUG(USER_LEVEL,"sql[%s]\n",sql.str().c_str());
+	r = mysql_db_engine_->SQLExec(sql.str().c_str());
+	if(!r)
+		return false;
+	num = mysql_db_engine_->RecordCount();
+	if (num>0){
+		db_rows = mysql_db_engine_->FetchRows();
+		rows = (*(MYSQL_ROW*)db_rows->proc); 
+		int count = atol(rows[0]);
+		count++;
+		sql.str("");
+		sql<<"update billing_packet_count set count = "<<count
+			<<" where type=\'"<<type.c_str()<<"\'";
+		MIG_DEBUG(USER_LEVEL,"sql[%s]\n",sql.str().c_str());
+		r = mysql_db_engine_->SQLExec(sql.str().c_str());
+
+	}
+	return true;
+}
+
 bool MysqlSerial::GetUserInfo(const std::string& username,std::string& userid,int32& sex,std::string& extadd,
 	                          std::string& street,std::string& locality,std::string& regin,
 	                          int32& pcode,std::string& ctry,std::string& head,

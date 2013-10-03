@@ -60,6 +60,13 @@ private:
 	                const std::string type = "1",const std::string birthday = "1986-10-01",
 	                const std::string location = "浙江省杭州市",
 					const std::string head = "http://fm.miglab.com/default.jpg");
+
+	bool CreateGuest(const int socket,const int flag,const std::string username,
+		             const std::string password,const std::string nickname,
+		             const std::string source,const std::string gender = "1",
+		             const std::string type = "1",const std::string birthday = "1986-10-01",
+		             const std::string location = "浙江省杭州市",
+		             const std::string head = "http://fm.miglab.com/default.jpg");
 };
 
 }
