@@ -95,6 +95,9 @@ public:
 	bool GetMusicHotCltCmt(const std::string &songid,std::string &hot_num, 
 		                   std::string &cmt_num, 
 		                   std::string &clt_num);
+
+	int GetMsgCount(const std::string &uid);
+
 public:
 	~LBSLogic();
 

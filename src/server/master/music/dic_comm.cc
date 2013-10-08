@@ -1,5 +1,7 @@
 #include "dic_comm.h"
 #include "logic_comm.h"
+#include "json/json.h"
+#include <sstream>
 #include <assert.h>
 
 namespace storage{
@@ -158,6 +160,41 @@ bool RedisComm::SetCollectSong(const std::string &uid,const std::string& songid,
 	return true;
 }
 
+bool RedisComm::GetMusicHistroyCollect(const std::string &uid, 
+									   const std::string &is_like, 
+									   std::list<std::string>&  songlist, 
+									   std::list<std::string>& collect_list, 
+									   std::list<std::string>& history_list){
+   std::string os;
+   bool r = false;
+   std::list<std::string> temp_list;
+   Json::Value root;
+   Json::Reader reader;
+   base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+   if (redis_engine_==NULL)
+	   return false;
+	//获取历史歌曲信息
+   GetMusicInfos(redis_engine_,songlist,history_list);
+   if(is_like=="1"){
+	   //获取红心歌单
+	   os.append("h");
+	   os.append(uid.c_str());
+	   os.append("clt");
+	   r = redis_engine_->GetHashValues(os.c_str(),os.length(),temp_list);
+	   while(temp_list.size()>0){
+		   std::string info = temp_list.front();
+		   temp_list.pop_front();
+		   r = reader.parse(info.c_str(),root);
+		   if (!r)
+			   continue;
+		   songlist.push_back(root["songid"].asString());
+
+	   }
+	   //获取歌曲信息
+	   GetMusicInfos(redis_engine_,songlist,collect_list);
+   }
+   return true;
+}
 
 bool RedisComm::GetCollectSongs(const std::string& uid,std::list<std::string>& song_list){
 	std::string os;
@@ -442,6 +479,76 @@ bool RedisComm::MgrListenSongsNum(const std::string& songid,const std::string& u
 	else
 		//r = redis_engine_->DecrValue(os.c_str(),os.length(),NULL,0);
 		r = redis_engine_->DelHashElement(os.c_str(),uid.c_str(),uid.length());
+}
+
+void RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
+							  std::list<std::string>& songlist, 
+							  std::list<std::string>& songinfolist){
+	redisContext *context = (redisContext *)engine->GetContext();
+	std::stringstream os;
+	int64 total;
+	os<<"mget";
+	while(songlist.size()>0){
+	  std::string songid = songlist.front();
+	  songlist.pop_front();
+	  os<<" "<<songid.c_str();
+	}
+
+	LOG_DEBUG2("%s",os.str().c_str());
+	if (NULL == context)
+	  return;
+	{
+	  redisReply *rpl = (redisReply *) redisCommand(context,os.str().c_str());
+	  base_storage::CommandReply *reply = _CreateReply(rpl);
+	  freeReplyObject(rpl);
+	  if (NULL == reply)
+		  return ;
+
+	  //存入
+	  if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
+		  base_storage::ArrayReply *arep = 
+			  static_cast<base_storage::ArrayReply *>(reply);
+		  base_storage::ArrayReply::value_type &items = arep->value;
+		  for (base_storage::ArrayReply::iterator it = items.begin(); 
+			  it != items.end();++it) {
+				  base_storage::CommandReply *item = (*it);
+				  if (base_storage::CommandReply::REPLY_STRING == item->type) {
+					  base_storage::StringReply *srep = static_cast<base_storage::StringReply *>(item);
+					  songinfolist.push_back(srep->value);
+				  }
+		  }
+	  }
+	  reply->Release();
+	}
+
+	os.str("");
+}
+
+base_storage::CommandReply* RedisComm::_CreateReply(redisReply* reply) {
+	using namespace base_storage;
+	switch (reply->type) {
+	case REDIS_REPLY_ERROR:
+		return new ErrorReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_NIL:
+		return new CommandReply(CommandReply::REPLY_NIL);
+	case REDIS_REPLY_STATUS:
+		return new StatusReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_INTEGER:
+		return new IntegerReply(reply->integer);
+	case REDIS_REPLY_STRING:
+		return new StringReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_ARRAY: {
+		ArrayReply *rep = new ArrayReply();
+		for (size_t i = 0; i < reply->elements; ++i) {
+			if (CommandReply *cr = _CreateReply(reply->element[i]))
+				rep->value.push_back(cr);
+		}
+		return rep;
+							}
+	default:
+		break;
+	}
+	return NULL;
 }
 
 /////////////////////////////////memcahced//////////////////////////////////////

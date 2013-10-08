@@ -899,7 +899,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 
 	if (flag==3){
 		result["result"]["music_num"] = usersmusic.size();
-		result["result"]["msg_num"] = 0;
+		result["result"]["msg_num"] = GetMsgCount(uid_str);
 	}else{
 		result["result"]["nearUser"] = usersmusic;
 	}
@@ -1236,6 +1236,12 @@ bool LBSLogic::GetMusicHotCltCmt(const std::string &songid,
 	   clt_num = root["typeid"].asString();
    else
 	   clt_num = "0";
+}
+
+int LBSLogic::GetMsgCount(const std::string &uid){
+	int count = 0;
+	bool r = storage::RedisComm::GetMsgCount(uid,count);
+	return count;
 }
 
 } /* namespace mig_lbs */

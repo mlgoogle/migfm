@@ -26,6 +26,9 @@ public:
 
 	static bool AddFriend(const std::string &uid, const std::string &touid);
 
+	static bool GetMusicUrl(const std::string& song_id,std::string& hq_url,
+		std::string& song_url);
+
 	struct FriendInfo {
 		std::string uid;
 		std::string name;

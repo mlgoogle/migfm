@@ -22,6 +22,8 @@ public:
 	static bool GetMusicAboutUser(const std::string &songid,std::string& content);
 	static bool GetCollectSongs(const std::string& uid,std::map<std::string,std::string>& collect);
 	static bool RecordCommect(const std::string& uid);
+
+	static bool GetMsgCount(const std::string& uid, int& count);
 private:
 	static std::list<base::ConnAddr>  addrlist_;
 };

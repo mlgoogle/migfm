@@ -1,5 +1,6 @@
 #include "dic_comm.h"
 #include "logic_comm.h"
+#include "basic/radom_in.h"
 #include <assert.h>
 #include <sstream>
 #include <hiredis.h>
@@ -27,7 +28,8 @@ base::MigRadomIn* RedisComm::radom_num_ = NULL;
 void RedisComm::Init(std::list<base::ConnAddr>& addrlist){
 	addrlist_ = addrlist;
 	radom_num_ = new base::MigRadomIn();
-	base::SysRadom::InitRandom();
+	//base::SysRadom::InitRandom();
+	base::SysRadom::GetInstance();
 }
 
 void RedisComm::Dest(){
@@ -35,7 +37,8 @@ void RedisComm::Dest(){
 		delete radom_num_;
 		radom_num_ = NULL;
 	}
-	base::SysRadom::DeinitRandom();
+	//base::SysRadom::DeinitRandom();
+	base::SysRadom::FreeInstance();
 }
 
 base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
@@ -100,6 +103,35 @@ bool RedisComm::SetUserPushConfig(int64 uid, const std::string& device_token,
 			val, strlen(val));
 
 	return true;
+}
+
+bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid){
+	std::string os;
+	bool r = false;
+	char* value;
+	size_t value_len = 0;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+
+	r = redis_engine_->GetHashElement(os.c_str(),songid.c_str(),songid.length(),
+		&value,&value_len);
+	if (r){
+		if (value){
+			free(value);
+			value = NULL;
+		}
+		return true;
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",songid.c_str());
+	}
+
+	return false;
 }
 
 bool RedisComm::GetUserPushConfig(int64 uid, std::string& device_token,
@@ -233,15 +265,15 @@ bool RedisComm::GetFriensList(int64 uid, std::list<std::string>& friends) {
 bool RedisComm::RecordingMsg(const std::string& uid,const base::NormalMsgInfo& msg){
 	REDIS_PROC_PROLOG(redis);
 	//hash name:uid_msg key:msg id 
-	std::string name;
+	/*std::string name;
 	std::stringstream os;
 	std::string str;
 	name.append(uid);
 	name.append("_msg");
 	os<<msg.msg_id();
-	msg.SerializedJson(str);
+	//msg.SerializedJson(str);
 	redis->AddHashElement(name.c_str(),os.str().c_str(),os.str().length(),
-		str.c_str(),str.length());
+		str.c_str(),str.length());*/
 }
 
 
@@ -271,9 +303,9 @@ bool RedisComm::SaveSongComment(int64 songid, int64 uid,
 	LOG_DEBUG2("value[%s]",curjson.c_str());
 	redis->SetValue(skey.c_str(),skey.length(),curjson.c_str(),curjson.length());
 
-	//if (!redis->IncDecValue(key, key_len, 1, comment_id)) {
-	//	return false;
-	//}
+	if (!redis->IncDecValue(key, key_len, 1, comment_id)) {
+		return false;
+	}
 
 	std::string cur_time;
 	mig_sociality::SomeUtils::GetCurrntTimeFormat(cur_time);

@@ -3,6 +3,8 @@
 #include "storage/storage.h"
 #include "basic/basic_info.h"
 #include "basic/radom_in.h"
+#include "storage/storage.h"
+#include <hiredis.h>
 #include <list>
 #include <vector>
 
@@ -57,8 +59,18 @@ public:
 
 	static bool GetMusicAboutUser(const std::string &songid,std::string& content);
 
+	static bool GetMusicHistroyCollect(const std::string &uid,
+					const std::string& is_like,std::list<std::string>& songlist,
+					std::list<std::string>& collect_list,
+					std::list<std::string>& history_list);
+
+	static base_storage::CommandReply* _CreateReply(redisReply* reply);
+
 private:
 	static void SetRadomNum();
+	static void GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
+		std::list<std::string>& songlist,
+		std::list<std::string>& songinfolist);
 private:
 	static std::list<base::ConnAddr>   addrlist_;
 	static base::MigRadomIn*              radom_num_;

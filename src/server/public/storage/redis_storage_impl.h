@@ -66,6 +66,8 @@ public:
     
     virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list);
 
+	virtual int GetListSize(const char* list_name);
+
 	virtual bool AddHashRadomElement(const char* hash_name,const char* val,const size_t val_len);
 
 	virtual bool GetHashRadomElement(const char* hash_name,char** val,size_t *val_len,

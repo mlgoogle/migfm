@@ -37,6 +37,7 @@ bool mig_sociality::HttpComm::PushMessage(const std::string &device_token,
 		post.Post(post_str.c_str());
 		std::string result;
 		post.GetContent(result);
+		LOG_DEBUG2("%s",result.c_str());
 
 		Json::Reader rd;
 		Json::Value value;

@@ -7,6 +7,9 @@
 #include "config/config.h"
 #include "basic/base64.h"
 #include "basic/errno_comm.h"
+#include "json/json.h"
+#include "storage/db_storage.h"
+#include "storage/dic_storage.h"
 #include "http_comm.h"
 #include <sstream>
 #include <ctime>
@@ -33,6 +36,8 @@ SocialityMgrEngine::SocialityMgrEngine(){
 	DBComm::Init(config->mysql_db_list_);
 	MemComm::Init(config->mem_list_);
 	RedisComm::Init(config->redis_list_);
+	base_storage::MYSQLDB::Init(config->mysql_db_list_);
+	base_storage::MemDic::Init(config->mem_list_);
 }
 
 SocialityMgrEngine::~SocialityMgrEngine(){
@@ -331,7 +336,7 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 	Json::Value &content = result["result"];
 	for (MsgList::iterator it=msg_list.begin(); it!=msg_list.end(); ++it) {
 		Json::Value item;
-		if (GetPushMsgDetail(*it, item))
+		if (GetPushMsgDetail(user_id,*it, item))
 			content.append(item);
 	}
 
@@ -393,6 +398,79 @@ bool SocialityMgrEngine::OnMsgSendFriendMsg(packet::HttpPacket& packet,
 bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		Json::Value& result, int& status, int &err_code) {
 	LOGIC_PROLOG();
+	std::string uid;
+	std::string touid;
+	std::string msg;
+	if (!packet.GetAttrib("uid",uid)){
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+	if (!packet.GetAttrib("touid",touid)){
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+	if (!packet.GetAttrib("msg",msg)){
+
+	}
+	int64 iuid = atoll(uid.c_str());
+	int64 itouid = atoll(touid.c_str());
+	if (0>=iuid||0>=itouid){
+		err_code = MIG_FM_HTTP_INVALID_USER_ID;
+		return false;
+	}
+	std::string device_token;
+	bool is_recv = false;
+	unsigned btime = 0,etime = 0;
+	if (!RedisComm::GetUserPushConfig(atoll(touid.c_str()),device_token,is_recv,btime,etime)){
+		err_code = MIG_FM_DB_READ_PUSH_CONFIG_FAILED;
+		status = -1;
+		return false;
+	}
+
+	if (!is_recv){
+		err_code = MIG_FM_OTHER_PUSH_SERVICE_CLOSED;
+		return false;
+	}
+	time_t cur_time =time(NULL);
+	tm cur_tm = *localtime(&cur_time);
+	unsigned ct = 60 * cur_tm.tm_hour+cur_tm.tm_min;
+	bool enable = true;
+	if (btime<etime)
+		enable = (btime<=ct) && (ct<=etime);
+	else
+		enable = (ct<=etime) || (btime<=ct);
+
+	if (!enable){
+		err_code = MIG_FM_OTHER_ANTI_HARASSMENT;
+		return false;
+	}
+
+	int64 msg_id = 0;
+	if (!RedisComm::GenaratePushMsgID(atoll(uid.c_str()), msg_id)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	std::string detail,summary;
+	if (!MakeHalloContent(uid,touid,msg_id,msg,detail,summary)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	if (!RedisComm::StagePushMsg(atoll(touid.c_str()),msg_id,detail)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	if(!HttpComm::PushMessage(device_token,summary)){
+		err_code = MIG_FM_PUSH_MSG_FAILED;
+		status = -1;
+		return false;
+	}
+	status = 1;
 	return true;
 }
 
@@ -497,9 +575,6 @@ bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
 		status = -1;
 		return false;
 	}
-
-	//写入同意消息库
-	//base::NormalMsgInfo commect_msg(uid_str,comment,base::CONTENT,);
 
 	status = 1;
 	return true;
@@ -606,6 +681,42 @@ bool SocialityMgrEngine::CheckAndTransHMTime(const std::string &str, unsigned &t
 	return true;
 }
 
+bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
+										  const std::string& to_uid, int64 msg_id,
+										  const std::string& msg,std::string& detail, 
+										  std::string &summary){
+   detail.clear();
+   summary.clear();
+   std::string sd_nick, sd_sex, sd_head;
+   std::string to_nick, to_sex, to_head;
+
+   if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head))
+	   return false;
+   if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head))
+	   return false;
+
+   std::stringstream ss;
+   ss << sd_nick << "(" << send_uid << ")" << "向你打招呼";
+   summary.assign(ss.str());
+
+   char tmp[256] = {0};
+   Json::FastWriter wr;
+   Json::Value value;
+   value["action"] = "sayhallo";
+   snprintf(tmp, arraysize(tmp), "%lld", msg_id);
+   value["msgid"] = tmp;
+   Json::Value &content = value["content"];
+   content["send_uid"] = send_uid.c_str();
+   content["to_uid"] = to_uid.c_str();
+   content["msg"] = msg;
+   std::string cur_time;
+   SomeUtils::GetCurrntTimeFormat(cur_time);
+   content["time"] = cur_time;
+   detail = wr.write(value);
+   return true;
+
+}
+
 bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 		const std::string& to_uid, int64 song_id,
 		int64 msg_id, const std::string& msg,
@@ -646,17 +757,20 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 	return true;
 }
 
-bool SocialityMgrEngine::GetPresentSongDetail(Json::Value& content) {
+
+bool SocialityMgrEngine::GetPresentSongDetail(const std::string& uid,
+											  Json::Value& content) {
 	std::string song_id = content["song_id"].asString();
 
-	if (!GetMusicInfos(song_id, content["song"])) {
+	if (!GetMusicInfos(uid,song_id, content["song"])) {
 		return false;
 	}
 
 	return true;
 }
 
-bool SocialityMgrEngine::GetPushMsgDetail(const std::string& msg,
+bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
+										  const std::string& msg,
 		Json::Value& content) {
 	content.clear();
 
@@ -667,21 +781,34 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& msg,
 	}
 
 	content["type"] = root["action"];
-	Json::Value detail_node = content["detail"] = root["content"];
+	Json::Value& detail_node = content["detail"] = root["content"];
+	std::string tar_uid = detail_node["send_uid"].asString();
 
 	std::string type = content["type"].asString();
 	if (type == "presentsong") {
-		GetPresentSongDetail(detail_node);
-	} else if (type == "presentsong") {
-
-	} else {
+		GetPresentSongDetail(uid,detail_node);
+	}else {
 		// do nothing
 	}
-
+	//userinfo
+	base::UserInfo usrinfo;
+	bool r = base::BasicUtil::GetUserInfo(tar_uid,usrinfo);
+	if (r){
+		Json::Value& userjson = content["userinfo"];
+		userjson["uid"] = usrinfo.uid();
+		userjson["nickname"] =  usrinfo.nickname();
+		userjson["sex"] = usrinfo.sex();
+		userjson["head"] = usrinfo.head();
+		userjson["birthday"] = usrinfo.birthday();
+		userjson["location"] = usrinfo.crty();
+		userjson["source"] = usrinfo.source();
+	}
 	return true;
 }
 
-bool SocialityMgrEngine::GetMusicInfos(const std::string& songid, Json::Value &info) {
+bool SocialityMgrEngine::GetMusicInfos(const std::string& uid,
+									   const std::string& songid, 
+									   Json::Value &info) {
 	std::stringstream os;
 	std::stringstream os1;
 	std::string result_out;
@@ -695,10 +822,15 @@ bool SocialityMgrEngine::GetMusicInfos(const std::string& songid, Json::Value &i
 	std::string dec_word;
 	std::string music_info;
 	std::string content_url;
+	std::string hi_content_url;
+	std::string hot_num;
+	std::string cmt_num;
+	std::string clt_num;
 	base::MusicInfo smi;
 	std::string b64title;
 	std::string b64artist;
 	std::string b64album;
+	std::string is_like;
 	bool r = false;
 
 	r = RedisComm::GetMusicInfos(songid,music_info);
@@ -712,21 +844,35 @@ bool SocialityMgrEngine::GetMusicInfos(const std::string& songid, Json::Value &i
 	MIG_DEBUG(USER_LEVEL,"artist[%s] title[%s]",smi.artist().c_str(),
 		smi.title().c_str());
 
-	DBComm::GetWXMusicUrl(smi.id(),content_url,dec,dec_id,dec_word);
-
+	//DBComm::GetWXMusicUrl(smi.id(),content_url,dec,dec_id,dec_word);
+	DBComm::GetMusicUrl(smi.id(),hi_content_url,content_url);
 	smi.set_url(content_url);
+	smi.set_hq_url(hi_content_url);
 	Base64Decode(smi.title(),&b64title);
 	Base64Decode(smi.artist(),&b64artist);
 	Base64Decode(smi.album_title(),&b64album);
+
+//是否是红心歌曲
+	r = RedisComm::IsCollectSong(uid,songid);
+	if (r)
+		is_like = "1";
+	else
+		is_like = "0";
+
+	r = this->GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
 
 	info["id"] = smi.id();
 	info["title"] = b64title;
 	info["artist"] = b64artist;
 	info["url"] = smi.url();
+	info["hqurl"] = smi.hq_url();
 	info["pub_time"] = smi.pub_time();
 	info["album"] = b64album;
 	info["pic"] = smi.pic_url();
-	info["like"] = "0";
+	info["like"] = is_like;
+	info["clt"] = clt_num;
+	info["cmt"] = cmt_num;
+	info["hot"] = hot_num;
 	info["id"] = smi.id();
 
 	return true;

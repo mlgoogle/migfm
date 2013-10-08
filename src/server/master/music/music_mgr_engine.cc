@@ -155,6 +155,8 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		PostUserLocalMusicinfos(socket,packet);
 	}else if (type=="updateconfigfile"){
 		UpdateConfigFile(socket,packet);
+	}else if (type=="getuserhis"){
+		GetUserMusicCltAndHis(socket,packet);
 	}
     return true;
 }
@@ -919,6 +921,98 @@ ret:
 	return true;
 }
 
+bool MusicMgrEngine::GetUserMusicCltAndHis(const int socket,
+										   const packet::HttpPacket& packet){
+	packet::HttpPacket pack = packet;
+	std::string uid;
+	std::string from_id;
+	std::string count;
+	std::string is_like;
+	std::string status;
+	std::string msg;
+	std::string result;
+	std::string result_out;
+	std::list<std::string> songlist;
+	std::list<std::string> collect_list;
+	std::list<std::string> history_list;
+	Json::FastWriter wr;
+	Json::Value value;
+
+	if (!pack.GetAttrib(UID,uid)){
+		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
+		status = "0";
+	}
+	
+	if (!pack.GetAttrib(FROMID,from_id))
+		from_id = "0";
+
+	if (!pack.GetAttrib(COUNT,count))
+		count = "10";
+	
+	if (!pack.GetAttrib(ISLIKE,is_like))
+		is_like = "0";
+
+	//获取历史歌曲
+	storage::DBComm::GetUserHistoryMusic(uid,from_id,count,songlist);
+
+	storage::RedisComm::GetMusicHistroyCollect(uid,is_like,songlist,
+		collect_list,history_list);
+	if (history_list.size()>0){
+		Json::Value& history = value["history"];
+		while (history_list.size()>0){
+			Json::Value music;
+			std::string musicinfo;
+			base::MusicInfo smi;
+			std::string b64title;
+			std::string b64artist;
+			std::string b64album;
+			musicinfo = history_list.front();
+			history_list.pop_front();
+			smi.UnserializedJson(musicinfo);
+			Base64Decode(smi.title(),&b64title);
+			Base64Decode(smi.artist(),&b64artist);
+			Base64Decode(smi.album_title(),&b64album);
+			music["id"] = smi.id();
+			music["title"] = b64title;
+			music["artist"] = b64artist;
+			music["pic"] = smi.pic_url();
+			music["album"] = b64album;
+			history.append(music);
+		}
+	}
+
+	if(collect_list.size()>0){
+		Json::Value& collect = value["collect"];
+		while (collect_list.size()>0){
+			Json::Value music;
+			std::string musicinfo;
+			base::MusicInfo smi;
+			std::string b64title;
+			std::string b64artist;
+			std::string b64album;
+			musicinfo = collect_list.front();
+			collect_list.pop_front();
+			smi.UnserializedJson(musicinfo);
+			Base64Decode(smi.title(),&b64title);
+			Base64Decode(smi.artist(),&b64artist);
+			Base64Decode(smi.album_title(),&b64album);
+			music["id"] = smi.id();
+			music["title"] = b64title;
+			music["artist"] = b64artist;
+			music["pic"] = smi.pic_url();
+			music["album"] = b64album;
+			collect.append(music);
+		}
+	}
+	status = "1";
+ret:
+	value["status"] = status;
+	value["msg"] = msg;
+	result_out = wr.write(value);
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
+
 bool MusicMgrEngine::SetMoodRecording(const int socket,
 									  const packet::HttpPacket& packet){
 	packet::HttpPacket pack = packet;
@@ -1029,6 +1123,8 @@ ret:
 		//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"艳阳天","singer":"窦唯"}
 
 		storage::MemComm::SetUsrCurrentSong(uid,songid,name,singer,state,mode,wordid);
+		storage::DBComm::RecordMusicHistory(uid,songid);
+		//记录用户听歌历史
 		if (state!="2"){//本地手机歌曲不记录
 			storage::RedisComm::MgrListenSongsNum(songid,uid,1);
 			if (atol(lastsongid.c_str())!=0)

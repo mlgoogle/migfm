@@ -6,6 +6,8 @@
 
 namespace storage{
 
+
+
 std::list<base::ConnAddr>  RedisComm::addrlist_;
 void RedisComm::Init(std::list<base::ConnAddr>& addrlist){
 	addrlist_ = addrlist;
@@ -63,6 +65,20 @@ bool RedisComm::GetMusicInfos(const std::string &key, std::string &music_infos){
 	return r;
 }
 
+bool RedisComm::GetMsgCount(const std::string& uid,int& count){
+
+	//"soc:%lld:push.msg";
+	std::string key;
+	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	if (redis_engine_==NULL)
+		return true;
+	key.append("soc:");
+	key.append(uid);
+	key.append(":push.msg");
+	count  = redis_engine_->GetListSize(key.c_str());
+	return true;
+
+}
 bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid)
 {
 	std::string os;
@@ -155,6 +171,7 @@ bool RedisComm::GetCollectSongs(const std::string &uid,
 	}
 	return r;
 }
+
 
 /////////////////////////////////memcahced//////////////////////////////////////
 base_storage::DictionaryStorageEngine* MemComm::engine_ = NULL;

@@ -135,15 +135,6 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 	dec = "mm";
 	os.str("");
 	os<<" select name,typeid from migfm_mood_word where typeid=1 ORDER BY RAND() limit 1;";
-// 	if (current==0){//mood
-// 		dec="mm";
-// 		os.str("");
-// 		os<<"select a.name,typeid from migfm_mood_word as a join migfm_mood as b where a.typeid = b.id  ORDER BY RAND() limit 1;";
-// 	}else{//scens
-// 		dec="ms";
-// 		os.str("");
-// 		os<<"select a.name,typeid from migfm_scene_word as a join migfm_scene as b where a.typeid = b.id  ORDER BY RAND() limit 1;";
-// 	}
 
 	MIG_DEBUG(USER_LEVEL,"%s",os.str().c_str());
 	r = engine->SQLExec(os.str().c_str());
@@ -163,8 +154,73 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 	return true;
 }
 
+bool DBComm::GetUserHistoryMusic(const std::string& uid,const std::string& fromid, 
+								 const std::string& count,
+								 std::list<std::string>& songlist){
+	 bool r = false;
+	 std::stringstream os;
+	 std::string sql;
+	 MYSQL_ROW rows;
+	 base_storage::DBStorageEngine* engine = GetConnection();
+	 if (engine==NULL){
+		 LOG_ERROR("engine error");
+		 return false;
+	 }
+
+	 os<<"select songid from migfm_user_music_history  where userid = \'"
+		 <<uid.c_str()<<"\' order by lasttime desc limit "<<fromid.c_str()
+		 <<","<<count.c_str()<<";";
+	 sql = os.str();
+	 engine->SQLExec(sql.c_str());
+	 LOG_DEBUG2("%s",sql.c_str());
+	 int32 num = engine->RecordCount();
+	 if(num>0){
+		 while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			 songlist.push_back(rows[0]);
+		 }
+		 return true;
+	 }
+	 return false;
+}
+
+bool DBComm::RecordMusicHistory(const std::string& uid,const std::string& songid){
+	std::stringstream os;
+	bool r = false;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	if (engine==NULL){
+		LOG_ERROR("engine error");
+		return false;
+	}
+	/*
+	call proc_RecordMusicHistory('100000','1232323');
+	*/
+	os<<"call proc_RecordMusicHistory(\'"<<uid.c_str()<<"\',\'"<<songid.c_str()
+		<<"\',@ret);";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+	os.str("");
+	os<<"select @ret";
+	sql = os.str();
+	r = engine->SQLExec(sql.c_str());
+	LOG_DEBUG2("[%s]", sql.c_str());
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+	int num = engine->RecordCount();
+	return true;
+}
+
 bool DBComm::GetSongidFromDoubanId(const std::string& douban_songid,std::string& songid){
-std::stringstream os;
+    std::stringstream os;
 	bool r = false;
 	base_storage::DBStorageEngine* engine = GetConnection();
 	if (engine==NULL){

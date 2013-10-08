@@ -4,6 +4,7 @@
 #include "basic/basic_info.h"
 #include <list>
 #include <vector>
+#include <string>
 namespace storage{
 
 class DBComm{
@@ -27,6 +28,12 @@ public:
 
 	static bool GetSongidFromDoubanId(const std::string& douban_songid,
 		                              std::string& songid);
+
+	static bool RecordMusicHistory(const std::string& uid,const std::string& songid);
+
+	static bool GetUserHistoryMusic(const std::string& uid,const std::string& fromid,
+		const std::string& count,std::list<std::string>& songlist);
+
 private:
 #if defined (_DB_POOL_)	
 	static base_storage::DBStorageEngine* CreateConnection(void);

@@ -77,10 +77,16 @@ private:
 			int64 msg_id, const std::string &msg,
 			std::string &detail, std::string &summary);
 
-	bool GetPushMsgDetail(const std::string &msg, Json::Value &content);
-	bool GetPresentSongDetail(Json::Value &content);
+	bool MakeHalloContent(const std::string& send_uid,const std::string& to_uid,
+						int64 msg_id,const std::string& msg,std::string& detail,
+						std::string &summary);
 
-	bool GetMusicInfos(const std::string& songid, Json::Value &info);
+	bool GetPushMsgDetail(const std::string& uid,
+		const std::string &msg, Json::Value &content);
+	
+	bool GetPresentSongDetail(const std::string& uid,Json::Value &content);
+
+	bool GetMusicInfos(const std::string& uid,const std::string& songid, Json::Value &info);
 
 	bool SetMusicHostCltCmt(const std::string& songid,const int32 flag,
 		                    std::string& json);//1 热度 2 收藏数 3评论数 

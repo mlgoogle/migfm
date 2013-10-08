@@ -68,6 +68,9 @@
 #define  STATE              "state"
 #define  MODETYPE           "modetype"
 #define  TYPEID             "typeid"
+#define  FROMID             "fromid"
+#define  COUNT              "count"
+#define  ISLIKE             "islike"
 
 #define IDENTITY "migfm_identity"
 #define USERINFOS "migfm_user_infos"

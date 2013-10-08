@@ -40,7 +40,8 @@ output:	dic_comm.o logic_comm.o thread_handler.o sociality_mgr_engine.o \
 	sociality_mgr_init.o http_response.o thread_lock.o db_comm.o http_comm.o \
 	basic_info.o http_packet.o basictypes.o config.o base64.o radom_in.o\
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
-	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o json_reader.o json_value.o json_writer.o
+	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o json_reader.o\
+	json_value.o json_writer.o db_storage.o dic_storage.o
 	$(LINK)
 
 clean:
@@ -113,6 +114,12 @@ redis_warrper.o:
 
 storage.o:
 	$(COMPILE) ./../../public/storage/storage.cc
+	
+db_storage.o:
+	$(COMPILE) ../../public/storage/db_storage.cc
+
+dic_storage.o:
+	$(COMPILE) ../../public/storage/dic_storage.cc
 
 constants.o:
 	$(COMPILE) ./../../public/basic/constants.cc

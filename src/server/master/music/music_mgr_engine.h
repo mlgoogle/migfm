@@ -77,6 +77,9 @@ private:
 	bool GetTypeSongs(const int socket,const packet::HttpPacket& packet);
 
     bool SetMoodRecording(const int socket,const packet::HttpPacket& packet);
+
+	bool GetUserMusicCltAndHis(const int socket,const packet::HttpPacket& packet);
+
 private:
 	bool GetMusicInfos(const int socket,const std::string& songid);
 

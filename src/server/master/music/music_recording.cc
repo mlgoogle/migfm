@@ -105,6 +105,8 @@ bool UserLocalMusicRecodingEngine::RecordingLocalMusic(const std::string& uid,
 	}
 	os<<"</info>";
 	WriteFileXml(os.str().c_str(),os.str().length());
+
+	//–¥»Îredis
 	return true;
 }
 ///////////////////////////////////////////moodrecording/////////////////////////////

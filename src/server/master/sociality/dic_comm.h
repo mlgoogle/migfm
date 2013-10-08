@@ -51,6 +51,8 @@ public:
 
 	static bool RecordingMsg(const std::string& uid,const base::NormalMsgInfo& msg);
 
+	static bool IsCollectSong(const std::string& uid,const std::string& songid);
+
 	static base_storage::CommandReply* _CreateReply(redisReply* reply);
 
 private:

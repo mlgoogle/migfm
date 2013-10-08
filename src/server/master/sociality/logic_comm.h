@@ -42,6 +42,8 @@
 
 #define DEFAULT_CONFIG_PATH     "./plugins/sociality_manager/sociality_manager_config.xml"
 
+#define DEFAULT_URL "http://42.121.14.108/wx/lp5.mp3"
+
 const unsigned DEFAULT_BEGIN_TIME = 8*60;
 const unsigned DEFAULT_END_TIME = 23*60;
 

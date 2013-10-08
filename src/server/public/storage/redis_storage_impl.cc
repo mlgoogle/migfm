@@ -245,6 +245,12 @@ bool RedisStorageEngineImpl::DelListElement(const char* key,const size_t key_len
 	return RedisDelListElement(c_,index,key,key_len)==1?true:false;
 }
 
+int RedisStorageEngineImpl::GetListSize(const char *list_name){
+	if (PingRedis()!=1)
+		return false;
+	return ReidsGetListSize(c_,list_name,strlen(list_name)+1);
+}
+
 bool RedisStorageEngineImpl::SetListElement(const int index,const char* key,
 	                                        const size_t key_len,const char* val,
 	                                        const size_t val_len){
