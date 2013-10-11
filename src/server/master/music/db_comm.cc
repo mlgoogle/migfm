@@ -186,6 +186,7 @@ bool DBComm::GetUserHistoryMusic(const std::string& uid,const std::string& fromi
 bool DBComm::RecordMusicHistory(const std::string& uid,const std::string& songid){
 	std::stringstream os;
 	bool r = false;
+	MYSQL_ROW rows;
 	base_storage::DBStorageEngine* engine = GetConnection();
 	if (engine==NULL){
 		LOG_ERROR("engine error");
@@ -195,7 +196,7 @@ bool DBComm::RecordMusicHistory(const std::string& uid,const std::string& songid
 	call proc_RecordMusicHistory('100000','1232323');
 	*/
 	os<<"call proc_RecordMusicHistory(\'"<<uid.c_str()<<"\',\'"<<songid.c_str()
-		<<"\',@ret);";
+		<<"\');";
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
@@ -204,18 +205,36 @@ bool DBComm::RecordMusicHistory(const std::string& uid,const std::string& songid
 		LOG_ERROR2("exec sql error");
 		return false;
 	}
-
-	os.str("");
-	os<<"select @ret";
-	sql = os.str();
+	/*os<<"select id from migfm_user_music_history where userid='10343' and songid='54583';";
+	std::string sql = os.str();
 	r = engine->SQLExec(sql.c_str());
 	LOG_DEBUG2("[%s]", sql.c_str());
 	if (!r) {
 		LOG_ERROR2("exec sql error");
 		return false;
 	}
-
+	std::string return_code;
 	int num = engine->RecordCount();
+	os.str("");
+	if (num>0){
+		os<<"update migfm_user_music_history set  lasttime = '12323'  where userid='10343' and songid='54583';";
+		sql = os.str();
+		r = engine->SQLExec(sql.c_str());
+		LOG_DEBUG2("[%s]", sql.c_str());
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+	}else{
+		os<<"insert into migfm_user_music_history(userid,songid) value('10343','54583');";
+		sql = os.str();
+		r = engine->SQLExec(sql.c_str());
+		LOG_DEBUG2("[%s]", sql.c_str());
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+	}*/
 	return true;
 }
 

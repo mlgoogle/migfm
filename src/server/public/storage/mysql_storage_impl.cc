@@ -71,6 +71,11 @@ bool MysqlStorageEngineImpl::SQLExec(const char* sql){
     //MIG_DEBUG(USER_LEVEL,"SQLExec sql[%s]\n",sql);
     mysql_query(mysql,sql);
     result_.get()->proc = mysql_store_result(mysql);
+	if (mysql->net.last_errno!=0){
+		MIG_ERROR(USER_LEVEL,"mysql error code [%d] [%s]",
+			mysql_errno(mysql),mysql_error(mysql));
+	}
+	//MIG_DEBUG(USER_LEVEL,"errno [%d]",mysql->net.last_errno);
 // 	unsigned long ulCount = (unsigned long)mysql_num_rows((MYSQL_RES *)(result_.get()->proc));
 // 	MIG_DEBUG(USER_LEVEL,"ulconut %d\n",ulCount);
     return true;

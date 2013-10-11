@@ -165,14 +165,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mem_connector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\mysql_connector.h"
-				>
-			</File>
-			<File
 				RelativePath=".\redis_connector.h"
 				>
 			</File>
@@ -214,14 +206,6 @@
 			</File>
 			<File
 				RelativePath=".\logic_comm.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\mem_connector.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\mysql_connector.cc"
 				>
 			</File>
 			<File

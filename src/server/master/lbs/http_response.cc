@@ -114,6 +114,14 @@ bool HttpPost::Post(const char* post){
 	goto out;
     }
 
+	//设置超时
+	curl_code = curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);//5s超时设置
+	if(curl_code!=CURLE_OK){
+		MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_TIMEOUT failed: %s",
+			curl_easy_strerror(curl_code));
+		goto out;
+	}
+
     curl_code = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
     if(curl_code != CURLE_OK) {
 	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_NOSIGNAL failed: %s",
@@ -245,6 +253,15 @@ bool HttpResponse::Get(){
 		 curl_easy_strerror(curl_code));
 	goto out;
     }
+
+
+	//设置超时
+	curl_code = curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);//5s超时设置
+	if(curl_code!=CURLE_OK){
+		MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_TIMEOUT failed: %s",
+			curl_easy_strerror(curl_code));
+		goto out;
+	}
 
 
 #if defined(GOOGLE_URL)

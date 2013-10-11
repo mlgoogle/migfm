@@ -461,7 +461,9 @@ bool RedisComm::GetUpdateConfig(const std::string& key,std::string& content){
 	}
 	return r;
 }
-bool RedisComm::MgrListenSongsNum(const std::string& songid,const std::string& uid,
+bool RedisComm::MgrListenSongsNum(const std::string& songid,
+								  const std::string& last_songid,
+								  const std::string& uid,
 								  const int32 flag){
 	//key num_songid:num_99999
 	std::string os;
@@ -472,13 +474,15 @@ bool RedisComm::MgrListenSongsNum(const std::string& songid,const std::string& u
 	os.append("num_");
 	os.append(songid.c_str());
 	LOG_DEBUG2("MgrListenSongsNum key[%s]",os.c_str());
-	if (flag)//1
-		//r = redis_engine_->IncrValue(os.c_str(),os.length(),NULL,0);
-		r = redis_engine_->SetHashElement(os.c_str(),uid.c_str(),uid.length(),
-		                                   songid.c_str(),songid.length());
-	else
-		//r = redis_engine_->DecrValue(os.c_str(),os.length(),NULL,0);
-		r = redis_engine_->DelHashElement(os.c_str(),uid.c_str(),uid.length());
+	r = redis_engine_->SetHashElement(os.c_str(),uid.c_str(),
+									  uid.length(),songid.c_str(),
+									 songid.length());
+	if (atol(last_songid.c_str())>0){
+		os.append("num_");
+		os.append(last_songid.c_str());
+		r = redis_engine_->DelHashElement(os.c_str(),uid.c_str(),
+		                              uid.length());
+	}
 }
 
 void RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
