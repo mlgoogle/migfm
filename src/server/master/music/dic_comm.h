@@ -48,8 +48,7 @@ public:
 	static bool GetDefaultSongs(const std::string& uid,std::list<std::string>& song_list);
 
 	static bool MgrListenSongsNum(const std::string& songid,
-		const std::string& last_songid,const std::string& uid,
-		                          const int32 flag);
+		const std::string& last_songid,const std::string& uid);
 
 	static bool GetUpdateConfig(const std::string& key,std::string& content);
 

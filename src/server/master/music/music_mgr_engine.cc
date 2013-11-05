@@ -760,6 +760,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	int32 mood_flag;
 	int32 scens_flag;
 	int32 channel_flag;
+	int32 flag_al = 0;
 	music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
 
 	r = pack.GetAttrib(MOODINDEX,mood_index);
@@ -820,8 +821,13 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	r = pack.GetAttrib(NUM,num);
 	//fix me
-	//if (!r)//若没提交个数 默认10首
+	if (!r)//若没提交个数 默认10首
 		num = "10";
+
+	//判断模式是否为-1 单选模式
+	if ((atol(mood_index.c_str())!=-1)&&(atol(scens_index.c_str())!=-1)&&(atol(channel_index.c_str())!=-1)){
+		flag_al = 1;
+	}
 
 	if (atoi(mood_index.c_str())<0){
 		mood_flag = 0;
@@ -847,15 +853,15 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	else
 		channel_flag = 1;
 
+
+
 	//判断提交序号三个不能同时为0
 	if((mood_index=="0")&&(scens_index=="0")&&(channel_index=="0"))
 		mood_index = scens_index = channel_index ="1";
+
 	//判断提交个数不能为0
-	
-	//test
-	/*if (num=="0")
-		num = "10";*/
-	num = "10";
+	if (num=="0")
+		num = "10";
 
 	moodci.set_info_id(mood_id);
 	moodci.set_info_index(mood_index);
@@ -865,15 +871,23 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	channelci.set_info_index(channel_index);
 
 	os1<<"\"song\":[";
+	if (flag_al){
+			algorithm::AlgorithmBase::AllocationLatitudeMusicNum(atol(mood_index.c_str()),mood_num,
+			atol(scens_index.c_str()),scens_num,
+			atol(channel_index.c_str()),channel_num,
+			atol(num.c_str()));
 
-	algorithm::AlgorithmBase::AllocationLatitudeMusicNum(atol(mood_index.c_str()),
-		mood_num,atol(scens_index.c_str()),scens_num,atol(channel_index.c_str()),
-		channel_num,atol(num.c_str()));
-
-	
-	moodci.set_info_num(mood_num);
-	scensci.set_info_num(scens_num);
-	channelci.set_info_num(channel_num);
+			moodci.set_info_num(mood_num);
+			scensci.set_info_num(scens_num);
+			channelci.set_info_num(channel_num);
+	}else{//单一模式
+		if(atol(mood_id.c_str())!=0)
+			moodci.set_info_num(atol(num.c_str()));
+		else if (atol(scene_id.c_str())!=0)
+			scensci.set_info_num(atol(num.c_str()));
+		else if (atol(channel_id.c_str())!=0)
+			channelci.set_info_num(atol(num.c_str()));
+	}
 
 
 	if (mood_flag){
@@ -1126,9 +1140,10 @@ ret:
 		storage::DBComm::RecordMusicHistory(uid,songid);
 		//记录用户听歌历史
 		if (state!="2"){//本地手机歌曲不记录
-			storage::RedisComm::MgrListenSongsNum(songid,uid,1);
-			if (atol(lastsongid.c_str())!=0)
-				storage::RedisComm::MgrListenSongsNum(lastsongid,uid,0);
+			storage::RedisComm::MgrListenSongsNum(songid,lastsongid,uid);
+			//storage::RedisComm::MgrListenSongsNum(songid,uid,1);
+			//if (atol(lastsongid.c_str())!=0)
+				//storage::RedisComm::MgrListenSongsNum(lastsongid,uid,0);
 		}
 		if (songid!="0")
 			//记录热度

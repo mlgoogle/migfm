@@ -463,8 +463,7 @@ bool RedisComm::GetUpdateConfig(const std::string& key,std::string& content){
 }
 bool RedisComm::MgrListenSongsNum(const std::string& songid,
 								  const std::string& last_songid,
-								  const std::string& uid,
-								  const int32 flag){
+								  const std::string& uid){
 	//key num_songid:num_99999
 	std::string os;
 	bool r = false;
