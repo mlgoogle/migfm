@@ -130,7 +130,9 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 		OnMsgCommentSong(packet, root, ret_status, err_code);
 	} else if (type == "get_comment") {
 		OnMsgGetComment(packet, root, ret_status, err_code);
-	} else {
+	} else if (type == "getmusicuser"){
+		OnMsgGetMusicFriend(packet,root,ret_status, err_code);
+	}else {
 		return true;
 	}
 
@@ -169,7 +171,7 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 		begin_time = "08:00";
 	}
 	if (!packet.GetAttrib("endtime", end_time)) {
-		end_time = "23:00";
+		end_time = "22:00";
 	}
 
 	int64 uid = atoll(user_id.c_str());
@@ -236,6 +238,31 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
+	int64 msg_id = 0;
+	if (!RedisComm::GenaratePushMsgID(uid, msg_id)) {
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	std::string detail, summary;
+	if (!MakePresentSongContent(user_id, to_user_id, song_id_str, msg_id, ext_msg,
+		detail, summary)) {
+			err_code = MIG_FM_DB_ACCESS_FAILED;
+			status = -1;
+			return false;
+	}
+
+	if (!RedisComm::StagePushMsg(to_uid, msg_id, detail)) {
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	//加入历史记录
+	DBComm::AddMusciFriend(user_id,to_user_id);
+
+	//推送消息配置
 	std::string device_token;
 	bool is_recv = false;
 	unsigned btime=0, etime=0;
@@ -264,32 +291,13 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	int64 msg_id = 0;
-	if (!RedisComm::GenaratePushMsgID(uid, msg_id)) {
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
-
-	std::string detail, summary;
-	if (!MakePresentSongContent(user_id, to_user_id, song_id, msg_id, ext_msg,
-			detail, summary)) {
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
-
-	if (!RedisComm::StagePushMsg(to_uid, msg_id, detail)) {
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
 
 	if (!HttpComm::PushMessage(device_token, summary)) {
 		err_code = MIG_FM_PUSH_MSG_FAILED;
 		status = -1;
 		return false;
 	}
+
 
 	status = 1;
 	return true;
@@ -418,6 +426,31 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		err_code = MIG_FM_HTTP_INVALID_USER_ID;
 		return false;
 	}
+
+
+	int64 msg_id = 0;
+	if (!RedisComm::GenaratePushMsgID(atoll(uid.c_str()), msg_id)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	std::string detail,summary;
+	if (!MakeHalloContent(uid,touid,msg_id,msg,detail,summary)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	if (!RedisComm::StagePushMsg(atoll(touid.c_str()),msg_id,detail)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	DBComm::AddMusciFriend(uid,touid);
+
+
 	std::string device_token;
 	bool is_recv = false;
 	unsigned btime = 0,etime = 0;
@@ -445,31 +478,12 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		return false;
 	}
 
-	int64 msg_id = 0;
-	if (!RedisComm::GenaratePushMsgID(atoll(uid.c_str()), msg_id)){
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
-
-	std::string detail,summary;
-	if (!MakeHalloContent(uid,touid,msg_id,msg,detail,summary)){
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
-
-	if (!RedisComm::StagePushMsg(atoll(touid.c_str()),msg_id,detail)){
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
-
 	if(!HttpComm::PushMessage(device_token,summary)){
 		err_code = MIG_FM_PUSH_MSG_FAILED;
 		status = -1;
 		return false;
 	}
+
 	status = 1;
 	return true;
 }
@@ -578,6 +592,61 @@ bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
 
 	status = 1;
 	return true;
+}
+
+bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
+											 Json::Value &result,
+											 int &status, int &err_code){
+
+	LOGIC_PROLOG();
+	std::list<base::UserInfo> user_list;
+	std::vector<std::string> vec_users;
+	std::string uid_str,fromid_str,count_str;
+	std::map<std::string, std::string> temp_usersong;
+	std::map<std::string,base::MusicInfo> user_song;
+	std::map<std::string,std::string> collect_map;
+	if (!packet.GetAttrib("uid", uid_str)) {
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+	if (!packet.GetAttrib("fromid", fromid_str)) {
+		fromid_str = "0";
+	}
+	if (!packet.GetAttrib("count", count_str)) {
+		count_str = "10";
+	}
+
+	//获取歌友信息
+	DBComm::GetMusicUser(uid_str,fromid_str,count_str,vec_users,user_list);
+	if (user_list.size()<0){
+		//fix me
+		err_code = MIG_FM_HTTP_COMMENT_INVALID;
+		return false;
+	}
+
+	//获取当前用户试听歌曲
+	MemComm::GetUserCurrentSong(vec_users, temp_usersong);
+
+	//获取该用户红心歌曲
+	RedisComm::GetCollectSongs(uid_str,collect_map);
+
+	//获取歌曲信息
+	RedisComm::GetMusicInfos(temp_usersong,user_song);
+
+	//遍历用户信息 音乐信息 封包
+	while(user_list.size()>0){
+		Json::Value info;
+		base::UserInfo userinfo = user_list.front();
+		user_list.pop_front();
+		//获取音乐信息
+		GetMusicInfo(info,userinfo.uid(),temp_usersong,collect_map,user_song);
+		//获取用户信息
+		GetUserInfo(info,userinfo);
+		result["nearUser"].append(info);
+	}
+	status = 1;
+	return true;
+
 }
 
 bool SocialityMgrEngine::OnMsgGetComment(packet::HttpPacket& packet,
@@ -702,7 +771,7 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
    char tmp[256] = {0};
    Json::FastWriter wr;
    Json::Value value;
-   value["action"] = "sayhallo";
+   value["action"] = "sayhello";
    snprintf(tmp, arraysize(tmp), "%lld", msg_id);
    value["msgid"] = tmp;
    Json::Value &content = value["content"];
@@ -718,11 +787,15 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
 }
 
 bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
-		const std::string& to_uid, int64 song_id,
-		int64 msg_id, const std::string& msg,
-		std::string &detail, std::string &summary) {
+												const std::string& to_uid,
+												const std::string& song_id,
+												int64 msg_id,
+												const std::string& msg,
+												std::string &detail, 
+												std::string &summary) {
 	detail.clear();
 	summary.clear();
+	bool r = false;
 
 	std::string sd_nick, sd_sex, sd_head;
 	std::string to_nick, to_sex, to_head;
@@ -736,22 +809,26 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 	ss << sd_nick << "(" << send_uid << ")" << "赠送您一首歌";
 	summary.assign(ss.str());
 
+	
+
 	char tmp[256] = {0};
 	Json::FastWriter wr;
 	Json::Value value;
+	
+	//获取歌曲信息，杜绝不存在歌曲id提交
+ 	if(!GetMusicInfos(to_uid,song_id,value["song"]))
+ 		return false;
+
 	value["action"] = "presentsong";
 	snprintf(tmp, arraysize(tmp), "%lld", msg_id);
 	value["msgid"] = tmp;
 	Json::Value &content = value["content"];
 	content["send_uid"] = send_uid.c_str();
 	content["to_uid"] = to_uid.c_str();
-	snprintf(tmp, arraysize(tmp), "%lld", song_id);
-	content["song_id"] = tmp;
 	content["msg"] = msg;
 	std::string cur_time;
 	SomeUtils::GetCurrntTimeFormat(cur_time);
 	content["time"] = cur_time;
-
 	detail = wr.write(value);
 
 	return true;
@@ -761,6 +838,7 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 bool SocialityMgrEngine::GetPresentSongDetail(const std::string& uid,
 											  Json::Value& content) {
 	std::string song_id = content["song_id"].asString();
+
 
 	if (!GetMusicInfos(uid,song_id, content["song"])) {
 		return false;
@@ -772,6 +850,7 @@ bool SocialityMgrEngine::GetPresentSongDetail(const std::string& uid,
 bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
 										  const std::string& msg,
 		Json::Value& content) {
+	bool r = false;
 	content.clear();
 
 	Json::Reader rd;
@@ -786,13 +865,14 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
 
 	std::string type = content["type"].asString();
 	if (type == "presentsong") {
-		GetPresentSongDetail(uid,detail_node);
+		//r = GetPresentSongDetail(uid,detail_node);
+		content["song"] = root["song"];
 	}else {
 		// do nothing
 	}
 	//userinfo
 	base::UserInfo usrinfo;
-	bool r = base::BasicUtil::GetUserInfo(tar_uid,usrinfo);
+	r = base::BasicUtil::GetUserInfo(tar_uid,usrinfo);
 	if (r){
 		Json::Value& userjson = content["userinfo"];
 		userjson["uid"] = usrinfo.uid();
@@ -983,6 +1063,103 @@ bool SocialityMgrEngine::GetMusicHotCltCmt(const std::string &songid,
 	   else
 		   clt_num = "0";
 	   return true;
+}
+
+bool SocialityMgrEngine::GetUserInfo(Json::Value &value,base::UserInfo& userinfo){
+	//获取距离缓存
+
+	value["users"]["nickname"] = userinfo.nickname();
+	value["users"]["sex"] = userinfo.sex();
+	value["users"]["userid"] = userinfo.uid();
+	value["users"]["head"] = userinfo.head();
+	value["users"]["plat"] = userinfo.source();
+	return true;
+}
+
+bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
+		std::map<std :: string,std :: string> &temp_usersong, 
+		std::map<std :: string,std :: string> &collect_map, 
+		std::map<std :: string,base :: MusicInfo> &user_song){
+   
+	bool r  = false;
+    //获取音乐信息
+	std::map<std :: string,base :: MusicInfo>::iterator it_music = user_song.find(uid);
+	std::map<std :: string,std :: string>::iterator it_temp = temp_usersong.find(uid);
+	if (it_music==user_song.end())
+		return false;
+	if (it_temp == temp_usersong.end())
+		return false;
+	base::MusicInfo music_info = it_music->second;
+	std::string temp_info = it_temp->second;
+
+	/*从temp_usersong 获取状态 
+	value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"艳阳天","singer":"窦唯"}
+	*/
+
+	std::string state;
+	std::string tid;
+	std::string type;
+	Json::Reader reader;
+	Json::Value  root;
+	std::string hot_num;
+	std::string clt_num;
+	std::string cmt_num;
+	std::string hq_content_url;
+	std::string content_url;
+	bool is_like = false;
+	r = reader.parse(temp_info,root);
+	if (r){
+		if (root.isMember("state")){
+			state = root["state"].asString();
+		}
+		if (root.isMember("tid")){
+			tid = root["tid"].asString();
+		}
+		if (root.isMember("type")){
+			type = root["type"].asString();
+		}
+	}
+
+	//是否是红心歌曲
+	std::map<std :: string,std :: string>::iterator it_like = 
+		collect_map.find(music_info.id());
+
+	if (it_like!=collect_map.end())
+		is_like = true;
+
+	GetMusicHotCltCmt(music_info.id(),hot_num,cmt_num,clt_num);
+
+	//storage::DBComm::GetMusicUrl(music_info.id(),hq_content_url,content_url);
+	mig_sociality::DBComm::GetMusicUrl(music_info.id(),hq_content_url,content_url);
+
+	music_info.set_hq_url(hq_content_url);
+	music_info.set_url(content_url);
+
+	std::string b64title,b64artist,b64album;
+	Base64Decode(music_info.title(),&b64title);
+	Base64Decode(music_info.artist(),&b64artist);
+	Base64Decode(music_info.album_title(),&b64album);
+
+	//组装json
+	value["songstat"] = state;
+	value["music"]["album"] = b64album;
+	value["music"]["artist"] = b64artist;
+	value["music"]["title"] = b64title;
+	value["music"]["clt"] = clt_num;
+	value["music"]["cmt"] = cmt_num;
+	value["music"]["hot"] = hot_num;
+	value["music"]["hqurl"] = music_info.hq_url();
+	value["music"]["id"] = music_info.id();
+	if (is_like)
+		value["music"]["islike"] = 1;
+	else
+		value["music"]["islike"] = 0;
+	value["music"]["pic"] = music_info.pic_url();
+	value["music"]["pub_time"] = music_info.pub_time();
+	value["music"]["tid"] = tid;
+	value["music"]["type"] = type;
+	value["music"]["url"] = content_url;
+	return true;
 }
 
 }

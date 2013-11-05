@@ -42,38 +42,55 @@ public:
 	bool OnTimeout (struct server *srv, char* id, int opcode, int time);
 
 private:
-	bool OnMsgSetUserConfigOfPush(packet::HttpPacket& packet, Json::Value &result,
-			int &status, int &err_code);
+	bool OnMsgSetUserConfigOfPush(packet::HttpPacket& packet, 
+								  Json::Value &result,int &status, 
+								  int &err_code);
+
 	bool OnMsgPresentSong(packet::HttpPacket& packet, Json::Value &result,
-			int &status, int &err_code);
+						  int &status, int &err_code);
+
 	bool OnMsgGetPushMsg(packet::HttpPacket& packet, Json::Value &result,
-			int &status, int &err_code);
-	bool OnMsgGetPushMsgSummary(packet::HttpPacket& packet, Json::Value &result,
-			int &status, int &err_code);
+		 	             int &status, int &err_code);
+
+	bool OnMsgGetPushMsgSummary(packet::HttpPacket& packet, 
+		                        Json::Value &result,int &status, 
+								int &err_code);
+
 	bool OnMsgGetFriendList(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgSendFriendMsg(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgSayHello(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgAddUserBacklist(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgAddFriend(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgImportSongList(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgImportFriend(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgCommentSong(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
 	bool OnMsgGetComment(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
+
+	bool OnMsgGetMusicFriend(packet::HttpPacket& packet, Json::Value &result,
+		int &status, int &err_code);
 
 private:
 	bool CheckAndTransHMTime(const std::string &str, unsigned &time);
 
 	bool MakePresentSongContent(const std::string& send_uid,
-			const std::string& to_uid,int64 song_id,
+		const std::string& to_uid,const std::string& song_id,
 			int64 msg_id, const std::string &msg,
 			std::string &detail, std::string &summary);
 
@@ -93,6 +110,14 @@ private:
 
 	bool GetMusicHotCltCmt(const std::string &songid, std::string &hot_num, 
 		std::string &cmt_num, std::string &clt_num);
+
+	bool GetMusicInfo(Json::Value &value,const std::string& uid,
+		std::map<std::string,std::string> &temp_usersong, 
+		std::map<std::string,std::string> &collect_map, 
+		std::map<std::string,base::MusicInfo> &user_song);
+
+	bool GetUserInfo(Json::Value &value,base::UserInfo& userinfo);
+
 };
 
 }

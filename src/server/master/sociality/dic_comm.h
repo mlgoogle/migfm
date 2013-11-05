@@ -3,8 +3,10 @@
 #include "storage/storage.h"
 #include "basic/basic_info.h"
 #include "basic/radom_in.h"
+#include <libmemcached/memcached.h>
 #include <list>
 #include <vector>
+#include <hiredis.h>
 #include "json/json.h"
 
 struct redisReply;
@@ -53,6 +55,12 @@ public:
 
 	static bool IsCollectSong(const std::string& uid,const std::string& songid);
 
+	static bool GetCollectSongs(const std::string& uid,
+		std::map<std::string,std::string>& song_map);
+
+	static bool GetMusicInfos(std::map<std::string,std::string>&temp_songinfo,
+		               std::map<std::string,base::MusicInfo>& songinfo);
+
 	static base_storage::CommandReply* _CreateReply(redisReply* reply);
 
 private:
@@ -72,6 +80,9 @@ public:
 
 	static bool GetString(const char* key,const size_t key_len,
 		                  char** data,size_t* len);
+
+    static bool GetUserCurrentSong(const std::vector<std::string> &vec_user,
+		std::map<std::string, std::string> &map_songs);
 private:
 	static base_storage::DictionaryStorageEngine* engine_;
 };

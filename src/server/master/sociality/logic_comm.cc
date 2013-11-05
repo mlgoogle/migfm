@@ -133,7 +133,7 @@ void SomeUtils::GetCurrntTimeFormat(std::string& current_time){
 	std::stringstream os;
 	os<<(1900+local->tm_year)<<"-"
 	  <<(1+local->tm_mon)<<"-"
-	  <<local->tm_mday<<"-"
+	  <<local->tm_mday<<" "
 	  <<local->tm_hour<<":"
 	  <<local->tm_min<<":"
 	  <<local->tm_sec;

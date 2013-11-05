@@ -18,6 +18,13 @@ public:
 	static void Dest();
 
 public:
+
+	static bool GetMusicUser(const std::string& uid,
+							 const std::string& fromid,
+							 const std::string& count,
+							 std::vector<std::string>& vec_users,
+							 std::list<base::UserInfo>& userlist);
+
 	static bool GetUserInfos(const std::string& uid, std::string& nickname,
 			std::string& gender, std::string &head);
 
@@ -25,6 +32,9 @@ public:
 			std::string& dec,std::string& dec_id,std::string& dec_word);
 
 	static bool AddFriend(const std::string &uid, const std::string &touid);
+
+	static bool AddMusciFriend(const std::string& uid,
+							   const std::string &touid);
 
 	static bool GetMusicUrl(const std::string& song_id,std::string& hq_url,
 		std::string& song_url);

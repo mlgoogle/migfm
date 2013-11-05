@@ -100,6 +100,47 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 	}
 }
 
+bool DBComm::GetMusicUser(const std::string& uid, 
+						  const std::string& fromid, 
+						  const std::string& count, 
+						  std::vector<std::string>& vec_users,
+						  std::list<base::UserInfo>& userlist){
+	  std::stringstream os;
+	  std::string sql;
+	  MYSQL_ROW rows;
+	  base_storage::DBStorageEngine* engine = GetConnection();
+	  if (engine==NULL){
+		  LOG_ERROR("engine error");
+		  return false;
+	  }
+
+	  // proc_GetHistoryFriends
+	  os<< "call proc_GetHistoryFriends("
+		  << uid.c_str() << ","
+		  << fromid.c_str() << ","
+		  << count.c_str() << ")";
+
+	  sql = os.str();
+	  engine->SQLExec(sql.c_str());
+	  LOG_DEBUG2("%s",sql.c_str());
+	  int32 num = engine->RecordCount();
+	  if(num>0){
+		  while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			  base::UserInfo userinfo;
+			  userinfo.set_nickname(rows[0]);
+			  userinfo.set_sex(rows[1]);
+			  userinfo.set_uid(rows[2]);
+			  userinfo.set_head(rows[3]);
+			  userinfo.set_source(rows[4]);
+			  vec_users.push_back(userinfo.uid());
+			  userlist.push_back(userinfo);
+			  //userlist.push_back(rows[0]);
+		  }
+		  return true;
+	  }
+	  return false;
+}
+
 bool DBComm::GetUserInfos(const std::string& uid, std::string& nickname,
 		std::string& gender, std::string& head) {
 	nickname.clear();
@@ -208,7 +249,7 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 	//mood scens
 	int current = time(NULL)%2;
 
-	//�ƹ��� ��������1
+
 	dec = "mm";
 	os.str("");
 	os<<" select name,typeid from migfm_mood_word where typeid=1 ORDER BY RAND() limit 1;";
@@ -237,6 +278,32 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
  		}
  	}
 
+	return true;
+}
+
+bool DBComm::AddMusciFriend(const std::string& uid, 
+							const std::string &touid){
+	base_storage::DBStorageEngine* engine = GetConnection();
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+	// proc_AddFriend
+	os	<< "call proc_RecordMusicFriend("
+		<< uid.c_str() << ","
+		<< touid.c_str() << ")";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
 	return true;
 }
 
