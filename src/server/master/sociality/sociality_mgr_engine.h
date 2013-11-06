@@ -116,7 +116,7 @@ private:
 		std::map<std::string,std::string> &collect_map, 
 		std::map<std::string,base::MusicInfo> &user_song);
 
-	bool GetUserInfo(Json::Value &value,base::UserInfo& userinfo);
+	bool GetUserInfo(Json::Value &value,struct MusicFriendInfo& userinfo);
 
 };
 

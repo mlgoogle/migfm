@@ -240,5 +240,6 @@ bool MemComm::GetUserCurrentSong(const std::vector<std::string> &vec_user,
 	}
 	return true;
 }
+
 }
 

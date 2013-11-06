@@ -2,6 +2,7 @@
 #define _MASTER_PLUGIN_USR_MGR_DB_COMM_H__
 #include "storage/storage.h"
 #include "basic/basic_info.h"
+#include "json/json.h"
 #include <list>
 
 namespace storage{
@@ -22,6 +23,9 @@ public:
 
 	static bool GetMusicUrl(const std::string& song_id,std::string& hq_url,
 		std::string& song_url);
+
+	static bool UpDateUserLbsPos(Json::Value& users);
+
 
 private:
 	static std::list<base::ConnAddr>  addrlist_;

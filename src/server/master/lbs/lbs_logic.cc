@@ -863,6 +863,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  temp_users.append(val);
 		  }
 	}
+	//缓存用户的经度 纬度 存入mysql
+	if (temp_users.size()>0)
+		storage::DBComm::UpDateUserLbsPos(temp_users);
 
 	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
 

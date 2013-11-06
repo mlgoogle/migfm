@@ -345,7 +345,7 @@ public:
 	const std::string& sex() const {return data_->sex_;}
 	const std::string& type() const {return data_->type_;}
 	const std::string& crty() const {return data_->crty_;}
-	const std::string& head() const {return data_->head_;}
+	const std::string& head() const {return ((!data_)||(data_->head_=="0"))?DEFAULT_HEAD:data_->head_;}
 	const std::string& birthday() const {return data_->birthday_;}
 	const std::string& nickname() const {return data_->nickname_;}
 	const std::string& source() const {return data_->source_;}
@@ -359,6 +359,17 @@ public:
 	void set_birthday(const std::string& birthday){data_->birthday_ = birthday;}
 	void set_nickname(const std::string& nickname){data_->nickname_ = nickname;}
 	void set_source(const std::string& source){data_->source_ = source;}
+
+
+	void set_uid(const char* uid){data_->uid_.assign(uid);}
+	void set_username(const char* username){data_->username_.assign(username);}
+	void set_sex(const char* sex){data_->sex_.assign(sex);}
+	void set_type(const char* type){data_->type_.assign(type);}
+	void set_crty(const char* crty){data_->crty_.assign(crty);}
+	void set_head(const char* head){data_->head_.assign(head);}
+	void set_birthday(const char* birthday){data_->birthday_.assign(birthday);}
+	void set_nickname(const char* nickname){data_->nickname_.assign(nickname);}
+	void set_source(const char* source){data_->source_ .assign(source);}
 
 private:
 	class Data{

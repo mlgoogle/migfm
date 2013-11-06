@@ -23,7 +23,7 @@ public:
 							 const std::string& fromid,
 							 const std::string& count,
 							 std::vector<std::string>& vec_users,
-							 std::list<base::UserInfo>& userlist);
+							 std::list<struct MusicFriendInfo>& userlist);
 
 	static bool GetUserInfos(const std::string& uid, std::string& nickname,
 			std::string& gender, std::string &head);

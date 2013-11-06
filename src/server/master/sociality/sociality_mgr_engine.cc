@@ -599,7 +599,7 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 											 int &status, int &err_code){
 
 	LOGIC_PROLOG();
-	std::list<base::UserInfo> user_list;
+	std::list<struct MusicFriendInfo> user_list;
 	std::vector<std::string> vec_users;
 	std::string uid_str,fromid_str,count_str;
 	std::map<std::string, std::string> temp_usersong;
@@ -636,10 +636,10 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 	//遍历用户信息 音乐信息 封包
 	while(user_list.size()>0){
 		Json::Value info;
-		base::UserInfo userinfo = user_list.front();
+		struct MusicFriendInfo userinfo = user_list.front();
 		user_list.pop_front();
 		//获取音乐信息
-		GetMusicInfo(info,userinfo.uid(),temp_usersong,collect_map,user_song);
+		GetMusicInfo(info,userinfo.userinfo.uid(),temp_usersong,collect_map,user_song);
 		//获取用户信息
 		GetUserInfo(info,userinfo);
 		result["nearUser"].append(info);
@@ -799,14 +799,20 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 
 	std::string sd_nick, sd_sex, sd_head;
 	std::string to_nick, to_sex, to_head;
+	base::UserInfo sd_usrinfo;
+	base::UserInfo to_usrinfo;
+	if (!base::BasicUtil::GetUserInfo(send_uid,sd_usrinfo))
+		return false;
+	if (!base::BasicUtil::GetUserInfo(to_uid,to_usrinfo))
+		return false;
 
-	if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head))
-		return false;
-	if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head))
-		return false;
+	//if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head))
+	//	return false;
+	//if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head))
+	//	return false;
 
 	std::stringstream ss;
-	ss << sd_nick << "(" << send_uid << ")" << "赠送您一首歌";
+	ss << sd_usrinfo.nickname().c_str() << "(" << send_uid << ")" << "赠送您一首歌";
 	summary.assign(ss.str());
 
 	
@@ -1065,14 +1071,16 @@ bool SocialityMgrEngine::GetMusicHotCltCmt(const std::string &songid,
 	   return true;
 }
 
-bool SocialityMgrEngine::GetUserInfo(Json::Value &value,base::UserInfo& userinfo){
-	//获取距离缓存
-
-	value["users"]["nickname"] = userinfo.nickname();
-	value["users"]["sex"] = userinfo.sex();
-	value["users"]["userid"] = userinfo.uid();
-	value["users"]["head"] = userinfo.head();
-	value["users"]["plat"] = userinfo.source();
+bool SocialityMgrEngine::GetUserInfo(Json::Value &value,
+                                     struct MusicFriendInfo& userinfo){
+	value["users"]["latitude"] = userinfo.latitude;
+	value["users"]["distance"] = userinfo.distance;
+	value["users"]["longitude"] = userinfo.longitude;
+	value["users"]["nickname"] = userinfo.userinfo.nickname();
+	value["users"]["sex"] = userinfo.userinfo.sex();
+	value["users"]["userid"] = userinfo.userinfo.uid();
+	value["users"]["head"] = userinfo.userinfo.head();
+	value["users"]["plat"] = userinfo.userinfo.source();
 	return true;
 }
 

@@ -10,6 +10,11 @@ const std::string& ConStants::str_empty(){
    return str_empty;
 }
 
+const std::string& ConStants::str_head(){
+	static const std::string str_head = "http://fm.miglab.com/default.jpg";
+	return str_head;
+}
+
 const std::string& ConStants::str_zone(){
 	static const std::string str_zone = "0";
 	return str_zone;

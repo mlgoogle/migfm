@@ -27,7 +27,7 @@ bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
     	if(mysql_real_connect(mysql,addr.host().c_str(),
     		                  addr.usr().c_str(),addr.pwd().c_str(),
     		                  addr.source().c_str(),addr.port(),0,
-    		                  CLIENT_INTERACTIVE)==NULL){
+    		                  /*CLIENT_INTERACTIVE*/CLIENT_MULTI_STATEMENTS)==NULL){
             MIG_ERROR(USER_LEVEL,"mysql:connection to database failed failed %s",
                       mysql_error(mysql));
     		return false;

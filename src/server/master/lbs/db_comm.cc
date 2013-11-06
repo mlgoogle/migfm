@@ -86,6 +86,40 @@ bool DBComm::GetUserInfos(const std::string& uid,
 	return false;
 }
 
+bool DBComm::UpDateUserLbsPos(Json::Value& users){
+
+	base_storage::DBStorageEngine* engine = GetConnection();
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+	for (Json::Value::iterator it = users.begin();
+		it != users.end(); ++it){
+			Json::Value &item = *it;
+		//call proc_RecordUserLbsPos(10108,30.292207031178,120.0855621569,6000);
+			os<<"call proc_RecordUserLbsPos("
+				<<item["users"]["userid"].asString().c_str()
+				<<","<<item["users"]["latitude"].asDouble()
+				<<","<<item["users"]["longitude"].asDouble()
+				<<","<<item["users"]["distance"].asDouble()
+				<<"); ";
+	}
+
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+    return true;
+}
+
 bool DBComm::GetMusicUrl(const std::string &song_id, std::string &hq_url, std::string &song_url){
 	std::stringstream os;
 	bool r = false;

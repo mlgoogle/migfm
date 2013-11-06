@@ -104,7 +104,7 @@ bool DBComm::GetMusicUser(const std::string& uid,
 						  const std::string& fromid, 
 						  const std::string& count, 
 						  std::vector<std::string>& vec_users,
-						  std::list<base::UserInfo>& userlist){
+						  std::list<struct MusicFriendInfo>& userlist){
 	  std::stringstream os;
 	  std::string sql;
 	  MYSQL_ROW rows;
@@ -133,7 +133,13 @@ bool DBComm::GetMusicUser(const std::string& uid,
 			  userinfo.set_head(rows[3]);
 			  userinfo.set_source(rows[4]);
 			  vec_users.push_back(userinfo.uid());
-			  userlist.push_back(userinfo);
+			  struct MusicFriendInfo info;
+			  info.userinfo = userinfo;
+			  info.latitude = atof(rows[5]);
+			  info.longitude = atof(rows[6]);
+			  info.distance = atof(rows[7]);
+			  userlist.push_back(info);
+			  
 			  //userlist.push_back(rows[0]);
 		  }
 		  return true;
@@ -295,7 +301,8 @@ bool DBComm::AddMusciFriend(const std::string& uid,
 	// proc_AddFriend
 	os	<< "call proc_RecordMusicFriend("
 		<< uid.c_str() << ","
-		<< touid.c_str() << ")";
+		<< touid.c_str() << ");";
+
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());

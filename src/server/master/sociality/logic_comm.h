@@ -6,6 +6,7 @@
 #include "log/mig_log.h"
 #include "storage/storage.h"
 #include "basic/basictypes.h"
+#include "basic/basic_info.h"
 #include <vector>
 
 #if defined _DEBUG || defined DEBUG
@@ -47,7 +48,16 @@
 const unsigned DEFAULT_BEGIN_TIME = 8*60;
 const unsigned DEFAULT_END_TIME = 23*60;
 
+
 namespace mig_sociality {
+
+struct MusicFriendInfo{
+	base::UserInfo userinfo;
+	double latitude;
+	double longitude;
+	double distance;
+};
+
 class ThreadKey {
 public:
 	static void InitThreadKey ();

@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="lbs"
 	ProjectGUID="{1CD3CEBE-E431-4A79-BE80-0355BE880464}"
+	RootNamespace="lbs"
 	>
 	<Platforms>
 		<Platform
@@ -149,6 +150,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\defines.h"
+				>
+			</File>
+			<File
 				RelativePath=".\dic_comm.h"
 				>
 			</File>
@@ -182,10 +187,6 @@
 			</File>
 			<File
 				RelativePath=".\db_comm.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\defines.h"
 				>
 			</File>
 			<File
