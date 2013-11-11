@@ -94,6 +94,11 @@ private:
 			int64 msg_id, const std::string &msg,
 			std::string &detail, std::string &summary);
 
+	bool MakePresentSongContent(const std::string& send_uid,
+		const std::string& to_uid,const std::string& song_id,
+		int64 msg_id, const std::string &msg,
+		std::string &detail);
+
 	bool MakeHalloContent(const std::string& send_uid,const std::string& to_uid,
 						int64 msg_id,const std::string& msg,std::string& detail,
 						std::string &summary);
@@ -118,6 +123,9 @@ private:
 
 	bool GetUserInfo(Json::Value &value,struct MusicFriendInfo& userinfo);
 
+	bool PushPresentMsg(std::string& msg,std::string& summary,
+		                std::string& uid,std::string& to_uid,
+						int& err_code,int& status);
 };
 
 }

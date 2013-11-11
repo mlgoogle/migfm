@@ -13,30 +13,34 @@
 
 namespace mig_sociality {
 
-static const std::string URL_PUSH_SERVICE("121.199.32.88:9090/api/push");
+static const std::string URL_PUSH_SERVICE("121.199.32.88/api/push");
 
 bool mig_sociality::HttpComm::PushMessage(const std::string &device_token,
 		const std::string &msg, int badge/*=1*/, const std::string &sound/*=""*/) {
 
-	return true;
+	//return true;
 	if (device_token.empty())
 		return false;
 
 	HttpPost post(URL_PUSH_SERVICE);
 	std::stringstream post_cont;
-	post_cont << "devicetoken=" << device_token;
-	post_cont << "&message=" << msg;
+	post_cont<<"{\"message\":\""<<msg;
+	post_cont<<"\",\"badge\":\""<<badge;
+	post_cont<<"\",\"devicetoken\":\""<<device_token;
+	post_cont<<"\",\"sound\":\""<<sound;
+	post_cont<<"\"}";
+	/*post_cont << "message=" << msg;
 	post_cont << "&badge=" << badge;
-	if (sound.empty())
-		post_cont << "&sound=" << sound;
-	post_cont << std::ends;
+	//if (sound.empty())
+	//	post_cont << "&sound=" << sound;
 
-	std::string post_str(post_cont.str());
+	post_cont << "&devicetoken=" << device_token;*/
+	std::string post_str = post_cont.str();
 
 	LOG_DEBUG2("Push msg post:%s", post_str.c_str());
-
+	int port = 9090;
 	try {
-		post.Post(post_str.c_str());
+		post.Post(post_str.c_str(),port);
 		std::string result;
 		post.GetContent(result);
 		LOG_DEBUG2("%s",result.c_str());
@@ -48,11 +52,11 @@ bool mig_sociality::HttpComm::PushMessage(const std::string &device_token,
 			return false;
 		}
 
-		int ret_code = value["status"].asInt();
+		/*int ret_code = value["Status"].asInt();
 		if (1 != ret_code) {
 			LOG_DEBUG2("Push msg failed:推送失败,%d", ret_code);
 			return false;
-		}
+		}*/
 	} catch (const std::exception &ex) {
 		LOG_DEBUG2("Push msg failed:%s", ex.what());
 		return false;

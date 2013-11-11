@@ -93,6 +93,7 @@ bool HttpPost::Post(const char* post,const int port){
     CURL* curl = curl_easy_init();
     CURLcode curl_code;
     char curl_error[CURL_ERROR_SIZE];
+	curl_slist* http_headers = NULL;
     bool result = false;
     CurlContent curl_content;
     if(!curl){
@@ -100,6 +101,14 @@ bool HttpPost::Post(const char* post,const int port){
         goto out;
     }
     
+	http_headers = curl_slist_append(http_headers,"Content-Type: text/json");
+	curl_code = curl_easy_setopt(curl,CURLOPT_HTTPHEADER,http_headers);
+	if(curl_code != CURLE_OK) {
+		MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HTTPHEADER failed: %s",
+			curl_easy_strerror(curl_code));
+		goto out;
+	}
+
     curl_code = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error);
     if(curl_code != CURLE_OK) {
         MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_ERRORBUFFER failed: %s",
@@ -191,8 +200,8 @@ bool HttpPost::Post(const char* post,const int port){
 
     curl_code = curl_easy_perform(curl);
     if(curl_code != CURLE_OK) {
-	MIG_ERROR(USER_LEVEL,"curl_easy_perform failed: %s" ,
-		      curl_easy_strerror(curl_code));
+		MIG_ERROR(USER_LEVEL,"http:[%d] curl_easy_perform failed: %s" ,
+		      curl_content.code_,curl_easy_strerror(curl_code));
 	goto out;
     }
     code_ = curl_content.code_;
