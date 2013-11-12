@@ -58,6 +58,8 @@ public:
 	static bool CheckUserToken(const std::string& uid,const std::string& token);
 
 	static bool GetUserInfo(const std::string& uid,UserInfo& usrinfo);
+
+	static bool ConverNum(const int num,std::string& conver_num);
 };
 
 }

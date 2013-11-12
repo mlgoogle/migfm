@@ -1,4 +1,4 @@
-#include "basic_util.h"
+﻿#include "basic_util.h"
 #include "basic/basictypes.h"
 #include "storage/dic_serialization.h"
 #include "storage/dic_storage.h"
@@ -338,6 +338,54 @@ bool BasicUtil::CheckUserToken(const std::string& uid,const std::string& token){
 	return false;
 }
 
+bool BasicUtil::ConverNum(const int num,std::string& conver_num){
+	static const std::string letter[] = {"零","一","两","三","四","五","六","七","八","九"};
+	static const std::string unit[] = {"","十","百","千","万","十","百","千","亿","十"};  
+	std::string src;  
+	std::string des;  
+	char tmp[12];  
+	sprintf(tmp, "%d", num);  
+	src.append(tmp);  
+
+	if ( num < 0 )  
+	{  
+		conver_num.append("负");  
+		src.erase(0, 1);  
+	}  
+
+	int len = src.length();  
+	bool bPreZero = false;  
+	for ( int i = 0; i < len; i++)  
+	{  
+		int digit = src.at(i) - '0';  
+		int unit_index = len - i - 1;  
+		if (i == 0 && digit == 1 && (unit_index == 1 || unit_index == 5 || unit_index == 9))  
+		{  
+			conver_num.append(unit[unit_index]);  
+		}  
+		else if ( digit == 0 )  
+		{  
+			bPreZero = true;  
+			if (unit_index ==  4 ||  
+				unit_index ==  8)  
+			{  
+				conver_num.append(unit[unit_index]);  
+			}  
+		}  
+		else  
+		{  
+			if ( bPreZero )  
+			{  
+				conver_num.append(letter[0]);  
+			}  
+			conver_num.append(letter[digit]);  
+			conver_num.append(unit[unit_index]);  
+			bPreZero = false;        
+		}  
+	}
+	return true;
+}
+
 bool BasicUtil::GetUserInfo(const std::string& uid,UserInfo& usrinfo){
 	//memcached
 	//key uidinfo 10000info
@@ -354,13 +402,13 @@ bool BasicUtil::GetUserInfo(const std::string& uid,UserInfo& usrinfo){
 		return r;
 	}
 
-	//������
+	//不存在
 	r = base_storage::MYSQLDB::GetUserInfo(uid,usrinfo);
 	if(!r){
 		return r;
 	}
 
-	//д�뻺��
+	//写入缓存
 	std::string json;
 	usrinfo.SerializedJson(json);
 	base_storage::MemDic::SetString(key.c_str(),key.length(),json.c_str(),json.length());

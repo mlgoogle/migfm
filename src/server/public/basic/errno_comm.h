@@ -45,6 +45,7 @@
 #define  MIG_FM_HTTP_PLAT_INVALID				-42		// "登录平台信息错误" 
 #define  MIG_FM_HTTP_USERCHECK_INVALID				-43		// "用户名，密码错误" 
 #define  MIG_FM_HTTP_USERINFO_INVALID				-44		// "无效用户信息" 
+#define  MIG_FM_HTTP_JSON_ERROR                  -45 //"JSON格式错误"
 
 const char*
 migfm_strerror(int error_code);

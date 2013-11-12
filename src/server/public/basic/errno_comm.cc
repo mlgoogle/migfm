@@ -89,6 +89,8 @@ migfm_strerror(int error_code){
 		return "用户名或密码错误";
 	case MIG_FM_HTTP_USERINFO_INVALID:
 		return "无效用户信息";
+	case MIG_FM_HTTP_JSON_ERROR:
+		return "JSON格式错误";
 	default:
 		return "未知错误码";
 	}
