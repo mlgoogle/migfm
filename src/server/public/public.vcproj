@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="public"
 	ProjectGUID="{5847B53F-C291-4DDE-A619-DA0988C71492}"
+	RootNamespace="public"
 	>
 	<Platforms>
 		<Platform
@@ -168,10 +169,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\basic\http_packet.h"
-					>
-				</File>
-				<File
 					RelativePath=".\basic\linuxlist.h"
 					>
 				</File>
@@ -233,10 +230,6 @@
 				</File>
 				<File
 					RelativePath=".\basic\errno_comm.cc"
-					>
-				</File>
-				<File
-					RelativePath=".\basic\http_packet.cc"
 					>
 				</File>
 				<File
@@ -660,6 +653,46 @@
 				RelativePath=".\algorithm\algorithm_base.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="protocol"
+			>
+			<Filter
+				Name="include"
+				>
+				<File
+					RelativePath=".\protocol\cmd_packet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\communication_rules.h"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\data_packet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\http_packet.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="source"
+				>
+				<File
+					RelativePath=".\protocol\cmd_packet.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\data_packet.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\http_packet.cc"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

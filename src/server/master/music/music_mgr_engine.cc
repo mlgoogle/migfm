@@ -640,9 +640,9 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	}
 
 	if (type==1)//收藏歌曲表
-		r = storage::RedisComm::GetCollectSongs(uid,song_list);
+		r = storage::RedisComm::GetCollectSongs(tar_uid,song_list);
 	else if(type==0)//默认歌曲列表
-		r = storage::RedisComm::GetDefaultSongs(uid,song_list);
+		r = storage::RedisComm::GetDefaultSongs(tar_uid,song_list);
 
 	if (!r){
 		msg = migfm_strerror(MIG_FM_USER_NO_COLLECT_SONG);
