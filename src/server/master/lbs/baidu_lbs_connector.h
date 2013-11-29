@@ -17,6 +17,27 @@ namespace Json {
 
 namespace mig_lbs {
 
+
+class BaiduLBSConnectorV2{
+public:
+	BaiduLBSConnectorV2();
+	~BaiduLBSConnectorV2();
+public:
+	int CreatePOI(int64 user_id, double longitude,
+		double latitude, int64& poi_id, std::string &response,
+		std::string &err_msg);
+
+	int UpdatePOI(int64 user_id, int64 poi_id, double longitude, double latitude,
+		std::string &response, std::string &err_msg);
+
+	int DelPOI(int64 poi_id,std::string &response, std::string &err_msg);
+
+	int SearchNearby(double longitude, double latitude, uint32 radius,
+		             const std::string &q,const std::string &filter,
+					 uint32 page_index, uint32 page_size, Json::Value &result,
+					 std::string &response, std::string &err_msg);
+};
+
 class BaiduLBSConnector {
 public:
 	BaiduLBSConnector();
@@ -35,9 +56,10 @@ public:
 			std::string &response, std::string &err_msg);
 	int DelPOIEX(int64 poi_id,
 			std::string &response, std::string &err_msg);
-	int SearchNearby(double longitude, double latitude, uint32 radius, const std::string &filter,
-			uint32 page_index, uint32 page_size, Json::Value &result,
-			std::string &response, std::string &err_msg);
+	int SearchNearby(double longitude, double latitude, uint32 radius, 
+		             const std::string &filter,
+					 uint32 page_index, uint32 page_size, Json::Value &result,
+					 std::string &response, std::string &err_msg);
 
 	std::string CalcSN(const std::string &base_string);
 

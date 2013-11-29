@@ -419,10 +419,12 @@ bool RedisComm::SaveSongComment(int64 songid, int64 uid,
 
 	std::string content_str = content.str();
 	using base_storage::CommandReply;
-	snprintf(key, arraysize(key), KEY_COMMENT_SSET, songid);
+
+	char comm_key[256] = {0};
+	snprintf(comm_key, arraysize(comm_key), KEY_COMMENT_SSET, songid);
 
 	std::stringstream cmd_ss;
-	cmd_ss	<< "ZADD " << key
+	cmd_ss	<< "ZADD " << comm_key
 			<< " " << comment_id
 			<< " " << content_str.c_str()
 			<< std::ends;
@@ -433,7 +435,7 @@ bool RedisComm::SaveSongComment(int64 songid, int64 uid,
 		return false;
 	redisReply *rpl = (redisReply *)redisCommand(context,
 			"ZADD %s %lld %s",
-			key, comment_id, content_str.c_str());
+			comm_key, comment_id, content_str.c_str());
 	CommandReply *reply = _CreateReply(rpl);
 	freeReplyObject(rpl);
 	if (NULL == reply)
@@ -485,7 +487,7 @@ bool RedisComm::ReadSongComment(int64 songid, int64 from_id, int count,
 
 	{
 		redisReply *rpl = (redisReply *) redisCommand(context,
-				"ZREVRANGEBYSCORE %s %lld -inf LIMIT 0 %lld", key, from_id,
+				"ZREVRANGEBYSCORE %s +inf -inf LIMIT %lld %lld", key, from_id,
 				count);
 		CommandReply *reply = _CreateReply(rpl);
 		freeReplyObject(rpl);

@@ -23,19 +23,26 @@ bool mig_sociality::HttpComm::PushMessage(const std::string &device_token,
 		return false;
 
 	HttpPost post(URL_PUSH_SERVICE);
-	std::stringstream post_cont;
-	post_cont<<"{\"message\":\""<<msg;
-	post_cont<<"\",\"badge\":\""<<badge;
-	post_cont<<"\",\"devicetoken\":\""<<device_token;
-	post_cont<<"\",\"sound\":\""<<sound;
-	post_cont<<"\"}";
+	Json::Value value;
+	Json::FastWriter wr;
+	std::string post_str;
+	value["message"] = msg;
+	value["badge"] = badge;
+	value["devicetoken"] = device_token;
+	value["sound"] = sound;
+	post_str = wr.write(value);
+//	std::stringstream post_cont;
+// 	post_cont<<"{\"message\":\""<<msg;
+// 	post_cont<<"\",\"badge\":\""<<badge;
+// 	post_cont<<"\",\"devicetoken\":\""<<device_token;
+// 	post_cont<<"\",\"sound\":\""<<sound;
+// 	post_cont<<"\"}";
 	/*post_cont << "message=" << msg;
 	post_cont << "&badge=" << badge;
 	//if (sound.empty())
 	//	post_cont << "&sound=" << sound;
 
 	post_cont << "&devicetoken=" << device_token;*/
-	std::string post_str = post_cont.str();
 
 	LOG_DEBUG2("Push msg post:%s", post_str.c_str());
 	int port = 9090;

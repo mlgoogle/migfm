@@ -332,6 +332,7 @@ bool DBComm::GetMusicUrl(const std::string& song_id,std::string& hq_url,
 			else
 				song_url = rows[1];
 		}
+		song_url = hq_url;
 		return true;
 	}else{
 		hq_url = song_url = DEFAULT_URL;

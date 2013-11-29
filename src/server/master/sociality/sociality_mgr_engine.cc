@@ -234,37 +234,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		err_code = MIG_FM_HTTP_INVALID_USER_ID;
 		return false;
 	}
-/*
-	int64 song_id = strtoll(song_id_str.c_str(), NULL, 10);
-	if (0 == song_id) {
-		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
-		return false;
-	}
-*/
 
-/*
-	int64 msg_id = 0;
-	if (!RedisComm::GenaratePushMsgID(uid, msg_id)) {
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
-
-
-	std::string detail, summary;
-	if (!MakePresentSongContent(user_id, to_user_id, song_id_str, msg_id, ext_msg,
-		detail, summary)) {
-			err_code = MIG_FM_DB_ACCESS_FAILED;
-			status = -1;
-			return false;
-	}
-
-	if (!RedisComm::StagePushMsg(to_uid, msg_id, detail)) {
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
-*/
 	//修改为支持多首音乐
 	std::string summary;
 	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,err_code,status))
@@ -289,7 +259,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	/*time_t cur_time = time(NULL);
+	time_t cur_time = time(NULL);
 	tm cur_tm = *localtime(&cur_time);
 	unsigned ct = 60 * cur_tm.tm_hour + cur_tm.tm_min;
 	bool enable = true;
@@ -300,10 +270,10 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	if (!enable) {
 		err_code = MIG_FM_OTHER_ANTI_HARASSMENT;
 		return false;
-	}*/
+	}
 
 
-	device_token = "981b5df83c394507ae5b4c13449c826a534f2e01b991e2b9d0641f3414b5b7e3";
+	//device_token = "981b5df83c394507ae5b4c13449c826a534f2e01b991e2b9d0641f3414b5b7e3";
 	if (!HttpComm::PushMessage(device_token, summary)) {
 		err_code = MIG_FM_PUSH_MSG_FAILED;
 		status = -1;
@@ -490,6 +460,7 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		return false;
 	}
 
+		//device_token = "981b5df83c394507ae5b4c13449c826a534f2e01b991e2b9d0641f3414b5b7e3";
 	if(!HttpComm::PushMessage(device_token,summary)){
 		err_code = MIG_FM_PUSH_MSG_FAILED;
 		status = -1;
@@ -915,7 +886,8 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
 	std::string type = content["type"].asString();
 	if (type == "presentsong") {
 		//r = GetPresentSongDetail(uid,detail_node);
-		content["song"] = root["song"];
+		//content["song"] = root["song"];
+		content["music"] = root["song"];
 	}else {
 		// do nothing
 	}
@@ -924,7 +896,7 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
 	r = base::BasicUtil::GetUserInfo(tar_uid,usrinfo);
 	if (r){
 		Json::Value& userjson = content["userinfo"];
-		userjson["uid"] = usrinfo.uid();
+		userjson["userid"] = usrinfo.uid();
 		userjson["nickname"] =  usrinfo.nickname();
 		userjson["sex"] = usrinfo.sex();
 		userjson["head"] = usrinfo.head();
@@ -1116,14 +1088,14 @@ bool SocialityMgrEngine::GetMusicHotCltCmt(const std::string &songid,
 
 bool SocialityMgrEngine::GetUserInfo(Json::Value &value,
                                      struct MusicFriendInfo& userinfo){
-	value["users"]["latitude"] = userinfo.latitude;
-	value["users"]["distance"] = userinfo.distance;
-	value["users"]["longitude"] = userinfo.longitude;
-	value["users"]["nickname"] = userinfo.userinfo.nickname();
-	value["users"]["sex"] = userinfo.userinfo.sex();
-	value["users"]["userid"] = userinfo.userinfo.uid();
-	value["users"]["head"] = userinfo.userinfo.head();
-	value["users"]["plat"] = userinfo.userinfo.source();
+	value["userinfo"]["latitude"] = userinfo.latitude;
+	value["userinfo"]["distance"] = userinfo.distance;
+	value["userinfo"]["longitude"] = userinfo.longitude;
+	value["userinfo"]["nickname"] = userinfo.userinfo.nickname();
+	value["userinfo"]["sex"] = userinfo.userinfo.sex();
+	value["userinfo"]["userid"] = userinfo.userinfo.uid();
+	value["userinfo"]["head"] = userinfo.userinfo.head();
+	value["userinfo"]["plat"] = userinfo.userinfo.source();
 	return true;
 }
 
@@ -1202,9 +1174,9 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	value["music"]["hqurl"] = music_info.hq_url();
 	value["music"]["id"] = music_info.id();
 	if (is_like)
-		value["music"]["islike"] = 1;
+		value["music"]["like"] = 1;
 	else
-		value["music"]["islike"] = 0;
+		value["music"]["like"] = 0;
 	value["music"]["pic"] = music_info.pic_url();
 	value["music"]["pub_time"] = music_info.pub_time();
 	value["music"]["tid"] = tid;

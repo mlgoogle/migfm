@@ -65,9 +65,12 @@ public:
 	     2 获取周围在听你红心歌曲的用户 OnMsgSameMusic
 		 3 获取周围总数                 OnMsgMusicFri
 		 4 获取周围音乐                 OnMsgNearMusic
+		 5 获取周围音乐个数及附近人个数 OnMsgNearCollect
 	*/ 
 
-	
+	bool UpdateUserInfoPoi(int64 user_id,double longitude, 
+		                 double latitude,std::string &msg);
+
 	int SetPOI(int64 user_id, double longitude, double latitude, const std::string &data,
 			std::string &response, std::string &err_msg);
 
@@ -103,7 +106,7 @@ public:
 
 private:
 	RedisConnector		redis_conn_;
-	BaiduLBSConnector	bd_lbs_coon_;
+	BaiduLBSConnectorV2	bd_lbs_coon_;
 
 private:
 	LBSLogic();

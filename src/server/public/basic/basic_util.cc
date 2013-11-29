@@ -95,13 +95,13 @@ bool BasicUtil::ParserHttpRequest(const std::string& request,
     std::string request_str = request;
     while (request_str.length()!=0){
         int32 start_pos = request_str.find("=");
-	int32 end_pos = request_str.find("&")==-1?request.length():request_str.find("&");
-	std::string key = request_str.substr(0,start_pos);
-	std::string value = request_str.substr(key.length()+1,end_pos - key.length()-1);
-	http_map[key] = value;
-	if (request_str.find("&")!=-1)
-	    request_str = request_str.substr(end_pos+1,request_str.length());
-	else
+		int32 end_pos = request_str.find("&")==-1?request.length():request_str.find("&");
+		std::string key = request_str.substr(0,start_pos);
+		std::string value = request_str.substr(key.length()+1,end_pos - key.length()-1);
+		http_map[key] = value;
+		if (request_str.find("&")!=-1)
+			request_str = request_str.substr(end_pos+1,request_str.length());
+		else
             request_str.clear();
     }
     return true;
@@ -287,6 +287,9 @@ bool BasicUtil::UTF8ToGB2312 (const char *input, size_t inlen, char **output, si
 
 double BasicUtil::CalcGEODistance(double latitude1, double longitude1,
 		double latitude2, double longitude2) {
+
+	if ((latitude1==latitude2)&&(longitude1==longitude2))
+		return 0;
     double dd = M_PI/180;
     double x1 = latitude1 * dd;
     double y1 = longitude1 * dd;

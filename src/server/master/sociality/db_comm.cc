@@ -3,6 +3,7 @@
 #include "thread_handler.h"
 #include "basic/basic_info.h"
 #include "basic/base64.h"
+#include "basic/basic_util.h"
 #include "storage/storage.h"
 #include <mysql.h>
 #include <sstream>
@@ -108,13 +109,32 @@ bool DBComm::GetMusicUser(const std::string& uid,
 	  std::stringstream os;
 	  std::string sql;
 	  MYSQL_ROW rows;
+	  double uid_latitude = 0;
+	  double uid_longitude = 0;
 	  base_storage::DBStorageEngine* engine = GetConnection();
 	  if (engine==NULL){
 		  LOG_ERROR("engine error");
 		  return false;
 	  }
 
-	  // proc_GetHistoryFriends
+	  //获取自身的距离
+	  os<<"select uid,latitude,longitude from migfm_lbs_pos where uid = \'" <<uid <<"\';";
+	  sql = os.str();
+	  LOG_DEBUG2("%s",sql.c_str());
+	  engine->SQLExec(sql.c_str());
+	  
+	  int32 num = engine->RecordCount();
+	  if (num>0){
+		  while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			  uid_latitude = atof(rows[1]);
+			  uid_longitude = atof(rows[2]);
+		  }
+	  }else{
+		  return false;
+	  }
+
+	  os.str("");
+		  // proc_GetHistoryFriends
 	  os<< "call proc_GetHistoryFriends("
 		  << uid.c_str() << ","
 		  << fromid.c_str() << ","
@@ -123,24 +143,32 @@ bool DBComm::GetMusicUser(const std::string& uid,
 	  sql = os.str();
 	  engine->SQLExec(sql.c_str());
 	  LOG_DEBUG2("%s",sql.c_str());
-	  int32 num = engine->RecordCount();
+	  num = engine->RecordCount();
 	  if(num>0){
 		  while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+
 			  base::UserInfo userinfo;
 			  userinfo.set_nickname(rows[0]);
 			  userinfo.set_sex(rows[1]);
 			  userinfo.set_uid(rows[2]);
 			  userinfo.set_head(rows[3]);
 			  userinfo.set_source(rows[4]);
+			  if (userinfo.uid()==uid)
+				  continue;
 			  vec_users.push_back(userinfo.uid());
 			  struct MusicFriendInfo info;
 			  info.userinfo = userinfo;
 			  info.latitude = atof(rows[5]);
 			  info.longitude = atof(rows[6]);
-			  info.distance = atof(rows[7]);
+			  info.distance 
+				  = base::BasicUtil::CalcGEODistance(uid_latitude,
+				                                     uid_longitude,
+													 info.latitude,
+													 info.longitude);
+
+			 /* LOG_DEBUG2("uid[%s] touid[%s] uid_latitude [%lld] uid_longitude[%lld] info.latitude[%lld] info.longitude[%lld] distance[%lld]",uid.c_str(),userinfo.uid().c_str(),
+				  uid_latitude,uid_longitude,info.latitude,info.latitude,info.distance );*/
 			  userlist.push_back(info);
-			  
-			  //userlist.push_back(rows[0]);
 		  }
 		  return true;
 	  }
@@ -216,6 +244,7 @@ bool DBComm::GetMusicUrl(const std::string& song_id,std::string& hq_url,
 			 else
 				 song_url = rows[1];
 		 }
+		 song_url = hq_url;
 		 return true;
 	 }else{
 		 hq_url = song_url = DEFAULT_URL;
