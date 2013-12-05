@@ -221,7 +221,7 @@ bool DBComm::GetMusicFriendNum(const std::string &uid,
 	base_storage::db_row_t* db_rows;
 	int num;
 	MYSQL_ROW rows = NULL;
-	os<<"select count(*) from migfm_user_music_friend where userid=\'"
+	os<<"select count(*) from migfm_user_music_friend where taruserid=\'"
 		<<uid.c_str()<<"\';";
 
 	LOG_DEBUG2("%s",os.str().c_str());

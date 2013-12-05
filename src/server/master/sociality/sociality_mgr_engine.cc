@@ -565,8 +565,10 @@ bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
 	}
 
 	//获取这首歌评论数
-	this->SetMusicHostCltCmt(songid_str,3,curjson);
-	LOG_DEBUG2("%s",curjson.c_str());
+	//this->SetMusicHostCltCmt(songid_str,3,curjson);
+	//LOG_DEBUG2("%s",curjson.c_str());
+	DBComm::SetMusicHostCltCmt(songid_str,3);
+
 	if (!RedisComm::SaveSongComment(songid, uid, comment,curjson)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
 		status = -1;
@@ -615,7 +617,6 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 
 	//获取歌曲信息
 	RedisComm::GetMusicInfos(temp_usersong,user_song);
-
 	//遍历用户信息 音乐信息 封包
 	while(user_list.size()>0){
 		Json::Value info;

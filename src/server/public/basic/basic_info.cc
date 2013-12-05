@@ -339,6 +339,35 @@ bool UserInfo::UnserializedJson(const char* str){
 	return true;
 }
 
+MusicCollectInfo& MusicCollectInfo::operator=(const MusicCollectInfo& mclti){
+	if (mclti.data_!=NULL){
+		mclti.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = mclti.data_;
+}
+
+MusicCollectInfo::MusicCollectInfo(const base::MusicCollectInfo &mclti)
+:data_(mclti.data_){
+	if (data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+
+MusicCollectInfo::MusicCollectInfo(){
+	data_ = new Data();
+}
+
+MusicCollectInfo::MusicCollectInfo(const std::string& songid, 
+								   const std::string& type, 
+								   const std::string& tid){
+
+   data_ = new Data(songid,type,tid);
+}
+
 NormalMsgInfo& NormalMsgInfo::operator =(const base::NormalMsgInfo &nmi){
 	if (nmi.data_!=NULL){
 		nmi.data_->AddRef();
@@ -348,6 +377,32 @@ NormalMsgInfo& NormalMsgInfo::operator =(const base::NormalMsgInfo &nmi){
 		data_->Release();
 	}
 	data_ = nmi.data_;
+}
+
+bool MusicCollectInfo::SerializedJson(std::string& json){
+	std::stringstream os;
+	os<<"{\"songid\":"
+		<<"\""<<songid().c_str()<<"\",\"type\":"
+		<<"\""<<type().c_str()<<"\",\"typeid\":"
+		<<"\""<<tid().c_str()<<"\"}";
+
+	json.assign(os.str().c_str(),os.str().length());
+}
+
+bool MusicCollectInfo::UnserializedJson(std::string &str){
+	Json::Reader reader;
+	Json::Value root;
+	bool r = false;
+	r = reader.parse(str.c_str(),root);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"json parser error");
+		return false;
+	}
+
+	set_songid(root["songid"].asString());
+	set_tid(root["typeid"].asString());
+	set_type(root["type"].asString());
+	return true;
 }
 
 NormalMsgInfo::NormalMsgInfo(const NormalMsgInfo& nmi)

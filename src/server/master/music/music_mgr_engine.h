@@ -70,7 +70,11 @@ private:
 
 	bool UpdateConfigFile(const int socket,const packet::HttpPacket& packet);
 
-	bool GetSongList(const int socket,const packet::HttpPacket& packet,const int type);
+	bool GetSongList(const int socket,const packet::HttpPacket& packet,
+		             const int type);
+
+	bool GetSongListV2(const int socket,const packet::HttpPacket& packet,
+		               const int type);
 
 	 //0 default 1 collect
 
@@ -85,13 +89,26 @@ private:
 
 	bool GetOneMusicInfo(const std::string& song_id,base::MusicInfo& mi);
 
-	bool GetMoodScensChannelSongs(const std::string& uid,const std::string mode,
-		const int32 num,const std::string wordid,std::stringstream& result);
+	bool GetMoodScensChannelSongs(const std::string& uid,
+		                          const std::string mode,
+								  const int32 num,
+								  const std::string wordid,
+								  std::stringstream& result);
+
+	void ChangeMusicInfos(std::map<std::string,base::MusicInfo>& music_infos,
+		                                std::list<std::string>& songinfolist);
+
+	//优化版本1，获取音乐数据时，一次性从数据库和redis里面获取
+	bool GetMoodScensChannelSongsV2(const std::string& uid,
+		            const std::string mode,const int32 num,
+		                          const std::string wordid,
+		                         std::stringstream& result);
 
 	bool GetMusicHotCltCmt(const std::string& songid,std::string& hot_num,
 		                   std::string& cmt_num,std::string& clt_num);
 
-	bool SetMusicHostCltCmt(const std::string& songid,const int32 flag);//1 热度 2 收藏数 3评论数 
+	bool SetMusicHostCltCmt(const std::string& songid,const int32 flag,
+		                    const int32 value = 1);//1 热度 2 收藏数 3评论数 
 private:
 	music_logic::GetSongUrl*                         get_song_engine_;
 	music_record::MoodRecordingEngine*               mood_record_engine_;

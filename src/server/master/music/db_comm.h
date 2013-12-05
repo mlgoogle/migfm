@@ -5,6 +5,7 @@
 #include <list>
 #include <vector>
 #include <string>
+#include <map>
 namespace storage{
 
 class DBComm{
@@ -26,8 +27,13 @@ public:
 							  std::string& dec_word);
 	static bool GetMoodParentWord(std::list<base::WordAttrInfo>& word_list);
 
+	static bool SetMusicHostCltCmt(const std::string& songid,const int32 flag,
+		               const int32 value);
+
 	static bool GetSongidFromDoubanId(const std::string& douban_songid,
 		                              std::string& songid);
+
+	static bool GetMusicOtherInfos(std::map<std::string,base::MusicInfo> &song_music_infos);
 
 	static bool RecordMusicHistory(const std::string& uid,const std::string& songid);
 

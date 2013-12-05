@@ -39,6 +39,10 @@ public:
 	static bool GetMusicUrl(const std::string& song_id,std::string& hq_url,
 		std::string& song_url);
 
+	static bool SetMusicHostCltCmt(const std::string& songid,
+		const int32 flag, 
+		const int32 value=1);
+
 	struct FriendInfo {
 		std::string uid;
 		std::string name;

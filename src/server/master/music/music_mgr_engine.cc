@@ -125,7 +125,7 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMusicChannelSong(socket,packet);
 	}else if (type=="word"){
 		GetDescriptionWord(socket,packet);
-	}else if (type=="getmssong"){
+	}else if (type=="getmssong"){ //获取场景音乐用于微信版本 每次仅一首
 		GetMoodSceneWordSong(socket,packet);
 	}else if (type=="getsongid"){
 		GetWXMusicInfo(socket,packet);
@@ -136,10 +136,11 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 	}else if (type=="setcltsong"){//记录收藏度
 		PostCollectAndHateSong(socket,packet,1);
 	}else if (type=="getcltsongs"){
-		GetSongList(socket,packet,1);
-	}else if (type=="delcltsong"){
+		//GetSongList(socket,packet,1);
+		GetSongListV2(socket,packet,1);
+	}else if (type=="delcltsong"){//取消收藏歌曲
 		DelCollectAndHateSong(socket,packet,1);
-	}else if (type=="sethtsong"){
+	}else if (type=="sethtsong"){//设置垃圾歌曲
 		PostCollectAndHateSong(socket,packet,0);
 	}else if (type=="delthsong"){
 		DelCollectAndHateSong(socket,packet,0);
@@ -576,9 +577,10 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 
 		//批量删除
 		for (j=0;j<song_pair.size();j++){
-			if (flag)
+			if (flag){
 				storage::RedisComm::DelCollectSong(uid,song_pair[j]);
-			else
+				SetMusicHostCltCmt(songid,2,-1);
+			}else
 				storage::RedisComm::DelHateSong(uid,song_pair[j]);
 		}
 
@@ -590,6 +592,109 @@ ret:
 		LOG_DEBUG2("[%s]",result_out.c_str());
 		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 		return true;
+}
+
+
+bool MusicMgrEngine::GetSongListV2(const int socket,
+								   const packet::HttpPacket& packet,
+								   const int type){
+
+     packet::HttpPacket pack = packet;
+	 std::list<std::string> song_list;
+	 int32 utf8_flag = 0;
+	 std::string uid;
+	 std::string tar_uid;
+	 bool r = false;
+	 std::string msg;
+	 std::string result;
+	 std::string status;
+	 std::string result_out;
+	 Json::Reader reader;
+	 Json::Value  root;
+	 std::stringstream os;
+	 std::map<std::string,base::MusicCollectInfo> songmap;
+	 std::list<std::string> songinfolist;
+	 std::map<std::string,base::MusicInfo> song_music_infos;
+	 int music_num  = 0;
+	 r = pack.GetAttrib(UID,uid);
+	 if (!r){
+		 msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
+		 status = "0";
+		 goto ret;
+	 }
+
+	 r = pack.GetAttrib(TARID,tar_uid);
+	 if (!r){
+		 msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
+		 status = "0";
+		 goto ret;
+	 }
+
+	 if (type==1)//收藏歌曲表
+		 r = storage::RedisComm::GetCollectSongs(tar_uid,songmap);
+
+	 if (!r){
+		 msg = migfm_strerror(MIG_FM_USER_NO_COLLECT_SONG);
+		 status = "0";
+		 goto ret;
+	 }
+
+ 	 //获取音乐信息
+ 	 storage::RedisComm::GetMusicInfosV2(songmap,songinfolist);
+
+
+ 	 ChangeMusicInfos(song_music_infos,songinfolist);
+
+ 	 //获取歌曲URL及评论，热度，收藏
+ 	 storage::DBComm::GetMusicOtherInfos(song_music_infos);
+
+ 	 //json拼装
+	 music_num = song_music_infos.size();
+
+	 os<<"\"song\":[";
+	 for(std::map<std::string,base::MusicInfo>::iterator it = 
+		 song_music_infos.begin();it!=song_music_infos.end();++it){
+ 			 base::MusicInfo smi = it->second;
+ 			 music_num--;
+ 			 std::string b64title;
+ 			 std::string b64artist;
+ 			 std::string b64album;
+ 			 Base64Decode(smi.title(),&b64title);
+ 			 Base64Decode(smi.artist(),&b64artist);
+ 			 Base64Decode(smi.album_title(),&b64album);
+			 //"{\"songid\":\"9913\",\"type\":\"1\",\"typeid\":\"2\"}"
+			 std::map<std::string,base::MusicCollectInfo>::iterator itr =
+				 songmap.find(smi.id());
+			 os<<"{\"id\":\""<<smi.id().c_str()
+ 				 <<"\",\"title\":\""<<b64title.c_str()
+ 				 <<"\",\"artist\":\""<<b64artist.c_str()
+ 				 <<"\",\"url\":\""<<smi.url().c_str()
+ 				 <<"\",\"hqurl\":\""<<smi.hq_url().c_str()
+ 				 <<"\",\"pub_time\":\""<<smi.pub_time().c_str()
+ 				 <<"\",\"album\":\""<<b64album.c_str()
+ 				 <<"\",\"time\":\""<<smi.music_time()
+ 				 <<"\",\"pic\":\""<<smi.pic_url().c_str()
+ 				 <<"\",\"type\":\""<<itr->second.type()
+ 				 <<"\",\"tid\":\""<<itr->second.tid()
+ 				 <<"\",\"clt\":\""<<smi.clt_num().c_str()
+ 				 <<"\",\"cmt\":\""<<smi.cmt_num().c_str()
+ 				 <<"\",\"hot\":\""<<smi.hot_num().c_str()
+ 				 <<"\",\"like\":\"1\"}";
+ 			 if (music_num!=0)
+ 				 os<<",";
+ 	 }
+	 os<<"]";
+	 result = os.str();
+	 status = "1";
+	 msg = "0";
+	 utf8_flag = 0;
+ret:
+	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	 LOG_DEBUG2("[%s]",result_out.c_str());
+	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),
+		                            result_out.length());
+	 return true;
+
 }
 
 bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& packet,
@@ -892,7 +997,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	if (mood_flag){
 		mode = "mm";
-		r = GetMoodScensChannelSongs(uid,mode,moodci.info_num(),moodci.info_id(),os1);//心情
+		r = GetMoodScensChannelSongsV2(uid,mode,moodci.info_num(),moodci.info_id(),os1);//心情
 		if (r){
 			if (scens_flag!=0||channel_flag!=0)
 				os1<<",";
@@ -902,7 +1007,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	if (scens_flag){
 		mode = "ms";
-		r = GetMoodScensChannelSongs(uid,mode,scensci.info_num(),scensci.info_id(),os1);//场景
+		r = GetMoodScensChannelSongsV2(uid,mode,scensci.info_num(),scensci.info_id(),os1);//场景
 		if (r){
 			if (mood_flag!=0||channel_flag!=0)
 				os1<<",";
@@ -912,7 +1017,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	if (channel_flag){
 		mode = "chl";
-		r = GetMoodScensChannelSongs(uid,mode,channelci.info_num(),channelci.info_id(),os1);//频道
+		r = GetMoodScensChannelSongsV2(uid,mode,channelci.info_num(),channelci.info_id(),os1);//频道
 	}
 
 	if (!r){
@@ -1219,7 +1324,9 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 		storage::RedisComm::SetHateSong(uid,songid);
 
 	//记录收藏数
-	SetMusicHostCltCmt(songid,2);
+	if(flag)
+		SetMusicHostCltCmt(songid,2);
+
 	msg = "0";
 	status = "1";
 	utf8_flag = 0;
@@ -1322,6 +1429,123 @@ bool MusicMgrEngine::GetMusicInfos(const int socket,const std::string& songid){
 	return true;
 }
 
+
+bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
+												const std::string mode,
+                                                const int32 num, 
+												const std::string wordid,
+											std::stringstream& result){
+	std::stringstream os;
+	bool r = false;
+	os<<mode.c_str()<<"_r"<<wordid.c_str();
+	int32 temp_index = 0;
+	int32 temp_total = 0;
+	int is_like = 0;
+
+	std::list<std::string> songinfolist;
+
+
+
+	std::map<std::string, std::string> songid_map;
+	std::map<std::string,base::MusicInfo> song_music_infos;
+
+	std::map<std::string, std::string>::iterator it;
+	//先获取整个hash 值
+	int hash_size = storage::RedisComm::GetHashSize(os.str());
+	if (hash_size==0)
+		return false;
+	temp_index = num>hash_size?hash_size:num;
+	temp_total = algorithm::AlgorithmBase::GetTotalForNum(temp_index,3);
+	while(temp_total>0){
+		std::string songid;
+		std::string music_info;
+		std::string hq_content_url;
+		std::string content_url;
+		std::string hot_num;
+		std::string clt_num;
+		std::string cmt_num;
+		base::MusicInfo smi;
+		r = storage::RedisComm::GetMusicMapRadom(os.str(),songid);
+		if (!r){
+			temp_total--;
+			continue;
+		}
+		//是否拉黑
+		r = storage::RedisComm::IsHateSong(uid,songid);
+		if (r){
+			temp_total--;
+			continue;
+		}
+		//是否已经存在
+		it = songid_map.find(songid);
+		if (it!=songid_map.end()){
+			temp_total--;
+			continue;
+		}
+		songid_map[songid] = songid;
+		temp_total--;
+	}
+
+	//获取歌曲信息
+	storage::RedisComm::GetMusicInfosV2(songid_map,songinfolist);
+
+	ChangeMusicInfos(song_music_infos,songinfolist);
+
+	//获取歌曲URL及评论，热度，收藏
+	storage::DBComm::GetMusicOtherInfos(song_music_infos);
+
+	//json拼装
+	int music_num = song_music_infos.size();
+	for(std::map<std::string,base::MusicInfo>::iterator it = song_music_infos.begin();
+		it!=song_music_infos.end();++it){
+			base::MusicInfo smi = it->second;
+			music_num--;
+			std::string b64title;
+			std::string b64artist;
+			std::string b64album;
+			Base64Decode(smi.title(),&b64title);
+			Base64Decode(smi.artist(),&b64artist);
+			Base64Decode(smi.album_title(),&b64album);
+			//是否是红心歌曲
+			r = storage::RedisComm::IsCollectSong(uid,smi.id());
+			if (r)
+				is_like = 1;
+			else
+				is_like = 0;
+			result<<"{\"id\":\""<<smi.id().c_str()
+				<<"\",\"title\":\""<<b64title.c_str()
+				<<"\",\"artist\":\""<<b64artist.c_str()
+				<<"\",\"url\":\""<<smi.url().c_str()
+				<<"\",\"hqurl\":\""<<smi.hq_url().c_str()
+				<<"\",\"pub_time\":\""<<smi.pub_time().c_str()
+				<<"\",\"album\":\""<<b64album.c_str()
+				<<"\",\"time\":\""<<smi.music_time()
+				<<"\",\"pic\":\""<<smi.pic_url().c_str()
+				<<"\",\"type\":\""<<mode.c_str()
+				<<"\",\"tid\":\""<<wordid.c_str()
+				<<"\",\"clt\":\""<<smi.clt_num().c_str()
+				<<"\",\"cmt\":\""<<smi.cmt_num().c_str()
+				<<"\",\"hot\":\""<<smi.hot_num().c_str()
+				<<"\",\"like\":\""<<is_like<<"\"}";
+			if (music_num!=0)
+				result<<",";
+	}
+	return true;
+}
+
+
+void MusicMgrEngine::ChangeMusicInfos(std::map<std::string,base::MusicInfo>& music_infos,
+									  std::list<std::string>& songinfolist){
+		
+	  while(songinfolist.size()>0){
+		  base::MusicInfo music_info;
+		  std::string info = songinfolist.front();
+		  music_info.UnserializedJson(info);
+		  songinfolist.pop_front();
+		  music_infos[music_info.id()] = music_info;
+	  }
+}
+
 bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 									   const std::string mode, 
 									   const int32 num, const std::string wordid,
@@ -1369,6 +1593,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 			temp_total--;
 			continue;
 		}
+
 		songid_map[songid] = songid;
 		r = storage::RedisComm::GetMusicInfos(songid,music_info);
 		if (!r){
@@ -1572,8 +1797,14 @@ ret:
 	return true;
 }
 
-bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,const int32 flag)
+bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,
+										const int32 flag,
+										const int32 value)
 {
+
+
+	return storage::DBComm::SetMusicHostCltCmt(songid,flag,value);
+	/*
 	std::string hot_num;
 	std::string cmt_num;
 	std::string clt_num;
@@ -1631,6 +1862,7 @@ bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,const int32 fl
 	}
 
 	storage::RedisComm::SetMusicAboutUser(songid,hot_num,cmt_num,clt_num);
+	*/
 }
 
 

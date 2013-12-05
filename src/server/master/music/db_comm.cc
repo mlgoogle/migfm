@@ -266,6 +266,36 @@ bool DBComm::GetSongidFromDoubanId(const std::string& douban_songid,std::string&
 	return true;
 }
 
+bool DBComm::SetMusicHostCltCmt(const std::string& songid,
+								const int32 flag, 
+								const int32 value){
+	
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	if (engine==NULL){
+		LOG_ERROR("engine error");
+		return false;
+	}
+	/*
+	call proc_SetMuiscAbout`('100000',1,1);
+	*/
+	os<<"call proc_SetMuiscAbout(\'"<<songid.c_str()<<"\',"
+		<<flag<<","<<value<<");";
+
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+	return true;
+}
+
+
 bool DBComm::GetMoodParentWord(std::list<base::WordAttrInfo>& word_list){
 	std::stringstream os;
 	bool r = false;
@@ -408,4 +438,56 @@ bool DBComm::GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& num){
 	return true;
 }
 
+
+bool DBComm::GetMusicOtherInfos(std::map<std::string,base::MusicInfo>&song_music_infos){
+
+	std::stringstream os;
+	bool r = false;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	int num = song_music_infos.size();
+	os<<"call proc_GetMusicInfo('";
+	for(std::map<std::string,base::MusicInfo>::iterator it = song_music_infos.begin();
+		it!=song_music_infos.end();++it){
+		
+		os<<it->second.id();
+		num--;
+		if (num!=0){
+			os<<",";
+		}
+	}
+
+	os<<"');";
+	LOG_DEBUG2("%s",os.str().c_str());
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			std::string songdid = rows[1];
+			std::string hifi_url = rows[2];
+			//std::string url = rows[3];
+			std::string clt_num = rows[4];
+			std::string cmt_num = rows[5];
+			std::string hot_num = rows[6];
+			std::map<std::string,base::MusicInfo>::iterator itr 
+				=song_music_infos.find(songdid);
+			if (itr!=song_music_infos.end()){
+				itr->second.set_hq_url(hifi_url);
+				itr->second.set_url(hifi_url);
+				itr->second.set_music_clt(clt_num);
+				itr->second.set_music_cmt(cmt_num);
+				itr->second.set_music_hot(hot_num);
+			}
+		}
+		return true;
+	}
+
+	return false;
+}
 }

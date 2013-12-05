@@ -101,6 +101,37 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 	}
 }
 
+
+bool DBComm::SetMusicHostCltCmt(const std::string& songid,
+								const int32 flag, 
+								const int32 value){
+
+		std::stringstream os;
+		bool r = false;
+		MYSQL_ROW rows;
+		base_storage::DBStorageEngine* engine = GetConnection();
+		if (engine==NULL){
+			LOG_ERROR("engine error");
+			return false;
+		}
+		/*
+		call proc_SetMuiscAbout`('100000',1,1);
+		*/
+		os<<"call proc_SetMuiscAbout(\'"<<songid.c_str()<<"\',"
+			<<flag<<","<<value<<");";
+
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+		return true;
+}
+
+
 bool DBComm::GetMusicUser(const std::string& uid, 
 						  const std::string& fromid, 
 						  const std::string& count, 

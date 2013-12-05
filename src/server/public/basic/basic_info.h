@@ -409,6 +409,54 @@ private:
 
 };
 
+class MusicCollectInfo{
+public:
+	explicit MusicCollectInfo();
+	explicit MusicCollectInfo(const std::string& songid,
+		                      const std::string& type,
+							  const std::string& tid);
+
+	MusicCollectInfo(const MusicCollectInfo& mclti);
+
+	MusicCollectInfo& operator=(const MusicCollectInfo& mclti);
+
+	~MusicCollectInfo(){
+
+	}
+
+	bool SerializedJson(std::string& json);
+	bool UnserializedJson(std::string& str);
+
+	const std::string& songid() const {return data_->songid_;}
+	const std::string& type() const {return data_->type_;}
+	const std::string& tid() const {return data_->typeid_;}
+
+	void set_songid(const std::string& songid){data_->songid_ = songid;}
+	void set_type(const std::string& type) {data_->type_ = type;}
+	void set_tid(const std::string& tid) {data_->typeid_ = tid;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(1){}
+		Data(const std::string& songid,
+			 const std::string& type,
+			 const std::string& tid)
+			:songid_(songid)
+			,type_(type)
+			,typeid_(tid)
+			,refcount_(1){}
+		void AddRef(){refcount_++;}
+		void Release(){if(!--refcount_) delete this;}
+		std::string songid_;
+		std::string type_;
+		std::string typeid_;
+	private:
+		int refcount_;
+	};
+	Data*      data_;
+
+};
 
 class NormalMsgInfo{
 public:

@@ -45,7 +45,9 @@ public:
     
         //list
         
-    virtual bool AddListElement(const char* key,const size_t key_len,const char* val,const size_t val_len);
+    virtual bool AddListElement(const char* key,const size_t key_len,
+								const char* val,const size_t val_len,
+		                        const int flag);
     
     virtual bool GetListElement (const char* key,const size_t key_len,const int index,char** val,size_t *val_len);
     
@@ -76,11 +78,17 @@ public:
     
     virtual bool GetListAll(const char* key,const size_t key_len,std::list<std::string>& list);
 
-	virtual bool GetHashValues(const char* hash_name,const size_t hash_name_len,
+	virtual bool GetHashValues(const char* hash_name,
+		                       const size_t hash_name_len,
 		                       std::list<std::string>& list);
 
+	virtual bool GetAllHash(const char* hash_name,
+		                    const size_t hash_name_len,
+		                    std::map<std::string,std::string>& map);
+
 	virtual bool GetListRange(const char* key,const size_t key_len,
-				int from, int to, std::list<std::string>& list) {}
+				int from, int to, std::list<std::string>& list,
+				const int flag) {}
 
 	virtual CommandReply *DoCommand(const char *format/*, ...*/) { return NULL; }
 

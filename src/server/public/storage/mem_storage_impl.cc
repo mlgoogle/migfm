@@ -242,8 +242,11 @@ Delete key3 success
 */
 
 
-bool MemStorageEngineImpl::AddListElement(const char* key,const size_t key_len,
-										  const char* val,const size_t val_len){
+bool MemStorageEngineImpl::AddListElement(const char* key,
+										  const size_t key_len,
+										  const char* val,
+										  const size_t val_len,
+										  const int flag){
 	return true;
 }
 
@@ -266,11 +269,18 @@ bool MemStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 	return true;
 }
 
-bool MemStorageEngineImpl::GetHashValues(const char *hash_name, const size_t hash_name_len,
+bool MemStorageEngineImpl::GetHashValues(const char *hash_name, 
+										 const size_t hash_name_len,
 										 std::list<std::string> &list){
 
     return true;
 
+}
+
+bool MemStorageEngineImpl::GetAllHash(const char* hash_name, 
+									  const size_t hash_name_len, 
+									  std::map<std::string,std::string>& map){
+    return true;
 }
 
 #if defined (MEM_POOL)

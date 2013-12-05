@@ -196,12 +196,45 @@ bool RedisComm::GetMusicHistroyCollect(const std::string &uid,
    return true;
 }
 
+bool RedisComm::GetCollectSongs(const std::string& uid, 
+					std::map<std::string,base::MusicCollectInfo>& song_map){
+	
+	std::string os;
+	bool r = false;
+	char* value = NULL;
+	std::list<std::string> song_list;
+	base_storage::DictionaryStorageEngine* redis_engine_ = 
+		GetConnection();
+	if (!redis_engine_)
+		return false;
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+	r = redis_engine_->GetHashValues(os.c_str(),os.length(),song_list);
+
+	if (r){
+		while(song_list.size()>0){
+			std::string content = song_list.front();
+			song_list.pop_front();
+			base::MusicCollectInfo mcltinfo;
+			mcltinfo.UnserializedJson(content);
+			song_map[mcltinfo.songid()] = mcltinfo;
+		}
+	}
+	//return redis_engine_->GetAllHash(os.c_str(),os.length(),
+		 //                            song_map);
+
+	return r;
+}
+
 bool RedisComm::GetCollectSongs(const std::string& uid,std::list<std::string>& song_list){
 	std::string os;
 	bool r = false;
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+	base_storage::DictionaryStorageEngine* redis_engine_ = 
+		GetConnection();
+
 	if (redis_engine_==NULL)
 		return false;
 
@@ -484,10 +517,104 @@ bool RedisComm::MgrListenSongsNum(const std::string& songid,
 	}
 }
 
+void RedisComm::GetMusicInfosV2(std::list<std::string>& songlist,
+								std::list<std::string>& songinfolist){
+									
+	base_storage::DictionaryStorageEngine* redis_engine_ 
+										= GetConnection();
+	std::stringstream os;
+	int64 total;
+	os<<"mget";
+	if (songlist.size()==0)
+		return;
+	while(songlist.size()>0){
+		std::string songid = songlist.front();
+		os<<" "<<songid.c_str();
+		songlist.pop_front();
+	}
+
+	GetMusicInfos(redis_engine_,os.str(),songinfolist);
+}
+
+void RedisComm::GetMusicInfosV2(std::map<std::string,base::MusicCollectInfo>& songmap, std::list<std::string>& songinfolist){
+
+	base_storage::DictionaryStorageEngine* redis_engine_ 
+		= GetConnection();
+
+	//redisContext *context = (redisContext *)redis_engine_->GetContext();
+	std::stringstream os;
+	int64 total;
+	bool r = false;
+	os<<"mget";
+	if (songmap.size()==0)
+		return;
+
+	for (std::map<std::string,base::MusicCollectInfo>::iterator it 
+		= songmap.begin();it!=songmap.end();it++){
+			std::string songid;
+			base::MusicCollectInfo mclti = it->second;
+			os<<" "<<mclti.songid();
+	}
+
+	GetMusicInfos(redis_engine_,os.str(),songinfolist);
+}
+
+void RedisComm::GetMusicInfosV2(std::map<std::string,std::string>& songmap, 
+								std::list<std::string>& songinfolist){
+									
+	base_storage::DictionaryStorageEngine* redis_engine_ 
+		                   = GetConnection();
+									
+	//redisContext *context = (redisContext *)redis_engine_->GetContext();
+	std::stringstream os;
+	int64 total;
+	bool r = false;
+	os<<"mget";
+	if (songmap.size()==0)
+		return;
+
+	for (std::map<std::string,std::string>::iterator it 
+		   = songmap.begin();it!=songmap.end();it++){
+		std::string songid = it->second;
+		os<<" "<<songid.c_str();
+	}
+
+	GetMusicInfos(redis_engine_,os.str(),songinfolist);
+	/*LOG_DEBUG2("%s",os.str().c_str());
+	if (NULL == context)
+		return;
+	{
+		redisReply *rpl = (redisReply *) redisCommand(context,os.str().c_str());
+		base_storage::CommandReply *reply = _CreateReply(rpl);
+		freeReplyObject(rpl);
+		if (NULL == reply)
+			return ;
+
+		//´æÈë
+		if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
+			base_storage::ArrayReply *arep = 
+				static_cast<base_storage::ArrayReply *>(reply);
+			base_storage::ArrayReply::value_type &items = arep->value;
+			for (base_storage::ArrayReply::iterator it = items.begin(); 
+				it != items.end();++it) {
+					base_storage::CommandReply *item = (*it);
+					if (base_storage::CommandReply::REPLY_STRING == item->type) {
+						base_storage::StringReply *srep = static_cast<base_storage::StringReply *>(item);
+						songinfolist.push_back(srep->value);
+					}
+			}
+		}
+		reply->Release();
+	}
+
+	os.str("");*/
+}
+
 void RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
 							  std::list<std::string>& songlist, 
 							  std::list<std::string>& songinfolist){
-	redisContext *context = (redisContext *)engine->GetContext();
+
+	//redisContext *context = (redisContext *)engine->GetContext();
 	std::stringstream os;
 	int64 total;
 	os<<"mget";
@@ -496,8 +623,8 @@ void RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
 	  songlist.pop_front();
 	  os<<" "<<songid.c_str();
 	}
-
-	LOG_DEBUG2("%s",os.str().c_str());
+	GetMusicInfos(engine,os.str(),songinfolist);
+	/*LOG_DEBUG2("%s",os.str().c_str());
 	if (NULL == context)
 	  return;
 	{
@@ -525,6 +652,42 @@ void RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
 	}
 
 	os.str("");
+	*/
+}
+
+bool RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
+                              const std::string& command, 
+                              std::list<std::string>& songinfolist){
+
+    redisContext *context = (redisContext *)engine->GetContext();
+	LOG_DEBUG2("%s",command.c_str());
+	if (NULL == context)
+		return false;
+	{
+		redisReply *rpl = (redisReply *) redisCommand(context,command.c_str());
+		base_storage::CommandReply *reply = _CreateReply(rpl);
+		freeReplyObject(rpl);
+		if (NULL == reply)
+			return false;
+
+		//´æÈë
+		if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
+			base_storage::ArrayReply *arep = 
+				static_cast<base_storage::ArrayReply *>(reply);
+			base_storage::ArrayReply::value_type &items = arep->value;
+			for (base_storage::ArrayReply::iterator it = items.begin(); 
+				it != items.end();++it) {
+					base_storage::CommandReply *item = (*it);
+					if (base_storage::CommandReply::REPLY_STRING == item->type) {
+						base_storage::StringReply *srep = static_cast<base_storage::StringReply *>(item);
+						songinfolist.push_back(srep->value);
+					}
+			}
+		}
+		reply->Release();
+	}
+	return true;
+
 }
 
 base_storage::CommandReply* RedisComm::_CreateReply(redisReply* reply) {
@@ -600,4 +763,5 @@ bool MemComm::SetUsrCurrentSong(const std::string& uid,
 	r = engine_->SetValue(key.c_str(),key.length(),
 							value.c_str(),value.length());
 }
+
 }

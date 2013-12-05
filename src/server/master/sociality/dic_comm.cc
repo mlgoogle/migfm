@@ -324,7 +324,9 @@ bool RedisComm::StagePushMsg(int64 uid, int64 msg_id, const std::string& msg) {
 
 	char key[256] = {0};
 	snprintf(key, arraysize(key), KEY_PUSH_MSG_STAGE, uid);
-	return redis->AddListElement(key, strlen(key), msg.c_str(), msg.length());
+	return redis->AddListElement(key, strlen(key), 
+		                         msg.c_str(), 
+								 msg.length(),1);
 }
 
 bool RedisComm::GetStagedPushMsg(int64 uid, int page_index, int page_size, std::list<std::string>& msgs) {
@@ -334,7 +336,7 @@ bool RedisComm::GetStagedPushMsg(int64 uid, int page_index, int page_size, std::
 	snprintf(key, arraysize(key), KEY_PUSH_MSG_STAGE, uid);
 	int from = page_index * page_size;
 	int to = from + page_size;
-	return redis->GetListRange(key, strlen(key), from, to, msgs);
+	return redis->GetListRange(key, strlen(key), from, to, msgs,0);
 }
 
 bool RedisComm::AddFriend(int64 uid, int64 touid) {
@@ -346,7 +348,7 @@ bool RedisComm::AddFriend(int64 uid, int64 touid) {
 	size_t key_len = strlen(key);
 	snprintf(val, arraysize(val), "%lld", touid);
 	size_t val_len = strlen(val);
-	return redis->AddListElement(key, strlen(key), val, val_len);
+	return redis->AddListElement(key, strlen(key), val, val_len,1);
 }
 
 bool RedisComm::GetFriensList(int64 uid, std::list<std::string>& friends) {
@@ -393,14 +395,14 @@ bool RedisComm::SaveSongComment(int64 songid, int64 uid,
 
 	//ÆÀÂÛÊı
 	//key: a10000t
-	skey.append("a");
+/*	skey.append("a");
 	ssongid<<songid;
 	skey.append(ssongid.str().c_str());
 	skey.append("t");
 
 	LOG_DEBUG2("key[%s]",skey.c_str());
 	LOG_DEBUG2("value[%s]",curjson.c_str());
-	redis->SetValue(skey.c_str(),skey.length(),curjson.c_str(),curjson.length());
+	redis->SetValue(skey.c_str(),skey.length(),curjson.c_str(),curjson.length());*/
 
 	if (!redis->IncDecValue(key, key_len, 1, comment_id)) {
 		return false;

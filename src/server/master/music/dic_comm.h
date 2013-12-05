@@ -7,6 +7,7 @@
 #include <hiredis.h>
 #include <list>
 #include <vector>
+#include <map>
 
 namespace storage{
 
@@ -32,12 +33,18 @@ public:
 
 	static bool IsCollectSong(const std::string& uid,const std::string& songid);
 
-	static bool GetCollectSong(const std::string& uid,const std::string& songid,
+	static bool GetCollectSong(const std::string& uid,
+		                       const std::string& songid,
 		                       std::string& content);
 
-	static bool GetCollectSongs(const std::string& uid,std::list<std::string>& song_list);
+	static bool GetCollectSongs(const std::string& uid,
+		             std::list<std::string>& song_list);
 
-	static bool DelCollectSong(const std::string& uid,const std::string& songid);
+	static bool GetCollectSongs(const std::string& uid,
+		             std::map<std::string,base::MusicCollectInfo>& song_map);
+
+	static bool DelCollectSong(const std::string& uid,
+		                       const std::string& songid);
 
 	static bool SetHateSong(const std::string& uid,const std::string& songid);
 
@@ -59,6 +66,15 @@ public:
 
 	static bool GetMusicAboutUser(const std::string &songid,std::string& content);
 
+	static void GetMusicInfosV2(std::map<std::string,std::string>& songmap,
+		                        std::list<std::string>& songinfolist);
+
+	static void GetMusicInfosV2(std::list<std::string>& songlist,
+		                        std::list<std::string>& songinfolist);
+
+	static void GetMusicInfosV2(std::map<std::string,base::MusicCollectInfo>& songmap,
+		                        std::list<std::string>& songinfolist);
+
 	static bool GetMusicHistroyCollect(const std::string &uid,
 					const std::string& is_like,std::list<std::string>& songlist,
 					std::list<std::string>& collect_list,
@@ -71,6 +87,11 @@ private:
 	static void GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
 		std::list<std::string>& songlist,
 		std::list<std::string>& songinfolist);
+	
+	static bool GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
+                              const std::string& command,
+                              std::list<std::string>& songinfolist); 
+
 private:
 	static std::list<base::ConnAddr>   addrlist_;
 	static base::MigRadomIn*              radom_num_;

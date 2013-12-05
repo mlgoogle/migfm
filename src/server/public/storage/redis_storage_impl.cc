@@ -223,11 +223,14 @@ bool RedisStorageEngineImpl::DelHashElement(const char* hash_name,const char* ke
 	return RedisDelHashElement(c_,hash_name,key,key_len);
 }
 
-bool RedisStorageEngineImpl::AddListElement(const char* key,const size_t key_len,
-	                                        const char* val,const size_t val_len){
+bool RedisStorageEngineImpl::AddListElement(const char* key,
+											const size_t key_len,
+	                                        const char* val,
+											const size_t val_len,
+											const int flag){
 	if(PingRedis()!=1)
 		return false;
-	return RedisAddListElement(c_,key,key_len,val,val_len)==1?true:false;
+	return RedisAddListElement(c_,key,key_len,val,val_len,flag)==1?true:false;
 }
 
 bool RedisStorageEngineImpl::GetListElement (const char* key,const size_t key_len,
@@ -259,7 +262,34 @@ bool RedisStorageEngineImpl::SetListElement(const int index,const char* key,
 	return RedisSetListElement(c_,index,key,key_len,val,val_len)==1?true:false;
 }
 
-bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,const size_t hash_name_len,
+bool RedisStorageEngineImpl::GetAllHash(const char* hash_name, 
+										const size_t hash_name_len, 
+							std::map<std::string,std::string>& map){
+   int r = 0;
+   if (PingRedis()!=1)
+	   return false;
+   char** pptr = NULL;
+   int n;
+   warrper_redis_reply_t* rp = NULL;
+   rp = RedisGetAllHash(c_,hash_name,hash_name_len,&pptr,&n);
+   for (r = 0; r<(n/2); r++){
+	   std::string key;
+	   std::string value;
+	   if ((pptr[r]==NULL)||(pptr[r+1]==NULL))
+		   continue;
+	   key.assign(pptr[r]);
+	   value.assign(pptr[r+1]);
+	   map[key] = value;
+   }
+   free(pptr);
+   if(rp==NULL)
+	   return false;
+   RedisFreeReply(rp);
+   return true;
+}
+
+bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,
+										   const size_t hash_name_len,
 										   std::list<std::string>& list){
     int r = 0;
 	if (PingRedis()!=1)
@@ -302,8 +332,11 @@ bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 	return true;
 }
 
-bool RedisStorageEngineImpl::GetListRange(const char* key, const size_t key_len,
-		int from, int to, std::list<std::string>& list) {
+bool RedisStorageEngineImpl::GetListRange(const char* key, 
+										  const size_t key_len,
+		                                  int from, int to, 
+										  std::list<std::string>& list,
+										  const int flag) {
     int i = 0;
 	if(PingRedis()!=1)
     	return false;

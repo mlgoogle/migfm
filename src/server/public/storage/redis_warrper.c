@@ -206,9 +206,15 @@ int RedisDelHash(warrper_redis_context_t* context,const char* hash_name){
 
 int RedisAddListElement(warrper_redis_context_t* context,
 				const char* key,const size_t key_len,
-				const char* val,const size_t val_len){
+				const char* val,const size_t val_len,
+				const int flag){
 	redisReply* reply;
-	reply = redisCommand(context->context,"RPUSH %s %s",key,val);
+	if (flag==0)
+
+		reply = redisCommand(context->context,"RPUSH %s %s",key,val);
+	else
+		reply = redisCommand(context->context,"LPUSH %s %s",key,val);
+
 	freeReplyObject(reply);
 	return 1;
 }
@@ -242,8 +248,29 @@ int RedisDelListElement(warrper_redis_context_t* context,int index,
 	return 1;
 }
 
-warrper_redis_reply_t* RedisGetHashValueAll(warrper_redis_context_t* context,const char* key,
-									   const size_t key_len,char***val,int* val_len){
+warrper_redis_reply_t* RedisGetAllHash(warrper_redis_context_t* context, 
+									   const char* key,const size_t key_len, 
+									   char***val,int* val_len){
+	redisReply* reply;
+	int j =0;
+	warrper_redis_reply_t* wa_re = NULL;
+	reply = redisCommand(context->context,"hgetall %s",key);
+	if(reply->type==REDIS_REPLY_ARRAY){
+	   wa_re = (warrper_redis_reply_t*)malloc(sizeof(warrper_redis_reply_t));
+	   wa_re->reply = reply;
+	   (*val_len) = wa_re->reply->elements;
+	   (*val) = (char**)malloc(sizeof(char*)*(wa_re->reply->elements));
+	   for(j =0;j<reply->elements;j++){
+		   (*val)[j] = reply->element[j]->str;
+	   }
+	   return wa_re;
+	}
+	return NULL;
+}
+
+warrper_redis_reply_t* RedisGetHashValueAll(warrper_redis_context_t* context,
+											const char* key,const size_t key_len,
+											char***val,int* val_len){
 	redisReply* reply;
 	int j =0;
 	warrper_redis_reply_t* wa_re = NULL;

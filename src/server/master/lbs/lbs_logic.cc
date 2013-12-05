@@ -930,8 +930,8 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	//获取用户红心歌曲名单
 	if ((flag==2)||(flag==3)||(flag==5)){
 		r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
-		if (!r)
-			return r;
+// 		if (!r)
+// 			return r;
 	}
 
 	for (Json::Value::iterator it = temp_users.begin();
@@ -949,7 +949,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  if (r)
 				  if (flag==2||flag==3){
 					  if (is_user_like)
-						  usersmusic.append(item);
+						  usersmusic.append(item); //周围歌曲是否是用户红心歌曲
 				  }else{
 					  usersmusic.append(item);
 				  }
@@ -964,7 +964,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		std::string str_friend_num;
 		storage::DBComm::GetMusicFriendNum(uid_str,str_friend_num);
 		int friend_num = atol(str_friend_num.c_str());
-		int near_num = usersmusic.size();
+		int near_num = temp_users.size();
 		//friend
 		result["result"]["fri_num"] = friend_num;
 		//same_music
@@ -975,8 +975,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		result["result"]["msg_num"] = GetMsgCount(uid_str);
 	}else if (flag==5){
 		int collect_num = collect_musices.size();
+		int near_num = temp_users.size();
 		result["result"]["mynum"] = collect_num;
-		result["result"]["nearnum"] = usersmusic.size();
+		result["result"]["nearnum"] = near_num;
 	}
 	else{
 		result["result"]["nearUser"] = usersmusic;

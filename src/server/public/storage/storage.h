@@ -3,6 +3,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <map>
 #include "basic/basictypes.h"
 #include "basic/basic_info.h"
 
@@ -158,9 +159,10 @@ public:
 
 	virtual bool DecrValue(const char* key,const size_t key_len,
 		                   const char* val,const size_t val_len) = 0;
-        //list
+        //list 1为left 即头 0 为right 即尾
     virtual bool AddListElement(const char* key,const size_t key_len,
-    								const char* val,const size_t val_len) = 0;
+    						    const char* val,const size_t val_len,
+								const int flag) = 0;
     
     virtual bool GetListElement (const char* key,const size_t key_len,
     								const int index,char** val,size_t *val_len) = 0;
@@ -195,11 +197,18 @@ public:
 
 	virtual int GetListSize(const char* list_name) = 0;
 
-	virtual bool GetHashValues(const char* hash_name,const size_t hash_name_len,
+	virtual bool GetHashValues(const char* hash_name,
+		                       const size_t hash_name_len,
 		                       std::list<std::string>& list) = 0;
 
+	virtual bool GetAllHash(const char* hash_name,
+		                    const size_t hash_name_len,
+							std::map<std::string,std::string>& map) = 0;
+
+	 //1为left 即头 0 为right 即尾
 	virtual bool GetListRange(const char* key,const size_t key_len,
-				int from, int to, std::list<std::string>& list) = 0;
+				int from, int to, std::list<std::string>& list,
+				const int flag) = 0;
 
 	virtual CommandReply *DoCommand(const char *format/*, ...*/) = 0;
 
