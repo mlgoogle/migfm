@@ -617,6 +617,10 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 
 	//获取歌曲信息
 	RedisComm::GetMusicInfos(temp_usersong,user_song);
+
+	//获取歌曲URL及评论，热度，收藏
+	DBComm::GetMusicOtherInfos(user_song);
+
 	//遍历用户信息 音乐信息 封包
 	while(user_list.size()>0){
 		Json::Value info;
@@ -1119,7 +1123,7 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	/*从temp_usersong 获取状态 
 	value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"艳阳天","singer":"窦唯"}
 	*/
-
+/*
 	std::string state;
 	std::string tid;
 	std::string type;
@@ -1163,15 +1167,49 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	Base64Decode(music_info.title(),&b64title);
 	Base64Decode(music_info.artist(),&b64artist);
 	Base64Decode(music_info.album_title(),&b64album);
+*/
+	//
+
+	std::string state;
+	std::string tid;
+	std::string type;
+	Json::Reader reader;
+	Json::Value  root;
+	bool is_like = false;
+	r = reader.parse(temp_info,root);
+	if (r){
+		if (root.isMember("state")){
+			state = root["state"].asString();
+		}
+		if (root.isMember("tid")){
+			tid = root["tid"].asString();
+		}
+		if (root.isMember("type")){
+			type = root["type"].asString();
+		}
+	}
+
+
+	//是否是红心歌曲
+	std::map<std :: string,std :: string>::iterator it_like = 
+		collect_map.find(music_info.id());
+
+	if (it_like!=collect_map.end())
+		is_like = true;
+
+	std::string b64title,b64artist,b64album;
+	Base64Decode(music_info.title(),&b64title);
+	Base64Decode(music_info.artist(),&b64artist);
+	Base64Decode(music_info.album_title(),&b64album);
 
 	//组装json
 	value["songstat"] = state;
 	value["music"]["album"] = b64album;
 	value["music"]["artist"] = b64artist;
 	value["music"]["title"] = b64title;
-	value["music"]["clt"] = clt_num;
-	value["music"]["cmt"] = cmt_num;
-	value["music"]["hot"] = hot_num;
+	value["music"]["clt"] = music_info.clt_num();
+	value["music"]["cmt"] =music_info.cmt_num();
+	value["music"]["hot"] = music_info.hot_num();
 	value["music"]["hqurl"] = music_info.hq_url();
 	value["music"]["id"] = music_info.id();
 	if (is_like)
@@ -1182,7 +1220,7 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	value["music"]["pub_time"] = music_info.pub_time();
 	value["music"]["tid"] = tid;
 	value["music"]["type"] = type;
-	value["music"]["url"] = content_url;
+	value["music"]["url"] = music_info.url();
 	return true;
 }
 

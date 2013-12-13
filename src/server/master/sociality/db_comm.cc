@@ -284,6 +284,62 @@ bool DBComm::GetMusicUrl(const std::string& song_id,std::string& hq_url,
 	 return true;
 }
 
+
+bool DBComm::GetMusicOtherInfos(std::map<std::string,base::MusicInfo>&song_music_infos){
+
+	std::stringstream os;
+	bool r = false;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	int num = song_music_infos.size();
+	os<<"call proc_GetMusicInfo('";
+	for(std::map<std::string,base::MusicInfo>::iterator it = song_music_infos.begin();
+		it!=song_music_infos.end();++it){
+
+			os<<it->second.id();
+			num--;
+			if (num!=0){
+				os<<",";
+			}
+	}
+
+	os<<"');";
+	LOG_DEBUG2("%s",os.str().c_str());
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+
+	num = engine->RecordCount();
+	if(num>0){
+		std::map<std::string,base::MusicInfo>::iterator itr 
+			= song_music_infos.begin();
+
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			std::string songdid = rows[1];
+			std::string hifi_url = rows[2];
+			//std::string url = rows[3];
+			std::string clt_num = rows[4];
+			std::string cmt_num = rows[5];
+			std::string hot_num = rows[6];
+			if (itr!=song_music_infos.end()){
+				itr->second.set_hq_url(hifi_url);
+				itr->second.set_url(hifi_url);
+				itr->second.set_music_clt(clt_num);
+				itr->second.set_music_cmt(cmt_num);
+				itr->second.set_music_hot(hot_num);
+			}
+			++itr;
+		}
+		return true;
+	}
+
+	return false;
+}
+
+
 bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 						   std::string& dec,std::string& dec_id,std::string& dec_word){
 	std::stringstream os;

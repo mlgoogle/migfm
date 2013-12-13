@@ -100,9 +100,11 @@ private:
 
 	//优化版本1，获取音乐数据时，一次性从数据库和redis里面获取
 	bool GetMoodScensChannelSongsV2(const std::string& uid,
-		            const std::string mode,const int32 num,
-		                          const std::string wordid,
-		                         std::stringstream& result);
+		                            const std::string mode,
+									const int32 num,
+		                            const std::string wordid,
+									std::map<std::string,base::MusicCollectInfo>& song_map,
+		                            std::stringstream& result);
 
 	bool GetMusicHotCltCmt(const std::string& songid,std::string& hot_num,
 		                   std::string& cmt_num,std::string& clt_num);

@@ -43,6 +43,8 @@ public:
 		const int32 flag, 
 		const int32 value=1);
 
+	static bool GetMusicOtherInfos(std::map<std::string,base::MusicInfo> &                                         song_music_infos);
+
 	struct FriendInfo {
 		std::string uid;
 		std::string name;

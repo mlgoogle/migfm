@@ -856,6 +856,8 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	  return true;
 	}
 
+
+
 	Json::Value usersmusic;
 	std::map<std::string, bool> mapExist;
 	std::vector<std::string> vec_users;
@@ -947,7 +949,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  else
 				  r = GetUserCurrentMusic(find->second,item,is_user_like);
 			  if (r)
-				  if (flag==2||flag==3){
+				  if (flag==2||flag==3||(flag==5)){
 					  if (is_user_like)
 						  usersmusic.append(item); //周围歌曲是否是用户红心歌曲
 				  }else{

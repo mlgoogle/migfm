@@ -447,6 +447,8 @@ bool DBComm::GetMusicOtherInfos(std::map<std::string,base::MusicInfo>&song_music
 	base_storage::db_row_t* db_rows;
 	MYSQL_ROW rows = NULL;
 	int num = song_music_infos.size();
+	if (num==0)
+		return false;
 	os<<"call proc_GetMusicInfo('";
 	for(std::map<std::string,base::MusicInfo>::iterator it = song_music_infos.begin();
 		it!=song_music_infos.end();++it){
