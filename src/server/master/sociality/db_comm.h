@@ -28,6 +28,10 @@ public:
 	static bool GetUserInfos(const std::string& uid, std::string& nickname,
 			std::string& gender, std::string &head);
 
+	static bool GetUserInfos(const std::string& uid, std::string& nickname,
+		std::string& gender, std::string &head,double& latitude,
+		double& longitude);
+
 	static bool GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 			std::string& dec,std::string& dec_id,std::string& dec_word);
 

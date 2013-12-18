@@ -110,4 +110,62 @@ back:
 
 }
 
+MigRadomInV2::MigRadomInV2(int num)
+:num_(num)
+,rate_table_(NULL){
+	SetRateTable();
+}
+
+MigRadomInV2::~MigRadomInV2(){
+	if (rate_table_!=NULL){
+		delete[] rate_table_;
+		rate_table_ = NULL;
+	}
+}
+
+void MigRadomInV2::SetRateTable(int num /* = 0 */){
+	num_ = num>0?num:num_;
+	index_ = 0;
+	Reset();
+}
+
+void MigRadomInV2::Reset(){
+	if (rate_table_!=NULL){
+		delete[] rate_table_;
+		rate_table_ = NULL;
+	}
+	srand((int)time(0));
+	rate_table_ = new int[num_];
+	if (rate_table_==NULL)
+		assert(0);
+	//memset(rate_table_,0,sizeof(rate_table_));
+	for(int i = 0;i<num_;i++)
+		rate_table_[i] = 0;
+	int refcount_ = 0;
+	for(; refcount_< num_;__sync_fetch_and_add(&refcount_,1)/*refcount_++*/)
+	{
+		int liIndex  =  (int) ((float)num_ * (rand() /(RAND_MAX + 1.0)));
+		while(rate_table_[liIndex] != 0)
+		{
+			liIndex ++;
+			liIndex = liIndex % num_;
+
+		}
+		rate_table_[liIndex] = refcount_;
+		MIG_DEBUG(USER_LEVEL,"liIndex [%d],refconut_[%d]",liIndex,refcount_);
+	}
+
+}
+
+void MigRadomInV2::GetPrize(int *rands, int num){
+	assert(num!=0);
+	for (int i= 0;i<num;i++){
+		if (!(index_<num_)){
+			SetRateTable();
+		}
+		rands[i] = rate_table_[index_++];
+	}
+}
+
+
 }

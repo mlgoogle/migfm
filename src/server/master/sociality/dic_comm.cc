@@ -663,4 +663,31 @@ bool MemComm::GetUserCurrentSong(const std::vector<std::string> &vec_user,
 	 return true;
 }
 
+bool MemComm::SetString(const char* key,const size_t key_len,
+						const char* data, size_t len){
+	 return engine_->SetValue(key,key_len,data,len);
+}
+
+bool MemComm::GetString(const char* key,const size_t key_len,
+						char** data,size_t* len){
+
+	 return engine_->GetValue(key,key_len,data,len);
+}
+
+bool MemComm::GetCurrentSong(const std::string &key,std::string& value){
+	std::string skey;
+	skey.append("cur");
+	skey.append(key);
+	bool r = false;
+	size_t svalue_len = 0;
+	char* svalue = NULL;
+	r = engine_->GetValue(skey.c_str(),skey.length(),&svalue,&svalue_len);
+	value.assign(svalue,svalue_len);
+	if (r&&svalue!=NULL){
+		delete [] svalue;
+		svalue = NULL;
+	}
+	return r;
+}
+
 } // mig_sociality

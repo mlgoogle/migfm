@@ -31,6 +31,10 @@ public:
 	static bool SetCollectSong(const std::string& uid,const std::string& songid,
 		const std::string& content);
 
+	static bool GetCltAndHateSong(const std::string& uid,
+		std::map<std::string,base::MusicCltHateInfo>& clt_song_map,
+		std::map<std::string,base::MusicCltHateInfo>& hate_song_map);
+
 	static bool IsCollectSong(const std::string& uid,const std::string& songid);
 
 	static bool GetCollectSong(const std::string& uid,
@@ -41,17 +45,22 @@ public:
 		             std::list<std::string>& song_list);
 
 	static bool GetCollectSongs(const std::string& uid,
-		             std::map<std::string,base::MusicCollectInfo>& song_map);
+		         std::map<std::string,base::MusicCltHateInfo>& song_map);
 
 	static bool DelCollectSong(const std::string& uid,
 		                       const std::string& songid);
 
-	static bool SetHateSong(const std::string& uid,const std::string& songid);
+	static bool SetHateSong(const std::string& uid,const std::string& songid,
+		                    const std::string& content);
 
 	static bool IsHateSong(const std::string& uid,const std::string& songid);
 
 	static bool DelHateSong(const std::string& uid,const std::string& songid);
 
+	static bool GetHateSongs(const std::string& uid,
+		std::map<std::string,base::MusicCltHateInfo>& song_map);
+
+	//static bool GetHateSongs(const std::string& uid,std::list<>);
 	static bool GetDefaultSongs(const std::string& uid,std::list<std::string>& song_list);
 
 	static bool MgrListenSongsNum(const std::string& songid,
@@ -69,11 +78,19 @@ public:
 	static void GetMusicInfosV2(std::map<std::string,std::string>& songmap,
 		                        std::list<std::string>& songinfolist);
 
+	static void GetMusicInfosV3(const std::string& type,std::list<int>& random_list, 
+		                        std::list<std::string>& songinfolist);
+
+
+
 	static void GetMusicInfosV2(std::list<std::string>& songlist,
 		                        std::list<std::string>& songinfolist);
 
-	static void GetMusicInfosV2(std::map<std::string,base::MusicCollectInfo>& songmap,
+	static void GetMusicInfosV2(std::map<std::string,base::MusicCltHateInfo>& songmap,
 		                        std::list<std::string>& songinfolist);
+
+	//static void GetMusicInfosV2(std::map<std::string,base::MusicCltHateInfo>& songmap,
+	//	                        std::list<std::string>& songinfolist);
 
 	static bool GetMusicHistroyCollect(const std::string &uid,
 					const std::string& is_like,std::list<std::string>& songlist,

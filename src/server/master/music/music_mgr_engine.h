@@ -4,7 +4,9 @@
 #include "get_song.h"
 #include "basic/http_packet.h"
 #include "basic/basic_info.h"
+#include "basic/radom_in.h"
 #include "music_recording.h"
+#include "thread_lock.h"
 
 namespace music_logic{
 
@@ -100,21 +102,45 @@ private:
 
 	//优化版本1，获取音乐数据时，一次性从数据库和redis里面获取
 	bool GetMoodScensChannelSongsV2(const std::string& uid,
-		                            const std::string mode,
-									const int32 num,
-		                            const std::string wordid,
-									std::map<std::string,base::MusicCollectInfo>& song_map,
-		                            std::stringstream& result);
+		const std::string mode,const int32 num,
+		const std::string wordid,
+		std::map<std::string,base::MusicCltHateInfo>& song_map,
+		std::stringstream& result);
+
+	//优化版本2，在版本1的基础上加入一次性获取黑名单歌曲，并通过自建随机数
+	//自建产生随机歌曲，大大降低重复性，并一次读取redis 减少连接次数
+	bool GetMoodScensChannelSongsV3(const std::string& uid,
+		const std::string mode,const int32 num,
+		const std::string wordid,
+		std::map<std::string,base::MusicCltHateInfo>& clt_song_map,
+		std::map<std::string,base::MusicCltHateInfo>& hate_song_map,
+		std::stringstream& result);
+
 
 	bool GetMusicHotCltCmt(const std::string& songid,std::string& hot_num,
 		                   std::string& cmt_num,std::string& clt_num);
 
 	bool SetMusicHostCltCmt(const std::string& songid,const int32 flag,
 		                    const int32 value = 1);//1 热度 2 收藏数 3评论数 
+
+	bool RestMusicListRandom();
+
+	bool CreateTypeRamdon(std::string& type,std::list<int>& list);
+
+	bool GetTypeRamdon(const std::string& type,const std::string& wordid,
+		               int num,std::list<int>& list);
+
 private:
 	music_logic::GetSongUrl*                         get_song_engine_;
 	music_record::MoodRecordingEngine*               mood_record_engine_;
 	music_record::UserLocalMusicRecodingEngine*      user_local_music_engine_;
+private:
+	std::map<int,base::MigRadomInV2*>                       channel_random_map_;
+	std::map<int,base::MigRadomInV2*>                       mood_random_map_;
+	std::map<int,base::MigRadomInV2*>                       scene_random_map_;
+	threadrw_t*                                       channel_random_lock_;
+	threadrw_t*                                       mood_random_lock_;
+	threadrw_t*                                       scene_random_lock_;
 
 };
 

@@ -492,4 +492,76 @@ bool DBComm::GetMusicOtherInfos(std::map<std::string,base::MusicInfo>&song_music
 
 	return false;
 }
+
+bool DBComm::GetChannelInfos(std::list<int>& list){
+	std::stringstream os;
+	bool r = false;
+	int num = 0;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	os<<"select channel_id from migfm_channel;";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			int channel_id = atol(rows[0]);
+			list.push_back(channel_id);
+		}
+	}
+	return true;
+}
+
+bool DBComm::GetMoodInfos(std::list<int> &list){
+	std::stringstream os;
+	bool r = false;
+	int num = 0;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	os<<"select id from migfm_mood;";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			int channel_id = atol(rows[0]);
+			list.push_back(channel_id);
+		}
+	}
+	return true;
+}
+
+bool DBComm::GetSceneInfos(std::list<int> &list){
+	std::stringstream os;
+	bool r = false;
+	int num = 0;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	os<<"select id from migfm_scene;";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			int channel_id = atol(rows[0]);
+			list.push_back(channel_id);
+		}
+	}
+	return true;
+}
+
+
 }

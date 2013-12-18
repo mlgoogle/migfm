@@ -206,6 +206,47 @@ bool DBComm::GetMusicUser(const std::string& uid,
 	  return false;
 }
 
+bool DBComm::GetUserInfos(const std::string &uid, std::string &nickname, 
+						  std::string &gender, std::string &head, 
+						  double &latitude, double &longitude){
+	nickname.clear();
+	gender.clear();
+	head.clear();
+
+	base_storage::DBStorageEngine* engine = GetConnection();
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	int num = 0;
+	if (engine == NULL) {
+	  LOG_ERROR("GetConnection Error");
+	  return false;
+	}
+
+	os <<"call proc_GetUserInfos(\'"<<uid<<"\')";
+
+	LOG_DEBUG2("%s",os.str().c_str());
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			latitude = atof(rows[0]);
+			longitude = atof(rows[1]);
+			nickname = rows[2];
+			gender = rows[3];
+			head = rows[4];
+
+		}
+		return true;
+	}
+	return false;
+}
+
 bool DBComm::GetUserInfos(const std::string& uid, std::string& nickname,
 		std::string& gender, std::string& head) {
 	nickname.clear();
@@ -293,6 +334,9 @@ bool DBComm::GetMusicOtherInfos(std::map<std::string,base::MusicInfo>&song_music
 	base_storage::db_row_t* db_rows;
 	MYSQL_ROW rows = NULL;
 	int num = song_music_infos.size();
+	if (num<=0)
+		return true;
+
 	os<<"call proc_GetMusicInfo('";
 	for(std::map<std::string,base::MusicInfo>::iterator it = song_music_infos.begin();
 		it!=song_music_infos.end();++it){

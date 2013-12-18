@@ -339,7 +339,7 @@ bool UserInfo::UnserializedJson(const char* str){
 	return true;
 }
 
-MusicCollectInfo& MusicCollectInfo::operator=(const MusicCollectInfo& mclti){
+MusicCltHateInfo& MusicCltHateInfo::operator=(const MusicCltHateInfo& mclti){
 	if (mclti.data_!=NULL){
 		mclti.data_->AddRef();
 	}
@@ -349,7 +349,7 @@ MusicCollectInfo& MusicCollectInfo::operator=(const MusicCollectInfo& mclti){
 	data_ = mclti.data_;
 }
 
-MusicCollectInfo::MusicCollectInfo(const base::MusicCollectInfo &mclti)
+MusicCltHateInfo::MusicCltHateInfo(const base::MusicCltHateInfo &mclti)
 :data_(mclti.data_){
 	if (data_!=NULL){
 		data_->AddRef();
@@ -357,11 +357,11 @@ MusicCollectInfo::MusicCollectInfo(const base::MusicCollectInfo &mclti)
 }
 
 
-MusicCollectInfo::MusicCollectInfo(){
+MusicCltHateInfo::MusicCltHateInfo(){
 	data_ = new Data();
 }
 
-MusicCollectInfo::MusicCollectInfo(const std::string& songid, 
+MusicCltHateInfo::MusicCltHateInfo(const std::string& songid, 
 								   const std::string& type, 
 								   const std::string& tid){
 
@@ -379,7 +379,7 @@ NormalMsgInfo& NormalMsgInfo::operator =(const base::NormalMsgInfo &nmi){
 	data_ = nmi.data_;
 }
 
-bool MusicCollectInfo::SerializedJson(std::string& json){
+bool MusicCltHateInfo::SerializedJson(std::string& json){
 	std::stringstream os;
 	os<<"{\"songid\":"
 		<<"\""<<songid().c_str()<<"\",\"type\":"
@@ -389,7 +389,7 @@ bool MusicCollectInfo::SerializedJson(std::string& json){
 	json.assign(os.str().c_str(),os.str().length());
 }
 
-bool MusicCollectInfo::UnserializedJson(std::string &str){
+bool MusicCltHateInfo::UnserializedJson(std::string &str){
 	Json::Reader reader;
 	Json::Value root;
 	bool r = false;

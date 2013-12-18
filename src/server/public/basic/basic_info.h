@@ -409,18 +409,18 @@ private:
 
 };
 
-class MusicCollectInfo{
+class MusicCltHateInfo{
 public:
-	explicit MusicCollectInfo();
-	explicit MusicCollectInfo(const std::string& songid,
+	explicit MusicCltHateInfo();
+	explicit MusicCltHateInfo(const std::string& songid,
 		                      const std::string& type,
 							  const std::string& tid);
 
-	MusicCollectInfo(const MusicCollectInfo& mclti);
+	MusicCltHateInfo(const MusicCltHateInfo& mclti);
 
-	MusicCollectInfo& operator=(const MusicCollectInfo& mclti);
+	MusicCltHateInfo& operator=(const MusicCltHateInfo& mclti);
 
-	~MusicCollectInfo(){
+	~MusicCltHateInfo(){
 
 	}
 

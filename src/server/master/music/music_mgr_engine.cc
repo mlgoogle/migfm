@@ -52,7 +52,16 @@ bool MusicMgrEngine::Init(){
 		                                      recording_path);
 	user_local_music_engine_ = 
 		new music_record::UserLocalMusicRecodingEngine(config->usr_local_music_path_,
-		                                               usr_local_music_path);    
+		                                               usr_local_music_path);   
+
+	
+	InitThreadrw(&channel_random_lock_);
+	InitThreadrw(&mood_random_lock_);
+	InitThreadrw(&scene_random_lock_);
+
+	////初始化随机数列表
+	RestMusicListRandom();
+
 }
 
 MusicMgrEngine::~MusicMgrEngine(){
@@ -64,6 +73,11 @@ MusicMgrEngine::~MusicMgrEngine(){
 		delete user_local_music_engine_;
 		user_local_music_engine_ = NULL;
 	}
+
+	DeinitThreadrw(channel_random_lock_);
+	DeinitThreadrw(mood_random_lock_);
+	DeinitThreadrw(scene_random_lock_);
+
 }
 
 MusicMgrEngine* MusicMgrEngine::instance_ = NULL;
@@ -612,7 +626,7 @@ bool MusicMgrEngine::GetSongListV2(const int socket,
 	 Json::Reader reader;
 	 Json::Value  root;
 	 std::stringstream os;
-	 std::map<std::string,base::MusicCollectInfo> songmap;
+	 std::map<std::string,base::MusicCltHateInfo> songmap;
 	 std::list<std::string> songinfolist;
 	 std::map<std::string,base::MusicInfo> song_music_infos;
 	 int music_num  = 0;
@@ -663,7 +677,7 @@ bool MusicMgrEngine::GetSongListV2(const int socket,
  			 Base64Decode(smi.artist(),&b64artist);
  			 Base64Decode(smi.album_title(),&b64album);
 			 //"{\"songid\":\"9913\",\"type\":\"1\",\"typeid\":\"2\"}"
-			 std::map<std::string,base::MusicCollectInfo>::iterator itr =
+			 std::map<std::string,base::MusicCltHateInfo>::iterator itr =
 				 songmap.find(smi.id());
 			 os<<"{\"id\":\""<<smi.id().c_str()
  				 <<"\",\"title\":\""<<b64title.c_str()
@@ -866,7 +880,8 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	int32 scens_flag;
 	int32 channel_flag;
 	int32 flag_al = 0;
-	std::map<std::string,base::MusicCollectInfo> song_map;
+	std::map<std::string,base::MusicCltHateInfo> clt_song_map;
+	std::map<std::string,base::MusicCltHateInfo> hate_song_map;
 	music_logic::MusicCacheManager* mcm = music_logic::CacheManagerOp::GetMusicCache();
 
 	r = pack.GetAttrib(UID,uid);
@@ -1003,11 +1018,16 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 			channelci.set_info_num(atol(num.c_str()));
 	}
 //获取用户的红心歌单
-	storage::RedisComm::GetCollectSongs(uid,song_map);
+	//storage::RedisComm::GetCollectSongs(uid,song_map);
+	storage::RedisComm::GetCltAndHateSong(uid,clt_song_map,hate_song_map);
+
 	if (mood_flag){
 		mode = "mm";
-		r = GetMoodScensChannelSongsV2(uid,mode,moodci.info_num(),
-			                           moodci.info_id(),song_map,os1);//心情
+		//r = GetMoodScensChannelSongsV2(uid,mode,moodci.info_num(),
+		//	                           moodci.info_id(),song_map,os1);//心情
+		r = GetMoodScensChannelSongsV3(uid,mode,moodci.info_num(),
+			                           moodci.info_id(),clt_song_map,hate_song_map,
+									   os1);
 		if (r){
 			if (scens_flag!=0||channel_flag!=0)
 				os1<<",";
@@ -1017,8 +1037,11 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	if (scens_flag){
 		mode = "ms";
-		r = GetMoodScensChannelSongsV2(uid,mode,scensci.info_num(),
-			scensci.info_id(),song_map,os1);//场景
+		//r = GetMoodScensChannelSongsV2(uid,mode,scensci.info_num(),
+		//	scensci.info_id(),song_map,os1);//场景
+		r = GetMoodScensChannelSongsV3(uid,mode,scensci.info_num(),
+			scensci.info_id(),clt_song_map,hate_song_map,
+			os1);
 		if (r){
 			if (mood_flag!=0||channel_flag!=0)
 				os1<<",";
@@ -1028,8 +1051,12 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	if (channel_flag){
 		mode = "chl";
-		r = GetMoodScensChannelSongsV2(uid,mode,channelci.info_num(),
-			 channelci.info_id(),song_map,os1);//频道
+		//r = GetMoodScensChannelSongsV2(uid,mode,channelci.info_num(),
+		//	 channelci.info_id(),song_map,os1);//频道
+
+		r = GetMoodScensChannelSongsV3(uid,mode,channelci.info_num(),
+			channelci.info_id(),clt_song_map,hate_song_map,
+			os1);
 	}
 
 	if (!r){
@@ -1333,7 +1360,7 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 	if (flag)
 		storage::RedisComm::SetCollectSong(uid,songid,content);
 	else
-		storage::RedisComm::SetHateSong(uid,songid);
+		storage::RedisComm::SetHateSong(uid,songid,content);
 
 	//记录收藏数
 	if(flag)
@@ -1442,9 +1469,94 @@ bool MusicMgrEngine::GetMusicInfos(const int socket,const std::string& songid){
 }
 
 
+bool MusicMgrEngine::GetMoodScensChannelSongsV3(const std::string& uid, 
+			const std::string mode,const int32 num, const std::string wordid, 
+			std::map<std::string,base::MusicCltHateInfo>& clt_song_map, 
+			std::map<std::string,base::MusicCltHateInfo>& hate_song_map, 
+			std::stringstream& result){
+	std::stringstream os;
+	bool r = false;
+	os<<mode.c_str()<<"_r"<<wordid.c_str();
+	int32 temp_index = 0;
+	int32 temp_total = 0;
+	int is_like = 0;
+	std::list<std::string> songinfolist;
+	std::map<std::string, std::string> songid_map;
+	std::map<std::string,base::MusicInfo> song_music_infos;
+	std::list<int> random_list;
+
+	std::map<std::string, std::string>::iterator it;
+	//先获取整个hash 值
+	int hash_size = storage::RedisComm::GetHashSize(os.str());
+	if (hash_size==0)
+		return false;
+	temp_index = num>hash_size?hash_size:num;
+	temp_total = algorithm::AlgorithmBase::GetTotalForNum(temp_index,3);
+	r = GetTypeRamdon(mode,wordid,temp_total,random_list);
+	if (!r)
+		return false;
+	//一次性获取歌曲信息
+	storage::RedisComm::GetMusicInfosV3(os.str(),random_list,songinfolist);
+
+	ChangeMusicInfos(song_music_infos,songinfolist);
+
+	//获取歌曲URL及评论，热度，收藏
+	storage::DBComm::GetMusicOtherInfos(song_music_infos);
+
+	//json拼装
+	int music_num = song_music_infos.size();
+	for(std::map<std::string,base::MusicInfo>::iterator it = song_music_infos.begin();
+		it!=song_music_infos.end();++it){
+			base::MusicInfo smi = it->second;
+			music_num--;
+			std::string b64title;
+			std::string b64artist;
+			std::string b64album;
+			Base64Decode(smi.title(),&b64title);
+			Base64Decode(smi.artist(),&b64artist);
+			Base64Decode(smi.album_title(),&b64album);
+
+			//是否是黑名单歌曲
+			std::map<std::string,base::MusicCltHateInfo>::iterator itr 
+				= hate_song_map.find(smi.id());
+			if (itr!=hate_song_map.end())
+				continue;
+
+			//是否是红心歌曲
+			std::map<std::string,base::MusicCltHateInfo>::iterator it 
+				= clt_song_map.find(smi.id());
+			if (it!=clt_song_map.end())
+				is_like = 1;
+			else
+				is_like = 0;
+
+			result<<"{\"id\":\""<<smi.id().c_str()
+				<<"\",\"title\":\""<<b64title.c_str()
+				<<"\",\"artist\":\""<<b64artist.c_str()
+				<<"\",\"url\":\""<<smi.url().c_str()
+				<<"\",\"hqurl\":\""<<smi.hq_url().c_str()
+				<<"\",\"pub_time\":\""<<smi.pub_time().c_str()
+				<<"\",\"album\":\""<<b64album.c_str()
+				<<"\",\"time\":\""<<smi.music_time()
+				<<"\",\"pic\":\""<<smi.pic_url().c_str()
+				<<"\",\"type\":\""<<mode.c_str()
+				<<"\",\"tid\":\""<<wordid.c_str()
+				<<"\",\"clt\":\""<<smi.clt_num().c_str()
+				<<"\",\"cmt\":\""<<smi.cmt_num().c_str()
+				<<"\",\"hot\":\""<<smi.hot_num().c_str()
+				<<"\",\"like\":\""<<is_like<<"\"}";
+			if (music_num!=0)
+				result<<",";
+	}
+	return true;
+
+
+
+}
+
 bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
 		const std::string mode,const int32 num, const std::string wordid,
-		std::map<std::string,base::MusicCollectInfo>& song_map,
+		std::map<std::string,base::MusicCltHateInfo>& song_map,
 		std::stringstream& result){
 
 	std::stringstream os;
@@ -1468,6 +1580,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
 		return false;
 	temp_index = num>hash_size?hash_size:num;
 	temp_total = algorithm::AlgorithmBase::GetTotalForNum(temp_index,3);
+
 	while(temp_total>0){
 		std::string songid;
 		std::string music_info;
@@ -1519,7 +1632,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
 			Base64Decode(smi.artist(),&b64artist);
 			Base64Decode(smi.album_title(),&b64album);
 			//是否是红心歌曲
-			std::map<std::string,base::MusicCollectInfo>::iterator it 
+			std::map<std::string,base::MusicCltHateInfo>::iterator it 
 				= song_map.find(smi.id());
 			if (it!=song_map.end())
 				is_like = 1;
@@ -1811,6 +1924,32 @@ ret:
 	return true;
 }
 
+
+bool MusicMgrEngine::RestMusicListRandom(){
+	//数据库获取频道信息
+	bool r = false;
+	std::list<int> channel_list;
+	std::list<int> mood_list;
+	std::list<int> scene_list;
+	r = storage::DBComm::GetChannelInfos(channel_list);
+	if (!r)
+		assert(0);
+	r = storage::DBComm::GetMoodInfos(mood_list);
+	if (!r)
+		assert(0);
+	r = storage::DBComm::GetSceneInfos(scene_list);
+	if (!r)
+		assert(0);
+
+	//创建随机数存储
+	std::string chl = "chl";
+	std::string mm = "mm";
+	std::string ms = "ms";
+	CreateTypeRamdon(chl,channel_list);
+	CreateTypeRamdon(mm,mood_list);
+	CreateTypeRamdon(ms,scene_list);
+}
+
 bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,
 										const int32 flag,
 										const int32 value)
@@ -1916,5 +2055,82 @@ bool MusicMgrEngine::GetMusicHotCltCmt(const std::string &songid,
 	return true;
 }
 
+//chl_r1 mm_r1 ms_r1
+template <typename MapType,typename MapTypeIT>
+static bool GetTypeRamdonTemplate(MapType &map, int idx,int* rands,int num,
+								  threadrw_t* lock){
+	//
+	usr_logic::WLockGd lk(lock);
+	MapTypeIT it = map.find(idx);
+	if (it!=map.end()){
+		it->second->GetPrize(rands,num);
+		return true;
+	}
+	return false;
+}
+
+bool MusicMgrEngine::GetTypeRamdon(const std::string& type,
+								   const std::string& wordid,
+								   int num,std::list<int>& list){
+    int id = atol(wordid.c_str());
+	int* rands = NULL;
+	rands = new int[num];
+	if (rands==NULL)
+		return false;
+
+	bool r = false;
+	if (type=="chl")
+		r = GetTypeRamdonTemplate<std::map<int,base::MigRadomInV2*>,
+		std::map<int,base::MigRadomInV2*>::iterator >(channel_random_map_,id,
+		rands,num,channel_random_lock_);
+	
+	else if (type=="mm")
+		r = GetTypeRamdonTemplate<std::map<int,base::MigRadomInV2*>,
+		std::map<int,base::MigRadomInV2*>::iterator >(mood_random_map_,id,
+		rands,num,mood_random_lock_);
+
+	else if (type=="ms")
+		r = GetTypeRamdonTemplate<std::map<int,base::MigRadomInV2*> ,
+		std::map<int,base::MigRadomInV2*>::iterator>(scene_random_map_,id,
+		rands,num,scene_random_lock_);
+
+	//存在map中便与查找黑名单歌曲
+	int i = 0;
+	while(i<num){
+		list.push_back(rands[i]);
+		i++;
+	}
+
+	if (rands){
+		delete[] rands;
+		rands = NULL;
+	}
+
+	return r;
+}
+
+bool MusicMgrEngine::CreateTypeRamdon(std::string& type,
+									  std::list<int> &list){
+	while(list.size()>0){
+		int id = list.front();
+		list.pop_front();
+		//从redis里面读取歌曲map size
+		std::stringstream os;
+		os<<type.c_str()<<"_r"<<id;
+		int list_size = storage::RedisComm::GetHashSize(os.str());
+		if (list_size<=0)
+			continue;
+		//创建随机数
+		LOG_DEBUG2("name[%s] list_size[%d]",os.str().c_str(),list_size);
+
+		base::MigRadomInV2* radomV2 = new base::MigRadomInV2((list_size));
+		if (type=="chl")
+			channel_random_map_[id] = radomV2;
+		else if (type=="mm")
+			mood_random_map_[id] = radomV2;
+		else if (type=="ms")
+			scene_random_map_[id] = radomV2;
+	}
+}
 
 }

@@ -249,14 +249,19 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	unsigned btime=0, etime=0;
 	if (!RedisComm::GetUserPushConfig(to_uid, device_token,
 		is_recv, btime, etime)) {
-		err_code = MIG_FM_DB_READ_PUSH_CONFIG_FAILED;
-		status = -1;
-		return false;
+		//err_code = MIG_FM_DB_READ_PUSH_CONFIG_FAILED;
+		//status = -1;
+		//return false;
+		status = 1;
+		return true;
 	}
 
 	if (!is_recv) {
-		err_code = MIG_FM_OTHER_PUSH_SERVICE_CLOSED;
-		return false;
+		//err_code = MIG_FM_OTHER_PUSH_SERVICE_CLOSED;
+		//return false;
+		status = 1;
+		return true;
+
 	}
 
 	time_t cur_time = time(NULL);
@@ -268,16 +273,21 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	else
 		enable = (ct<=etime) || (btime<=ct);
 	if (!enable) {
-		err_code = MIG_FM_OTHER_ANTI_HARASSMENT;
-		return false;
+		//err_code = MIG_FM_OTHER_ANTI_HARASSMENT;
+		//return false;
+		status = 1;
+		return true;
 	}
 
 
 	//device_token = "981b5df83c394507ae5b4c13449c826a534f2e01b991e2b9d0641f3414b5b7e3";
+
 	if (!HttpComm::PushMessage(device_token, summary)) {
-		err_code = MIG_FM_PUSH_MSG_FAILED;
-		status = -1;
-		return false;
+// 		err_code = MIG_FM_PUSH_MSG_FAILED;
+// 		status = -1;
+// 		return false;
+		status = 1;
+		return true;
 	}
 
 
@@ -437,14 +447,18 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 	bool is_recv = false;
 	unsigned btime = 0,etime = 0;
 	if (!RedisComm::GetUserPushConfig(atoll(touid.c_str()),device_token,is_recv,btime,etime)){
-		err_code = MIG_FM_DB_READ_PUSH_CONFIG_FAILED;
-		status = -1;
-		return false;
+// 		err_code = MIG_FM_DB_READ_PUSH_CONFIG_FAILED;
+// 		status = -1;
+// 		return false;
+		status = 1;
+		return true;
 	}
 
 	if (!is_recv){
-		err_code = MIG_FM_OTHER_PUSH_SERVICE_CLOSED;
-		return false;
+// 		err_code = MIG_FM_OTHER_PUSH_SERVICE_CLOSED;
+// 		return false;
+		status = 1;
+		return true;
 	}
 	time_t cur_time =time(NULL);
 	tm cur_tm = *localtime(&cur_time);
@@ -456,15 +470,19 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		enable = (ct<=etime) || (btime<=ct);
 
 	if (!enable){
-		err_code = MIG_FM_OTHER_ANTI_HARASSMENT;
-		return false;
+// 		err_code = MIG_FM_OTHER_ANTI_HARASSMENT;
+// 		return false;
+		status = 1;
+		return true;
 	}
 
 		//device_token = "981b5df83c394507ae5b4c13449c826a534f2e01b991e2b9d0641f3414b5b7e3";
 	if(!HttpComm::PushMessage(device_token,summary)){
-		err_code = MIG_FM_PUSH_MSG_FAILED;
-		status = -1;
-		return false;
+// 		err_code = MIG_FM_PUSH_MSG_FAILED;
+// 		status = -1;
+// 		return false;
+		status = 1;
+		return true;
 	}
 
 	status = 1;
@@ -603,7 +621,7 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 
 	//获取歌友信息
 	DBComm::GetMusicUser(uid_str,fromid_str,count_str,vec_users,user_list);
-	if (user_list.size()<0){
+	if (user_list.size()<=0){
 		//fix me
 		err_code = MIG_FM_HTTP_COMMENT_INVALID;
 		return false;
@@ -746,10 +764,11 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
    summary.clear();
    std::string sd_nick, sd_sex, sd_head;
    std::string to_nick, to_sex, to_head;
+   double uid_latitude,uid_longitude,tar_latitude,tar_longitude;
 
-   if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head))
+   if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head,uid_latitude,uid_longitude))
 	   return false;
-   if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head))
+   if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head,tar_latitude,tar_longitude))
 	   return false;
 
    std::stringstream ss;
@@ -766,9 +785,15 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
    content["send_uid"] = send_uid.c_str();
    content["to_uid"] = to_uid.c_str();
    content["msg"] = msg;
+   value["distance"] = base::BasicUtil::CalcGEODistance(uid_latitude,uid_longitude,tar_latitude,tar_longitude);
+
    std::string cur_time;
    SomeUtils::GetCurrntTimeFormat(cur_time);
    content["time"] = cur_time;
+   
+   //当前用户试听音乐获取信息
+   GetUserCurrentMusic(value,send_uid);
+
    detail = wr.write(value);
    return true;
 
@@ -893,7 +918,11 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
 		//r = GetPresentSongDetail(uid,detail_node);
 		//content["song"] = root["song"];
 		content["music"] = root["song"];
-	}else {
+	}
+	else if (type == "sayhello"){
+		content["music"] = root["music"];
+	}
+	else {
 		// do nothing
 	}
 	//userinfo
@@ -908,6 +937,8 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
 		userjson["birthday"] = usrinfo.birthday();
 		userjson["location"] = usrinfo.crty();
 		userjson["source"] = usrinfo.source();
+		if (type == "sayhello")
+			userjson["distance"] = root["distance"];
 	}
 	return true;
 }
@@ -1222,6 +1253,38 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	value["music"]["type"] = type;
 	value["music"]["url"] = music_info.url();
 	return true;
+}
+
+bool SocialityMgrEngine::GetUserCurrentMusic(Json::Value &value,const std::string& tar_uid){
+
+	//因为未含试听功能，所以暂时只需要歌名即可
+	bool r = false;
+	std::string current;
+	Json::Reader reader;
+	Json::Value  root;
+	std::string id;
+	std::string name;
+	std::string singer;
+
+	//
+	r = MemComm::GetCurrentSong(tar_uid,current);
+	r = reader.parse(current,root);
+	if (r){
+		if (root.isMember("songid")){
+			id = root["songid"].asString();
+		}
+		if (root.isMember("name")){
+			name = root["name"].asString();
+		}
+		if (root.isMember("singer")){
+			singer = root["singer"].asString();
+		}
+		value["music"]["title"] = name;
+		value["music"]["artist"] = singer;
+		value["music"]["id"] = id;
+		return true;
+	}
+	return false;
 }
 
 bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,

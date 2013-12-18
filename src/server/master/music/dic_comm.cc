@@ -196,8 +196,58 @@ bool RedisComm::GetMusicHistroyCollect(const std::string &uid,
    return true;
 }
 
+bool RedisComm::GetCltAndHateSong(const std::string& uid, 
+			std::map<std::string,base::MusicCltHateInfo>& clt_song_map, 
+			std::map<std::string,base::MusicCltHateInfo>& hate_song_map){
+	std::string os;
+	bool r = false;
+	char* value = NULL;
+	std::list<std::string> song_list;
+	base_storage::DictionaryStorageEngine* redis_engine_ = 
+		GetConnection();
+	if (!redis_engine_)
+		return false;
+
+//红心歌单
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("clt");
+	r = redis_engine_->GetHashValues(os.c_str(),os.length(),song_list);
+
+	if (r){
+		while(song_list.size()>0){
+			std::string content = song_list.front();
+			song_list.pop_front();
+			base::MusicCltHateInfo mcltinfo;
+			mcltinfo.UnserializedJson(content);
+			clt_song_map[mcltinfo.songid()] = mcltinfo;
+		}
+	}
+
+	song_list.clear();
+	os.clear();
+//垃圾歌曲
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("ht");
+	r = redis_engine_->GetHashValues(os.c_str(),os.length(),song_list);
+
+	if (r){
+		while(song_list.size()>0){
+			std::string content = song_list.front();
+			song_list.pop_front();
+			base::MusicCltHateInfo mcltinfo;
+			mcltinfo.UnserializedJson(content);
+			clt_song_map[mcltinfo.songid()] = mcltinfo;
+		}
+	}
+
+	return r;
+
+}
+
 bool RedisComm::GetCollectSongs(const std::string& uid, 
-					std::map<std::string,base::MusicCollectInfo>& song_map){
+					std::map<std::string,base::MusicCltHateInfo>& song_map){
 	
 	std::string os;
 	bool r = false;
@@ -216,7 +266,7 @@ bool RedisComm::GetCollectSongs(const std::string& uid,
 		while(song_list.size()>0){
 			std::string content = song_list.front();
 			song_list.pop_front();
-			base::MusicCollectInfo mcltinfo;
+			base::MusicCltHateInfo mcltinfo;
 			mcltinfo.UnserializedJson(content);
 			song_map[mcltinfo.songid()] = mcltinfo;
 		}
@@ -327,7 +377,8 @@ bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid){
 }
 
 
-bool RedisComm::SetHateSong(const std::string &uid, const std::string &songid){
+bool RedisComm::SetHateSong(const std::string &uid, const std::string &songid,
+							const std::string& content){
 
 	//key: huid_ht
 	std::string os;
@@ -342,9 +393,40 @@ bool RedisComm::SetHateSong(const std::string &uid, const std::string &songid){
 	os.append("ht");
 
 	redis_engine_->SetHashElement(os.c_str(),songid.c_str(),songid.length(),
-		songid.c_str(),songid.length());
+		content.c_str(),content.length());
 	return true;
 }
+
+bool RedisComm::GetHateSongs(const std::string& uid, 
+			std::map<std::string,base::MusicCltHateInfo>& song_map){
+
+	std::string os;
+	bool r = false;
+	char* value = NULL;
+	std::list<std::string> song_list;
+	base_storage::DictionaryStorageEngine* redis_engine_ = 
+		GetConnection();
+	if (!redis_engine_)
+		return false;
+	os.append("h");
+	os.append(uid.c_str());
+	os.append("ht");
+	r = redis_engine_->GetHashValues(os.c_str(),os.length(),song_list);
+
+	if (r){
+		while(song_list.size()>0){
+			std::string content = song_list.front();
+			song_list.pop_front();
+			base::MusicCltHateInfo mcltinfo;
+			mcltinfo.UnserializedJson(content);
+			song_map[mcltinfo.songid()] = mcltinfo;
+		}
+	}
+	//return redis_engine_->GetAllHash(os.c_str(),os.length(),
+	//                            song_map);
+
+	return r;
+	}
 
 bool RedisComm::DelHateSong(const std::string &uid, const std::string &songid){
 	std::string os;
@@ -536,7 +618,9 @@ void RedisComm::GetMusicInfosV2(std::list<std::string>& songlist,
 	GetMusicInfos(redis_engine_,os.str(),songinfolist);
 }
 
-void RedisComm::GetMusicInfosV2(std::map<std::string,base::MusicCollectInfo>& songmap, std::list<std::string>& songinfolist){
+
+
+void RedisComm::GetMusicInfosV2(std::map<std::string,base::MusicCltHateInfo>& songmap, std::list<std::string>& songinfolist){
 
 	base_storage::DictionaryStorageEngine* redis_engine_ 
 		= GetConnection();
@@ -549,14 +633,58 @@ void RedisComm::GetMusicInfosV2(std::map<std::string,base::MusicCollectInfo>& so
 	if (songmap.size()==0)
 		return;
 
-	for (std::map<std::string,base::MusicCollectInfo>::iterator it 
+	for (std::map<std::string,base::MusicCltHateInfo>::iterator it 
 		= songmap.begin();it!=songmap.end();it++){
 			std::string songid;
-			base::MusicCollectInfo mclti = it->second;
+			base::MusicCltHateInfo mclti = it->second;
 			os<<" "<<mclti.songid();
 	}
 
 	GetMusicInfos(redis_engine_,os.str(),songinfolist);
+}
+
+void RedisComm::GetMusicInfosV3(const std::string& type,std::list<int>& random_list, 
+								std::list<std::string>& songinfolist){
+
+	base_storage::DictionaryStorageEngine* redis_engine_ 
+		= GetConnection();
+	std::stringstream os;
+	int64 total;
+	bool r = false;
+	std::list<std::string> temp_list;
+
+	//获取随机歌曲id
+	os<<"hmget";
+	if (random_list.size()<=0)
+		return ;
+	os<<" "<<type;
+
+	while(random_list.size()>0){
+		int num = random_list.front();
+		random_list.pop_front();
+		os<<" "<<num;
+	}
+	LOG_DEBUG2("%s",os.str().c_str());
+	
+	//提取歌曲
+	GetMusicInfos(redis_engine_,os.str(),temp_list);
+	os.str("");
+
+	os<<"mget";
+	if (temp_list.size()<=0)
+		return ;
+
+	while(temp_list.size()>0){
+		std::string songid = temp_list.front();
+		temp_list.pop_front();
+		os<<" "<<songid;
+	}
+	LOG_DEBUG2("%s",os.str().c_str());
+
+
+	//获取歌曲信息
+	GetMusicInfos(redis_engine_,os.str(),songinfolist);
+
 }
 
 void RedisComm::GetMusicInfosV2(std::map<std::string,std::string>& songmap, 

@@ -31,6 +31,20 @@ private:
 	FILE *m_urandomfp;
 };
 
+class MigRadomInV2
+{
+public:
+	MigRadomInV2(int num = 0);
+	~MigRadomInV2(void);
+public:
+	void SetRateTable(int num = 0);
+	void Reset();
+	void GetPrize(int* rands,int num);
+private:
+	int*       rate_table_;
+	int        num_;
+	int        index_;
+};
 class MigRadomIn
 {
 public:

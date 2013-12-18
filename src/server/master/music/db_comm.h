@@ -37,8 +37,15 @@ public:
 
 	static bool RecordMusicHistory(const std::string& uid,const std::string& songid);
 
-	static bool GetUserHistoryMusic(const std::string& uid,const std::string& fromid,
-		const std::string& count,std::list<std::string>& songlist);
+	static bool GetUserHistoryMusic(const std::string& uid,
+		const std::string& fromid,const std::string& count,
+		std::list<std::string>& songlist);
+
+	static bool GetChannelInfos(std::list<int>& list);
+
+	static bool GetMoodInfos(std::list<int>& list);
+
+	static bool GetSceneInfos(std::list<int>& list);
 
 private:
 #if defined (_DB_POOL_)	

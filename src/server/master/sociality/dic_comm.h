@@ -81,6 +81,8 @@ public:
 	static bool GetString(const char* key,const size_t key_len,
 		                  char** data,size_t* len);
 
+	static bool GetCurrentSong(const std::string& key,std::string& value);
+
     static bool GetUserCurrentSong(const std::vector<std::string> &vec_user,
 		std::map<std::string, std::string> &map_songs);
 private:
