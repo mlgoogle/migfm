@@ -93,7 +93,6 @@ int BaiduLBSConnector::CreatePOI(int64 user_id, double longitude,
 		double latitude, int64& poi_id, std::string &response,
 		std::string &err_msg) {
 	using namespace std;
-
 	ASSERT(user_id != 0);
 
 	poi_id = 0;

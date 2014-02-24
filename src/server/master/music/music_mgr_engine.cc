@@ -2094,6 +2094,8 @@ bool MusicMgrEngine::GetTypeRamdon(const std::string& type,
 		std::map<int,base::MigRadomInV2*>::iterator>(scene_random_map_,id,
 		rands,num,scene_random_lock_);
 
+	if (!r)
+		return r;
 	//存在map中便与查找黑名单歌曲
 	int i = 0;
 	while(i<num){
