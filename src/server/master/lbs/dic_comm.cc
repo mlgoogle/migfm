@@ -32,7 +32,9 @@ base_storage::DictionaryStorageEngine* RedisComm::GetConnection() {
 		}
 		MIG_DEBUG(USER_LEVEL, "ip:%s,port:%d", addrlist_.front().host().c_str(),
 				addrlist_.front().port());
-		engine->Connections(addrlist_);
+		bool r =  engine->Connections(addrlist_);
+		if (!r)
+			return NULL;
 		mig_lbs::ThreadKey::SetStorageDicConn(engine);
 		LOG_DEBUG("Created database connection");
 		return engine;

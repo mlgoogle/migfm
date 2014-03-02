@@ -72,6 +72,7 @@ void DBComm::Dest(){
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
 	try{
+		bool r = false;
 		base_storage::DBStorageEngine* engine = mig_sociality::ThreadKey::GetStorageDBConn();
 		if (engine){
 			if (!engine->CheckConnect()){
@@ -90,7 +91,9 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 			assert(0);
 			return NULL;
 		}
-		engine->Connections(addrlist_);
+		r = engine->Connections(addrlist_);
+		if (!r)
+			return NULL;
 		mig_sociality::ThreadKey::SetStorageDBConn(engine);
 		LOG_DEBUG("Created database connection");
 		return engine;

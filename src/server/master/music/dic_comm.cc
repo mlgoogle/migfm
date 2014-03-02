@@ -39,11 +39,14 @@ base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
 
 		engine = 
 			base_storage::DictionaryStorageEngine::Create(base_storage::IMPL_RADIES);
-		engine->Connections(addrlist_);
 		if (engine==NULL){
 			assert(0);
 			return NULL;
 		}
+		bool r = engine->Connections(addrlist_);
+		if (!r)
+			return NULL;
+
 		usr_logic::ThreadKey::SetStorageDicConn(engine);
 		LOG_DEBUG("Created database connection");
 		return engine;

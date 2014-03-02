@@ -256,7 +256,7 @@ bool HttpResponse::Get(){
 
 
 	//设置超时
-	curl_code = curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);//5s超时设置
+	curl_code = curl_easy_setopt(curl,CURLOPT_TIMEOUT,7);//5s超时设置
 	if(curl_code!=CURLE_OK){
 		MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_TIMEOUT failed: %s",
 			curl_easy_strerror(curl_code));

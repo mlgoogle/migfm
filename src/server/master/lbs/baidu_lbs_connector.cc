@@ -35,8 +35,10 @@ const std::string BD_V2_URL_POI = "http://api.map.baidu.com/geodata/v2/poi/creat
 const std::string BD_V2_URL_UPDATE_POI = "http://api.map.baidu.com/geodata/v2/poi/update";
 const std::string BD_V2_URL_DELETE_POI = "http://api.map.baidu.com/geodata/v2/poi/delete";
 const std::string BD_V2_URL_NEARBY = "http://api.map.baidu.com/geosearch/v2/nearby";
-const std::string BD_V2_GEOTABLE_ID = "44341";
-const std::string BD_V2_ACCESS_KEY = "A63c7ee45648535fa6144615846e7b13";
+//const std::string BD_V2_GEOTABLE_ID = "44341";
+//const std::string BD_V2_ACCESS_KEY = "A63c7ee45648535fa6144615846e7b13";
+const std::string BD_V2_GEOTABLE_ID = "53304";
+const std::string BD_V2_ACCESS_KEY = "esMsm0k6HDMDOFLxRqtRoWs7";
 BaiduLBSConnector::BaiduLBSConnector() {
 	// TODO Auto-generated constructor stub
 

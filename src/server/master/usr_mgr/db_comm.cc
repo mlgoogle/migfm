@@ -19,6 +19,7 @@ void DBComm::Dest(){
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
 	try{
+		bool r = false;
 		base_storage::DBStorageEngine* engine = usr_logic::ThreadKey::GetStorageDBConn();
 		if (engine){
 			if (!engine->CheckConnect()){
@@ -33,11 +34,13 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 		}
 
 		engine = base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
-		engine->Connections(addrlist_);
 		if (engine==NULL){
 			assert(0);
 			return NULL;
 		}
+		r = engine->Connections(addrlist_);
+		if (!r)
+			return NULL;
 		usr_logic::ThreadKey::SetStorageDBConn(engine);
 		LOG_DEBUG("Created database connection");
 		return engine;
