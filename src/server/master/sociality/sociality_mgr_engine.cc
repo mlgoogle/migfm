@@ -235,15 +235,15 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	//修改为支持多首音乐
+	//淇敼涓烘敮鎸佸棣栭煶涔�
 	std::string summary;
 	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,err_code,status))
 		return false;
 
-	//加入历史记录
+	//鍔犲叆鍘嗗彶璁板綍
 	DBComm::AddMusciFriend(user_id,to_user_id);
 
-	//推送消息配置
+	//鎺ㄩ�娑堟伅閰嶇疆
 	std::string device_token;
 	bool is_recv = false;
 	unsigned btime=0, etime=0;
@@ -318,7 +318,7 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 	}
 
 	int page_index = atoi(page_index_str.c_str());
-	int page_size = atoi(page_size_str.c_str());
+	int page_size = atoi(page_size_str.c_str()) -1;
 
 	typedef std::list<std::string> MsgList;
 	MsgList msg_list;
@@ -582,7 +582,7 @@ bool SocialityMgrEngine::OnMsgCommentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	//获取这首歌评论数
+	//鑾峰彇杩欓姝岃瘎璁烘暟
 	//this->SetMusicHostCltCmt(songid_str,3,curjson);
 	//LOG_DEBUG2("%s",curjson.c_str());
 	DBComm::SetMusicHostCltCmt(songid_str,3);
@@ -619,7 +619,7 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 		count_str = "10";
 	}
 
-	//获取歌友信息
+	//鑾峰彇姝屽弸淇℃伅
 	DBComm::GetMusicUser(uid_str,fromid_str,count_str,vec_users,user_list);
 	if (user_list.size()<=0){
 		//fix me
@@ -627,26 +627,26 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 		return false;
 	}
 
-	//获取当前用户试听歌曲
+	//鑾峰彇褰撳墠鐢ㄦ埛璇曞惉姝屾洸
 	MemComm::GetUserCurrentSong(vec_users, temp_usersong);
 
-	//获取该用户红心歌曲
+	//鑾峰彇璇ョ敤鎴风孩蹇冩瓕鏇�
 	RedisComm::GetCollectSongs(uid_str,collect_map);
 
-	//获取歌曲信息
+	//鑾峰彇姝屾洸淇℃伅
 	RedisComm::GetMusicInfos(temp_usersong,user_song);
 
-	//获取歌曲URL及评论，热度，收藏
+	//鑾峰彇姝屾洸URL鍙婅瘎璁猴紝鐑害锛屾敹钘�
 	DBComm::GetMusicOtherInfos(user_song);
 
-	//遍历用户信息 音乐信息 封包
+	//閬嶅巻鐢ㄦ埛淇℃伅 闊充箰淇℃伅 灏佸寘
 	while(user_list.size()>0){
 		Json::Value info;
 		struct MusicFriendInfo userinfo = user_list.front();
 		user_list.pop_front();
-		//获取音乐信息
+		//鑾峰彇闊充箰淇℃伅
 		GetMusicInfo(info,userinfo.userinfo.uid(),temp_usersong,collect_map,user_song);
-		//获取用户信息
+		//鑾峰彇鐢ㄦ埛淇℃伅
 		GetUserInfo(info,userinfo);
 		result["result"]["nearUser"].append(info);
 	}
@@ -772,7 +772,7 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
 	   return false;
 
    std::stringstream ss;
-   ss << sd_nick << "(" << send_uid << ")" << "向你打招呼";
+   ss << sd_nick << "(" << send_uid << ")" << "打招呼";
    summary.assign(ss.str());
 
    char tmp[256] = {0};
@@ -791,7 +791,7 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
    SomeUtils::GetCurrntTimeFormat(cur_time);
    content["time"] = cur_time;
    
-   //当前用户试听音乐获取信息
+   //褰撳墠鐢ㄦ埛璇曞惉闊充箰鑾峰彇淇℃伅
    GetUserCurrentMusic(value,send_uid);
 
    detail = wr.write(value);
@@ -810,7 +810,7 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string &send_uid,
 	Json::FastWriter wr;
 	Json::Value value;
 
-	//获取歌曲信息，杜绝不存在歌曲id提交
+	//
 	if(!GetMusicInfos(to_uid,song_id,value["song"]))
 		return false;
 
@@ -856,7 +856,7 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 	//	return false;
 
 	std::stringstream ss;
-	ss << sd_usrinfo.nickname().c_str() << "(" << send_uid << ")" << "赠送您一首歌";
+	ss << sd_usrinfo.nickname().c_str() << "(" << send_uid << ")" << "璧犻�鎮ㄤ竴棣栨瓕";
 	summary.assign(ss.str());
 
 	
@@ -865,7 +865,7 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string& send_uid,
 	Json::FastWriter wr;
 	Json::Value value;
 	
-	//获取歌曲信息，杜绝不存在歌曲id提交
+	//鑾峰彇姝屾洸淇℃伅锛屾潨缁濅笉瀛樺湪姝屾洸id鎻愪氦
  	if(!GetMusicInfos(to_uid,song_id,value["song"]))
  		return false;
 
@@ -989,7 +989,7 @@ bool SocialityMgrEngine::GetMusicInfos(const std::string& uid,
 	Base64Decode(smi.artist(),&b64artist);
 	Base64Decode(smi.album_title(),&b64album);
 
-//是否是红心歌曲
+//鏄惁鏄孩蹇冩瓕鏇�
 	r = RedisComm::IsCollectSong(uid,songid);
 	if (r)
 		is_like = "1";
@@ -1026,7 +1026,7 @@ bool SocialityMgrEngine::SetMusicHostCltCmt(const std::string &songid, const int
 	bool r = false;
 	r = this->GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
 
-	//意外情况
+	//鎰忓鎯呭喌
 	if (hot_num.empty())
 		hot_num="0";
 	if (cmt_num.empty())
@@ -1034,7 +1034,7 @@ bool SocialityMgrEngine::SetMusicHostCltCmt(const std::string &songid, const int
 	if (clt_num.empty())
 		clt_num="0";
 
-	if (!r){//第一次添加
+	if (!r){//绗竴娆℃坊鍔�
 		switch (flag){
 		  case 1:
 			  hot_num = "1";
@@ -1051,7 +1051,7 @@ bool SocialityMgrEngine::SetMusicHostCltCmt(const std::string &songid, const int
 		  default:
 			  clt_num = cmt_num = hot_num = "0";
 		}
-	}else{//累计累加
+	}else{//绱绱姞
 		switch (flag){
 		  case 1:
 			  refcount = atoll(hot_num.c_str());
@@ -1132,6 +1132,7 @@ bool SocialityMgrEngine::GetUserInfo(Json::Value &value,
 	value["userinfo"]["userid"] = userinfo.userinfo.uid();
 	value["userinfo"]["head"] = userinfo.userinfo.head();
 	value["userinfo"]["plat"] = userinfo.userinfo.source();
+	value["userinfo"]["birthday"] = userinfo.userinfo.birthday();
 	return true;
 }
 
@@ -1141,7 +1142,7 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 		std::map<std :: string,base :: MusicInfo> &user_song){
    
 	bool r  = false;
-    //获取音乐信息
+    //鑾峰彇闊充箰淇℃伅
 	std::map<std :: string,base :: MusicInfo>::iterator it_music = user_song.find(uid);
 	std::map<std :: string,std :: string>::iterator it_temp = temp_usersong.find(uid);
 	if (it_music==user_song.end())
@@ -1151,8 +1152,8 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	base::MusicInfo music_info = it_music->second;
 	std::string temp_info = it_temp->second;
 
-	/*从temp_usersong 获取状态 
-	value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"艳阳天","singer":"窦唯"}
+	/*浠巘emp_usersong 鑾峰彇鐘舵�
+	value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"鑹抽槼澶�,"singer":"绐﹀敮"}
 	*/
 /*
 	std::string state;
@@ -1179,8 +1180,8 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 		}
 	}
 
-	//是否是红心歌曲
-	std::map<std :: string,std :: string>::iterator it_like = 
+	//鏄惁鏄孩蹇冩瓕鏇�
+	std::map<std :: string,std :: string>::iterator it_like =
 		collect_map.find(music_info.id());
 
 	if (it_like!=collect_map.end())
@@ -1221,8 +1222,8 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	}
 
 
-	//是否是红心歌曲
-	std::map<std :: string,std :: string>::iterator it_like = 
+	//鏄惁鏄孩蹇冩瓕鏇�
+	std::map<std :: string,std :: string>::iterator it_like =
 		collect_map.find(music_info.id());
 
 	if (it_like!=collect_map.end())
@@ -1233,7 +1234,7 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 	Base64Decode(music_info.artist(),&b64artist);
 	Base64Decode(music_info.album_title(),&b64album);
 
-	//组装json
+	//缁勮json
 	value["songstat"] = state;
 	value["music"]["album"] = b64album;
 	value["music"]["artist"] = b64artist;
@@ -1257,7 +1258,7 @@ bool SocialityMgrEngine::GetMusicInfo(Json::Value &value,const std::string& uid,
 
 bool SocialityMgrEngine::GetUserCurrentMusic(Json::Value &value,const std::string& tar_uid){
 
-	//因为未含试听功能，所以暂时只需要歌名即可
+	//鍥犱负鏈惈璇曞惉鍔熻兘锛屾墍浠ユ殏鏃跺彧闇�姝屽悕鍗冲彲
 	bool r = false;
 	std::string current;
 	Json::Reader reader;
@@ -1291,18 +1292,18 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 										std::string& uid,std::string& to_uid,
 										int& err_code,int& status){
    
-    //解析json
+    //json
 /*
 
 {
 "song": [
 {
 "songid": "234",
-"msg": "来听听"
+"msg": "鏉ュ惉鍚�
 },
 {
 "songid": "2334",
-"msg": "来听听下嘛"
+"msg": "鏉ュ惉鍚笅鍢�"
 }
 ]
 }
@@ -1371,13 +1372,13 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 
 	}
 
-	//内容
+	//鍐呭
 	std::stringstream ss;
 	std::string conver_num;
 	r = base::BasicUtil::ConverNum(infos_size,conver_num);
 	if(!r)
 		conver_num.append("0");
-	ss << sd_usrinfo.nickname().c_str() << "(" << uid << ")" << "赠送您"<<conver_num<<"首歌";
+	ss << sd_usrinfo.nickname().c_str() << "(" << uid << ")" << "赠送"<<conver_num<<"首歌";
 	summary.assign(ss.str());
 	return true;
 }

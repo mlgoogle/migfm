@@ -187,13 +187,14 @@ bool DBComm::GetMusicUser(const std::string& uid,
 			  userinfo.set_uid(rows[2]);
 			  userinfo.set_head(rows[3]);
 			  userinfo.set_source(rows[4]);
+			  userinfo.set_birthday(rows[5]);
 			  if (userinfo.uid()==uid)
 				  continue;
 			  vec_users.push_back(userinfo.uid());
 			  struct MusicFriendInfo info;
 			  info.userinfo = userinfo;
-			  info.latitude = atof(rows[5]);
-			  info.longitude = atof(rows[6]);
+			  info.latitude = atof(rows[6]);
+			  info.longitude = atof(rows[7]);
 			  info.distance 
 				  = base::BasicUtil::CalcGEODistance(uid_latitude,
 				                                     uid_longitude,

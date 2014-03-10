@@ -875,8 +875,12 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		  /*if (!item.isMember("ext"))
 			  continue;
 		  std::string uid_str = item["ext"]["user_id"].asString();*/
+
 		  std::string uid_str = item["usr_id"].asString();
 		  if (uid_str.empty())
+			  continue;
+		  int64 tar_uid = atoll(uid_str.c_str());
+		  if (uid==tar_uid)
 			  continue;
 		  if (mapExist.end() != mapExist.find(uid_str))
 			  continue;
@@ -918,6 +922,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  val["userinfo"]["nickname"] = usrinfo.nickname();
 			  val["userinfo"]["sex"] = usrinfo.sex();
 			  val["userinfo"]["head"] = usrinfo.head();
+			  val["userinfo"]["birthday"] = usrinfo.birthday();
 			  vec_users.push_back(uid_str);
 			  temp_users.append(val);
 		  }
@@ -955,9 +960,18 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 				  }else{
 					  usersmusic.append(item);
 				  }
+		  }else{
+			  if (flag==1){//处理未听歌不显示的用户
+				//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"艳阳天","singer":"窦唯"}
+// 				  const std::string default_content = "{\"songid\":\"0\",\"state\":\"1\",\"type\":\"mm\",\"tid\":\"1\",\"name\":\"艳阳天\",\"singer\":\"窦唯\"}";
+// 				  bool is_user_like = false;
+// 				  r = GetUserCurrentMusic(default_content,item,is_user_like);
+				  usersmusic.append(item);
+			  }else {
+				  item["music"] = 0;
+			  }
+			  
 		  }
-		  else
-			  item["music"] = 0;
 	}
 
 	//获取用户数
@@ -978,8 +992,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	}else if (flag==5){
 		int collect_num = collect_musices.size();
 		int near_num = temp_users.size();
+		int music_num = map_songs.size();
 		result["result"]["mynum"] = collect_num;
-		result["result"]["nearnum"] = near_num;
+		result["result"]["nearnum"] = music_num;
 	}
 	else{
 		result["result"]["nearUser"] = usersmusic;
