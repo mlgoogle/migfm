@@ -2,7 +2,7 @@
 #define _MASTER_PLUGIN_USR_MGR_USR_MGR_ENGINE_H__
 #include "plugins.h"
 #include "basic/http_packet.h"
-namespace usr_logic{
+namespace chat_logic{
 
 class UsrMgrEngine{
 public:

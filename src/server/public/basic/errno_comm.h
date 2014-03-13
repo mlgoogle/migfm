@@ -24,29 +24,28 @@
 #define  MIG_FM_CONTENT_NO_EXITS                 -21
 #define  MIG_FM_VERSION_NO_EXITS                 -22
 #define  MIG_FM_NET_STATE_NO_EXITS               -23
-#define  MIG_FM_HTTP_INVALID_USER_ID           -24		// "è¯·æ±‚ä¸­IDå­—æ®µéžæ³•";
-#define  MIG_FM_HTTP_DEVICE_TOKEN_NOT_EXIST   	-25		// "è¯·æ±‚ä¸­æœªåŒ…å«devicetokenå­—æ®µ";
-#define  MIG_FM_HTTP_INVALID_TIME_FORMAT    	-26		// "è¯·æ±‚ä¸­æ—¶é—´æ ¼å¼éžæ³•";
-#define  MIG_FM_DB_SAVE_PUSH_CONFIG_FAILED 		-27		// "æ•°æ®åº“ä¿å­˜æŽ¨é€è®¾ç½®å¤±è´¥";
-#define  MIG_FM_DB_READ_PUSH_CONFIG_FAILED 		-28		// "æ•°æ®åº“è¯»å–æŽ¨é€è®¾ç½®å¤±è´¥";
-#define  MIG_FM_OTHER_PUSH_SERVICE_CLOSED 		-29		// "å¯¹æ–¹æŽ¨é€æœåŠ¡å…³é—­"
-#define  MIG_FM_OTHER_ANTI_HARASSMENT 			-30		// "å¯¹æ–¹å¼€å¯é˜²æ‰“æ‰°"
-#define  MIG_FM_DB_ACCESS_FAILED    			-31		// "æ•°æ®åº“è®¿é—®å¤±è´¥"
-#define  MIG_FM_PUSH_MSG_FAILED   				-32		// "æŽ¨é€æ¶ˆæ¯å¤±è´¥"
-#define  MIG_FM_MSG_LIST_EMPTY     				-33 	// "æ¶ˆæ¯åˆ—è¡¨ä¸ºç©º"
-#define  MIG_FM_SOURCE_NO_VAILED                -34  //"è¯·æ±‚ä¸­æœªåŒ…å«æ¥æº";
-#define  MIG_FM_SOURCE_SESSION_NO_VAILED        -35  //"è¯·æ±‚ä¸­æœªåŒ…å«ç¬¬ä¸‰æ–¹æ ‡ç¤ºç¬¦";
-#define  MIG_FM_USERNAME_NO_VAILED              -36  //"è¯·æ±‚ä¸­æœªåŒ…å«ç”¨æˆ·å";
-#define  MIG_FM_PASSWORD_NO_VAILED              -37  //"è¯·æ±‚ä¸­æœªåŒ…å«å¯†ç ";
-#define  MIG_FM_USER_EXITS                      -38   //ç”¨æˆ·å­˜åœ¨
-#define  MIG_FM_HTTP_COMMENT_INVALID			-39		// "è¯·æ±‚ä¸­è¯„è®ºå­—æ®µæ— æ•ˆ"
-#define  MIG_FM_HTTP_FROMID_INVALID				-40		// "è¯·æ±‚ä¸­èµ·å§‹IDæ— æ•ˆ"
-#define  MIG_FM_HTTP_COUNT_INVALID				-41		// "è¯·æ±‚ä¸­åˆ†é¡µæ•°é‡æ— æ•ˆ" 
-#define  MIG_FM_HTTP_PLAT_INVALID				-42		// "ç™»å½•å¹³å°ä¿¡æ¯é”™è¯¯" 
-#define  MIG_FM_HTTP_USERCHECK_INVALID				-43		// "ç”¨æˆ·åï¼Œå¯†ç é”™è¯¯" 
-#define  MIG_FM_HTTP_USERINFO_INVALID				-44		// "æ— æ•ˆç”¨æˆ·ä¿¡æ¯" 
-#define  MIG_FM_HTTP_JSON_ERROR                  -45 //"JSONæ ¼å¼é”™è¯¯"
-
+#define  MIG_FM_HTTP_INVALID_USER_ID           -24		// "ÇëÇóÖÐID×Ö¶Î·Ç·¨";
+#define  MIG_FM_HTTP_DEVICE_TOKEN_NOT_EXIST   	-25		// "ÇëÇóÖÐÎ´°üº¬devicetoken×Ö¶Î";
+#define  MIG_FM_HTTP_INVALID_TIME_FORMAT    	-26		// "ÇëÇóÖÐÊ±¼ä¸ñÊ½·Ç·¨";
+#define  MIG_FM_DB_SAVE_PUSH_CONFIG_FAILED 		-27		// "Êý¾Ý¿â±£´æÍÆËÍÉèÖÃÊ§°Ü";
+#define  MIG_FM_DB_READ_PUSH_CONFIG_FAILED 		-28		// "Êý¾Ý¿â¶ÁÈ¡ÍÆËÍÉèÖÃÊ§°Ü";
+#define  MIG_FM_OTHER_PUSH_SERVICE_CLOSED 		-29		// "¶Ô·½ÍÆËÍ·þÎñ¹Ø±Õ"
+#define  MIG_FM_OTHER_ANTI_HARASSMENT 			-30		// "¶Ô·½¿ªÆô·À´òÈÅ"
+#define  MIG_FM_DB_ACCESS_FAILED    			-31		// "Êý¾Ý¿â·ÃÎÊÊ§°Ü"
+#define  MIG_FM_PUSH_MSG_FAILED   				-32		// "ÍÆËÍÏûÏ¢Ê§°Ü"
+#define  MIG_FM_MSG_LIST_EMPTY     				-33 	// "ÏûÏ¢ÁÐ±íÎª¿Õ"
+#define  MIG_FM_SOURCE_NO_VAILED                -34  //"ÇëÇóÖÐÎ´°üº¬À´Ô´";
+#define  MIG_FM_SOURCE_SESSION_NO_VAILED        -35  //"ÇëÇóÖÐÎ´°üº¬µÚÈý·½±êÊ¾·û";
+#define  MIG_FM_USERNAME_NO_VAILED              -36  //"ÇëÇóÖÐÎ´°üº¬ÓÃ»§Ãû";
+#define  MIG_FM_PASSWORD_NO_VAILED              -37  //"ÇëÇóÖÐÎ´°üº¬ÃÜÂë";
+#define  MIG_FM_USER_EXITS                      -38   //ÓÃ»§´æÔÚ
+#define  MIG_FM_HTTP_COMMENT_INVALID			-39		// "ÇëÇóÖÐÆÀÂÛ×Ö¶ÎÎÞÐ§"
+#define  MIG_FM_HTTP_FROMID_INVALID				-40		// "ÇëÇóÖÐÆðÊ¼IDÎÞÐ§"
+#define  MIG_FM_HTTP_COUNT_INVALID				-41		// "ÇëÇóÖÐ·ÖÒ³ÊýÁ¿ÎÞÐ§"
+#define  MIG_FM_HTTP_PLAT_INVALID				-42		// "µÇÂ¼Æ½Ì¨ÐÅÏ¢´íÎó"
+#define  MIG_FM_HTTP_USERCHECK_INVALID				-43		// "ÓÃ»§Ãû£¬ÃÜÂë´íÎó"
+#define  MIG_FM_HTTP_USERINFO_INVALID				-44		// "ÎÞÐ§ÓÃ»§ÐÅÏ¢"
+#define  MIG_FM_HTTP_JSON_ERROR                  -45 //"JSON¸ñÊ½´íÎó"
 const char*
 migfm_strerror(int error_code);
 #endif

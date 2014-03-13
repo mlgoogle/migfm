@@ -1,5 +1,5 @@
 #include "protocol/data_packet.h"
-
+#include<netinet/in.h>
 namespace packet{
 
 void DataOutPacket::Write8(int8 b){

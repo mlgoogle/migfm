@@ -8,90 +8,90 @@ migfm_strerror(int error_code){
 	
 	switch (error_code) {
 	case MIG_FM_HTTP_MOOD_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«å¿ƒæƒ…ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬ĞÄÇéĞÅÏ¢";
 	case MIG_FM_HTTP_USER_NO_EXITS:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«ç”¨æˆ·ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬ÓÃ»§ĞÅÏ¢";
 	case MIG_FM_USER_MOOD_NO_EXITS:
-		return "ç”¨æˆ·å¿ƒæƒ…æœªç”Ÿæˆ";
+		return "ÓÃ»§ĞÄÇéÎ´Éú³É";
 	case MIG_FM_HTTP_MODE_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«æ¨¡å¼ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬Ä£Ê½ĞÅÏ¢";
 	case MIG_FM_HTTP_MOOD_DEC_NO_EXITS:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«å¿ƒæƒ…æè¿°ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬ĞÄÇéÃèÊöĞÅÏ¢";
 	case MIG_FM_HTTP_DEC_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«æ¨¡å¼æè¿°ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬Ä£Ê½ÃèÊöĞÅÏ¢";
 	case MIG_FM_HTTP_CHANNLE_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«é¢‘é“ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬ÆµµÀĞÅÏ¢";
 	case MIG_FM_HTTP_SONG_ID_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«æ­Œæ›²ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬¸èÇúĞÅÏ¢";
 	case MIG_FM_USER_NO_COLLECT_SONG:
-		return "ç”¨æˆ·æœªæ”¶è—æ­Œæ›²";
+		return "ÓÃ»§Î´ÊÕ²Ø¸èÇú";
 	case MIG_FM_MOOD_NO_VALID:
-		return "ç³»ç»Ÿä¸­å¿ƒæƒ…ä¸å­˜åœ¨";
+		return "ÏµÍ³ÖĞĞÄÇé²»´æÔÚ";
 	case MIG_FM_SYSTEM_DEC_NO_VALID:
-		return "ç³»ç»Ÿä¸­æè¿°è¯ä¸å­˜åœ¨";
+		return "ÏµÍ³ÖĞÃèÊö´Ê²»´æÔÚ";
 	case MIG_FM_MOODID_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«å¿ƒæƒ…åºå·";
+		return "ÇëÇóÖĞÎ´°üº¬ĞÄÇéĞòºÅ";
 	case MIG_FM_MOODINDEX_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«å¿ƒæƒ…é¡ºåº";
+		return "ÇëÇóÖĞÎ´°üº¬ĞÄÇéË³Ğò";
 	case MIG_FM_SCENEID_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«åœºæ™¯åºå·";
+		return "ÇëÇóÖĞÎ´°üº¬³¡¾°ĞòºÅ";
 	case MIG_FM_SCENEINDEX_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«åœºæ™¯é¡ºåº";
+		return "ÇëÇóÖĞÎ´°üº¬³¡¾°Ë³Ğò";
 	case MIG_FM_CHANNELID_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«é¢‘é“åºå·";
+		return "ÇëÇóÖĞÎ´°üº¬ÆµµÀĞòºÅ";
 	case MIG_FM_CHANNELINDEX_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«é¢‘é“é¡ºåº";
+		return "ÇëÇóÖĞÎ´°üº¬ÆµµÀË³Ğò";
 	case MIG_FM_SOUCE_NO_VALID:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«æ¥æº";
+		return "ÇëÇóÖĞÎ´°üº¬À´Ô´";
 	case MIG_FM_CONTENT_NO_EXITS:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«æ­Œæ›²ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬¸èÇúĞÅÏ¢";
 	case MIG_FM_VERSION_NO_EXITS:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«ç‰ˆæœ¬ä¿¡æ¯";
+		return "ÇëÇóÖĞÎ´°üº¬°æ±¾ĞÅÏ¢";
 	case MIG_FM_NET_STATE_NO_EXITS:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«ç½‘ç»œçŠ¶æ€";
+		return "ÇëÇóÖĞÎ´°üº¬ÍøÂç×´Ì¬";
 	case MIG_FM_HTTP_INVALID_USER_ID:
-		return "è¯·æ±‚ä¸­IDå­—æ®µéæ³•";
+		return "ÇëÇóÖĞID×Ö¶Î·Ç·¨";
 	case MIG_FM_HTTP_DEVICE_TOKEN_NOT_EXIST:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«devicetokenå­—æ®µ";
+		return "ÇëÇóÖĞÎ´°üº¬devicetoken×Ö¶Î";
 	case MIG_FM_HTTP_INVALID_TIME_FORMAT:
-		return "è¯·æ±‚ä¸­æ—¶é—´æ ¼å¼éæ³•";
+		return "ÇëÇóÖĞÊ±¼ä¸ñÊ½·Ç·¨";
 	case MIG_FM_DB_SAVE_PUSH_CONFIG_FAILED:
-		return "æ•°æ®åº“ä¿å­˜æ¨é€è®¾ç½®å¤±è´¥";
+		return "Êı¾İ¿â±£´æÍÆËÍÉèÖÃÊ§°Ü";
 	case MIG_FM_DB_READ_PUSH_CONFIG_FAILED:
-		return "æ•°æ®åº“è¯»å–æ¨é€è®¾ç½®å¤±è´¥";
+		return "Êı¾İ¿â¶ÁÈ¡ÍÆËÍÉèÖÃÊ§°Ü";
 	case MIG_FM_OTHER_PUSH_SERVICE_CLOSED:
-		return "å¯¹æ–¹æ¨é€æœåŠ¡å…³é—­";
+		return "¶Ô·½ÍÆËÍ·şÎñ¹Ø±Õ";
 	case MIG_FM_OTHER_ANTI_HARASSMENT:
-		return "å¯¹æ–¹å¼€å¯é˜²æ‰“æ‰°";
+		return "¶Ô·½¿ªÆô·À´òÈÅ";
 	case MIG_FM_DB_ACCESS_FAILED:
-		return "æ•°æ®åº“è®¿é—®å¤±è´¥";
+		return "Êı¾İ¿â·ÃÎÊÊ§°Ü";
 	case MIG_FM_PUSH_MSG_FAILED:
-		return "æ¨é€æ¶ˆæ¯å¤±è´¥";
+		return "ÍÆËÍÏûÏ¢Ê§°Ü";
 	case MIG_FM_MSG_LIST_EMPTY:
-		return "æ¶ˆæ¯åˆ—è¡¨ä¸ºç©º";
+		return "ÏûÏ¢ÁĞ±íÎª¿Õ";
 	case MIG_FM_SOURCE_SESSION_NO_VAILED:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«ç¬¬ä¸‰æ–¹æ ‡ç¤ºç¬¦";
+		return "ÇëÇóÖĞÎ´°üº¬µÚÈı·½±êÊ¾·û";
 	case MIG_FM_USERNAME_NO_VAILED:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«ç”¨æˆ·å";
+		return "ÇëÇóÖĞÎ´°üº¬ÓÃ»§Ãû";
 	case MIG_FM_PASSWORD_NO_VAILED:
-		return "è¯·æ±‚ä¸­æœªåŒ…å«å¯†ç ";
+		return "ÇëÇóÖĞÎ´°üº¬ÃÜÂë";
 	case MIG_FM_USER_EXITS:
-		return "ç”¨æˆ·å·²ç»å­˜åœ¨";
+		return "ÓÃ»§ÒÑ¾­´æÔÚ";
 	case MIG_FM_HTTP_COMMENT_INVALID:
-		return "è¯·æ±‚ä¸­è¯„è®ºå­—æ®µæ— æ•ˆ";
+		return "ÇëÇóÖĞÆÀÂÛ×Ö¶ÎÎŞĞ§";
 	case MIG_FM_HTTP_FROMID_INVALID:
-		return "è¯·æ±‚ä¸­èµ·å§‹IDæ— æ•ˆ";
+		return "ÇëÇóÖĞÆğÊ¼IDÎŞĞ§";
 	case MIG_FM_HTTP_COUNT_INVALID:
-		return "è¯·æ±‚ä¸­åˆ†é¡µæ•°é‡æ— æ•ˆ";
+		return "ÇëÇóÖĞ·ÖÒ³ÊıÁ¿ÎŞĞ§";
 	case MIG_FM_HTTP_PLAT_INVALID:
-		return "ç™»å½•å¹³å°ä¿¡æ¯é”™è¯¯";
+		return "µÇÂ¼Æ½Ì¨ĞÅÏ¢´íÎó";
 	case MIG_FM_HTTP_USERCHECK_INVALID:
-		return "ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯";
+		return "ÓÃ»§Ãû»òÃÜÂë´íÎó";
 	case MIG_FM_HTTP_USERINFO_INVALID:
-		return "æ— æ•ˆç”¨æˆ·ä¿¡æ¯";
+		return "ÎŞĞ§ÓÃ»§ĞÅÏ¢";
 	case MIG_FM_HTTP_JSON_ERROR:
-		return "JSONæ ¼å¼é”™è¯¯";
+		return "JSON¸ñÊ½´íÎó";
 	default:
-		return "æœªçŸ¥é”™è¯¯ç ";
+		return "Î´Öª´íÎóÂë";
 	}
 }

@@ -156,7 +156,6 @@ static inline struct echo_block *echo_block_alloc(struct echo_conn *conn,
     }
     
     assert(block_count>=0);
-    //block_count++;
     __sync_fetch_and_add(&block_count,1);
     block->address = addr;
     block->length = 4096;
@@ -168,7 +167,6 @@ static inline struct echo_block *echo_block_alloc(struct echo_conn *conn,
 static inline void echo_block_free(struct echo_block *block,struct server *srv){
 
     assert(block->refcount==0);
-    //block_count--;
     __sync_fetch_and_sub(&block_count,1);
     free(block->address);
     free(block);
@@ -177,7 +175,6 @@ static inline void echo_block_free(struct echo_block *block,struct server *srv){
 static inline struct echo_packet *echo_packet_alloc(struct echo_conn *conn,
                                                     struct server *srv){
     struct echo_packet *packet;
-    //packet_count++;
     __sync_fetch_and_add(&packet_count,1);
     packet = (struct echo_packet*)malloc(sizeof(*packet));
     memset(packet,'\0',sizeof(*packet));
@@ -187,14 +184,12 @@ static inline struct echo_packet *echo_packet_alloc(struct echo_conn *conn,
 
 static inline void echo_packet_free(struct echo_packet *packet,
                                     struct server *srv){
-    //packet_count--;
     __sync_fetch_and_sub(&packet_count,1);
     free(packet);
     packet=NULL;
 }
 
 static inline void echo_block_addref(struct echo_block *block){
-    //block->refcount++;
     __sync_fetch_and_add(&block->refcount,1);
 }
 
@@ -211,7 +206,6 @@ static inline struct echo_conn *echo_conn_alloc(struct psock_conn *sc,struct ser
     if(ec==NULL)
         return NULL;
     memset(ec,'\0',sizeof(*ec));
-    //echo_conn_count++;
     __sync_fetch_and_add(&echo_conn_count,1);
     INIT_LIST_HEAD(&ec->pending_packets);
     INIT_LIST_HEAD(&ec->inflight_packets);
@@ -222,7 +216,6 @@ static inline struct echo_conn *echo_conn_alloc(struct psock_conn *sc,struct ser
 }
 
 static inline void echo_conn_free(struct echo_conn *conn,struct server *srv){
-    //echo_conn_count--;
     __sync_fetch_and_sub(&echo_conn_count,1); 
     assert(list_empty(&conn->pending_packets));
     assert(list_empty(&conn->inflight_packets));
@@ -235,7 +228,6 @@ static inline void echo_conn_free(struct echo_conn *conn,struct server *srv){
     pthread_mutex_destroy(&conn->lock);
     free(conn);
     conn=NULL;
-    //srv->echo_conn_count = echo_conn_count;
 }
 
 
@@ -261,7 +253,6 @@ static void block_add_tail(struct echo_packet *packet, struct echo_block *block,
     list_add_tail(&block->list, &packet->u.blocks.blocks);
     packet->u.blocks.tail_offset = offset + length;
   }
-  //packet->block_count++;
   __sync_fetch_and_add(&packet->block_count,1);
   echo_block_addref(block);
 }
@@ -355,6 +346,8 @@ void echo_handle_packet(struct echo_packet *packet,struct server *srv) {
     	if(pack_buff==NULL)
             return;
         pack_buff->buf = buffer_init_string("");
+		//MIG_DEBUG(USER_LEVEL,"%*.*s\n", packet->u.one_block.length, packet->u.one_block.length,
+		//	packet->u.one_block.one_block->address + packet->u.one_block.offset);
         buffer_append_string_len(pack_buff->buf,
 		    packet->u.one_block.one_block->address+packet->u.one_block.offset,
 			packet->u.one_block.length);
@@ -376,10 +369,15 @@ void echo_handle_packet(struct echo_packet *packet,struct server *srv) {
                 buffer_append_string_len(pack_buff->buf,
 						                 block->address+packet->u.blocks.head_position,
 										 len); 
+				//MIG_DEBUG(USER_LEVEL,"%*.*s\n", len, len,
+				//	block->address+packet->u.blocks.head_position);
             }else if(i!=packet->block_count-1){
-                buffer_append_string_len(pack_buff->buf,block->address,block->length);	
+                buffer_append_string_len(pack_buff->buf,block->address,block->length);
+				//MIG_DEBUG(USER_LEVEL,"%*.*s\n", block->length, block->length, block->address);
             }else{
                 buffer_append_string_len(pack_buff->buf,block->address,packet->u.blocks.tail_offset);
+				//MIG_DEBUG(USER_LEVEL,"%*.*s\n", packet->u.blocks.tail_offset,
+				//	packet->u.blocks.tail_offset, block->address);
             }
             __list_del(block->list.prev,block->list.next);
             pack_buff->type = packet->type;
@@ -390,8 +388,7 @@ void echo_handle_packet(struct echo_packet *packet,struct server *srv) {
     }
     srv->system_addtask(srv,PACKET,pack_buff);
     list_del(&packet->list);
-    srv->echo_packet_free(packet,srv);
-    //srv->system_addtask(srv,PACKET,packet);
+    echo_packet_free(packet,srv);
 }
 
 int echo_forward(void *privates,int length,struct server *srv)
@@ -432,7 +429,7 @@ int echo_forward(void *privates,int length,struct server *srv)
                 break;
            }
         }else{
-            SINA_LOG(SYSTEM_LEVEL,"packet_state error\n");
+        	MIG_LOG(SYSTEM_LEVEL,"packet_state error\n");
             break;
         }
         
@@ -479,7 +476,7 @@ struct psock_conn *create_sock_conn(struct server *srv){
     struct psock_conn *conn;
     conn = alloc_sock_conn(srv);
     if(conn==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"alloc sock_conn failed\n");
+        MIG_ERROR(USER_LEVEL,"alloc sock_conn failed\n");
         return NULL;
     } 
 
@@ -493,10 +490,7 @@ struct psock_conn *create_sock_conn(struct server *srv){
     return conn;
 }
 
-void destroy_sock_conn(struct psock_conn *conn,struct server *srv)
-{
-
-    //SINA_INFO(SYSTEM_LEVEL,"destroy_scok_conn\n");
+void destroy_sock_conn(struct psock_conn *conn,struct server *srv){
     printf("destroy_sock_conn\n");
     assert(list_empty(&conn->psc_rx_list));
     assert(list_empty(&conn->psc_tx_list));
@@ -513,7 +507,6 @@ void destroy_sock_conn(struct psock_conn *conn,struct server *srv)
 static inline void sock_conn_decref(struct psock_conn* conn,struct server *srv) {
     struct sock_adapter* sa = (struct sock_adapter*)conn->psc_adapter;
     if (!(--conn->psc_refcount)){
-		SINA_LOG(SYSTEM_LEVEL,"conn->psc_sock[%d]",conn->psc_sock);
 	    if(sa->type==0)
             plugins_call_connection_close(srv,conn->psc_sock);
 	    else
@@ -523,22 +516,21 @@ static inline void sock_conn_decref(struct psock_conn* conn,struct server *srv) 
   }
 }
 
-void sockbase_schedule_lock(struct psock_sched *sched)
-{
+void sockbase_schedule_lock(struct psock_sched *sched){
 
 }
 
-void sockbase_schedule_unlock(struct psock_sched *sched)
-{
+void sockbase_schedule_unlock(struct psock_sched *sched){
 
 }
 
-int sockbase_receive(struct psock_conn *conn)
-{
+int sockbase_receive(struct psock_conn *conn){
     int rc,err=0;
     for(;;){
         rc = recv(conn->psc_sock,conn->psc_rx_buffer,conn->psc_rx_size,0);
-        //SINA_LOG(SYSTEM_LEVEL,"recv %d %d %d\n", conn->psc_rx_size,rc, errno);
+//    		if (rc>0)
+//    			MIG_DEBUG(USER_LEVEL,"conn->psc_rx_size[%d] [%s] rc[%d]",conn->psc_rx_size,
+//    			      conn->psc_rx_buffer,rc);
         if(rc>0){
             conn->psc_rx_started = 1;
             conn->psc_rx_deadline = time(NULL)+5;
@@ -572,11 +564,11 @@ again:
                 return -EAGAIN;
             if(rc==0){
                 //read eof
-                //sock_conn_decref(conn,srv);
+                sock_conn_decref(conn,srv);
             }
             else if(!conn->psc_closing){
                 //read error
-                //sock_conn_decref(conn,srv);
+                sock_conn_decref(conn,srv);
             }
 
 			if(rc!=-EAGAIN){
@@ -585,7 +577,7 @@ again:
            
             return rc==0?-ESHUTDOWN:rc;
         }
-        //assert(conn->psc_rx_nob_wanted==-1);
+        assert(conn->psc_rx_nob_wanted==-1);
       
         rc = echo_forward(conn->psc_cookie,rc,srv);
         if(rc==-EAGAIN){
@@ -691,9 +683,6 @@ int sockbase_schedule(struct psock_sched *sched,struct server *srv){
 }
 
 void server_read_buffer(int fd,short which,void *arg){
-    //struct sock_adapter *sa = ((struct server*)arg)->tmp_sa;
-    //struct psock_conn *conn = sa->conn;
-    //struct server *srv = ((struct server*)arg);
     struct sock_adapter *sa = (struct sock_adapter*)arg;
     struct psock_conn *conn = sa->conn;
     struct server *srv = ((struct echo_conn*)conn->psc_cookie)->srv;
@@ -749,20 +738,22 @@ static int  create_socket(){
     struct sockaddr_in sai;
     int rc,opt;
     sock =socket(AF_INET,SOCK_STREAM,0);
-    if(sock<0){
-        SINA_ERROR(SYSTEM_LEVEL,"unable to create server socket[%d]]\n",errno);
+
+
+	if(sock<0){
+        MIG_ERROR(USER_LEVEL,"unable to create server socket[%d]]\n",errno);
         return 0;
     }
     opt = 1;
     rc = setsockopt(sock,SOL_SOCKET,SO_KEEPALIVE,&opt,sizeof(opt));
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"unable to set SO_KEEPALIVE on server socket%d\n",errno);
+        MIG_ERROR(USER_LEVEL,"unable to set SO_KEEPALIVE on server socket%d\n",errno);
         close(sock);
         return 0;
     }
     rc = setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"unable to set SO_REUSEADDR on servert socket:%d\n",errno);
+        MIG_ERROR(USER_LEVEL,"unable to set SO_REUSEADDR on servert socket:%d\n",errno);
         return 0;
     }
     return sock;
@@ -781,7 +772,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
     conn = alloc_sock_adapter(srv);
     
     if(conn==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"alloc sock adapter failed");
+        MIG_ERROR(USER_LEVEL,"alloc sock adapter failed");
         return NULL;
     }
     conn->type = CONNECT;
@@ -797,7 +788,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
     sai.sin_addr.s_addr = inet_addr(host);
     sc = create_sock_conn(srv);
     if(sc==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"fail to allocate sock_conn\n");
+        MIG_ERROR(USER_LEVEL,"fail to allocate sock_conn\n");
         free_sock_adapter(conn,srv);
         close(sock);
         return NULL;
@@ -805,7 +796,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
 
     rc = connect(sock,(const struct sockaddr *)&sai,sizeof(sai));
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"connect error (%d)\n",errno);
+        MIG_ERROR(USER_LEVEL,"connect error (%d)\n",errno);
         free_sock_adapter(conn,srv);
         close(sock);
         return NULL;
@@ -820,7 +811,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
     sc->psc_cookie = (void*)echo_conn_alloc(sc,srv);
     
     if(sc->psc_cookie==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"failed to allocate echo_conn\n");
+        MIG_ERROR(USER_LEVEL,"failed to allocate echo_conn\n");
 	      free_sock_adapter(conn,srv);
 	      close(sock);
 	      return NULL;
@@ -828,7 +819,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
     sc->psc_rx_state = STATE_NEW;
     rc = echo_post_recv((struct echo_conn*)sc->psc_cookie,0,srv);
     if(sc->psc_cookie==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"failed to allocate echo_conn\n");
+        MIG_ERROR(USER_LEVEL,"failed to allocate echo_conn\n");
 	      free_sock_adapter(conn,srv);
 	      close(sock);
 	      return NULL;
@@ -851,7 +842,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
     event_set(&conn->ev,sock,EV_READ|EV_PERSIST,server_read_buffer,conn);
     rc = event_add(&conn->ev,NULL);
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"event_add failed (%d)\n",errno);
+        MIG_ERROR(USER_LEVEL,"event_add failed (%d)\n",errno);
         free_sock_adapter(conn,srv);
         close(sock);
         return NULL;
@@ -862,7 +853,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
     flags = fcntl(sock,F_GETFL,0);
     rc = fcntl(sock,F_SETFL,flags|O_NONBLOCK);
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,
+        MIG_ERROR(USER_LEVEL,
                    "fcntl set socket non-block failed:%d\n",
                    errno);
         free_sock_adapter(conn,srv);
@@ -874,14 +865,20 @@ struct sock_adapter* create_connect_socket(struct server* srv,
 }
 
 struct sock_adapter *create_listen_socket(struct server* srv,int port){
+
+
+
     struct sock_adapter* sa = NULL;
     struct sockaddr_in sai;
+
     int rc,opt;
     int sock;
+	struct stat tstat;
     assert(port>0&&port<65536);
+
     sa = alloc_sock_adapter(srv);
     if(sa==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"alloc sock adapter failed");
+        MIG_ERROR(USER_LEVEL,"alloc sock adapter failed");
         return NULL;
     }
     INIT_LIST_HEAD(&sa->list);
@@ -892,14 +889,16 @@ struct sock_adapter *create_listen_socket(struct server* srv,int port){
     sa->type = 0;
     sock = create_socket();
     opt = 1;
-
     sai.sin_family = AF_INET;
     sai.sin_port = htons(port);
     sai.sin_addr.s_addr = 0;
 
+
+
+
     rc = bind(sock,(const struct sockaddr *)&sai,sizeof(sai));
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"unable bind socket:%d\n",errno);
+        MIG_ERROR(USER_LEVEL,"unable bind socket:%s\n",strerror(errno));
         close(sock);
         free_sock_adapter(sa,srv);
         return NULL;
@@ -907,7 +906,7 @@ struct sock_adapter *create_listen_socket(struct server* srv,int port){
 
     rc = listen(sock,0);
     if(rc<0){
-        SINA_ERROR(SYSTEM_LEVEL,"unable to listen to server socket :%d\n",errno);
+        MIG_ERROR(USER_LEVEL,"unable to listen to server socket :%d\n",errno);
         close(sock);
         free_sock_adapter(sa,srv);
         return NULL;
@@ -918,7 +917,7 @@ struct sock_adapter *create_listen_socket(struct server* srv,int port){
     rc = fcntl(sock,F_SETFL,opt|O_NONBLOCK);
     if(rc!=0){
     
-        SINA_ERROR(SYSTEM_LEVEL,"fcntl set sock non-block failed:%d\n",errno);
+        MIG_ERROR(USER_LEVEL,"fcntl set sock non-block failed:%d\n",errno);
         close(sock);
         free_sock_adapter(sa,srv);
         return NULL;
@@ -944,7 +943,7 @@ void server_accept(int fd,short which,void *arg){
     addrlen = sizeof(addr);
     sock = accept(fd,(struct sockaddr *)&addr,&addrlen);
     if(sock<0){
-		SINA_ERROR(SYSTEM_LEVEL,"accept error [%s]",strerror(errno));
+		MIG_ERROR(USER_LEVEL,"accept error [%s]",strerror(errno));
         err =errno;
         if(err==EWOULDBLOCK) 
             return;
@@ -954,13 +953,13 @@ void server_accept(int fd,short which,void *arg){
     flags = fcntl(sock,F_GETFL,0);
     rc = fcntl(sock,F_SETFL,flags|O_NONBLOCK);
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"fcntl set socket non-block failed:%d\n",errno);
+        MIG_ERROR(USER_LEVEL,"fcntl set socket non-block failed:%d\n",errno);
         close(sock);
         return;
     }
     conn = alloc_sock_adapter(srv);
     if(conn==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"alloc sock adapter failed\n");
+        MIG_ERROR(USER_LEVEL,"alloc sock adapter failed\n");
         close(sock);
         return;
     }
@@ -969,7 +968,7 @@ void server_accept(int fd,short which,void *arg){
     sc = create_sock_conn(srv);
     if(sc==NULL){
         
-        SINA_ERROR(SYSTEM_LEVEL,"fail to allocate sock_conn\n");
+        MIG_ERROR(USER_LEVEL,"fail to allocate sock_conn\n");
         free_sock_adapter(conn,srv);
         close(sock);
         return;
@@ -978,12 +977,11 @@ void server_accept(int fd,short which,void *arg){
     sc->psc_sock = sock;
     sc->psc_scheduler = &srv->one_scheduler;
     sc->psc_adapter = conn;
-    //sc->psc_rx_nob_left = sc->psc_rx_nob_wanted = -1;
-    sc->psc_rx_nob_left = sc->psc_rx_nob_wanted = 4;
+	sc->psc_rx_nob_left = sc->psc_rx_nob_wanted = -1;
     sc->psc_cookie = (void*)echo_conn_alloc(sc,srv);
 
     if(sc->psc_cookie==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"failed to allocate eho_conn\n");
+        MIG_ERROR(USER_LEVEL,"failed to allocate eho_conn\n");
         destroy_sock_conn(conn->conn,srv);
         free_sock_adapter(conn,srv);
         close(sock);
@@ -992,7 +990,7 @@ void server_accept(int fd,short which,void *arg){
     sc->psc_rx_state = STATE_NEW; 
     rc = echo_post_recv((struct echo_conn*)sc->psc_cookie,0,srv);
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"failed to post recv:%d\n",rc);
+        MIG_ERROR(USER_LEVEL,"failed to post recv:%d\n",rc);
         destroy_sock_conn(conn->conn,srv);
         free_sock_adapter(conn,srv);
         close(sock);
@@ -1020,7 +1018,7 @@ void server_accept(int fd,short which,void *arg){
     rc = event_add(&conn->ev,NULL);
 
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"event_add failed (%d)\n",errno);
+        MIG_ERROR(USER_LEVEL,"event_add failed (%d)\n",errno);
         destroy_sock_conn(conn->conn,srv);
         free_sock_adapter(conn,srv);
         close(sock);
@@ -1054,10 +1052,6 @@ int network_init(struct server *srv){
 
    srv->one_scheduler.pss_nconns = 0;
    
-   srv->echo_packet_free = echo_packet_free;
- 
-   srv->echo_block_decref = echo_block_decref;
-   
    srv->register_event = register_event;
    
    srv->create_reconnects = create_reconnects;
@@ -1080,11 +1074,13 @@ int network_register_fdevents(struct server *srv)
     srv->base = event_init();
 
     if(srv->base==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"event_init failed\n");
+        MIG_ERROR(USER_LEVEL,"event_init failed\n");
         return -1;
     }
 
     srv->sa = create_listen_socket(srv,atoi(srv->srv_conf.port->ptr));
+
+
 
     if(srv->sa==NULL){
         return -1;
@@ -1112,17 +1108,11 @@ int network_start(struct server *srv)
 int network_stop(struct server *srv)
 {
    destroy_sock_adapter(srv->sa,srv);  
- 
-   SINA_INFO(SYSTEM_LEVEL,"destroy_sock_adapter");
-
+   
    event_base_free(srv->base);
   
-   SINA_INFO(SYSTEM_LEVEL,"event_base_free");
-
    destroy_sock_adapter_table(srv);
-
-   SINA_INFO(SYSTEM_LEVEL,"destroy_sock_adapter_table");
-
+   
    if(srv->connect_pool){free(srv->connect_pool);srv->connect_pool;}
 }
 
@@ -1134,11 +1124,11 @@ int create_reconnects(struct server *srv){
     int n =srv->ncount_connect;
     int index = 0;
     if(list_empty(&srv->srv_conf.remotes)){
-    	 SINA_ERROR(SYSTEM_LEVEL,"srv->srv_conf.remotes empty");
+    	 MIG_ERROR(USER_LEVEL,"srv->srv_conf.remotes empty");
          return 0;
     }
     if(srv->connect_pool==NULL){
-    	 SINA_ERROR(SYSTEM_LEVEL,"srv->connect_pool empty");
+    	 MIG_ERROR(USER_LEVEL,"srv->connect_pool empty");
          return -1;
     }
     list_for_each(tmp,&srv->srv_conf.remotes){
@@ -1154,8 +1144,8 @@ int create_reconnects(struct server *srv){
     		sa->index = index;
     		index++;
     	}else{
-		    SINA_ERROR(SYSTEM_LEVEL,"connect error sa port[%d] srv_conf.remotes port[%d] ip[%s]",
-					    tmp_sa->port,atol(p->port->ptr),p->bindremote->ptr);
+		    MIG_ERROR(USER_LEVEL,"connect error sa port[%d] srv_conf.remotes port[%d]",
+					    tmp_sa->port,atol(p->port->ptr));
 		}
     }
     
@@ -1193,13 +1183,13 @@ int register_event(struct server *srv,int fd,short events){
 	int flags;
 	conn = alloc_sock_adapter(srv);
 	if(conn==NULL){
-	    SINA_ERROR(SYSTEM_LEVEL,"alloc sock adapter failed");
+	    MIG_ERROR(USER_LEVEL,"alloc sock adapter failed");
 		return 1 ;
 	}
 	conn->type = OTHER;
 	sc = create_sock_conn(srv);
 	if(sc==NULL){
-		SINA_ERROR(SYSTEM_LEVEL,"fail to allocate sock_conn\n");
+		MIG_ERROR(USER_LEVEL,"fail to allocate sock_conn\n");
 		free_sock_adapter(conn,srv);
 		return 0;
 	}
@@ -1211,7 +1201,7 @@ int register_event(struct server *srv,int fd,short events){
 	sc->psc_cookie = (void*)echo_conn_alloc(sc,srv);
 
 	if(sc->psc_cookie==NULL){
-		SINA_ERROR(SYSTEM_LEVEL,"failed to allocate echo_conn\n");
+		MIG_ERROR(USER_LEVEL,"failed to allocate echo_conn\n");
 		free_sock_adapter(conn,srv);
 		return 0;
 	}
@@ -1220,7 +1210,7 @@ int register_event(struct server *srv,int fd,short events){
 	rc = echo_post_recv((struct echo_conn*)sc->psc_cookie,0,srv);
 
     if(sc->psc_cookie==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"failed to allocate echo_conn\n");
+        MIG_ERROR(USER_LEVEL,"failed to allocate echo_conn\n");
 	    free_sock_adapter(conn,srv);
 	    return 0;
     }
@@ -1240,21 +1230,21 @@ int register_event(struct server *srv,int fd,short events){
 
 	conn->flags = EV_READ;
     if(srv->base==NULL){
-        SINA_ERROR(SYSTEM_LEVEL,"base init error(%d)\n",errno);
+        MIG_ERROR(USER_LEVEL,"base init error(%d)\n",errno);
         free_sock_adapter(conn,srv);
         return 0;
     }
     event_set(&conn->ev,fd,EV_READ|EV_PERSIST,server_read_buffer,conn);
     rc = event_add(&conn->ev,NULL);
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,"event_add failed (%d)\n",errno);
+        MIG_ERROR(USER_LEVEL,"event_add failed (%d)\n",errno);
         free_sock_adapter(conn,srv);
         return 0;
     }
     list_add_tail(&conn->list,sock_adapter_sock2hash(srv,fd));
     
     if(rc!=0){
-        SINA_ERROR(SYSTEM_LEVEL,
+        MIG_ERROR(USER_LEVEL,
                    "fcntl set socket non-block failed:%d\n",
                    errno);
         free_sock_adapter(conn,srv);

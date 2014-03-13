@@ -1,7 +1,7 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = ./../../bin/plugins/core/core.so
+OUTPUT_FILE = ./../../bin/hfcrsrv/plugins/core/core.so
 ## 编译器
 COMPILER = g++
 COMPILERC = gcc

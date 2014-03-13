@@ -2,6 +2,7 @@
 #define MIG_FM_PUBLIC_PROTOCOL_DATA_PACKET_H__
 
 #include <stdio.h>
+#include <string>
 #include "basic/basictypes.h"
 
 namespace packet{

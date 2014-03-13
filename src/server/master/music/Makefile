@@ -1,7 +1,7 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = ./../../bin/plugins/music_manager/music_manager.so
+OUTPUT_FILE = ./../../bin/hfcrsrv/plugins/music_manager/music_manager.so
 
 ## 编译器
 COMPIlER = g++
