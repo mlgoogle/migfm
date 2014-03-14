@@ -23,7 +23,7 @@ static void *OnChatManagerStart(){
 	chat_mgr->version = PLUGIN_VERSION;
 	chat_mgr->provider = PLUGIN_PROVIDER;
 
-	if (chat_logic::ChatManager::GetInstance())
+	if (!chat_logic::ChatManager::GetInstance())
 		assert(0);
 
 	LOG_MSG("ChatManagerPlugin was started");
@@ -47,7 +47,7 @@ static handler_t OnChatManagerConnect(struct server *srv, int fd,
 static handler_t OnChatCenterConectClose(struct server* srv,int fd){
 	
 	LOG_DEBUG("OnChatCenterConectClose");
-	//chat_logic::ChatManager::GetInstance()->OnChatManagerClose(/*srv,*/fd);
+	chat_logic::ChatManager::GetInstance()->OnChatManagerClose(srv,fd);
 	return HANDLER_GO_ON;
 }
 
@@ -55,7 +55,7 @@ static handler_t OnChatCenterMessage(struct server *srv, int sock,
 										void *data, int len){
 
 	LOG_DEBUG("OnChatCenterMessage");
-	//chat_logic::ChatManager::GetInstance()->OnChatManagerMessage(/*srv,*/sock,data,len);
+	chat_logic::ChatManager::GetInstance()->OnChatManagerMessage(srv,sock,data,len);
 	return HANDLER_GO_ON;
 }
 
@@ -69,21 +69,21 @@ static handler_t OnBroadcastConnect (struct server *srv, int fd,
 									 void *data, int len)
 {
 	LOG_DEBUG ("OnBroadcastConnect");
-	//chat_logic::ChatManager::GetInstance()->OnBroadcastConnect(/*srv,*/fd,data,len);
+	chat_logic::ChatManager::GetInstance()->OnBroadcastConnect(srv,fd,data,len);
 	return HANDLER_GO_ON;
 }
 
 static handler_t OnBroadcastClose (struct server *srv, int fd)
 {
 	LOG_DEBUG ("OnBroadcastClose");
-	//chat_logic::ChatManager::GetInstance()->OnBroadcastClose(/*srv,*/fd);
+	chat_logic::ChatManager::GetInstance()->OnBroadcastClose(srv,fd);
 	return HANDLER_GO_ON;
 
 }
 static handler_t OnBroadcastMessage (struct server *srv, int fd, void *data, int len)
 {
 	LOG_DEBUG ("OnBroadcastMessage");
-	//chat_logic::ChatManager::GetInstance()->OnBroadcastMessage(/*srv,*/fd,data,len);
+	chat_logic::ChatManager::GetInstance()->OnBroadcastMessage(srv,fd,data,len);
 	return HANDLER_GO_ON;
 }
 
@@ -95,14 +95,14 @@ static handler_t OnClock (struct server *srv, int fd)
 
 static handler_t OnIniTimer (struct server *srv){
 	LOG_DEBUG ("OnIniTimer");
-	//chat_logic::ChatManager::GetInstance()->OnIniTimer(/*srv,*/);
+	chat_logic::ChatManager::GetInstance()->OnIniTimer(srv);
 	return HANDLER_GO_ON;
 }
 
 static handler_t OnTimeOut (struct server *srv, char* id, 
 							int opcode, int time){
     LOG_DEBUG ("OnTimeout");
-	//chat_logic::ChatManager::GetInstance()->OnTimeout(/*srv,*/id,opcode,time);
+	chat_logic::ChatManager::GetInstance()->OnTimeout(srv,id,opcode,time);
 	return HANDLER_GO_ON;
 }
 

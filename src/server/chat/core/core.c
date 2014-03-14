@@ -48,12 +48,8 @@ static struct server* server_init(void){
 	CLEAN(srv_conf.max_worker);
 	CLEAN(srv_conf.max_fds);
 	CLEAN(srv_conf.max_conns);
-#if defined (NET_WORK)
 	CLEAN(srv_conf.port);
-#endif
-#if defined (PROCESS_WORK)
-	CLEAN(srv_conf.process_path);
-#endif
+
 	CLEAN(module_path);
 	CLEAN(tmp_buf);
 #undef CLEAN
@@ -90,12 +86,7 @@ static void server_free(struct server *srv)
 	CLEAN(srv_conf.max_worker);
 	CLEAN(srv_conf.max_fds);
 	CLEAN(srv_conf.max_conns);
-#if defined (NET_WORK)
 	CLEAN(srv_conf.port);
-#endif
-#if defined (PROCESS_WORK)
-	CLEAN(srv_conf.process_path);
-#endif
 	CLEAN(module_path);
 	CLEAN(tmp_buf);
 #undef CLEAN

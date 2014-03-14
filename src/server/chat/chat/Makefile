@@ -42,7 +42,7 @@ output:	chat_basic_infos.o chat_cache_manager.o chat_manager.o db_comm.o\
 		dic_comm.o http_response.o im_mgr.o logic_unit.o user_connection.o error_code.o logic_comm.o\
 		protocol.o protocol.o thread_handler.o thread_lock.o chat_init.o basictypes.o basic_util.o\
 		radom_in.o data_packet.o constants.o mig_log.o mem_storage_impl.o mysql_storage_impl.o\
-		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o
+		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o
 	$(LINK)
 
 clean:
@@ -125,6 +125,12 @@ mysql_storage_impl.o:
 
 redis_storage_impl.o:
 	$(COMPILE) $(THIRD_PATH)/storage/redis_storage_impl.cc
+	
+config.o:
+	$(COMPILE) $(THIRD_PATH)/config/config.cc
+	
+basic_info.o:
+	$(COMPILE) $(THIRD_PATH)/basic/basic_info.cc
 
 redis_warrper.o:
 	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb $(THIRD_PATH)/storage/redis_warrper.c

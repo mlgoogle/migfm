@@ -7,6 +7,9 @@
 
 namespace chat_logic{
 
+
+PlatformChatCacheManager* CacheManagerOp::platform_opertion_mgr_ = NULL;
+
 PlatformChatCacheManager::PlatformChatCacheManager(){
     InitThreadrw(&lock_);
 }

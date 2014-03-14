@@ -977,7 +977,8 @@ void server_accept(int fd,short which,void *arg){
     sc->psc_sock = sock;
     sc->psc_scheduler = &srv->one_scheduler;
     sc->psc_adapter = conn;
-	sc->psc_rx_nob_left = sc->psc_rx_nob_wanted = -1;
+    //sc->psc_rx_nob_left = sc->psc_rx_nob_wanted = -1;
+    sc->psc_rx_nob_left = sc->psc_rx_nob_wanted = 4;
     sc->psc_cookie = (void*)echo_conn_alloc(sc,srv);
 
     if(sc->psc_cookie==NULL){

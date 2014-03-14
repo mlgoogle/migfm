@@ -62,12 +62,7 @@ static void XMLCALL start_config_element(void *userData,
     if(strcmp(name,srv_config)==0){
         for(i=0;atts[i]!=0;i+=2){
             SET_SRV_CONFIG(srv_config_bindhost,srv_conf.bindhost);
-#if defined (NET_WORK)
             SET_SRV_CONFIG(srv_config_port,srv_conf.port);
-#endif
-#if defined (PROCESS_WORK)
-			SET_SRV_CONFIG(srv_config_path,srv_conf.process_path);
-#endif
         }
 	return;
     }

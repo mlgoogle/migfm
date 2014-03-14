@@ -66,6 +66,12 @@ static void *sys_trun(base_thread_t *thd,int flag,void *data)
             }
         }
         break;
+        case CLOCK:
+        	  {
+        		    int fd = (*(int*)data);
+        		    plugins_call_clock_handler(srv,fd);
+        		}
+        break;
         default:
             MIG_ERROR(USER_LEVEL,"flag unkown");
     }

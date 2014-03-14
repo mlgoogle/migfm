@@ -13,6 +13,8 @@ static char *PLUGIN_NAME = "chat_manager";
 static char *PLUGIN_VERSION = "1.0.0";
 static char *PLUGIN_PROVIDER = "kerry";
 
+#define DEFAULT_CONFIG_PATH     "./plugins/chat_manager/chat_manager_config.xml"
+
 typedef std::map<int64/* user_id */,chat_base::UserInfo/* userinfo*/> UserInfosMap;
 
 typedef std::map<int64 /*to_id*/,int64 /*session*/> SessionInfosMap;

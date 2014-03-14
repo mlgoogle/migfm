@@ -263,12 +263,6 @@ static void * thread_pool_func(base_thread_t * t, void *param)
             if (TH_STOP == elt->state) {
                 break;
             }
-            //fix
-            /*if (task){
-                free(task);
-                task = NULL;
-	        }*/
-
             task = pop_task(me);
         }
         assert(NULL == elt->current_owner);

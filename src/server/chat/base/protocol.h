@@ -19,6 +19,7 @@
 	out.Write32(current_time);                              \
 	out.Write16(msg_type);                                  \
     out.Write8(is_zip);                                     \
+    out.Write64(msg_id);                                    \
 	out.Write32(reserverd)
 
 
@@ -30,6 +31,7 @@
 	(*packhead)->current_time = in.Read32();                        \
 	(*packhead)->msg_type = in.Read16();                            \
 	(*packhead)->is_zip = in.Read8();                               \
+	(*packhead)->msg_id = in.Read64();                              \
 	(*packhead)->reserverd = in.Read32()                            \
 
 

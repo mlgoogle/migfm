@@ -24,22 +24,22 @@ public:
 public:
 	bool OnChatConnect (struct server *srv,const int socket);
 
-	bool OnChatManagerMessage (/*struct server *srv,*/ const int socket,
+	bool OnChatManagerMessage (struct server *srv, const int socket,
 		                         const void *msg, const int len);
 
-	bool OnChatManagerClose (/*struct server *srv,*/const int socket);
+	bool OnChatManagerClose (struct server *srv,const int socket);
 
-	bool OnBroadcastConnect (/*struct server *srv,*/const int socket,
+	bool OnBroadcastConnect (struct server *srv,const int socket,
 		                     const void *data, const int len);
 
-	bool OnBroadcastMessage (/*struct server *srv,*/ const int socket,
+	bool OnBroadcastMessage (struct server *srv, const int socket,
 		                     const void *msg, const int len);
 
-	bool OnBroadcastClose (/*struct server *srv,*/ const int socket);
+	bool OnBroadcastClose (struct server *srv, const int socket);
 
-	bool OnIniTimer (/*struct server *srv,*/);
+	bool OnIniTimer (struct server *srv);
 
-	bool OnTimeout (/*struct server *srv,*/ char* id, int opcode, int time);
+	bool OnTimeout (struct server *srv, char* id, int opcode, int time);
 private:
 	bool Init();
 private:

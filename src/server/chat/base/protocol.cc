@@ -252,6 +252,7 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 	int32 current_time = packhead->current_time;
 	int8  is_zip = packhead->is_zip;
 	int16 msg_type = packhead->msg_type;
+	int64 msg_id =packhead->msg_id;
 	int32 reserverd = packhead->reserverd;
 
 	char* packet = NULL;
@@ -437,6 +438,10 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 	PRINT_INT (packet_length);	\
 	PRINT_INT (operate_code);	\
 	PRINT_INT (data_length);    \
+	PRINT_INT (current_time);   \
+	PRINT_INT (msg_type);       \
+	PRINT_INT (is_zip);         \
+	PRINT_INT (msg_id);         \
 	PRINT_INT (reserved);       \
 	if (packet_length == PACKET_HEAD_LENGTH \
 	&& data_length == 0)    \
@@ -448,7 +453,21 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 	int32 packet_length = packhead->packet_length;
 	int32 operate_code = packhead->operate_code;
 	int32 data_length = packhead->data_length;
+	int32 current_time = packhead->current_time;
+	int16 msg_type = packhead->msg_type;
+	int8 is_zip = packhead->is_zip;
+	int64 msg_id = packhead->msg_id;
 	int32 reserved = packhead->reserverd;
+	/*
+   int32 packet_length;
+   int32 operate_code;
+   int32 data_length;
+   int32 current_time;
+   int16 msg_type;
+   int8  is_zip;
+   int64 msg_id;
+   int32 reserverd;
+	 */
 	char buf[DUMPPACKBUF];
 	bool r = false;
 	buf[0] = '\0';
@@ -603,6 +622,8 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			r = false;
 			break;
 	}
+	if (buf[0]!='\0')
+		LOG_DEBUG2("%s\n",buf);
 #endif
 }
 
@@ -621,6 +642,7 @@ void ProtocolPack::HexEncode(const void *bytes, size_t size){
 		else
 			sret[(i * 3) + 2] = '\n';
 	}
-	struct PackHead *packet = NULL;
+	LOG_DEBUG2("===start====\nopcode[%d]:\n%s\n====end====\n",
+			head->operate_code,sret.c_str());
 }
 
