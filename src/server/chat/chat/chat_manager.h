@@ -42,6 +42,7 @@ public:
 	bool OnTimeout (struct server *srv, char* id, int opcode, int time);
 private:
 	bool Init();
+	bool InitDefaultPlatformInfo();
 private:
 	scoped_ptr<chat_logic::UserConnectionMgr>    usr_connection_mgr_;
 	scoped_ptr<chat_logic::IMSMgr>               ims_mgr_;

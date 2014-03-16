@@ -65,16 +65,26 @@ bool DBComm::RecordMessage(const int64 platform_id,const int64 fid,const int64 t
 		LOG_ERROR("GetConnection Error");
 		return false;
 	}
-	//call billing.proc_ChatRecordMessage(10001,12321323,10013,10014,"o","2014-03-10")
+	char* temp_message = new char[message.length()];
+	memset(temp_message,'\0',message.length());
+	sprintf(temp_message,"%s",message.c_str());
+
+	LOG_DEBUG2("current_time = %s msg_id = %lld send_id = %lld recv_id = %lld content = %s",
+			current_time.c_str(),msg_id,fid,tid,message.c_str());
+	//call migfm.proc_ChatRecordMessage(10001,12321323,10013,10014,'o','2014-03-10')
 	os<<"call proc_ChatRecordMessage("<<platform_id<<","<<msg_id<<","
-			<<fid<<","<<tid<<",'"<<message<<"','"<<current_time<<"');";
+			<<fid<<","<<tid<<",'"<<current_time<<"','"<<temp_message<<"');";
 	sql = os. str();
 	LOG_DEBUG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
 
 	if (!r) {
-		LOG_ERROR2("exec sql error");
+		LOG_ERROR("exec sql error");
 		return false;
+	}
+	if(temp_message){
+		delete [] temp_message;
+		temp_message = NULL;
 	}
 	return r;
 
@@ -101,7 +111,7 @@ bool DBComm::GetUserInfo(const int64 platform_id,int64 user_id,
 	r = engine->SQLExec(sql.c_str());
 
 	if (!r) {
-		LOG_ERROR2("exec sql error");
+		LOG_ERROR("exec sql error");
 		return false;
 	}
 	num = engine->RecordCount();
@@ -109,8 +119,8 @@ bool DBComm::GetUserInfo(const int64 platform_id,int64 user_id,
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
 			//song_url = rows[0];
 			int64 nicknumber = atoll(rows[0]);
-			std::string nickname = rows[0];
-			std::string head_url = rows[1];
+			std::string nickname = rows[1];
+			std::string head_url = rows[2];
 			chat_base::UserInfo current_userinfo(platform_id,user_id,
 				                            nicknumber,nickname,
 									        head_url);

@@ -16,13 +16,16 @@ public:
 	LeaveInfosMap             leave_infos_map_;
 
 	MeetingMap                meeting_infos_map_;
-
 };
 
 class PlatformChatCacheManager{
 public:
 	PlatformChatCacheManager();
 	virtual ~PlatformChatCacheManager();
+
+	void SetPlatformInfo(const int64 platform_id,chat_base::PlatformInfo& platform);
+
+	bool GetPlatformInfo(const int64 platform_id,chat_base::PlatformInfo& platform);
 
 	bool AddUserInfos(const int64 platform_id,const int64 user_id,
 		const chat_base::UserInfo& userinfo);
@@ -36,7 +39,7 @@ public:
 						const int64 tid,const int64 mid);
 
 	bool IsExitsLeaveInfos(const int64 platform_id,const int64 tid,
-			               const int64 mid,const int64 session);
+			               const int64 mid,int64& session);
 
 	bool DelLeaveInfos(const int64 platform_id,const int64 tid,const int64 mid);
 
@@ -49,6 +52,7 @@ public:
 
 	bool SendQuitInfoSession(const int64 platform_id,const int64 session,const int32 uid);
 
+
 private:
 	std::map<int64,PlatformCache*>             platform_cache_;
 	struct threadrw_t*                         lock_;
@@ -59,10 +63,14 @@ private:
 
 class CacheManagerOp{
 private:
+	SocketMap                                 socket_infos_map_;
+	struct threadrw_t*                         lock_;
+private:
 	static PlatformChatCacheManager  *platform_opertion_mgr_;
+	static CacheManagerOp            *cache_manager_op_;
 
-	CacheManagerOp() {}
-	virtual ~CacheManagerOp() {}
+	CacheManagerOp();
+	virtual ~CacheManagerOp();
 public:
 	static PlatformChatCacheManager* GetPlatformChatMgrCache (){
 		if (platform_opertion_mgr_ == NULL)
@@ -70,6 +78,19 @@ public:
 
 		return platform_opertion_mgr_;
 	}
+
+	static CacheManagerOp* GetCacheManagerOp(){
+		if(cache_manager_op_ == NULL){
+			cache_manager_op_ = new CacheManagerOp();
+		}
+		return cache_manager_op_;
+	}
+public:
+	bool AddSocket(const int socket,const chat_base::UserInfo& userinfo);
+
+	bool GetSocket(const int socket,chat_base::UserInfo& userinfo);
+
+	bool DelSocket(const int socket);
 };
 
 }

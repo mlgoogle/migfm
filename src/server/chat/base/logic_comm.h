@@ -126,7 +126,7 @@ public:
 #define sendbytes (socket,bytes,len)     \
 	logic::SomeUtils::SendBytes(socket,bytes,len,__FILE__,__LINE__)
 
-#define sendmessage (socket,packet)      \
+#define sendmessage (socket,packet) \
 	logic::SomeUtils::SendMessage(socket,packet,__FILE__,__LINE__)
 
 #define sendheadmsg(socket,operate_code,msg_type,is_zip,session)  \

@@ -92,8 +92,8 @@ void ThreadKey::DeinitThreadKey(){
 char *SomeUtils::SafeStrncpy (char *dest, size_t dest_size, const char *src, size_t src_size)
 {
 	size_t n = dest_size < src_size ? dest_size : src_size;
+	memset(dest,'\0',dest_size);
 	memcpy (dest, src, n);
-	dest[n - 1] = '\0';
 	return dest;
 }
 
@@ -150,6 +150,7 @@ bool SomeUtils::SendMessage(int socket, struct PacketHead *packet,
 	void *packet_stream = NULL;
 	int32_t packet_stream_length = 0;
 	int ret = 0;
+	bool  r1 = false;
 	if (socket <= 0 || packet == NULL)
 		return false;
 
@@ -168,14 +169,9 @@ bool SomeUtils::SendMessage(int socket, struct PacketHead *packet,
 		r = false;
 		goto MEMFREE;
 	} else {
-		// LOG_DEBUG ("Sent msg success");
 		r = true;
 		goto MEMFREE;
 	}
-	//	ProtocolPack::DumpPacket (packet);
-	// 	if (packet->operate_code == USER_ROOM_USER_ONLINE){
-	// 	   RoomPack::HexEncode(packet_stream,packet_stream_length);
-	// 	}
 	MEMFREE:
 	char* stream = (char*)packet_stream;
 	if (stream){

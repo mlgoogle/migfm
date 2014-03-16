@@ -54,9 +54,11 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				*packhead = (struct PacketHead*)vUserLoginSucess;
 
 				BUILDPACKHEAD();
+
 				vUserLoginSucess->platform_id = in.Read64();
 				vUserLoginSucess->user_id = in.Read64();
 				vUserLoginSucess->nick_number = in.Read64();
+
 				int temp = 0;
 				memcpy(vUserLoginSucess->token,in.ReadData(TOKEN_LEN,temp),
 					TOKEN_LEN);
@@ -67,7 +69,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				vUserLoginSucess->nickname[NICKNAME_LEN - 1] = '\0';
 
 				memcpy(vUserLoginSucess->head_url,in.ReadData(HEAD_URL_LEN,temp),
-					NICKNAME_LEN);
+						HEAD_URL_LEN);
 				vUserLoginSucess->head_url[HEAD_URL_LEN - 1] = '\0';
 			}
 			break;
@@ -381,7 +383,7 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 				struct OppositionInfo* vOppostionInfo =
 					(struct OppositionInfo*)packhead;
 				int len = 0;
-				data_length = vOppostionInfo->opponfo_list.size()* OPPSITIONINFO_SIZE + sizeof(int64) * 2 + sizeof(int16) + NICKNAME_LEN + HEAD_URL_LEN;
+				data_length = vOppostionInfo->opponfo_list.size()* OPPSITIONINFO_SIZE + sizeof(int64) * 4 + sizeof(int16) + NICKNAME_LEN + HEAD_URL_LEN;
 				BUILDHEAD(data_length);
 				out.Write64(vOppostionInfo->platform_id);
 				out.Write64(vOppostionInfo->oppo_id);
@@ -544,6 +546,7 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				struct ReqOppstionInfo* vReqOppstionInfo =
 					(struct ReqOppstionInfo*)packhead;
 				PRINT_TITLE("struct UserQuitNotification Dump Begin");
+				DUMPHEAD ();
 				PRINT_INT64(vReqOppstionInfo->platform_id);
 				PRINT_INT64(vReqOppstionInfo->user_id);
 				PRINT_INT64(vReqOppstionInfo->oppostion_id);
@@ -571,8 +574,8 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				for(;it!=vOppostionInfo->opponfo_list.end();it++){
 					PRINT_INT64((*it)->user_id);
 					PRINT_INT64((*it)->user_nicknumber);
-					PRINT_INT64((*it)->nickname);
-					PRINT_INT64((*it)->user_head);
+					PRINT_STRING((*it)->nickname);
+					PRINT_STRING((*it)->user_head);
 				}
 
 				PRINT_END ("struct OppositionInfo Dump End");
@@ -583,6 +586,7 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				struct TextChatPrivateSend* vTextChatPrivateSend = 
 					(struct TextChatPrivateSend*)packhead;
 				PRINT_TITLE("struct TextChatPrivateSend Dump Begin");
+				DUMPHEAD ();
 				PRINT_INT64(vTextChatPrivateSend->platform_id);
 				PRINT_INT64(vTextChatPrivateSend->send_user_id);
 				PRINT_INT64(vTextChatPrivateSend->recv_user_id);
@@ -598,6 +602,7 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				struct TextChatPrivateRecv* vTextChatPrivateRecv = 
 					(struct TextChatPrivateRecv*)packhead;
 				PRINT_TITLE("struct TextChatPrivateRecv Dump Begin");
+				DUMPHEAD ();
 				PRINT_INT64(vTextChatPrivateRecv->platform_id);
 				PRINT_INT64(vTextChatPrivateRecv->send_user_id);
 				PRINT_INT64(vTextChatPrivateRecv->recv_user_id);
@@ -610,6 +615,7 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				struct PacketConfirm* vPacketConfirm =
 					(struct PacketConfirm*)packhead;
 				PRINT_TITLE("struct PacketConfirm Dump Begin");
+				DUMPHEAD ();
 				PRINT_INT64(vPacketConfirm->platform_id);
 				PRINT_INT64(vPacketConfirm->send_user_id);
 				PRINT_INT64(vPacketConfirm->recv_user_id);

@@ -20,12 +20,14 @@ public:
 
 	bool OnUserQuit(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg = NULL, int len = 0);
+public:
+	bool OnAberrant(const int socket);
 private:
 	bool OnGetUserInfo(const int socket,const int64 platform_id,
 			           const int64 user_id,const int64 oppinfo_id,const int32 type,
 			           const int64 usr_session);
 
-	bool ClearUserinfo(const int64 platform_id,const int64 user_id);
+	bool ClearUserinfo(const int64 platform_id,const int64 user_id,const int64 session);
 };
 
 }

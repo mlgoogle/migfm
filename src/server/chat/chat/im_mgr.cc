@@ -1,11 +1,11 @@
 #include "im_mgr.h"
-#include "logic_unit.h"
 #include "dic_comm.h"
 #include "db_comm.h"
 #include "chat_cache_manager.h"
+#include "logic_unit.h"
+#include "base/logic_comm.h"
 #include "base/error_code.h"
 #include "json/json.h"
-#include "base/logic_comm.h"
 #include <sstream>
 
 namespace chat_logic{
@@ -30,6 +30,7 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	chat_base::UserInfo send_user_info;
 	chat_base::UserInfo recv_user_info;
 	int64 msg_id = private_send->msg_id;
+	bool is_push = false;
 	time_t current_time;
 	bool r = false;
 
@@ -37,6 +38,7 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	r = chat_logic::LogicUnit::CheckToken(private_send->platform_id,private_send->send_user_id,
 											(const char*)private_send->token);
 
+	r = true;
 	if (!r){//password error
 		//senderror(socket,USER_LOGIN_FAILED,0,private_send->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
 		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,private_send->reserverd,MIG_CHAT_USER_PASSWORD_ERROR,__FILE__,__LINE__);
@@ -47,14 +49,24 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	r = pc->GetUserInfos(private_send->platform_id,private_send->send_user_id,send_user_info);
 
 	if(!r){
-		//senderror(socket,USER_LOGIN_FAILED,0,private_send->send_user_id,MIG_CHAT_USER_NO_EXIST);
-		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,private_send->send_user_id,MIG_CHAT_USER_NO_EXIST,__FILE__,__LINE__);
+		senderror(socket,USER_LOGIN_FAILED,0,send_user_info.session(),MIG_CHAT_USER_NO_EXIST);
 		return false;
 	}
 
 	r = pc->GetUserInfos(private_send->platform_id,private_send->recv_user_id,recv_user_info);
+	if(!r){ // offline
+		is_push = true;
+		//get oppinfo_user_info from db
+		if(!r)
+			r = chat_logic::LogicUnit::GetUserInfo(private_send->platform_id,private_send->recv_user_id,recv_user_info);
+		if (!r){//user vailed
+			senderror(socket,USER_LOGIN_FAILED,0,send_user_info.session(),MIG_CHAT_USER_NO_EXIST);
+			return false;
+		}
 
-	if(!r){
+	}
+
+	if(is_push){
 		msg_id = base::SysRadom::GetInstance()->GetRandomID();
 		current_time = time(NULL);
 		PushMessage(private_send->platform_id,send_user_info,recv_user_info,private_send->content);
@@ -72,24 +84,27 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	}
 
 	// Leave Meassage
-
 	return LeaveMessage(private_send->platform_id,msg_id,current_time,send_user_info,
 			recv_user_info,private_send->content);
 }
 
 
-bool IMSMgr::LeaveMessage(const int64 platform_id,const int64 msg_id,
-		const time_t current_time,
-		const chat_base::UserInfo& send_userinfo,
-		const chat_base::UserInfo& recv_userinfo,
+bool IMSMgr::LeaveMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,
+		const chat_base::UserInfo& send_userinfo,const chat_base::UserInfo& recv_userinfo,
 		const std::string& message){
 
 	//storage mysql
-	std::stringstream os;
-	os<<current_time;
+
+	//std::stringstream os;
+	//os<<current_time;
+	std::string s_current_time;
+	logic::SomeUtils::GetCurrntTimeFormat(s_current_time);
+
+	//LOG_DEBUG2("current_time = %s msg_id = %lld send_id = %lld recv_id = %lld content = %s",
+		//	s_current_time.c_str(),msg_id,send_userinfo.user_id(),recv_userinfo.user_id(),message.c_str());
 
 	return chat_storage::DBComm::RecordMessage(platform_id,send_userinfo.user_id(),recv_userinfo.user_id(),
-												msg_id,message,os.str());
+												msg_id,message,s_current_time);
 }
 
 // push to apple message center
@@ -103,10 +118,10 @@ bool IMSMgr::PushMessage(const int64 platform_id,const chat_base::UserInfo& send
 	unsigned end_time;
 	os<<recv_userinfo.nickname()<<":"<<message;
 	//get decivce token and  begin_time/end_time
-	chat_storage::RedisComm::GetUserPushConfig(recv_userinfo.user_id(),
-			device_token,is_receive,begin_time,end_time);
+	//chat_storage::RedisComm::GetUserPushConfig(recv_userinfo.user_id(),
+		//	device_token,is_receive,begin_time,end_time);
 
-	return chat_logic::HttpComm::PushMessage(device_token,message);
+	return chat_logic::HttpComm::PushMessage(device_token,os.str());
 }
 
 }

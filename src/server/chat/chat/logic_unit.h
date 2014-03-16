@@ -25,6 +25,8 @@ typedef std::map<int64,int64> MeetingSession;
 
 typedef std::map<int64 /*session*/,MeetingSession> MeetingMap;
 
+typedef std::map<int /*socket*/,chat_base::UserInfo/* userinfo*/> SocketMap;
+
 
 namespace chat_logic {
 

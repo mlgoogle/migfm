@@ -46,8 +46,8 @@ struct PacketHead{
    int8  is_zip;
    int64 msg_id;
    int32 reserverd;
-};
-#define PACKET_HEAD_LENGTH (sizeof(struct PacketHead))
+}; //31
+#define PACKET_HEAD_LENGTH (sizeof(int32) * 5 + sizeof(int16) + sizeof(int8) + sizeof(int64))
 
 //PACKET_CONFIRM = 100
 #define PACKET_CONFIRM_SIZE (sizeof(int64) * 3 + TOKEN_LEN)
@@ -60,7 +60,7 @@ struct PacketConfirm:public PacketHead{
 };
 
 //USER_LOGIN = 1000
-#define USER_LOGIN_SIZE (sizeof(int64) * 2 + sizeof(int8) * 3 + TOKEN_LEN)
+#define USER_LOGIN_SIZE (sizeof(int64) * 2 + sizeof(int8) * 3 + TOKEN_LEN) //51
 struct UserLogin:public PacketHead{
 	int64 platform_id;
 	int64 user_id;
@@ -71,7 +71,7 @@ struct UserLogin:public PacketHead{
 };
 
 //USER_LOGIN_SUCESS = 1001
-#define USER_LOGIN_SUCESS_SIZE (sizeof(int64) * 3 + TOKEN_LEN + NICKNAME_LEN)
+#define USER_LOGIN_SUCESS_SIZE (sizeof(int64) * 3 + TOKEN_LEN + NICKNAME_LEN + HEAD_URL_LEN)
 struct UserLoginSucess:public PacketHead
 {
 	int64 platform_id;

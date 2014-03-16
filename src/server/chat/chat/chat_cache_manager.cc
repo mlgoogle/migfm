@@ -9,6 +9,7 @@ namespace chat_logic{
 
 
 PlatformChatCacheManager* CacheManagerOp::platform_opertion_mgr_ = NULL;
+CacheManagerOp* CacheManagerOp::cache_manager_op_ = NULL;
 
 PlatformChatCacheManager::PlatformChatCacheManager(){
     InitThreadrw(&lock_);
@@ -16,6 +17,25 @@ PlatformChatCacheManager::PlatformChatCacheManager(){
 
 PlatformChatCacheManager::~PlatformChatCacheManager(){
     DeinitThreadrw(lock_);
+}
+
+void PlatformChatCacheManager::SetPlatformInfo(const int64 platform_id,chat_base::PlatformInfo& platform){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc == NULL){
+		pc = new PlatformCache;
+		platform_cache_[platform_id] = pc;
+	}
+	pc->platform_info_ = platform;
+}
+
+bool PlatformChatCacheManager::GetPlatformInfo(const int64 platform_id,chat_base::PlatformInfo& platform){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	platform = pc->platform_info_;
+	return true;
 }
 
 PlatformCache* PlatformChatCacheManager::GetPlatformCache(int64 platform_id){
@@ -139,24 +159,22 @@ bool PlatformChatCacheManager::AddLeaveInfos(const int64 platform_id,const int64
 
 
 bool PlatformChatCacheManager::IsExitsLeaveInfos(const int64 platform_id,const int64 tid,
-			               const int64 mid,const int64 session){
+			               const int64 mid,int64& session){
 	logic::RLockGd lk(lock_);
 	bool r = false;
-	int64 tsession;
 	PlatformCache* pl = GetPlatformCache(platform_id);
 	if (pl==NULL)
 	   return false;
 
+	//查询自己是否已经和对方产生会话
 	SessionInfosMap session_infos;
-	r = base::MapGet<LeaveInfosMap,LeaveInfosMap::iterator,SessionInfosMap>(pl->leave_infos_map_,tid,session_infos);
+	r = base::MapGet<LeaveInfosMap,LeaveInfosMap::iterator,SessionInfosMap>(pl->leave_infos_map_,mid,session_infos);
 
 	if(!r)
 		return false;
 
-	r = base::MapGet<SessionInfosMap,SessionInfosMap::iterator,int64>(session_infos,mid,tsession);
+	r = base::MapGet<SessionInfosMap,SessionInfosMap::iterator,int64>(session_infos,tid,session);
 	if(!r)
-		return false;
-	if(tsession!=session)
 		return false;
 	return true;
 }
@@ -183,6 +201,35 @@ bool PlatformChatCacheManager::DelLeaveInfos(const int64 platform_id,const int64
 }
 
 
+CacheManagerOp::CacheManagerOp(){
+	InitThreadrw(&lock_);
+}
 
+CacheManagerOp::~CacheManagerOp(){
+	DeinitThreadrw(lock_);
+}
+
+
+bool CacheManagerOp::AddSocket(const int socket,const chat_base::UserInfo& userinfo){
+	logic::WLockGd lk(lock_);
+	bool r = false;
+
+	r = base::MapAdd<SocketMap,chat_base::UserInfo>(socket_infos_map_,socket,userinfo);
+	return r;
+}
+
+bool CacheManagerOp::GetSocket(const int socket,chat_base::UserInfo& userinfo){
+	logic::RLockGd lk(lock_);
+	bool r = false;
+
+	r = base::MapGet<SocketMap,SocketMap::iterator,chat_base::UserInfo>(socket_infos_map_,socket,userinfo);
+	return r;
+}
+
+bool CacheManagerOp::DelSocket(const int socket){
+	logic::WLockGd lk(lock_);
+	bool r = base::MapDel<SocketMap,SocketMap::iterator>(socket_infos_map_,socket);
+	return r;
+}
 
 }

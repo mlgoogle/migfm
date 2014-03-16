@@ -23,20 +23,22 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
 	chat_base::UserInfo userinfo;
 	bool r = false;
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	chat_logic::CacheManagerOp * cache_op = CacheManagerOp::GetCacheManagerOp();
+
 	r = chat_logic::LogicUnit::CheckToken(usr_login->platform_id,
 										usr_login->user_id,
 										usr_login->token);
 
+	r = true;
+
 	if (!r){//password error
-		//senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
-		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,usr_login->reserverd,MIG_CHAT_USER_PASSWORD_ERROR,__FILE__,__LINE__);
+		senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
 		return false;
 	}
 	r = chat_logic::LogicUnit::GetUserInfo(usr_login->platform_id,
 			                               usr_login->user_id,userinfo);
 	if (!r){//user vailed
-		//senderror(socket,USER_LOGIN_FAILED,0,usr_logic->reserverd,MIG_CHAT_USER_NO_EXIST);
-		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,usr_login->reserverd,MIG_CHAT_USER_NO_EXIST,__FILE__,__LINE__);
+		senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_NO_EXIST);
 		return false;
 	}
 
@@ -44,10 +46,11 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
 	userinfo.set_platform_token(usr_login->token);
 
 	r = pc->AddUserInfos(usr_login->platform_id,usr_login->user_id,userinfo);
+	r = cache_op->AddSocket(socket,userinfo);
 
 	if (!r){// user vailed
-		//senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_NO_EXIST);
-		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,usr_login->reserverd,MIG_CHAT_USER_NO_EXIST,__FILE__,__LINE__);
+		senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_NO_EXIST);
+		//logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,usr_login->reserverd,MIG_CHAT_USER_NO_EXIST,__FILE__,__LINE__);
 		return false;
 	}
 
@@ -88,12 +91,28 @@ bool UserConnectionMgr::OnGetOppInfos(struct server *srv, int socket, struct Pac
 							 vReqOppstionInfo->reserverd);
 }
 
+bool UserConnectionMgr::OnAberrant(const int socket){
+	int64 uid;
+	bool r = false;
+	chat_base::UserInfo user_info;
+	chat_logic::CacheManagerOp * cache_op = CacheManagerOp::GetCacheManagerOp();
+	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	r = cache_op->GetSocket(socket,user_info);
+	if(!r)
+		return r;
+	cache_op->DelSocket(socket);
+	ClearUserinfo(user_info.platform_id(),user_info.user_id(),user_info.session());
+	return r;
+
+}
+
 bool UserConnectionMgr::OnUserQuit(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg /*= NULL*/, int len/* = 0*/){
 
 	struct UserQuit* vUserQuit = (struct UserQuit*)packet;
 	bool r = false;
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	chat_logic::CacheManagerOp * cache_op = CacheManagerOp::GetCacheManagerOp();
 	r = chat_logic::LogicUnit::CheckToken(vUserQuit->platform_id,
 			vUserQuit->user_id,vUserQuit->token);
 	if (!r){//password error
@@ -102,13 +121,9 @@ bool UserConnectionMgr::OnUserQuit(struct server *srv, int socket, struct Packet
 		return false;
 	}
 
+	cache_op->DelSocket(socket);
 
-	//clear meeting session
-	pc->DelMeetingInfos(vUserQuit->platform_id,vUserQuit->session,vUserQuit->user_id);
-	pc->SendQuitInfoSession(vUserQuit->platform_id,vUserQuit->session,vUserQuit->user_id);
-
-
-	return ClearUserinfo(vUserQuit->platform_id,vUserQuit->user_id);
+	return ClearUserinfo(vUserQuit->platform_id,vUserQuit->user_id,vUserQuit->session);
 
 }
 
@@ -118,14 +133,15 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 	//get userinfo from cache
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
 	chat_base::UserInfo userinfo;
+	chat_base::UserInfo oppinfo_user_info;
 	int64 session = 0 /*base::SysRadom::GetInstance()->GetRandomID()*/;
-	bool r = pc->GetUserInfos(platform_id,user_id,userinfo);
+	bool r = pc->GetUserInfos(platform_id,oppinfo_id,oppinfo_user_info);
 
 	if(!r){ // offline
 
-		//get userinfo from db
+		//get oppinfo_user_info from db
 		if(!r)
-			r = chat_logic::LogicUnit::GetUserInfo(platform_id,oppinfo_id,userinfo);
+			r = chat_logic::LogicUnit::GetUserInfo(platform_id,oppinfo_id,oppinfo_user_info);
 		if (!r){//user vailed
 			senderror(socket,USER_LOGIN_FAILED,0,usr_session,MIG_CHAT_USER_NO_EXIST);
 			return false;
@@ -133,12 +149,22 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 
 	}
 
+	//get userinfo
+	r = pc->GetUserInfos(platform_id,user_id,userinfo);
+	if(!r){
+		return false;
+	}
+
 	//select session
 	r =pc->IsExitsLeaveInfos(platform_id,oppinfo_id,user_id,session);
 	if(!r){//create leave message
-		pc->AddLeaveInfos(platform_id,session,oppinfo_id,user_id);
 		session = base::SysRadom::GetInstance()->GetRandomID();
+		pc->AddLeaveInfos(platform_id,session,oppinfo_id,user_id);
+		userinfo.set_session(session);
+	}else{//已经存在 将session
+		oppinfo_user_info.set_session(session);
 	}
+
 
 
 
@@ -159,12 +185,12 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 
     struct Oppinfo oppinfo;
     oppinfo.user_id = oppinfo_id;
-    oppinfo.user_nicknumber = userinfo.nicknumber();
+    oppinfo.user_nicknumber = oppinfo_user_info.nicknumber();
 	logic::SomeUtils::SafeStrncpy(oppinfo.nickname,NICKNAME_LEN,
-								  userinfo.nickname().c_str(),userinfo.nickname().length());
+			oppinfo_user_info.nickname().c_str(),oppinfo_user_info.nickname().length());
 
     logic::SomeUtils::SafeStrncpy(oppinfo.user_head,HEAD_URL_LEN,
-    							  userinfo.head_url().c_str(),userinfo.head_url().length());
+    		oppinfo_user_info.head_url().c_str(),oppinfo_user_info.head_url().length());
 
     opposition_info.opponfo_list.push_back(&oppinfo);
 
@@ -174,8 +200,11 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 }
 
 
-bool UserConnectionMgr::ClearUserinfo(const int64 platform_id,const int64 user_id){
+bool UserConnectionMgr::ClearUserinfo(const int64 platform_id,const int64 user_id,const int64 session){
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	//clear meeting session
+	pc->DelMeetingInfos(platform_id,session,user_id);
+	pc->SendQuitInfoSession(platform_id,session,user_id);
 	return pc->DelUserInos(platform_id,user_id);
 }
 

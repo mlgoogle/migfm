@@ -2,6 +2,7 @@
 #define _CHAT_IM_MGR_H__
 
 #include "chat_basic_infos.h"
+#include "common.h"
 #include "base/comm_head.h"
 #include "basic/basictypes.h"
 #include <string>

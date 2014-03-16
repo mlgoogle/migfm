@@ -1,10 +1,13 @@
 #include "chat_manager.h"
+#include "chat_cache_manager.h"
+#include "chat_basic_infos.h"
 #include "logic_unit.h"
 #include "db_comm.h"
 #include "dic_comm.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
 #include "base/logic_comm.h"
+#include "basic/radom_in.h"
 #include "config/config.h"
 #include "common.h"
 
@@ -15,13 +18,21 @@ ChatManager::ChatManager(){
 
 	if(!Init())
 		assert(0);
+	InitDefaultPlatformInfo();
 }
 
 ChatManager::~ChatManager(){
-
+	base::SysRadom::GetInstance()->DeinitRandom();
 }
 
 
+bool ChatManager::InitDefaultPlatformInfo(){
+	int64 platform_id = 1000;
+	std::string platform_name = "miu";
+	chat_base::PlatformInfo platforminfo(platform_id,platform_name);
+	CacheManagerOp::GetPlatformChatMgrCache()->SetPlatformInfo(platform_id,platforminfo);
+	return true;
+}
 
 bool ChatManager::Init(){
 
@@ -39,6 +50,8 @@ bool ChatManager::Init(){
 
 	usr_connection_mgr_.reset(new chat_logic::UserConnectionMgr());
 	ims_mgr_.reset(new chat_logic::IMSMgr());
+	base::SysRadom::GetInstance()->InitRandom();
+
 	return true;
 }
 
@@ -118,6 +131,8 @@ bool ChatManager::OnChatManagerMessage(struct server *srv,
 
 bool ChatManager::OnChatManagerClose(struct server *srv,
 									 const int socket){
+
+	usr_connection_mgr_.get()->OnAberrant(socket);
     return true;
 }
 

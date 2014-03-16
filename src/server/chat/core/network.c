@@ -148,6 +148,7 @@ static inline struct echo_block *echo_block_alloc(struct echo_conn *conn,
     if(addr==NULL)
         return NULL;
 
+    memset(addr,'\0',4096);
     block = (struct echo_block *)malloc(sizeof(*block));
     if(block==NULL){
         free(addr);

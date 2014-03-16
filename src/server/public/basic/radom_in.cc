@@ -44,6 +44,7 @@ int64 SysRadom::GetRandomID(){
 		errno = 0;
 		fread (&rd, sizeof (rd), 1, m_urandomfp);
 	} while (errno == EINTR);
+	rd = (rd>0)?rd:(-rd);
 	return rd;
 }
 
