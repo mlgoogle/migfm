@@ -31,6 +31,27 @@ bool LogicUnit::GetUserInfo(const int64 platform_id,int64 user_id,chat_base::Use
 	
 }
 
+bool LogicUnit::SetChatToken(chat_base::UserInfo& userinfo){
+	//create token
+	std::string token;
+	int32 random_num = base::SysRadom::GetInstance()->GetRandomID();
+	//md5
+	token="miglab";
+	std::stringstream os;
+	std::string key;
+	os<<random_num;
+	MD5Sum md5(os.str());
+	token = md5.GetHash();
+	userinfo.set_chat_token(token);
+	return true;
+}
+
+bool LogicUnit::CheckChatToken(const chat_base::UserInfo& userinfo,
+		const char* token){
+    if(strcmp(userinfo.chat_token().c_str(),token)==0)
+    	return true;
+    return false;
+}
 
 bool HttpComm::PushMessage(const std::string &device_token,
 		const std::string &msg, int badge/*=1*/, const std::string &sound/*=""*/) {

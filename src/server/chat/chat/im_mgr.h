@@ -22,6 +22,9 @@ public:
 	bool OnCreatePrviateChat(struct server *srv,int socket,struct PacketHead *packet,
 					const void *msg = NULL, int len = 0);
 
+	bool OnConfirmMessage(struct server *srv,int socket,struct PacketHead *packet,
+					const void *msg = NULL, int len = 0);
+
 private:
 	bool LeaveMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,
 			const chat_base::UserInfo& send_userinfo,

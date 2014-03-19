@@ -47,6 +47,7 @@ bool ChatManager::Init(){
 	r = config->LoadConfig(path);
 	chat_storage::DBComm::Init(config->mysql_db_list_);
 	chat_storage::MemComm::Init(config->mem_list_);
+	chat_storage::RedisComm::Init(config->redis_list_);
 
 	usr_connection_mgr_.reset(new chat_logic::UserConnectionMgr());
 	ims_mgr_.reset(new chat_logic::IMSMgr());

@@ -21,6 +21,7 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
     
 	struct UserLogin* usr_login = (struct UserLogin*)packet;
 	chat_base::UserInfo userinfo;
+	std::string token;
 	bool r = false;
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
 	chat_logic::CacheManagerOp * cache_op = CacheManagerOp::GetCacheManagerOp();
@@ -54,6 +55,8 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
 		return false;
 	}
 
+	//create new token
+	chat_logic::LogicUnit::SetChatToken(userinfo);
 	//返回新token 和session
 	struct UserLoginSucess usr_loginsucess;
 	MAKE_HEAD(usr_loginsucess, USER_LOGIN_SUCESS,USER_TYPE,0,usr_login->reserverd);
@@ -84,6 +87,19 @@ bool UserConnectionMgr::OnGetOppInfos(struct server *srv, int socket, struct Pac
 	struct ReqOppstionInfo* vReqOppstionInfo = (struct ReqOppstionInfo*)packet;
 	bool r = false;
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	chat_base::UserInfo user_info;
+
+	//get userinfo
+	r = pc->GetUserInfos(vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,user_info);
+	if(!r){
+		return false;
+	}
+
+	r = chat_logic::LogicUnit::CheckChatToken(user_info,vReqOppstionInfo->token);
+	if (!r){//password error
+		senderror(socket,USER_LOGIN_FAILED,0,vReqOppstionInfo->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
+		return false;
+	}
 
 	if(vReqOppstionInfo->type==1)//单用户
 		return OnGetUserInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
@@ -111,10 +127,18 @@ bool UserConnectionMgr::OnUserQuit(struct server *srv, int socket, struct Packet
 
 	struct UserQuit* vUserQuit = (struct UserQuit*)packet;
 	bool r = false;
+	chat_base::UserInfo userinfo;
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
 	chat_logic::CacheManagerOp * cache_op = CacheManagerOp::GetCacheManagerOp();
-	r = chat_logic::LogicUnit::CheckToken(vUserQuit->platform_id,
-			vUserQuit->user_id,vUserQuit->token);
+	//r = chat_logic::LogicUnit::CheckToken(vUserQuit->platform_id,
+		//	vUserQuit->user_id,vUserQuit->token);
+	pc->GetUserInfos(vUserQuit->platform_id,vUserQuit->user_id,userinfo);
+
+	if(!r)
+		return false;
+
+	r = chat_logic::LogicUnit::CheckChatToken(userinfo,vUserQuit->token);
+
 	if (!r){//password error
 		//senderror(socket,USER_LOGIN_FAILED,0,vUserQuit->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
 		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,vUserQuit->reserverd,MIG_CHAT_USER_PASSWORD_ERROR,__FILE__,__LINE__);

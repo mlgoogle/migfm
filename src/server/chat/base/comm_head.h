@@ -50,7 +50,7 @@ struct PacketHead{
 #define PACKET_HEAD_LENGTH (sizeof(int32) * 5 + sizeof(int16) + sizeof(int8) + sizeof(int64))
 
 //PACKET_CONFIRM = 100
-#define PACKET_CONFIRM_SIZE (sizeof(int64) * 3 + TOKEN_LEN)
+#define PACKET_CONFIRM_SIZE (sizeof(int64) * 4 + TOKEN_LEN)
 struct PacketConfirm:public PacketHead{
 	int64 platform_id;
 	int64 send_user_id;
@@ -106,7 +106,7 @@ struct UserQuitNotification :public PacketHead{
 };
 
 //REQ_OPPOSITION_INFO = 1020
-#define REQ_OPPOSITION_INFO_SIZE (sizeof(int64) * 4 + sizeof(int16) + TOKEN_LEN)
+#define REQ_OPPOSITION_INFO_SIZE (sizeof(int64) * 3 + sizeof(int16) + TOKEN_LEN)
 struct ReqOppstionInfo : public PacketHead{
 	int64 platform_id;
 	int64 user_id;
@@ -115,7 +115,7 @@ struct ReqOppstionInfo : public PacketHead{
 	char token[TOKEN_LEN];
 };
 
-#define OPPSITIONINFO_SIZE (sizeof(int64) + sizeof(64) + NICKNAME_LEN + HEAD_URL_LEN)
+#define OPPSITIONINFO_SIZE (sizeof(int64) * 2 + NICKNAME_LEN + HEAD_URL_LEN)
 struct Oppinfo
 {
 	int64 user_id;
@@ -139,7 +139,7 @@ struct OppositionInfo:public PacketHead{
 };
 
 //TEXT_CHAT_PRIVATE_SEND = 1100
-#define TEXTCHATPRIVATESEND_SIZE (sizeof(int64) * 3 + TOKEN_LEN + vTextChatPrivateSend->content.length())
+#define TEXTCHATPRIVATESEND_SIZE (sizeof(int64) * 4 + TOKEN_LEN + vTextChatPrivateSend->content.length())
 
 struct TextChatPrivateSend:public PacketHead{
 	int64 platform_id;
@@ -151,7 +151,7 @@ struct TextChatPrivateSend:public PacketHead{
 };
 
 //TEXT_CHAT_PRIVATE_RECV = 1101
-#define TEXTCHATPRIVATERECV_SIZE (sizeof(int64) * 2 + vTextChatPrivateRecv->content.length())
+#define TEXTCHATPRIVATERECV_SIZE (sizeof(int64) * 3 + vTextChatPrivateRecv->content.length())
 struct TextChatPrivateRecv:public PacketHead{
 	int64 platform_id;
 	int64 send_user_id;

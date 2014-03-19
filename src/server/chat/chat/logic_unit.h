@@ -27,6 +27,8 @@ typedef std::map<int64 /*session*/,MeetingSession> MeetingMap;
 
 typedef std::map<int /*socket*/,chat_base::UserInfo/* userinfo*/> SocketMap;
 
+typedef std::map<int64 /*msg id*/,chat_base::UserInfo /*userinfo*/> ConfirmMap;
+
 
 namespace chat_logic {
 
@@ -38,6 +40,10 @@ public:
 
 	static bool CheckToken(const int64 platform_id,int64 user_id,
 			const char* token);
+
+	static bool SetChatToken(chat_base::UserInfo& userinfo);
+
+	static bool CheckChatToken(const chat_base::UserInfo& userinfo,const char* token);
 
 
 };

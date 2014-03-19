@@ -16,6 +16,8 @@ public:
 	LeaveInfosMap             leave_infos_map_;
 
 	MeetingMap                meeting_infos_map_;
+
+	ConfirmMap                confirm_message_map_;
 };
 
 class PlatformChatCacheManager{
@@ -26,6 +28,10 @@ public:
 	void SetPlatformInfo(const int64 platform_id,chat_base::PlatformInfo& platform);
 
 	bool GetPlatformInfo(const int64 platform_id,chat_base::PlatformInfo& platform);
+
+	bool AddConfirmMessage(const int64 platform_id,const int64 msg_id,chat_base::UserInfo& user_info);
+
+	bool DelConfirmMessage(const int64 platform_id,const int64 msg_id);
 
 	bool AddUserInfos(const int64 platform_id,const int64 user_id,
 		const chat_base::UserInfo& userinfo);

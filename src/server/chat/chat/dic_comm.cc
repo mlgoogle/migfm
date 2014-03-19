@@ -4,10 +4,10 @@
 
 namespace chat_storage{
 
-static const char *HKEY_PUSH_CFG_DEV_TOK = "chat:push.cfg:dev.tok";
-static const char *HKEY_PUSH_CFG_IS_RECV = "chat:push.cfg:is.recv";
-static const char *HKEY_PUSH_CFG_BTIME = "chat:push.cfg:btime";
-static const char *HKEY_PUSH_CFG_ETIME = "chat:push.cfg:etime";
+static const char *HKEY_PUSH_CFG_DEV_TOK = "soc:push.cfg:dev.tok";
+static const char *HKEY_PUSH_CFG_IS_RECV = "soc:push.cfg:is.recv";
+static const char *HKEY_PUSH_CFG_BTIME = "soc:push.cfg:btime";
+static const char *HKEY_PUSH_CFG_ETIME = "soc:push.cfg:etime";
 
 base_storage::DictionaryStorageEngine* MemComm::engine_ = NULL;
 std::list<base::ConnAddr>  RedisComm::addrlist_;

@@ -47,6 +47,22 @@ PlatformCache* PlatformChatCacheManager::GetPlatformCache(int64 platform_id){
 	return it->second;
 }
 
+bool PlatformChatCacheManager::AddConfirmMessage(const int64 platform_id,const int64 msg_id,
+													chat_base::UserInfo& user_info){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if(pl==NULL)
+		return false;
+	return base::MapAdd<ConfirmMap,chat_base::UserInfo>(pl->confirm_message_map_,msg_id,user_info);
+}
+
+bool PlatformChatCacheManager::DelConfirmMessage(const int64 platform_id,const int64 msg_id){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if(pl==NULL)
+		return false;
+	return base::MapDel<ConfirmMap,ConfirmMap::iterator>(pl->confirm_message_map_,msg_id);
+}
 
 bool PlatformChatCacheManager::AddUserInfos(const int64 platform_id,
 											const int64 user_id, 
