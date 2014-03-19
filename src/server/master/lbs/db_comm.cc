@@ -166,6 +166,7 @@ bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
     return true;
 }
 
+
 bool DBComm::GetMusicUrl(const std::string &song_id, std::string &hq_url, std::string &song_url){
 	std::stringstream os;
 	bool r = false;
@@ -211,7 +212,42 @@ bool DBComm::GetMusicUrl(const std::string &song_id, std::string &hq_url, std::s
 	return true;
 }
 
+bool DBComm::GetMusicAboutInfo(const std::string& song_id,std::string& hq_url,std::string& song_url,
+		std::string& clt_num,std::string& cmt_num,std::string& hot_num){
+	std::stringstream os;
+	bool r = false;
+	int num;
+	MYSQL_ROW rows = NULL;
+	base_storage::DBStorageEngine* engine = GetConnection();
+	if (engine==NULL){
+		LOG_ERROR("engine error");
+		return true;
+	}
+	//call migfm.proc_GetMusicInfo(232438)
+	os<<"call migfm.proc_GetMusicInfo("<<song_id<<");";
+	LOG_DEBUG2("%s",os.str().c_str());
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		LOG_ERROR("sqlexec error");
+		return r;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			if (rows[0] !=NULL){
+				hq_url.assign(rows[2]);
+				song_url = hq_url;
+				clt_num.assign(rows[4]);
+				cmt_num.assign(rows[5]);
+				hot_num.assign(rows[6]);
+			}
+		}
+		return true;
+	}
 
+	return true;
+
+}
 bool DBComm::GetMusicFriendNum(const std::string &uid,
 							   std::string& snum){
 	std::stringstream os;

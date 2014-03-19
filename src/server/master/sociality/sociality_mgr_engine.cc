@@ -809,15 +809,23 @@ bool SocialityMgrEngine::MakePresentSongContent(const std::string &send_uid,
 	char tmp[256] = {0};
 	Json::FastWriter wr;
 	Json::Value value;
+	std::string sd_nick, sd_sex, sd_head;
+	std::string to_nick, to_sex, to_head;
+	double uid_latitude,uid_longitude,tar_latitude,tar_longitude;
 
 	//
 	if(!GetMusicInfos(to_uid,song_id,value["song"]))
 		return false;
 
+	if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head,uid_latitude,uid_longitude))
+		return false;
+	if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head,tar_latitude,tar_longitude))
+		return false;
 
 	value["action"] = "presentsong";
 	snprintf(tmp, arraysize(tmp), "%lld", msg_id);
 	value["msgid"] = tmp;
+	value["distance"] = base::BasicUtil::CalcGEODistance(uid_latitude,uid_longitude,tar_latitude,tar_longitude);
 	Json::Value &content = value["content"];
 	content["send_uid"] = send_uid.c_str();
 	content["to_uid"] = to_uid.c_str();
@@ -937,7 +945,9 @@ bool SocialityMgrEngine::GetPushMsgDetail(const std::string& uid,
 		userjson["birthday"] = usrinfo.birthday();
 		userjson["location"] = usrinfo.crty();
 		userjson["source"] = usrinfo.source();
-		if (type == "sayhello")
+		if(root["distance"].isNull())
+			userjson["distance"] = 0;
+		else
 			userjson["distance"] = root["distance"];
 	}
 	return true;

@@ -24,6 +24,10 @@ public:
 	static bool GetMusicUrl(const std::string& song_id,std::string& hq_url,
 		std::string& song_url);
 
+	static bool GetMusicAboutInfo(const std::string& song_id,std::string& hq_url,
+			std::string& song_url,std::string& clt_num,std::string& cmt_num,
+			std::string& hot_num);
+
 	static bool UpDateUserLbsPos(Json::Value& users,const int64 src_uid);
 
 	static bool GetMusicFriendNum(const std::string& uid,
