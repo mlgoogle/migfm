@@ -893,6 +893,7 @@ bool MemComm::SetUsrCurrentSong(const std::string& uid,
 	value.append("\"}");
 	r = engine_->SetValue(key.c_str(),key.length(),
 							value.c_str(),value.length());
+	return r;
 }
 
 }
