@@ -30,7 +30,7 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
 										usr_login->user_id,
 										usr_login->token);
 
-	r = true;
+	//r = true;
 
 	if (!r){//password error
 		senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
@@ -57,7 +57,7 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
 
 	//create new token
 	chat_logic::LogicUnit::SetChatToken(userinfo);
-	//·µ»ØÐÂtoken ºÍsession
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½token ï¿½ï¿½session
 	struct UserLoginSucess usr_loginsucess;
 	MAKE_HEAD(usr_loginsucess, USER_LOGIN_SUCESS,USER_TYPE,0,usr_login->reserverd);
 	usr_loginsucess.platform_id = usr_login->platform_id;
@@ -101,7 +101,7 @@ bool UserConnectionMgr::OnGetOppInfos(struct server *srv, int socket, struct Pac
 		return false;
 	}
 
-	if(vReqOppstionInfo->type==1)//µ¥ÓÃ»§
+	if(vReqOppstionInfo->type==1)//
 		return OnGetUserInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
 							 vReqOppstionInfo->oppostion_id,vReqOppstionInfo->type,
 							 vReqOppstionInfo->reserverd);
@@ -185,7 +185,7 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 		session = base::SysRadom::GetInstance()->GetRandomID();
 		pc->AddLeaveInfos(platform_id,session,oppinfo_id,user_id);
 		userinfo.set_session(session);
-	}else{//ÒÑ¾­´æÔÚ ½«session
+	}else{//ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½session
 		oppinfo_user_info.set_session(session);
 	}
 

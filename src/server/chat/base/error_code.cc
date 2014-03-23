@@ -4,12 +4,12 @@ const char* migchat_strerror(int error_code){
 
 	switch(error_code){
 		case MIG_CHAT_USER_NO_EXIST:
-			return "ÓÃ»§²»´æÔÚ";
+			return "ç”¨æˆ·ä¸å­˜åœ¨";
 		case MIG_CHAT_USER_PASSWORD_ERROR:
-			return "ÃÜÂë´íÎó";
+			return "å¯†ç é”™è¯¯";
 		default:
-			return "Î´Öª";
+			return "æœªçŸ¥";
 	}
 
-	return "Î´Öª";
+	return "æœªçŸ¥";
 }
