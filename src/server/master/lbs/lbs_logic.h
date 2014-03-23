@@ -13,7 +13,7 @@
 #include "baidu_lbs_connector.h"
 #include "redis_connector.h"
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 
 namespace Json {
 	class Value;
@@ -57,15 +57,15 @@ public:
 
 public:
 
-	//fix me ºê¶¨Òå »òÕßÄ£°åÓÅ»¯ 
+	//fix me ï¿½ê¶¨ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½Å»ï¿½
 	 bool OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		int &status, std::string &msg,int flag);  
 	/*
-	flag 1 »ñÈ¡ÖÜÎ§µÄÓÃ»§               OnMsgSearchNearbyV2
-	     2 »ñÈ¡ÖÜÎ§ÔÚÌıÄãºìĞÄ¸èÇúµÄÓÃ»§ OnMsgSameMusic
-		 3 »ñÈ¡ÖÜÎ§×ÜÊı                 OnMsgMusicFri
-		 4 »ñÈ¡ÖÜÎ§ÒôÀÖ                 OnMsgNearMusic
-		 5 »ñÈ¡ÖÜÎ§ÒôÀÖ¸öÊı¼°¸½½üÈË¸öÊı OnMsgNearCollect
+	flag 1 ï¿½ï¿½È¡ï¿½ï¿½Î§ï¿½ï¿½ï¿½Ã»ï¿½               OnMsgSearchNearbyV2
+	     2 ï¿½ï¿½È¡ï¿½ï¿½Î§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ OnMsgSameMusic
+		 3 ï¿½ï¿½È¡ï¿½ï¿½Î§ï¿½ï¿½ï¿½ï¿½                 OnMsgMusicFri
+		 4 ï¿½ï¿½È¡ï¿½ï¿½Î§ï¿½ï¿½ï¿½ï¿½                 OnMsgNearMusic
+		 5 ï¿½ï¿½È¡ï¿½ï¿½Î§ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Ë¸ï¿½ï¿½ï¿½ OnMsgNearCollect
 	*/ 
 
 	bool UpdateUserInfoPoi(int64 user_id,double longitude, 
