@@ -30,6 +30,8 @@ public:
 
 	static bool UpDateUserLbsPos(Json::Value& users,const int64 src_uid);
 
+	static bool GetSameMusic(Json::Value& users,const int64 src_uid);
+
 	static bool GetMusicFriendNum(const std::string& uid,
 		                          std::string& snum);
 

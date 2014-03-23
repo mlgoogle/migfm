@@ -59,7 +59,7 @@ bool MusicMgrEngine::Init(){
 	InitThreadrw(&mood_random_lock_);
 	InitThreadrw(&scene_random_lock_);
 
-	////³õÊ¼»¯Ëæ»úÊıÁĞ±í
+	////ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
 	RestMusicListRandom();
 
 }
@@ -139,7 +139,7 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMusicChannelSong(socket,packet);
 	}else if (type=="word"){
 		GetDescriptionWord(socket,packet);
-	}else if (type=="getmssong"){ //»ñÈ¡³¡¾°ÒôÀÖÓÃÓÚÎ¢ĞÅ°æ±¾ Ã¿´Î½öÒ»Ê×
+	}else if (type=="getmssong"){ //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½Å°æ±¾ Ã¿ï¿½Î½ï¿½Ò»ï¿½ï¿½
 		GetMoodSceneWordSong(socket,packet);
 	}else if (type=="getsongid"){
 		GetWXMusicInfo(socket,packet);
@@ -147,18 +147,18 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMoodMap(socket,packet);
 	}else if (type=="getmparent"){
 		GetMoodParent(socket,packet);
-	}else if (type=="setcltsong"){//¼ÇÂ¼ÊÕ²Ø¶È
+	}else if (type=="setcltsong"){//ï¿½ï¿½Â¼ï¿½Õ²Ø¶ï¿½
 		PostCollectAndHateSong(socket,packet,1);
 	}else if (type=="getcltsongs"){
 		//GetSongList(socket,packet,1);
 		GetSongListV2(socket,packet,1);
-	}else if (type=="delcltsong"){//È¡ÏûÊÕ²Ø¸èÇú
+	}else if (type=="delcltsong"){//È¡ï¿½ï¿½ï¿½Õ²Ø¸ï¿½ï¿½ï¿½
 		DelCollectAndHateSong(socket,packet,1);
-	}else if (type=="sethtsong"){//ÉèÖÃÀ¬»ø¸èÇú
+	}else if (type=="sethtsong"){//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		PostCollectAndHateSong(socket,packet,0);
 	}else if (type=="delthsong"){
 		DelCollectAndHateSong(socket,packet,0);
-	}else if (type=="recordcursong"){//¼ÇÂ¼ÈÈ¶È
+	}else if (type=="recordcursong"){//ï¿½ï¿½Â¼ï¿½È¶ï¿½
 		SetMoodRecording(socket,packet);
 	}else if (type=="getdefsongs"){
 		GetSongList(socket,packet,0);
@@ -189,11 +189,11 @@ bool MusicMgrEngine::GetMoodParent(const int socket,const packet::HttpPacket& pa
 	std::string b64word;
 	std::list<base::WordAttrInfo> word_list;
 	std::list<base::WordAttrInfo>::iterator it;
-	//»ñÈ¡ĞÄÇé´Ê
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½
 	r = storage::DBComm::GetMoodParentWord(word_list);
 	if (!r){
 		status = "1";
-		//msg = "ĞÄÇé²»´æÔÚ;";
+		//msg = "ï¿½ï¿½ï¿½é²»ï¿½ï¿½ï¿½ï¿½;";
 		msg = migfm_strerror(MIG_FM_MOOD_NO_VALID);
 		utf8_flag = 0;
 		goto ret;
@@ -245,8 +245,8 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 		goto ret;
 	}
 
-	//´Óredis ÀïÃæ»ñÈ¡ÓÃ»§ĞÄĞ÷Í¼
-	//ÒôÀÖ»úÆ÷ÈË×¨ÃÅ´Ó²Ù×÷¼ÇÂ¼ÀïÃæ·ÖÎö
+	//ï¿½ï¿½redis ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+	//ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½×¨ï¿½Å´Ó²ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	r = storage::RedisComm::GetUserMoodMap(uid,result);
 	if (result.empty()){
 		//LOG_ERROR("Get UID Error");
@@ -350,11 +350,11 @@ ret1:
 			//return false;
 			continue;
 
-		//ÊÇ·ñÀ­ºÚ
+		//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½
 		r = storage::RedisComm::IsHateSong(uid,song_id);
-		if (r)//À­ºÚ
+		if (r)//ï¿½ï¿½ï¿½ï¿½
 			continue;
-		//ÊÇ·ñ´æÔÚ
+		//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 		it = songid_map.find(song_id);
 		if (it!=songid_map.end())
 			goto ret1;
@@ -383,7 +383,7 @@ ret1:
 	    Base64Decode(smi.title(),&b64title);
 	    Base64Decode(smi.artist(),&b64artist);
 	    Base64Decode(smi.album_title(),&b64album);
-		//ÊÇ·ñÊÇºìĞÄ¸èÇú
+		//ï¿½Ç·ï¿½ï¿½Çºï¿½ï¿½Ä¸ï¿½ï¿½ï¿½
 		r = storage::RedisComm::IsCollectSong(uid,song_id);
 		if (r)
 			is_like = 1;
@@ -589,7 +589,7 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 			goto ret;
 		}
 
-		//ÅúÁ¿É¾³ı
+		//ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½
 		for (j=0;j<song_pair.size();j++){
 			if (flag){
 				storage::RedisComm::DelCollectSong(uid,song_pair[j]);
@@ -644,7 +644,7 @@ bool MusicMgrEngine::GetSongListV2(const int socket,
 		 goto ret;
 	 }
 
-	 if (type==1)//ÊÕ²Ø¸èÇú±í
+	 if (type==1)//ï¿½Õ²Ø¸ï¿½ï¿½ï¿½ï¿½
 		 r = storage::RedisComm::GetCollectSongs(tar_uid,songmap);
 
 	 if (!r){
@@ -653,13 +653,13 @@ bool MusicMgrEngine::GetSongListV2(const int socket,
 		 goto ret;
 	 }
 
- 	 //»ñÈ¡ÒôÀÖĞÅÏ¢
+ 	 //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
  	 storage::RedisComm::GetMusicInfosV2(songmap,songinfolist);
 
 
  	 ChangeMusicInfos(song_music_infos,songinfolist);
 
- 	 //»ñÈ¡¸èÇúURL¼°ÆÀÂÛ£¬ÈÈ¶È£¬ÊÕ²Ø
+ 	 //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½URLï¿½ï¿½ï¿½ï¿½ï¿½Û£ï¿½ï¿½È¶È£ï¿½ï¿½Õ²ï¿½
  	 storage::DBComm::GetMusicOtherInfos(song_music_infos);
 
  	 //jsonÆ´×°
@@ -758,9 +758,9 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 		goto ret;
 	}
 
-	if (type==1)//ÊÕ²Ø¸èÇú±í
+	if (type==1)//ï¿½Õ²Ø¸ï¿½ï¿½ï¿½ï¿½
 		r = storage::RedisComm::GetCollectSongs(tar_uid,song_list);
-	else if(type==0)//Ä¬ÈÏ¸èÇúÁĞ±í
+	else if(type==0)//Ä¬ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
 		r = storage::RedisComm::GetDefaultSongs(tar_uid,song_list);
 
 	if (!r){
@@ -779,10 +779,10 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 			os<<",";
 		}
 
-		//½âÎöjson
+		//ï¿½ï¿½ï¿½ï¿½json
 		//{"songid":"100001","type":"1","typeid":"12"}
 
-		//ÊÕ²Ø¸èÇúÊôĞÔ
+		//ï¿½Õ²Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		r = reader.parse(content.c_str(),root);
 		if (!r)
 			continue;
@@ -809,7 +809,7 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 		if (!r)
 			continue;
 
-		//»ñÈ¡ÊÕ²ØÊı//»ñÈ¡ÆÀÂÛÊı//ÈÈ¶È
+		//ï¿½ï¿½È¡ï¿½Õ²ï¿½ï¿½ï¿½//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½//ï¿½È¶ï¿½
 		GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
 		smi.set_music_clt(clt_num);
 		smi.set_music_cmt(cmt_num);
@@ -950,10 +950,10 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	r = pack.GetAttrib(NUM,num);
 	//fix me
-	if (!r)//ÈôÃ»Ìá½»¸öÊı Ä¬ÈÏ10Ê×
+	if (!r)//ï¿½ï¿½Ã»ï¿½á½»ï¿½ï¿½ï¿½ï¿½ Ä¬ï¿½ï¿½10ï¿½ï¿½
 		num = "10";
 
-	//ÅĞ¶ÏÄ£Ê½ÊÇ·ñÎª-1 µ¥Ñ¡Ä£Ê½
+	//ï¿½Ğ¶ï¿½Ä£Ê½ï¿½Ç·ï¿½Îª-1 ï¿½ï¿½Ñ¡Ä£Ê½
 	if ((atol(mood_index.c_str())!=-1)&&(atol(scens_index.c_str())!=-1)&&(atol(channel_index.c_str())!=-1)){
 		flag_al = 1;
 	}
@@ -984,11 +984,11 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 
 
-	//ÅĞ¶ÏÌá½»ĞòºÅÈı¸ö²»ÄÜÍ¬Ê±Îª0
+	//ï¿½Ğ¶ï¿½ï¿½á½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬Ê±Îª0
 	if((mood_index=="0")&&(scens_index=="0")&&(channel_index=="0"))
 		mood_index = scens_index = channel_index ="1";
 
-	//ÅĞ¶ÏÌá½»¸öÊı²»ÄÜÎª0
+	//ï¿½Ğ¶ï¿½ï¿½á½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0
 	if (num=="0")
 		num = "10";
 
@@ -1009,7 +1009,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 			moodci.set_info_num(mood_num);
 			scensci.set_info_num(scens_num);
 			channelci.set_info_num(channel_num);
-	}else{//µ¥Ò»Ä£Ê½
+	}else{//ï¿½ï¿½Ò»Ä£Ê½
 		if(atol(mood_id.c_str())!=0)
 			moodci.set_info_num(atol(num.c_str()));
 		else if (atol(scene_id.c_str())!=0)
@@ -1017,14 +1017,14 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 		else if (atol(channel_id.c_str())!=0)
 			channelci.set_info_num(atol(num.c_str()));
 	}
-//»ñÈ¡ÓÃ»§µÄºìĞÄ¸èµ¥
+//ï¿½ï¿½È¡ï¿½Ã»ï¿½ï¿½Äºï¿½ï¿½Ä¸èµ¥
 	//storage::RedisComm::GetCollectSongs(uid,song_map);
 	storage::RedisComm::GetCltAndHateSong(uid,clt_song_map,hate_song_map);
 
 	if (mood_flag){
 		mode = "mm";
 		//r = GetMoodScensChannelSongsV2(uid,mode,moodci.info_num(),
-		//	                           moodci.info_id(),song_map,os1);//ĞÄÇé
+		//	                           moodci.info_id(),song_map,os1);//ï¿½ï¿½ï¿½ï¿½
 		r = GetMoodScensChannelSongsV3(uid,mode,moodci.info_num(),
 			                           moodci.info_id(),clt_song_map,hate_song_map,
 									   os1);
@@ -1038,7 +1038,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if (scens_flag){
 		mode = "ms";
 		//r = GetMoodScensChannelSongsV2(uid,mode,scensci.info_num(),
-		//	scensci.info_id(),song_map,os1);//³¡¾°
+		//	scensci.info_id(),song_map,os1);//ï¿½ï¿½ï¿½ï¿½
 		r = GetMoodScensChannelSongsV3(uid,mode,scensci.info_num(),
 			scensci.info_id(),clt_song_map,hate_song_map,
 			os1);
@@ -1052,7 +1052,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if (channel_flag){
 		mode = "chl";
 		//r = GetMoodScensChannelSongsV2(uid,mode,channelci.info_num(),
-		//	 channelci.info_id(),song_map,os1);//ÆµµÀ
+		//	 channelci.info_id(),song_map,os1);//Æµï¿½ï¿½
 
 		r = GetMoodScensChannelSongsV3(uid,mode,channelci.info_num(),
 			channelci.info_id(),clt_song_map,hate_song_map,
@@ -1110,7 +1110,7 @@ bool MusicMgrEngine::GetUserMusicCltAndHis(const int socket,
 	if (!pack.GetAttrib(ISLIKE,is_like))
 		is_like = "0";
 
-	//»ñÈ¡ÀúÊ·¸èÇú
+	//ï¿½ï¿½È¡ï¿½ï¿½Ê·ï¿½ï¿½ï¿½ï¿½
 	storage::DBComm::GetUserHistoryMusic(uid,from_id,count,songlist);
 
 	storage::RedisComm::GetMusicHistroyCollect(uid,is_like,songlist,
@@ -1250,11 +1250,11 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 
 	r = pack.GetAttrib(NAME,name);
 	if (!r)
-		name = "Î´Öª¸èÇú";
+		name = "æœªçŸ¥";
 
 	r = pack.GetAttrib(SINGER,singer);
 	if (!r)
-		singer = "ØıÃû";
+		singer = "ä½šå";
 
 	r = pack.GetAttrib(STATE,state);
 	if(!r){
@@ -1274,24 +1274,16 @@ ret:
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	//recording mood and current songid
 	if (recording_flag){
-		//Ö»¼ÇÂ¼ĞÄÇé
+		//Ö»ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½
 		if(mode=="mm")
 		   mood_record_engine_->RecordingMood(atoll(uid.c_str()),
 		                                   atol(wordid.c_str()));
-		//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"ÑŞÑôÌì","singer":"ñ¼Î¨"}
 
 		storage::MemComm::SetUsrCurrentSong(uid,songid,name,singer,state,mode,wordid);
 		storage::DBComm::RecordMusicHistory(uid,songid);
-		//¼ÇÂ¼ÓÃ»§Ìı¸èÀúÊ·
-		if (state!="2"){//±¾µØÊÖ»ú¸èÇú²»¼ÇÂ¼
-			storage::RedisComm::MgrListenSongsNum(songid,lastsongid,uid);
-			//storage::RedisComm::MgrListenSongsNum(songid,uid,1);
-			//if (atol(lastsongid.c_str())!=0)
-				//storage::RedisComm::MgrListenSongsNum(lastsongid,uid,0);
-		}
-// 		if (songid!="0")
-// 			//¼ÇÂ¼ÈÈ¶È
-// 			SetMusicHostCltCmt(songid,1);
+//		if (state!="2"){// --å¬æ­Œè®°å½•å·²ç»å­˜å…¥æ•°æ®åº“
+//			storage::RedisComm::MgrListenSongsNum(songid,lastsongid,uid);
+//		}
 	}
 	return true;
 
@@ -1362,7 +1354,7 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 	else
 		storage::RedisComm::SetHateSong(uid,songid,content);
 
-	//¼ÇÂ¼ÊÕ²ØÊı
+	//ï¿½ï¿½Â¼ï¿½Õ²ï¿½ï¿½ï¿½
 	if(flag)
 		SetMusicHostCltCmt(songid,2);
 
@@ -1486,7 +1478,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV3(const std::string& uid,
 	std::list<int> random_list;
 
 	std::map<std::string, std::string>::iterator it;
-	//ÏÈ»ñÈ¡Õû¸öhash Öµ
+	//ï¿½È»ï¿½È¡ï¿½ï¿½ï¿½hash Öµ
 	int hash_size = storage::RedisComm::GetHashSize(os.str());
 	if (hash_size==0)
 		return false;
@@ -1495,12 +1487,12 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV3(const std::string& uid,
 	r = GetTypeRamdon(mode,wordid,temp_total,random_list);
 	if (!r)
 		return false;
-	//Ò»´ÎĞÔ»ñÈ¡¸èÇúĞÅÏ¢
+	//Ò»ï¿½ï¿½ï¿½Ô»ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 	storage::RedisComm::GetMusicInfosV3(os.str(),random_list,songinfolist);
 
 	ChangeMusicInfos(song_music_infos,songinfolist);
 
-	//»ñÈ¡¸èÇúURL¼°ÆÀÂÛ£¬ÈÈ¶È£¬ÊÕ²Ø
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½URLï¿½ï¿½ï¿½ï¿½ï¿½Û£ï¿½ï¿½È¶È£ï¿½ï¿½Õ²ï¿½
 	storage::DBComm::GetMusicOtherInfos(song_music_infos);
 
 	//jsonÆ´×°
@@ -1516,13 +1508,13 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV3(const std::string& uid,
 			Base64Decode(smi.artist(),&b64artist);
 			Base64Decode(smi.album_title(),&b64album);
 
-			//ÊÇ·ñÊÇºÚÃûµ¥¸èÇú
+			//ï¿½Ç·ï¿½ï¿½Çºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			std::map<std::string,base::MusicCltHateInfo>::iterator itr 
 				= hate_song_map.find(smi.id());
 			if (itr!=hate_song_map.end())
 				continue;
 
-			//ÊÇ·ñÊÇºìĞÄ¸èÇú
+			//ï¿½Ç·ï¿½ï¿½Çºï¿½ï¿½Ä¸ï¿½ï¿½ï¿½
 			std::map<std::string,base::MusicCltHateInfo>::iterator it 
 				= clt_song_map.find(smi.id());
 			if (it!=clt_song_map.end())
@@ -1574,7 +1566,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
 	std::map<std::string,base::MusicInfo> song_music_infos;
 
 	std::map<std::string, std::string>::iterator it;
-	//ÏÈ»ñÈ¡Õû¸öhash Öµ
+	//ï¿½È»ï¿½È¡ï¿½ï¿½ï¿½hash Öµ
 	int hash_size = storage::RedisComm::GetHashSize(os.str());
 	if (hash_size==0)
 		return false;
@@ -1595,13 +1587,13 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
 			temp_total--;
 			continue;
 		}
-		//ÊÇ·ñÀ­ºÚ
+		//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½
 		r = storage::RedisComm::IsHateSong(uid,songid);
 		if (r){
 			temp_total--;
 			continue;
 		}
-		//ÊÇ·ñÒÑ¾­´æÔÚ
+		//ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½
 		it = songid_map.find(songid);
 		if (it!=songid_map.end()){
 			temp_total--;
@@ -1611,12 +1603,12 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
 		temp_total--;
 	}
 
-	//»ñÈ¡¸èÇúĞÅÏ¢
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 	storage::RedisComm::GetMusicInfosV2(songid_map,songinfolist);
 
 	ChangeMusicInfos(song_music_infos,songinfolist);
 
-	//»ñÈ¡¸èÇúURL¼°ÆÀÂÛ£¬ÈÈ¶È£¬ÊÕ²Ø
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½URLï¿½ï¿½ï¿½ï¿½ï¿½Û£ï¿½ï¿½È¶È£ï¿½ï¿½Õ²ï¿½
 	storage::DBComm::GetMusicOtherInfos(song_music_infos);
 
 	//jsonÆ´×°
@@ -1631,7 +1623,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV2(const std::string& uid,
 			Base64Decode(smi.title(),&b64title);
 			Base64Decode(smi.artist(),&b64artist);
 			Base64Decode(smi.album_title(),&b64album);
-			//ÊÇ·ñÊÇºìĞÄ¸èÇú
+			//ï¿½Ç·ï¿½ï¿½Çºï¿½ï¿½Ä¸ï¿½ï¿½ï¿½
 			std::map<std::string,base::MusicCltHateInfo>::iterator it 
 				= song_map.find(smi.id());
 			if (it!=song_map.end())
@@ -1688,7 +1680,7 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 	int is_like = 0;
 	std::map<std::string, std::string> songid_map;
 	std::map<std::string, std::string>::iterator it;
-	//ÏÈ»ñÈ¡Õû¸öhash Öµ
+	//ï¿½È»ï¿½È¡ï¿½ï¿½ï¿½hash Öµ
 	int hash_size = storage::RedisComm::GetHashSize(os.str());
 	if (hash_size==0)
 		return false;
@@ -1708,13 +1700,13 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 			temp_total--;
 			continue;
 		}
-		//ÊÇ·ñÀ­ºÚ
+		//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½
 		r = storage::RedisComm::IsHateSong(uid,songid);
 		if (r){
 			temp_total--;
 			continue;
 		}
-		//ÊÇ·ñÒÑ¾­´æÔÚ
+		//ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½
 		it = songid_map.find(songid);
 		if (it!=songid_map.end()){
 			temp_total--;
@@ -1739,14 +1731,14 @@ bool MusicMgrEngine::GetMoodScensChannelSongs(const std::string& uid,
 		Base64Decode(smi.title(),&b64title);
 		Base64Decode(smi.artist(),&b64artist);
 		Base64Decode(smi.album_title(),&b64album);
-		//ÊÇ·ñÊÇºìĞÄ¸èÇú
+		//ï¿½Ç·ï¿½ï¿½Çºï¿½ï¿½Ä¸ï¿½ï¿½ï¿½
 		r = storage::RedisComm::IsCollectSong(uid,songid);
 		if (r)
 			is_like = 1;
 		else
 			is_like = 0;
 
-		//»ñÈ¡ÊÕ²ØÊı//»ñÈ¡ÆÀÂÛÊı//ÈÈ¶È
+		//ï¿½ï¿½È¡ï¿½Õ²ï¿½ï¿½ï¿½//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½//ï¿½È¶ï¿½
 		GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
 		smi.set_music_clt(clt_num);
 		smi.set_music_cmt(cmt_num);
@@ -1812,7 +1804,7 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 
 	LOG_DEBUG2("[%s]",content.c_str());
 	content = "{\"filename\":\"channelinfo.xml\",\"version\":\"1.0.0\",\"url\":\"http://www.baidu.com/migfm\"}";
-	//½âÎöjson
+	//ï¿½ï¿½ï¿½ï¿½json
 	r = reader.parse(content.c_str(),root);
 	if (!r){
 		LOG_ERROR("parser json error");
@@ -1870,7 +1862,7 @@ bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
 		goto ret;
 	}
 
-	r = pack.GetAttrib(URLCODE,urlcode);//Ä¬ÈÏ²»½øĞĞurlcode ±àÂë
+	r = pack.GetAttrib(URLCODE,urlcode);//Ä¬ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½urlcode ï¿½ï¿½ï¿½ï¿½
 
 	r = pack.GetAttrib(NAME,name);
 	if (!r){
@@ -1926,7 +1918,7 @@ ret:
 
 
 bool MusicMgrEngine::RestMusicListRandom(){
-	//Êı¾İ¿â»ñÈ¡ÆµµÀĞÅÏ¢
+	//ï¿½ï¿½İ¿ï¿½ï¿½È¡Æµï¿½ï¿½ï¿½ï¿½Ï¢
 	bool r = false;
 	std::list<int> channel_list;
 	std::list<int> mood_list;
@@ -1941,7 +1933,7 @@ bool MusicMgrEngine::RestMusicListRandom(){
 	if (!r)
 		assert(0);
 
-	//´´½¨Ëæ»úÊı´æ´¢
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ´¢
 	std::string chl = "chl";
 	std::string mm = "mm";
 	std::string ms = "ms";
@@ -1966,7 +1958,7 @@ bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,
 	bool r = false;
 	r = this->GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
 
-	//ÒâÍâÇé¿ö
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (hot_num.empty())
 		hot_num="0";
 	if (cmt_num.empty())
@@ -1974,7 +1966,7 @@ bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,
 	if (clt_num.empty())
 		clt_num="0";
 
-	if (!r){//µÚÒ»´ÎÌí¼Ó
+	if (!r){//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½
 		switch (flag){
 		  case 1:
 			 hot_num = "1";
@@ -1991,7 +1983,7 @@ bool MusicMgrEngine::SetMusicHostCltCmt(const std::string& songid,
 		  default:
 			  clt_num = cmt_num = hot_num = "0";
 		}
-	}else{//ÀÛ¼ÆÀÛ¼Ó
+	}else{//ï¿½Û¼ï¿½ï¿½Û¼ï¿½
 		switch (flag){
 		  case 1:
 			  refcount = atoll(hot_num.c_str());
@@ -2096,7 +2088,7 @@ bool MusicMgrEngine::GetTypeRamdon(const std::string& type,
 
 	if (!r)
 		return r;
-	//´æÔÚmapÖĞ±ãÓë²éÕÒºÚÃûµ¥¸èÇú
+	//ï¿½ï¿½ï¿½ï¿½mapï¿½Ğ±ï¿½ï¿½ï¿½ï¿½ï¿½Òºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	int i = 0;
 	while(i<num){
 		list.push_back(rands[i]);
@@ -2116,13 +2108,13 @@ bool MusicMgrEngine::CreateTypeRamdon(std::string& type,
 	while(list.size()>0){
 		int id = list.front();
 		list.pop_front();
-		//´ÓredisÀïÃæ¶ÁÈ¡¸èÇúmap size
+		//ï¿½ï¿½redisï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½map size
 		std::stringstream os;
 		os<<type.c_str()<<"_r"<<id;
 		int list_size = storage::RedisComm::GetHashSize(os.str());
 		if (list_size<=0)
 			continue;
-		//´´½¨Ëæ»úÊı
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		LOG_DEBUG2("name[%s] list_size[%d]",os.str().c_str(),list_size);
 
 		base::MigRadomInV2* radomV2 = new base::MigRadomInV2((list_size));

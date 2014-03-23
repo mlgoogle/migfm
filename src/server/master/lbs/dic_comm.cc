@@ -104,10 +104,7 @@ bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid)
 		}
 		return true;
 
-	}else{
-		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",songid.c_str());
 	}
-
 	return false;
 }
 
@@ -162,7 +159,7 @@ bool RedisComm::GetCollectSongs(const std::string &uid,
 	while(song_list.size()>0){
 		std::string songinfo = song_list.front();
 		song_list.pop_front();
-		//½âÎöjson;
+		//ï¿½ï¿½ï¿½ï¿½json;
 		r = reader.parse(songinfo.c_str(),root);
 		if (!r)
 			continue;

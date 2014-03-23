@@ -41,7 +41,7 @@ static void keydestdic(void *v)
 		free (tv);
 		ThreadkeySet (NULL, ThreadKey::db_key_);
 
-		LOG_DEBUG ("Close database connection");
+		LOG_DEBUG ("Close dic connection");
 	}
 }
 

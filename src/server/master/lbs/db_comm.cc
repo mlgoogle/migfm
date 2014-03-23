@@ -122,6 +122,20 @@ bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude,
 	return false;
 }
 
+
+bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid){
+    std::stringstream os;
+    bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+	//获取用户信息
+
+}
+
 bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
 
 	base_storage::DBStorageEngine* engine = GetConnection();

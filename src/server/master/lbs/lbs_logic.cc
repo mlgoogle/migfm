@@ -175,377 +175,17 @@ bool LBSLogic::OnMsgSearchNearbyV2(packet::HttpPacket& packet, Json::Value &resu
 								   int &status, std::string &msg){
 
     return OnMsgPublicLbs(packet,result,status,msg,1);
-
-	/*
-	status = 0;
-	msg.clear();
-	bool r = false;
-
-	std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
-	if (!packet.GetAttrib("uid", uid_str)) {
-	   msg = "uid鏈寚瀹�;
-	   return false;
-	}
-	if (!packet.GetAttrib("location", location_str)) {
-	   msg = "location鏈寚瀹�;
-	   return false;
-	}
-
-	//if (!packet.GetAttrib("radius", radius_str)) {
-	radius_str = DEFAULT_MAX_RADIUS;
-	//}
-
-	if (!packet.GetAttrib("page_index", page_index_str)) {
-	   page_index_str = "0";
-	}
-
-	if (!packet.GetAttrib("page_size", page_size_str)) {
-	   page_size_str = "10";
-	}
-
-	int64 uid = atoll(uid_str.c_str());
-	if (0 == uid) {
-	   msg = "鏃犳晥uid";
-	   return false;
-	}
-	std::vector<std::string> location_pair;
-	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
-	   msg = "location鍙傛暟鏍煎紡閿欒";
-	   return false;
-	}
-
-	double latitude = atof(location_pair[0].c_str());
-	double longitude = atof(location_pair[1].c_str());
-	uint32 radius = atoi(radius_str.c_str());
-	int page_index = atoi(page_index_str.c_str());
-	int page_size = atoi(page_size_str.c_str());
-	std::string response;
-	Json::Value content;
-	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
-	   content, response, msg)) {
-		   return false;
-	}
-	const Json::Value &items = content["content"];
-	if (items.empty()){
-	   result["result"] = "";
-	   status = 1;
-	   return true;
-	}
-
-	Json::Value &usersmusic = result["result"]["nearUser"];
-	std::map<std::string, bool> mapExist;
-	std::vector<std::string> vec_users;
-	typedef std::map<std::string, std::string> UserSongMap;
-	UserSongMap map_songs;
-	std::string nick_name, sex,pic;
-	int jk = 0;
-	Json::Value temp_users;
-	std::map<std::string,std::string> collect_musices;
-	for (Json::Value::iterator it = items.begin();
-	   it != items.end();
-	   ++it,jk++) {
-		   const Json::Value &item = *it;
-		   Json::Value val;
-		   if (!item.isMember("ext"))
-			   continue;
-		   std::string uid_str = item["ext"]["user_id"].asString();
-		   if (uid_str.empty())
-			   continue;
-		   if (mapExist.end() != mapExist.find(uid_str))
-			   continue;
-
-		   mapExist[uid_str] = true;
-		   val["users"]["userid"] = uid_str;
-		   //鍒ゆ柇鐢ㄦ埛鍚庢槸鍚﹀瓨鍦�
-		   r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
-		   if (r){
-			   val["users"]["latitude"] = item["latitude"];
-			   val["users"]["longitude"] = item["longitude"];
-			   val["users"]["distance"] = item["distance"];
-			   val["users"]["nickname"] = nick_name;
-			   val["users"]["sex"] = sex;
-			   val["users"]["plat"] = 5;
-			   val["users"]["head"] = "http://fm.miglab.com/head.jpg";
-			   vec_users.push_back(uid_str);
-			   //users.append(val)
-			   //usersmusic.append(val);
-			   temp_users.append(val);
-		   }
-	}
-
-	LOG_DEBUG2("temp_users size [%d]",temp_users.size());
-	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
-
-	for (Json::Value::iterator it = temp_users.begin();
-	   it != temp_users.end(); ++it) {
-		   Json::Value &item = *it;
-		   const std::string uid_str = item["users"]["userid"].asString();
-		   UserSongMap::const_iterator find = map_songs.find(uid_str);
-		   if (map_songs.end() != find){
-			   bool is_user_like = false;
-			   r = GetUserCurrentMusic(find->second,item,is_user_like,&collect_musices,true);
-			   usersmusic.append(item);
-		   }
-		   else
-			   item["music"] = 0;
-	}
-	return true;*/
 }
 
 
 bool LBSLogic::OnMsgSameMusic(packet::HttpPacket& packet, Json::Value &result, 
 							  int &status, std::string &msg){
-	/*status = 0;
-	msg.clear();
-	bool r = false;
-
-	std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
-	if (!packet.GetAttrib("uid", uid_str)) {
-	  msg = "uid鏈寚瀹�;
-	  return false;
-	}
-	if (!packet.GetAttrib("location", location_str)) {
-	  msg = "location鏈寚瀹�;
-	  return false;
-	}
-
-	//if (!packet.GetAttrib("radius", radius_str)) {
-	radius_str = DEFAULT_MAX_RADIUS;
-	//}
-
-	if (!packet.GetAttrib("page_index", page_index_str)) {
-	  page_index_str = "0";
-	}
-
-	if (!packet.GetAttrib("page_size", page_size_str)) {
-	  page_size_str = "10";
-	}
-
-	int64 uid = atoll(uid_str.c_str());
-	if (0 == uid) {
-	  msg = "鏃犳晥uid";
-	  return false;
-	}
-	std::vector<std::string> location_pair;
-	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
-	  msg = "location鍙傛暟鏍煎紡閿欒";
-	  return false;
-	}
-
-	double latitude = atof(location_pair[0].c_str());
-	double longitude = atof(location_pair[1].c_str());
-	uint32 radius = atoi(radius_str.c_str());
-	int page_index = atoi(page_index_str.c_str());
-	int page_size = atoi(page_size_str.c_str());
-	std::string response;
-	Json::Value content;
-	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
-	  content, response, msg)) {
-		  return false;
-	}
-	const Json::Value &items = content["content"];
-	if (items.empty()){
-	  result["result"] = "";
-	  status = 1;
-	  return true;
-	}
-
-	Json::Value &usersmusic = result["result"]["nearUser"];
-	std::map<std::string, bool> mapExist;
-	std::vector<std::string> vec_users;
-	typedef std::map<std::string, std::string> UserSongMap;
-	UserSongMap map_songs;
-	std::string nick_name, sex,pic;
-	int jk = 0;
-	Json::Value temp_users;
-	std::map<std::string,std::string> collect_musices;
-	for (Json::Value::iterator it = items.begin();
-	  it != items.end();
-	  ++it,jk++) {
-		  const Json::Value &item = *it;
-		  Json::Value val;
-		  if (!item.isMember("ext"))
-			  continue;
-		  std::string uid_str = item["ext"]["user_id"].asString();
-		  if (uid_str.empty())
-			  continue;
-		  if (mapExist.end() != mapExist.find(uid_str))
-			  continue;
-
-		  mapExist[uid_str] = true;
-		  val["users"]["userid"] = uid_str;
-		  //鍒ゆ柇鐢ㄦ埛鍚庢槸鍚﹀瓨鍦�
-		  r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
-		  if (r){
-			  val["users"]["latitude"] = item["latitude"];
-			  val["users"]["longitude"] = item["longitude"];
-			  val["users"]["distance"] = item["distance"];
-			  val["users"]["nickname"] = nick_name;
-			  val["users"]["sex"] = sex;
-			  val["users"]["plat"] = 5;
-			  val["users"]["head"] = "http://fm.miglab.com/head.jpg";
-			  vec_users.push_back(uid_str);
-			  temp_users.append(val);
-		  }
-	}
-
-	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
-
-	//鑾峰彇鐢ㄦ埛绾㈠績姝屾洸鍚嶅崟
-	r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
-	if (!r)
-	  return true;
-	for (Json::Value::iterator it = temp_users.begin();
-	  it != temp_users.end(); ++it) {
-		  Json::Value &item = *it;
-		  const std::string uid_str = item["users"]["userid"].asString();
-		  UserSongMap::const_iterator find = map_songs.find(uid_str);
-		  if (map_songs.end() != find){
-			  bool is_user_like = false;
-			  r = GetUserCurrentMusic(find->second,item,is_user_like,&collect_musices,true);
-			  //娣诲姞鐢ㄦ埛
-			  if (r){
-				  if (is_user_like)
-					  usersmusic.append(item);
-			  }
-		  }
-		  else
-			  item["music"] = 0;
-	}
-	status = 1;
-	return true;*/
     return OnMsgPublicLbs(packet,result,status,msg,2);
 }
 
 bool LBSLogic::OnMsgMusicFri(packet::HttpPacket& packet, Json::Value &result, 
 							 int &status, std::string &msg){
-	 /*status = 0;
-	 msg.clear();
-	 bool r = false;
-
-	 std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
-	 if (!packet.GetAttrib("uid", uid_str)) {
-		 msg = "uid鏈寚瀹�;
-		 return false;
-	 }
-	 if (!packet.GetAttrib("location", location_str)) {
-		 msg = "location鏈寚瀹�;
-		 return false;
-	 }
 	
-	 //if (!packet.GetAttrib("radius", radius_str)) {
-		 radius_str = DEFAULT_MAX_RADIUS;
-	 //}
-
-	 if (!packet.GetAttrib("page_index", page_index_str)) {
-		 page_index_str = "0";
-	 }
-
-	 if (!packet.GetAttrib("page_size", page_size_str)) {
-		 page_size_str = "10";
-	 }
-
-	 int64 uid = atoll(uid_str.c_str());
-	 if (0 == uid) {
-		 msg = "鏃犳晥uid";
-		 return false;
-	 }
-	 std::vector<std::string> location_pair;
-	 if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
-		 msg = "location鍙傛暟鏍煎紡閿欒";
-		 return false;
-	 }
-
-	 double latitude = atof(location_pair[0].c_str());
-	 double longitude = atof(location_pair[1].c_str());
-	 uint32 radius = atoi(radius_str.c_str());
-	 int page_index = atoi(page_index_str.c_str());
-	 int page_size = atoi(page_size_str.c_str());
-	 std::string response;
-	 Json::Value content;
-	 if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
-		 content, response, msg)) {
-			 return false;
-	 }
-	 const Json::Value &items = content["content"];
-	 if (items.empty()){
-		 result["result"] = "";
-		 status = 1;
-		 return true;
-	 }
-
-	 //Json::Value &usersmusic = result["result"]["nearUser"];
-	 Json::Value usersmusic;
-	 std::map<std::string, bool> mapExist;
-	 std::vector<std::string> vec_users;
-	 typedef std::map<std::string, std::string> UserSongMap;
-	 UserSongMap map_songs;
-	 std::string nick_name, sex,pic;
-	 int jk = 0;
-	 Json::Value temp_users;
-	 std::map<std::string,std::string> collect_musices;
-	 for (Json::Value::iterator it = items.begin();
-		 it != items.end();
-		 ++it,jk++) {
-			 const Json::Value &item = *it;
-			 Json::Value val;
-			 if (!item.isMember("ext"))
-				 continue;
-			 std::string uid_str = item["ext"]["user_id"].asString();
-			 if (uid_str.empty())
-				 continue;
-			 if (mapExist.end() != mapExist.find(uid_str))
-				 continue;
-
-			 mapExist[uid_str] = true;
-			 val["users"]["userid"] = uid_str;
-			 //鍒ゆ柇鐢ㄦ埛鍚庢槸鍚﹀瓨鍦�
-			 r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
-			 if (r){
-				 val["users"]["latitude"] = item["latitude"];
-				 val["users"]["longitude"] = item["longitude"];
-				 val["users"]["distance"] = item["distance"];
-				 val["users"]["nickname"] = nick_name;
-				 val["users"]["sex"] = sex;
-				 val["users"]["plat"] = 5;
-				 val["users"]["head"] = "http://fm.miglab.com/head.jpg";
-				 vec_users.push_back(uid_str);
-				 //users.append(val)
-				 //usersmusic.append(val);
-				 temp_users.append(val);
-			 }
-	 }
-
-	 LOG_DEBUG2("temp_users size [%d]",temp_users.size());
-	 storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
-
-	 //鑾峰彇鐢ㄦ埛绾㈠績姝屾洸鍚嶅崟
-	 r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
-	 if (!r)
-		 return true;
-	 for (Json::Value::iterator it = temp_users.begin();
-		 it != temp_users.end(); ++it) {
-			 Json::Value &item = *it;
-			 const std::string uid_str = item["users"]["userid"].asString();
-			 UserSongMap::const_iterator find = map_songs.find(uid_str);
-			 if (map_songs.end() != find){
-				 bool is_user_like = false;
-				   r = GetUserCurrentMusic(find->second,item,is_user_like,&collect_musices,true);
-					//娣诲姞鐢ㄦ埛
-				   if (r){
-					   if (is_user_like)
-					    usersmusic.append(item);
-				  }
-			 }
-			 else
-				 item["music"] = 0;
-	 }
-
-	 result["result"]["music_num"] = usersmusic.size();
-
-	 result["result"]["msg_num"] = 0;
-	 status = 1;
-	 return true;*/
      return OnMsgPublicLbs(packet,result,status,msg,3);
 }
 
@@ -553,117 +193,7 @@ bool LBSLogic::OnMsgNearMusic(packet::HttpPacket& packet, Json::Value &result,
 							  int &status, std::string &msg){
 	
     return OnMsgPublicLbs(packet,result,status,msg,4);
-	/*status = 0;
-	msg.clear();
-	bool r = false;
 
-	std::string uid_str, location_str, radius_str, page_index_str, page_size_str;
-	if (!packet.GetAttrib("uid", uid_str)) {
-	  msg = "uid鏈寚瀹�;
-	  return false;
-	}
-	if (!packet.GetAttrib("location", location_str)) {
-	  msg = "location鏈寚瀹�;
-	  return false;
-	}
-	//if (!packet.GetAttrib("radius", radius_str)) {
-	  radius_str = DEFAULT_MAX_RADIUS;
-	//}
-
-	if (!packet.GetAttrib("page_index", page_index_str)) {
-		page_index_str = "0";
-	}
-	
-	if (!packet.GetAttrib("page_size", page_size_str)) {
-		page_size_str = "10";
-	}
-
-	int64 uid = atoll(uid_str.c_str());
-	if (0 == uid) {
-	  msg = "鏃犳晥uid";
-	  return false;
-	}
-	std::vector<std::string> location_pair;
-	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
-		msg = "location鍙傛暟鏍煎紡閿欒";
-		return false;
-	}
-
-	double latitude = atof(location_pair[0].c_str());
-	double longitude = atof(location_pair[1].c_str());
-	uint32 radius = atoi(radius_str.c_str());
-	int page_index = atoi(page_index_str.c_str());
-	int page_size = atoi(page_size_str.c_str());
-	std::string response;
-	Json::Value content;
-	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
-		content, response, msg)) {
-			return false;
-	}
-	const Json::Value &items = content["content"];
-	if (items.empty()){
-		//Json::Value &usersmusic = result["result"];
-		result["result"] = "";
-		msg = "鍛ㄥ洿娌℃湁鐢ㄦ埛";
-		status = 0;
-		return true;
-	}
-
-	Json::Value &usersmusic = result["result"]["nearUser"];
-	std::map<std::string, bool> mapExist;
-	std::vector<std::string> vec_users;
-	typedef std::map<std::string, std::string> UserSongMap;
-	UserSongMap map_songs;
-	Json::Value temp_users;
-	std::string nick_name, sex,pic;
-	int jk = 0;
-	for (Json::Value::iterator it = items.begin();
-		it != items.end();
-		++it,jk++) {
-			const Json::Value &item = *it;
-			Json::Value val;
-			if (!item.isMember("ext"))
-				continue;
-			std::string uid_str = item["ext"]["user_id"].asString();
-			if (uid_str.empty())
-				continue;
-			if (mapExist.end() != mapExist.find(uid_str))
-				continue;
-
-			mapExist[uid_str] = true;
-			val["users"]["userid"] = uid_str;
-			//鍒ゆ柇鐢ㄦ埛鍚庢槸鍚﹀瓨鍦�
-			r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
-			if (r){
-				val["users"]["latitude"] = item["latitude"];
-				val["users"]["longitude"] = item["longitude"];
-				val["users"]["distance"] = item["distance"];
-				val["users"]["nickname"] = nick_name;
-				val["users"]["sex"] = sex;
-				vec_users.push_back(uid_str);
-				temp_users.append(val);
-			}
-	}
-
-	storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
-
-	//
-	LOG_DEBUG2("temp_users size [%d]",temp_users.size());
-	for (Json::Value::iterator it = temp_users.begin();
-		it != temp_users.end(); ++it) {
-		Json::Value &item = *it;
-		const std::string uid_str = item["users"]["userid"].asString();
-		UserSongMap::const_iterator find = map_songs.find(uid_str);
-		if (map_songs.end() != find){
-			//item["cur_music"] = ::atoi(find->second.c_str());
-			bool is_user_like = false;
-			r = GetUserCurrentMusic(find->second,item,is_user_like);
-			if (r)
-				usersmusic.append(item);
-		}
-	}
-	status = 1;
-	return true;*/
 }
 
 
@@ -673,115 +203,6 @@ bool LBSLogic::OnMsgNearCollect(packet::HttpPacket &packet, Json::Value &result,
 
 	return OnMsgPublicLbs(packet,result,status,msg,5);
 
-	//status = 0;
-
-	//msg.clear();
-	//bool r = false;
-	//std::string uid_str, taruid_str,location_str, radius_str, page_index_str, page_size_str;
-	//if (!packet.GetAttrib("uid", uid_str)) {
-	//	msg = "uid鏈寚瀹�;
-	//	return false;
-	//}
-
-	//if (!packet.GetAttrib("taruid", taruid_str)) {
-	//	msg = "taruid鏈寚瀹�;
-	//	return false;
-	//}
-
-	//if (!packet.GetAttrib("location", location_str)) {
-	//	msg = "location鏈寚瀹�;
-	//	return false;
-	//}
-	////if (!packet.GetAttrib("radius", radius_str)) {
-	//	radius_str = DEFAULT_MAX_RADIUS;
-	////}
-	//if (!packet.GetAttrib("page_index", page_index_str)) {
-	//	page_index_str = "0";
-	//}
-	//if (!packet.GetAttrib("page_size", page_size_str)) {
-	//	page_size_str = "10";
-	//}
-
-	//std::vector<std::string> location_pair;
-	//if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
-	//	msg = "location鍙傛暟鏍煎紡閿欒";
-	//	return false;
-	//}
-
-	//double latitude = atof(location_pair[0].c_str());
-	//double longitude = atof(location_pair[1].c_str());
-	//uint32 radius = atoi(radius_str.c_str());
-	//int page_index = atoi(page_index_str.c_str());
-	//int page_size = atoi(page_size_str.c_str());
-
-	//int64 uid = atoll(uid_str.c_str());
-	//int64 taruid = atoll(taruid_str.c_str());
-	//std::string response;
-	//Json::Value content;
-	//if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
-	//	content, response, msg)) {
-	//		return false;
-	//}
-
-	////Json::Value &users = result["result"]["nearUser"];
-	//std::map<std::string, bool> mapExist;
-	//const Json::Value &items = content["content"];//澶氬皯鐢ㄦ埛鍗冲灏戞瓕鏇�
-	////鑾峰彇鏀惰棌鍒楄〃澶у皬
-	//int32 collect_num = redis_conn_.GetCollect(taruid);
-	//std::vector<std::string> vec_users;
-	//typedef std::map<std::string, std::string> UserSongMap;
-	//UserSongMap map_songs;
-
-	//for (Json::Value::iterator it = items.begin();
-	//	it != items.end();
-	//	++it) {
-	//		const Json::Value &item = *it;
-	//		Json::Value val;
-	//		/*if (!item.isMember("ext"))
-	//			continue;
-	//		std::string uid_str = item["ext"]["user_id"].asString();*/
-	//		std::string uid_str = item["usr_id"].asString();
-	//		if (uid_str.empty())
-	//			continue;
-	//		if (mapExist.end() != mapExist.find(uid_str))
-	//			continue;
-	//		mapExist[uid_str] = true;
-	//		val["users"]["userid"] = uid_str;
-	//		std::string nick_name;
-	//		std::string sex;
-	//		std::string pic;
-	//		//鍒ゆ柇鐢ㄦ埛鍚庢槸鍚﹀瓨鍦�
-	//		r = storage::DBComm::GetUserInfos(uid_str, nick_name, sex,pic);
-	//		if (r){
-	//			//鑾峰彇鍧愭爣
-	//			const Json::Value &pos_items = item["location"];
-	//			Json::Value json_latitude;
-	//			Json::Value json_logitude;
-	//			int index = 0;
-	//			for (Json::Value::iterator itr =pos_items.begin();
-	//				itr != items.end()){
-	//				if (index==0)
-	//					json_latitude = (*itr);
-	//				else if (index==1)
-	//					json_logitude = (*itr);
-	//				index++;
-	//			}
-	//			val["users"]["latitude"] = json_latitude;
-	//			val["users"]["longitude"] = json_logitude;
-	//			val["users"]["distance"] = item["distance"];
-	//			val["users"]["nickname"] = nick_name;
-	//			val["users"]["sex"] = sex;
-	//			vec_users.push_back(uid_str);
-	//		}
-	//}
-	//storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
-
-	//int nearnum = map_songs.size();
-	//result["result"]["mynum"] = collect_num;
-	//result["result"]["nearnum"] = nearnum;
-
-	//status = 1;
-	return true;
 }
 
 bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result, 
@@ -826,7 +247,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	/*double latitude = atof(location_pair[1].c_str());
 	double longitude = atof(location_pair[0].c_str());
 	*/
-	//鍥犲鎴风鍜屾湇鍔＄baiduSDK鍧愭爣鏈夎宸�鍥犳閮戒粠鏁版嵁搴撹鍙栨湇鍔＄杩斿洖鍧愭爣
+	//
 	double latitude = 0;
 	double longitude = 0;
 	r = storage::DBComm::GetUserLbsPos(atol(uid_str.c_str()),latitude,longitude);
@@ -849,7 +270,6 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	int i = content["size"].asInt();
 	const Json::Value &items = content["contents"];
 	if (items.empty()){
-	  //Json::Value &usersmusic = result["result"];
 	  result["result"] = "";
 	  msg = "周围没有用户";
 	  status = 0;
@@ -892,7 +312,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		  r = base::BasicUtil::GetUserInfo(uid_str,usrinfo);
 		  if (r){
 
-			  //鑾峰彇鍧愭爣
+			  //
 			  const Json::Value &pos_items = item["location"];
 			  Json::Value json_latitude;
 			  Json::Value json_logitude;
@@ -927,19 +347,22 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  temp_users.append(val);
 		  }
 	}
-	//缂撳瓨鐢ㄦ埛鐨勭粡搴�绾害 瀛樺叆mysql
+
 	if (temp_users.size()>0)
 		storage::DBComm::UpDateUserLbsPos(temp_users,uid);
 
 	if (vec_users.size()>0)
 		storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
 
-	//获取用户红心歌曲名单
+	//获取该用户用户红心歌曲名单
 	if ((flag==2)||(flag==3)||(flag==5)){
 		r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
 // 		if (!r)
 // 			return r;
 	}
+
+	//获取类型相同的用户
+	if(flag==2)
 
 	for (Json::Value::iterator it = temp_users.begin();
 	  it != temp_users.end(); ++it) {
@@ -961,7 +384,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 					  usersmusic.append(item);
 				  }
 		  }else{
-			  if (flag==1){//澶勭悊鏈惉姝屼笉鏄剧ず鐨勭敤鎴�
+			  if (flag==1){//
 				//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"鑹抽槼澶�,"singer":"绐﹀敮"}
 // 				  const std::string default_content = "{\"songid\":\"0\",\"state\":\"1\",\"type\":\"mm\",\"tid\":\"1\",\"name\":\"鑹抽槼澶‐",\"singer\":\"绐﹀敮\"}";
 // 				  bool is_user_like = false;
@@ -1238,7 +661,7 @@ bool LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 								   bool& is_user_like,
 								   std::map<std::string,std::string>* collect_musices,
 								   bool is_collect){
-//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"鑹抽槼澶�","singer":"绐﹀敮"}
+//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"窦唯","singer":"来听一听"}
 	bool r = false;
 	Json::Reader reader;
 	Json::Value  root;
