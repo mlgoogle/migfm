@@ -287,7 +287,7 @@ bool MusicCacheManager::PutJsonMusicChannel(int channel,
 
 bool MusicCacheManager::AddMusicChannelInfos(int channel,
 											 std::list<base::MusicInfo>& list){
-	usr_logic::WLockGd lw(cache_mgr_lock_);
+	music_logic::WLockGd lw(cache_mgr_lock_);
 	ChannelCache* cc = GetChannelCache(channel);
 	if(cc==NULL)
 		return false;
@@ -297,7 +297,7 @@ bool MusicCacheManager::AddMusicChannelInfos(int channel,
 }
 
 int MusicCacheManager::GetMusicCHannelNum(int channel){
-	usr_logic::RLockGd lr(cache_mgr_lock_);
+	music_logic::RLockGd lr(cache_mgr_lock_);
 	ChannelCache* cc = GetChannelCache(channel);
 	int num = -1;
 	if (cc==NULL)
@@ -308,7 +308,7 @@ int MusicCacheManager::GetMusicCHannelNum(int channel){
 
 
 time_t MusicCacheManager::GetMusicTime(int channel){
-	usr_logic::RLockGd lr(cache_mgr_lock_);
+	music_logic::RLockGd lr(cache_mgr_lock_);
 	ChannelCache* cc = GetChannelCache(channel);
 	time_t music_time = -1;
 	if (cc==NULL)
@@ -350,7 +350,7 @@ void MusicCacheManager::IsLessMuciChannelInfos(const std::string& channel, int n
 
 bool MusicCacheManager::GetMusicCahnelTypeInfos(int channel,const std::string& uid,const int nun,
 												std::stringstream& os){
-	usr_logic::RLockGd lr(cache_mgr_lock_);
+	music_logic::RLockGd lr(cache_mgr_lock_);
 	int32 i = 0;
 	int32 max_num = 0;
 	bool r = false;
@@ -366,23 +366,23 @@ bool MusicCacheManager::GetMusicCahnelTypeInfos(int channel,const std::string& u
 			base::MusicInfo mi = (*it);
 			int32 is_like = 0;
 
-			//id×ª»¯
+			//id×ªï¿½ï¿½
 			storage::DBComm::GetSongidFromDoubanId(mi.id(),songid);
 			mi.set_id(songid);
-			//ÊÇ·ñÀ­ºÚ
+			//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½
 			r = storage::RedisComm::IsHateSong(uid,mi.id());
 			if (r){
 				cc->channel_music_infos_.pop_front();
 				continue;
 			}
-			//ÊÇ·ñÊÕ²Ø
+			//ï¿½Ç·ï¿½ï¿½Õ²ï¿½
 			r = storage::RedisComm::IsCollectSong(uid,mi.id());
 			if (r)
 				is_like = 1;
 			else 
 				is_like = 0;
 
-			if (r)//À­ºÚ
+			if (r)//ï¿½ï¿½ï¿½ï¿½
 				continue;
 			os<<"{\"id\":\""<<mi.id().c_str()
 				<<"\",\"title\":\""<<mi.title().c_str()
@@ -406,7 +406,7 @@ bool MusicCacheManager::GetMusicCahnelTypeInfos(int channel,const std::string& u
 bool MusicCacheManager::GetMusicChannelInfos(int channel, 
 											 std::string &json_content,
 											 const int flag,const int cur_num){
-    usr_logic::RLockGd lr(cache_mgr_lock_);
+	music_logic::RLockGd lr(cache_mgr_lock_);
 	std::stringstream os;
 	int32 i = 0;
 	int32 max_num = 0;
@@ -428,7 +428,7 @@ bool MusicCacheManager::GetMusicChannelInfos(int channel,
 			if (flag==0){
 			    r = get_song_engine_->GetSongInfo(mi.artist(),mi.title(),
 				   mi.album_title(),content_url,0);
-			//¶¹°ê²»Ö§³Öhtml5 ¹Ê´ÓÅÀ³æ»ñÈ¡
+			//ï¿½ï¿½ï¿½ê²»Ö§ï¿½ï¿½html5 ï¿½Ê´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡
 			}else{
 				content_url = mi.url();
 			}
@@ -498,7 +498,7 @@ bool MusicCacheManager::RequestDoubanMusicInfos(const std::string& channel,
 }
 
 bool MusicCacheManager::GetMusicChannel(std::string& num,std::string& content){
-	usr_logic::RLockGd lr(cache_mgr_lock_);
+	music_logic::RLockGd lr(cache_mgr_lock_);
 	int32 pos = (atol(num.c_str()))%(channel_mode_.size());
 	std::stringstream os;
 	

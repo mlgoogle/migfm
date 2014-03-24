@@ -2,6 +2,8 @@
 #define _MASTER_PLUGIN_USR_MGR_DB_COMM_H__
 #include "storage/storage.h"
 #include "basic/basic_info.h"
+#include "thread_handler.h"
+#include "thread_lock.h"
 #include <list>
 #include <vector>
 
@@ -63,19 +65,26 @@ public:
 			std::string& location, std::string& source,
 			std::string& head);
 
-private:
+public:
 #if defined (_DB_POOL_)	
-	static base_storage::DBStorageEngine* CreateConnection(void);
 	static base_storage::DBStorageEngine* DBConnectionPop(void);
-	static void DBConnectionPush(base_storage::DBStorageEngine* db);
+	static void DBConnectionPush(base_storage::DBStorageEngine* engine);
 #endif
 private:
 	static std::list<base::ConnAddr>  addrlist_;
-#if defined (_STORAGE_POOL_)
-	static base_storage::DBStorageEngine**       db_conn_pool_;
-	static int32                                 db_conn_num_;
-	static threadrw_t*                           db_pool_lock_;
+#if defined (_DB_POOL_)
+	static std::list<base_storage::DBStorageEngine*>  db_conn_pool_;
+	static threadrw_t*                                db_pool_lock_;
 #endif
+};
+
+class AutoDBCommEngine{
+public:
+	AutoDBCommEngine();
+	virtual ~AutoDBCommEngine();
+	base_storage::DBStorageEngine*  GetDBEngine(){return engine_;}
+private:
+	base_storage::DBStorageEngine*  engine_;
 };
 
 }

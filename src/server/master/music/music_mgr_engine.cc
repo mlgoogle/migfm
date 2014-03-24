@@ -24,7 +24,7 @@ MusicMgrEngine::MusicMgrEngine(){
 bool MusicMgrEngine::Init(){
 	bool r = false;
 	std::string path = DEFAULT_CONFIG_PATH;
-	usr_logic::ThreadKey::InitThreadKey();
+	music_logic::ThreadKey::InitThreadKey();
 	config::FileConfig* config = config::FileConfig::GetFileConfig();
 	if(config==NULL){
 		return false;
@@ -221,9 +221,9 @@ bool MusicMgrEngine::GetMoodParent(const int socket,const packet::HttpPacket& pa
 	status = "1";
 	msg = "0";
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 }
 
@@ -245,8 +245,7 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 		goto ret;
 	}
 
-	//��redis �����ȡ�û�����ͼ
-	//���ֻ�����ר�ŴӲ�����¼�������
+
 	r = storage::RedisComm::GetUserMoodMap(uid,result);
 	if (result.empty()){
 		//LOG_ERROR("Get UID Error");
@@ -259,9 +258,9 @@ bool MusicMgrEngine::GetMoodMap(const int socket,const packet::HttpPacket& packe
 	msg = "0";
 	utf8_flag = 0;
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 }
 
@@ -410,9 +409,9 @@ ret1:
 	msg = "0";
 	utf8_flag = 0;
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 
 }
@@ -480,9 +479,9 @@ bool MusicMgrEngine::GetDescriptionWord(const int socket,
 
 	result = os.str();
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
 
 bool MusicMgrEngine::GetDoubanMusicChannelSong(const int socket, 
@@ -513,9 +512,9 @@ bool MusicMgrEngine::GetDoubanMusicChannelSong(const int socket,
 		 mcm->GetMusicChannelInfos(atol(channel.c_str()),result,1);
 	 }
 
-	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	 music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	 LOG_DEBUG2("[%s]",result_out.c_str());
-	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	 music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
 
 bool MusicMgrEngine::GetMusicChannelSong(const int socket,
@@ -546,9 +545,9 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 		 mcm->GetMusicChannelInfos(atol(channel.c_str()),result);
 	 }
 
-	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	 music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	 LOG_DEBUG2("[%s]",result_out.c_str());
-	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	 music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
 
 bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPacket& packet, 
@@ -602,9 +601,9 @@ bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPa
 		status = "1";
 		utf8_flag = 0;
 ret:
-		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+        music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 		LOG_DEBUG2("[%s]",result_out.c_str());
-		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+		music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 		return true;
 }
 
@@ -703,9 +702,9 @@ bool MusicMgrEngine::GetSongListV2(const int socket,
 	 msg = "0";
 	 utf8_flag = 0;
 ret:
-	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+     music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	 LOG_DEBUG2("[%s]",result_out.c_str());
-	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),
+	 music_logic::SomeUtils::SendFull(socket,result_out.c_str(),
 		                            result_out.length());
 	 return true;
 
@@ -843,9 +842,9 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 	msg = "0";
 	utf8_flag = 0;
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 
 }
@@ -1074,8 +1073,8 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 
 	//result = os1.str();
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 }
 
@@ -1167,7 +1166,7 @@ ret:
 	value["status"] = status;
 	value["msg"] = msg;
 	result_out = wr.write(value);
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 }
 
@@ -1269,9 +1268,9 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	status = "1";
 	utf8_flag = 0;
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	//recording mood and current songid
 	if (recording_flag){
 		//ֻ��¼����
@@ -1362,9 +1361,9 @@ bool MusicMgrEngine::PostCollectAndHateSong(const int socket,
 	status = "1";
 	utf8_flag = 0;
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 }
 
@@ -1394,9 +1393,9 @@ bool MusicMgrEngine::GetMusicChannel(const int socket,
 		 LOG_DEBUG2("[%s]",result.c_str());
 		 utf8_flag = 0;
 	 }
- 	 usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	 music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
  	 LOG_DEBUG2("[%s]",result_out.c_str());
- 	 usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+ 	 music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	 return true;
 }
 
@@ -1454,9 +1453,9 @@ bool MusicMgrEngine::GetMusicInfos(const int socket,const std::string& songid){
 	result = os1.str();
 	status = "1";
 	msg = "0";
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+	music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	return true;
 }
 
@@ -1821,9 +1820,9 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 		goto ret;
 	}
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }
 
 bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
@@ -1908,9 +1907,9 @@ bool MusicMgrEngine::PostUserLocalMusicinfos(const int socket,
 	status = "1";
 	utf8_flag = 0;
 ret:
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 	if (rlm_list.size()>0)
 		user_local_music_engine_->RecordingLocalMusic(uid,source,rlm_list);
 	return true;
@@ -2052,7 +2051,7 @@ template <typename MapType,typename MapTypeIT>
 static bool GetTypeRamdonTemplate(MapType &map, int idx,int* rands,int num,
 								  threadrw_t* lock){
 	//
-	usr_logic::WLockGd lk(lock);
+	music_logic::WLockGd lk(lock);
 	MapTypeIT it = map.find(idx);
 	if (it!=map.end()){
 		it->second->GetPrize(rands,num);

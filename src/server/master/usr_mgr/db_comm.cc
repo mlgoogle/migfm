@@ -1,20 +1,97 @@
 #include "db_comm.h"
 #include "logic_comm.h"
-#include "thread_handler.h"
 #include <mysql.h>
 #include <sstream>
 
 namespace storage{
 
+#if defined (_DB_POOL_)
+threadrw_t* DBComm::db_pool_lock_;
+std::list<base_storage::DBStorageEngine*>  DBComm::db_conn_pool_;
+#endif
+
 std::list<base::ConnAddr> DBComm::addrlist_;
 
-void DBComm::Init(std::list<base::ConnAddr>& addrlist){
-	addrlist_ = addrlist;
+
+AutoDBCommEngine::AutoDBCommEngine()
+:engine_(NULL){
+#if defined (_DB_POOL_)
+	engine_ = storage::DBComm::DBConnectionPop();
+#endif
 }
+
+AutoDBCommEngine::~AutoDBCommEngine(){
+#if defined (_DB_POOL_)
+	storage::DBComm::DBConnectionPush(engine_);
+#endif
+}
+
+void DBComm::Init(std::list<base::ConnAddr>& addrlist,
+				  const int32 db_conn_num/* = 10*/){
+	addrlist_ = addrlist;
+
+#if defined (_DB_POOL_)
+	bool r =false;
+	InitThreadrw(&db_pool_lock_);
+	for (int i = 0; i<=db_conn_num;i++){
+		base_storage::DBStorageEngine* engine  =
+				base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
+		if (engine==NULL){
+			assert(0);
+			LOG_ERROR("create db conntion error");
+			continue;
+		}
+
+		r = engine->Connections(addrlist_);
+		if (!r){
+			assert(0);
+			LOG_ERROR("db conntion error");
+			continue;
+		}
+
+		db_conn_pool_.push_back(engine);
+
+	}
+
+#endif
+}
+
+#if defined (_DB_POOL_)
+
+void DBComm::DBConnectionPush(base_storage::DBStorageEngine* engine){
+	usr_logic::WLockGd lk(db_pool_lock_);
+	db_conn_pool_.push_back(engine);
+}
+
+base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
+	if(db_conn_pool_.size()<=0)
+		return NULL;
+	usr_logic::WLockGd lk(db_pool_lock_);
+    base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+    db_conn_pool_.pop_front();
+    return engine;
+}
+
+#endif
+
 
 void DBComm::Dest(){
+#if defined (_DB_POOL_)
+	usr_logic::WLockGd lk(db_pool_lock_);
+	while(db_conn_pool_.size()>0){
+		base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+		db_conn_pool_.pop_front();
+		if(engine){
+			engine->Release();
+			delete engine;
+			engine =NULL;
+		}
+	}
+	DeinitThreadrw(db_pool_lock_);
 
+#endif
 }
+
 
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
@@ -52,7 +129,10 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 }
 
 bool DBComm::GetUserIndent(const std::string& username,int64& uid){
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r = false;
 	MYSQL_ROW rows;
@@ -87,7 +167,10 @@ bool DBComm::GetUserInfos(const std::string& username,std::string& uid,
 						  std::string& type,std::string& birthday, 
 						  std::string& location,std::string& source,
 						  std::string& head){
-	  base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	  std::stringstream os;
 	  bool r = false;
 	  MYSQL_ROW rows;
@@ -129,7 +212,10 @@ bool DBComm::UpDateUserInfos(const int uid,const std::string& username,
 							 const std::string& type,const std::string& birthday, 
 							 const std::string& location, const std::string& source, 
 							 const std::string& head){
-	 base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	 std::stringstream os;
 	 bool r = false;
 	 if (engine==NULL){
@@ -155,7 +241,10 @@ bool DBComm::AddUserInfos(const int uid,const std::string& username,
 						  const std::string& type, const std::string& birthday,
 						  const std::string& location, const std::string& source,
 						  const std::string& head){
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r = false;
 	if (engine==NULL){
@@ -180,7 +269,10 @@ bool DBComm::AddUserInfos(const int uid,const std::string& username,
 
 bool DBComm::RegeditUser(const std::string &username, const std::string &password, 
 						 const std::string &nickname, const std::string &source){
-    base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r = false;
 	std::string current_time;
@@ -210,7 +302,10 @@ bool DBComm::CheckUserInfo(const std::string& clientid,const std::string& token,
 						   std::string& location,std::string& source,
 						   std::string& head,int& return_code){
 
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r =false;
 	MYSQL_ROW rows;
@@ -233,7 +328,7 @@ bool DBComm::CheckUserInfo(const std::string& clientid,const std::string& token,
 		LOG_ERROR2("exec sql error");
 		return false;
 	}
-	//获取值
+	//锟斤拷取值
 	os.str("");
 	sql.c_str();
 	os<<"select @usrid,@sex,@type,@ctry,@birthday,"
@@ -271,7 +366,10 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 						std::string &nickname, int64 &userid, int64& type, 
 						std::string &location, std::string &birthday, 
 						std::string &head){
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r = false;
 	int return_code;
@@ -281,7 +379,7 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 		return false;
 	}
 
-	//call proc_RegisterUser('2','eweqwewqe','dasd',1,'flaght','oldk','北京','1986-09-03','http://fm.miglab.com/1.jpg',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);
+	//call proc_RegisterUser('2','eweqwewqe','dasd',1,'flaght','oldk','锟斤拷锟斤拷','1986-09-03','http://fm.miglab.com/1.jpg',@usrid,@sex,@type,@ctry,@birthday,@head,@username,@nickname,@return_code,@return_str);
 
     os<<"call proc_RegisterUser(\'"
 	  <<plat_id<<"\',\'"<<plat_session
@@ -298,7 +396,7 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 		LOG_ERROR2("exec sql error");
 		return false;
 	}
-	//获取值
+	//锟斤拷取值
 	os.str("");
 	sql.c_str();
 	os<<"select @usrid,@sex,@type,@ctry,@birthday,"

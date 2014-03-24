@@ -77,7 +77,7 @@
 #define DEFAULT_URL "http://42.121.14.108/wx/lp5.mp3"
 
 #define DEFAULT_CONFIG_PATH     "./plugins/music_manager/music_manager_config.xml"
-namespace usr_logic{
+namespace music_logic{
 class ThreadKey {
 public:
 	static void InitThreadKey ();

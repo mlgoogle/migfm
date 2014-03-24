@@ -76,6 +76,7 @@ bool MysqlStorageEngineImpl::SQLExec(const char* sql){
 	if (mysql->net.last_errno!=0){
 		MIG_ERROR(USER_LEVEL,"mysql error code [%d] [%s]",
 			mysql_errno(mysql),mysql_error(mysql));
+		return false;
 	}
 	//MIG_DEBUG(USER_LEVEL,"errno [%d]",mysql->net.last_errno);
 // 	unsigned long ulCount = (unsigned long)mysql_num_rows((MYSQL_RES *)(result_.get()->proc));

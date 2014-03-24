@@ -24,7 +24,7 @@ base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
 
 	try{
 		base_storage::DictionaryStorageEngine* engine =
-			usr_logic::ThreadKey::GetStorageDicConn();
+				music_logic::ThreadKey::GetStorageDicConn();
 		if (engine){
 // 			if (!engine->){
 // 				LOG_ERROR("Database %s connection was broken");
@@ -47,7 +47,7 @@ base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
 		if (!r)
 			return NULL;
 
-		usr_logic::ThreadKey::SetStorageDicConn(engine);
+		music_logic::ThreadKey::SetStorageDicConn(engine);
 		LOG_DEBUG("Created database connection");
 		return engine;
 	}
@@ -88,7 +88,7 @@ bool RedisComm::GetMusicMapRadom(const std::string &art_name,
 	return r;
 }
 
-//»ñÈ¡ÐÄÐ÷Í¼
+//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Í¼
 bool RedisComm:: GetUserMoodMap(const std::string& uid,std::string& mood_map){
 	char* value;
 	size_t value_len = 0;
@@ -97,7 +97,7 @@ bool RedisComm:: GetUserMoodMap(const std::string& uid,std::string& mood_map){
 	temp_key.append("_mmp");
 	//value
 	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
-	//value ÒÔÐ­Òéjson¸ñÊ½´æ´¢
+	//value ï¿½ï¿½Ð­ï¿½ï¿½jsonï¿½ï¿½Ê½ï¿½æ´¢
 	//{"day":"1","typeid:"1"},{"day":"2","typeid:"2"},{"day":"3","typeid:"1"},{"day":"4","typeid:"3"},{"day":"5","typeid:"2"},{"day":"6","typeid:"5"},{"day":"7","typeid:"6"},
 
 	if (redis_engine_==NULL)
@@ -176,10 +176,10 @@ bool RedisComm::GetMusicHistroyCollect(const std::string &uid,
    base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
    if (redis_engine_==NULL)
 	   return false;
-	//»ñÈ¡ÀúÊ·¸èÇúÐÅÏ¢
+	//ï¿½ï¿½È¡ï¿½ï¿½Ê·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
    GetMusicInfos(redis_engine_,songlist,history_list);
    if(is_like=="1"){
-	   //»ñÈ¡ºìÐÄ¸èµ¥
+	   //ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ä¸èµ¥
 	   os.append("h");
 	   os.append(uid.c_str());
 	   os.append("clt");
@@ -193,7 +193,7 @@ bool RedisComm::GetMusicHistroyCollect(const std::string &uid,
 		   songlist.push_back(root["songid"].asString());
 
 	   }
-	   //»ñÈ¡¸èÇúÐÅÏ¢
+	   //ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 	   GetMusicInfos(redis_engine_,songlist,collect_list);
    }
    return true;
@@ -211,7 +211,7 @@ bool RedisComm::GetCltAndHateSong(const std::string& uid,
 	if (!redis_engine_)
 		return false;
 
-//ºìÐÄ¸èµ¥
+//ï¿½ï¿½ï¿½Ä¸èµ¥
 	os.append("h");
 	os.append(uid.c_str());
 	os.append("clt");
@@ -229,7 +229,7 @@ bool RedisComm::GetCltAndHateSong(const std::string& uid,
 
 	song_list.clear();
 	os.clear();
-//À¬»ø¸èÇú
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	os.append("h");
 	os.append(uid.c_str());
 	os.append("ht");
@@ -656,7 +656,7 @@ void RedisComm::GetMusicInfosV3(const std::string& type,std::list<int>& random_l
 	bool r = false;
 	std::list<std::string> temp_list;
 
-	//»ñÈ¡Ëæ»ú¸èÇúid
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½id
 	os<<"hmget";
 	if (random_list.size()<=0)
 		return ;
@@ -669,7 +669,7 @@ void RedisComm::GetMusicInfosV3(const std::string& type,std::list<int>& random_l
 	}
 	LOG_DEBUG2("%s",os.str().c_str());
 	
-	//ÌáÈ¡¸èÇú
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
 	GetMusicInfos(redis_engine_,os.str(),temp_list);
 	os.str("");
 
@@ -685,7 +685,7 @@ void RedisComm::GetMusicInfosV3(const std::string& type,std::list<int>& random_l
 	LOG_DEBUG2("%s",os.str().c_str());
 
 
-	//»ñÈ¡¸èÇúÐÅÏ¢
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 	GetMusicInfos(redis_engine_,os.str(),songinfolist);
 
 }
@@ -721,7 +721,7 @@ void RedisComm::GetMusicInfosV2(std::map<std::string,std::string>& songmap,
 		if (NULL == reply)
 			return ;
 
-		//´æÈë
+		//ï¿½ï¿½ï¿½ï¿½
 		if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
 			base_storage::ArrayReply *arep = 
 				static_cast<base_storage::ArrayReply *>(reply);
@@ -765,7 +765,7 @@ void RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
 	  if (NULL == reply)
 		  return ;
 
-	  //´æÈë
+	  //ï¿½ï¿½ï¿½ï¿½
 	  if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
 		  base_storage::ArrayReply *arep = 
 			  static_cast<base_storage::ArrayReply *>(reply);
@@ -801,7 +801,7 @@ bool RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
 		if (NULL == reply)
 			return false;
 
-		//´æÈë
+		//ï¿½ï¿½ï¿½ï¿½
 		if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
 			base_storage::ArrayReply *arep = 
 				static_cast<base_storage::ArrayReply *>(reply);
@@ -877,7 +877,7 @@ bool MemComm::SetUsrCurrentSong(const std::string& uid,
 	std::string key = "cur";
 	std::string value;
 	key.append(uid);
-	//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"ÑÞÑôÌì","singer":"ñ¼Î¨"}
+	//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","singer":"ï¿½Î¨"}
 	value.append("{\"songid\":\"");
 	value.append(songid);
 	value.append("\",\"state\":\"");

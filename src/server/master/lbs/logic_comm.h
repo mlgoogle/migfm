@@ -2,6 +2,7 @@
 #define _MASTER_PLUGIN_USR_MGR_LOGIC_COMM_H__
 
 #include "thread_handler.h"
+#include "thread_lock.h"
 #include "log/mig_log.h"
 #include "storage/storage.h"
 
@@ -75,6 +76,45 @@ public:
 private:
 	static FILE *m_urandomfp;
 };
+
+class RLockGd
+{
+private:
+	threadrw_t *m_lock;
+
+public:
+	RLockGd (threadrw_t *lock)
+	{
+		assert (lock);
+		m_lock = lock;
+		RlockThreadrw (lock);
+	}
+
+	virtual ~RLockGd ()
+	{
+		UnlockThreadrw (m_lock);
+	}
+};
+
+class WLockGd
+{
+private:
+	threadrw_t *m_lock;
+
+public:
+	WLockGd (threadrw_t *lock)
+	{
+		assert (lock);
+		m_lock = lock;
+		WlockThreadrw (lock);
+	}
+
+	virtual ~WLockGd ()
+	{
+		UnlockThreadrw (m_lock);
+	}
+};
+
 
 }
 #endif // mig_lbs

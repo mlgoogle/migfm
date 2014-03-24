@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <time.h>
 
-namespace usr_logic{
+namespace music_logic{
 typedef struct {
 	base_storage::DBStorageEngine *conn_;
 } ThreadValueDB;

@@ -1,16 +1,16 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = ./../../bin/hfcrsrv/plugins/user_manager/user_manager.so
+OUTPUT_FILE = ./../../bin/plugins/user_manager/user_manager.so
 
 ## 编译器
 COMPIlER = g++
 COMPILERC = gcc
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
+##CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
 ## for release
-## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
+CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_DB_POOL_ -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
 
 ## 链接选项
 ## for debug
@@ -36,7 +36,7 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output:	db_comm.o dic_comm.o logic_comm.o thread_handler.o usr_mgr_engine.o \
+output:	db_comm.o dic_comm.o logic_comm.o thread_handler.o thread_lock.o usr_mgr_engine.o \
 	usr_mgr_init.o basic_info.o http_packet.o basictypes.o config.o \
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o md5sum.o dic_storage.o radom_in.o
@@ -61,6 +61,9 @@ logic_comm.o:
 
 thread_handler.o:
 	$(COMPILE) ./thread_handler.cc
+
+thread_lock.o:
+	$(COMPILE) ./thread_lock.cc
 
 usr_mgr_engine.o:
 	$(COMPILE) ./usr_mgr_engine.cc

@@ -8,24 +8,93 @@
 
 namespace chat_storage{
 
+#if defined (_DB_POOL_)
+threadrw_t* DBComm::db_pool_lock_;
+std::list<base_storage::DBStorageEngine*>  DBComm::db_conn_pool_;
+#endif
+
 std::list<base::ConnAddr> DBComm::addrlist_;
 
-DBComm::DBComm(){
 
+AutoDBCommEngine::AutoDBCommEngine()
+:engine_(NULL){
+#if defined (_DB_POOL_)
+	engine_ = chat_storage::DBComm::DBConnectionPop();
+#endif
 }
 
-DBComm::~DBComm(){
-
+AutoDBCommEngine::~AutoDBCommEngine(){
+#if defined (_DB_POOL_)
+	chat_storage::DBComm::DBConnectionPush(engine_);
+#endif
 }
 
 void DBComm::Init(std::list<base::ConnAddr>& addrlist,
 				  const int32 db_conn_num/* = 10*/){
 	addrlist_ = addrlist;
+
+#if defined (_DB_POOL_)
+	bool r =false;
+	InitThreadrw(&db_pool_lock_);
+	for (int i = 0; i<=db_conn_num;i++){
+		base_storage::DBStorageEngine* engine  =
+				base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
+		if (engine==NULL){
+			assert(0);
+			LOG_ERROR("create db conntion error");
+			continue;
+		}
+
+		r = engine->Connections(addrlist_);
+		if (!r){
+			assert(0);
+			LOG_ERROR("db conntion error");
+			continue;
+		}
+
+		db_conn_pool_.push_back(engine);
+
+	}
+
+#endif
 }
+
+#if defined (_DB_POOL_)
+
+void DBComm::DBConnectionPush(base_storage::DBStorageEngine* engine){
+	chat_logic::WLockGd lk(db_pool_lock_);
+	db_conn_pool_.push_back(engine);
+}
+
+base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
+	if(db_conn_pool_.size()<=0)
+		return NULL;
+	chat_logic::WLockGd lk(db_pool_lock_);
+    base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+    db_conn_pool_.pop_front();
+    return engine;
+}
+
+#endif
+
 
 void DBComm::Dest(){
+#if defined (_DB_POOL_)
+	chat_logic::WLockGd lk(db_pool_lock_);
+	while(db_conn_pool_.size()>0){
+		base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+		db_conn_pool_.pop_front();
+		if(engine){
+			engine->Release();
+			delete engine;
+			engine =NULL;
+		}
+	}
+	DeinitThreadrw(db_pool_lock_);
 
+#endif
 }
+
 
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
@@ -66,7 +135,10 @@ bool DBComm::GetLeaveMessage(const int64 platform_id,const int64 uid,const int64
 							 const int32 from,const int32 count,
                              std::list<struct GetLeaveMessage*>& list){
 	bool r = false;
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	MYSQL_ROW rows;
 

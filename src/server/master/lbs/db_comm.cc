@@ -9,14 +9,91 @@
 
 namespace storage {
 
+#if defined (_DB_POOL_)
+threadrw_t* DBComm::db_pool_lock_;
+std::list<base_storage::DBStorageEngine*>  DBComm::db_conn_pool_;
+#endif
+
 std::list<base::ConnAddr> DBComm::addrlist_;
 
-void DBComm::Init(std::list<base::ConnAddr>& addrlist){
-	addrlist_ = addrlist;
+
+AutoDBCommEngine::AutoDBCommEngine()
+:engine_(NULL){
+#if defined (_DB_POOL_)
+	engine_ = storage::DBComm::DBConnectionPop();
+#endif
 }
 
-void DBComm::Dest(){
+AutoDBCommEngine::~AutoDBCommEngine(){
+#if defined (_DB_POOL_)
+	storage::DBComm::DBConnectionPush(engine_);
+#endif
+}
 
+void DBComm::Init(std::list<base::ConnAddr>& addrlist,
+				  const int32 db_conn_num/* = 10*/){
+	addrlist_ = addrlist;
+
+#if defined (_DB_POOL_)
+	bool r =false;
+	InitThreadrw(&db_pool_lock_);
+	for (int i = 0; i<=db_conn_num;i++){
+		base_storage::DBStorageEngine* engine  =
+				base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
+		if (engine==NULL){
+			assert(0);
+			LOG_ERROR("create db conntion error");
+			continue;
+		}
+
+		r = engine->Connections(addrlist_);
+		if (!r){
+			assert(0);
+			LOG_ERROR("db conntion error");
+			continue;
+		}
+
+		db_conn_pool_.push_back(engine);
+
+	}
+
+#endif
+}
+
+#if defined (_DB_POOL_)
+
+void DBComm::DBConnectionPush(base_storage::DBStorageEngine* engine){
+	mig_lbs::WLockGd lk(db_pool_lock_);
+	db_conn_pool_.push_back(engine);
+}
+
+base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
+	if(db_conn_pool_.size()<=0)
+		return NULL;
+	mig_lbs::WLockGd lk(db_pool_lock_);
+    base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+    db_conn_pool_.pop_front();
+    return engine;
+}
+
+#endif
+
+
+void DBComm::Dest(){
+#if defined (_DB_POOL_)
+	mig_lbs::WLockGd lk(db_pool_lock_);
+	while(db_conn_pool_.size()>0){
+		base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+		db_conn_pool_.pop_front();
+		if(engine){
+			engine->Release();
+			delete engine;
+			engine =NULL;
+		}
+	}
+	DeinitThreadrw(db_pool_lock_);
+
+#endif
 }
 
 base_storage::DBStorageEngine* DBComm::GetConnection(){
@@ -60,7 +137,10 @@ bool DBComm::GetUserInfos(const std::string& uid,
 	nickname.clear();
 	gender.clear();
 
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r = false;
 	MYSQL_ROW rows;
@@ -93,7 +173,10 @@ bool DBComm::GetUserInfos(const std::string& uid,
 bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude, 
 						   double& longitude){
 							   
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r = false;
 	MYSQL_ROW rows;
@@ -127,7 +210,10 @@ bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude,
 bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double latitude,
                           const double longitude){
     std::stringstream os;
-    base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
     bool r = false;
 	MYSQL_ROW rows;
 	int num;
@@ -170,7 +256,10 @@ bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double la
 
 bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
 
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r = false;
 	MYSQL_ROW rows;
@@ -216,7 +305,10 @@ bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
 bool DBComm::GetMusicUrl(const std::string &song_id, std::string &hq_url, std::string &song_url){
 	std::stringstream os;
 	bool r = false;
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	if (engine==NULL){
 		LOG_ERROR("engine error");
 		return true;
@@ -264,7 +356,10 @@ bool DBComm::GetMusicAboutInfo(const std::string& song_id,std::string& hq_url,st
 	bool r = false;
 	int num;
 	MYSQL_ROW rows = NULL;
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	if (engine==NULL){
 		LOG_ERROR("engine error");
 		return true;
@@ -298,7 +393,10 @@ bool DBComm::GetMusicFriendNum(const std::string &uid,
 							   std::string& snum){
 	std::stringstream os;
 	bool r = false;
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	if (engine==NULL){
 		LOG_ERROR("engine error");
 		return true;
