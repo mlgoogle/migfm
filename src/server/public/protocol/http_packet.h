@@ -1,7 +1,7 @@
 #ifndef MIG_FM_PUBLIC_PROTOCOL_HTTP_PACKET_H__
 #define MIG_FM_PUBLIC_PROTOCOL_HTTP_PACKET_H__
 
-#include "basictypes.h"
+#include "basic/basictypes.h"
 #include "log/mig_log.h"
 #include <map>
 #include <string>

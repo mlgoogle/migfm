@@ -95,11 +95,18 @@ public:
 							std::map<std::string,std::string>* collect_musices=NULL,
 							bool is_collect = false);
 
+	bool GetUserCurrentMusic(Json::Value& item,const std::string& str_uid);
+
 	bool GetMusicHotCltCmt(const std::string &songid,std::string &hot_num, 
 		                   std::string &cmt_num, 
 		                   std::string &clt_num);
 
 	int GetMsgCount(const std::string &uid);
+
+private:
+	void AddSameMusicUsers(Json::Value& same_music_users,
+						   Json::Value& user_music,
+						   const std::string& str_uid);
 
 public:
 	~LBSLogic();

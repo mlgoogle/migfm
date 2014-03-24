@@ -30,7 +30,8 @@ public:
 
 	static bool UpDateUserLbsPos(Json::Value& users,const int64 src_uid);
 
-	static bool GetSameMusic(Json::Value& users,const int64 src_uid);
+	static bool GetSameMusic(Json::Value& users,const int64 src_uid,const double latitude,
+	                        const double longitude);
 
 	static bool GetMusicFriendNum(const std::string& uid,
 		                          std::string& snum);

@@ -1,6 +1,7 @@
 #include "db_comm.h"
 #include "logic_comm.h"
 #include "thread_handler.h"
+#include "basic/basic_util.h"
 #include <mysql.h>
 #include <sstream>
 
@@ -123,17 +124,48 @@ bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude,
 }
 
 
-bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid){
+bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double latitude,
+                          const double longitude){
     std::stringstream os;
+    base_storage::DBStorageEngine* engine = GetConnection();
     bool r = false;
 	MYSQL_ROW rows;
+	int num;
 	if (engine == NULL) {
 		LOG_ERROR("GetConnection Error");
 		return false;
 	}
 
 	//获取用户信息
+	//call migfm.proc_GetSameMusicUser(10108)
+	os<<"call proc_GetSameMusicUser("<<src_uid<<")";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
 
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			Json::Value val;
+			val["userinfo"]["userid"] = rows[1];
+			val["userinfo"]["birthday"] = rows[2];
+			val["userinfo"]["head"] = rows[3];
+			val["userinfo"]["latitude"] = atof(rows[4]);
+			val["userinfo"]["longitude"] = atof(rows[5]);
+			val["userinfo"]["nickname"] = rows[6];
+			val["userinfo"]["sex"] = rows[7];
+			val["userinfo"]["userid"] = rows[8];
+			val["music"]["id"] = rows[9];
+			val["userinfo"]["distance"]
+			  =  base::BasicUtil::CalcGEODistance(latitude,longitude,
+					  atof(rows[4]),atof(rows[5]));
+			users.append(val);
+		}
+		return true;
+	}
+	return false;
 }
 
 bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){

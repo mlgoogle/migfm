@@ -125,7 +125,7 @@ int LBSLogic::SearchNearby(double longitude, double latitude, uint32 radius,
 }
 
 bool LBSLogic::Init() {
-
+   return true;
 }
 
 bool LBSLogic::OnMsgRead(struct server* srv, int socket, const void* msg, int len) {
@@ -284,6 +284,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	typedef std::map<std::string, std::string> UserSongMap;
 	UserSongMap map_songs;
 	Json::Value temp_users;
+	Json::Value same_music_users;
 	std::map<std::string,std::string> collect_musices;
 	std::string nick_name, sex,pic;
 	int jk = 0;
@@ -357,12 +358,8 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	//获取该用户用户红心歌曲名单
 	if ((flag==2)||(flag==3)||(flag==5)){
 		r = storage::RedisComm::GetCollectSongs(uid_str,collect_musices);
-// 		if (!r)
-// 			return r;
 	}
 
-	//获取类型相同的用户
-	if(flag==2)
 
 	for (Json::Value::iterator it = temp_users.begin();
 	  it != temp_users.end(); ++it) {
@@ -376,13 +373,15 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 										 &collect_musices,true);
 			  else
 				  r = GetUserCurrentMusic(find->second,item,is_user_like);
-			  if (r)
+			  if (r){
 				  if (flag==2||flag==3||(flag==5)){
 					  if (is_user_like)
 						  usersmusic.append(item); //周围歌曲是否是用户红心歌曲
 				  }else{
 					  usersmusic.append(item);
 				  }
+			  }
+
 		  }else{
 			  if (flag==1){//
 				//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"鑹抽槼澶�,"singer":"绐﹀敮"}
@@ -397,7 +396,13 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		  }
 	}
 
-	//鑾峰彇鐢ㄦ埛鏁�
+
+	//获取相同类型的歌曲
+	if(flag==2){
+		storage::DBComm::GetSameMusic(same_music_users,uid,latitude,longitude);
+		AddSameMusicUsers(same_music_users,usersmusic,uid_str);
+
+	}
 
 	if (flag==3){
 		std::string str_friend_num;
@@ -427,6 +432,31 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	return true;
 }
 
+
+void LBSLogic::AddSameMusicUsers(Json::Value& same_music_users,
+		   Json::Value& user_music,
+		   const std::string& str_uid){
+
+	int flag = 0;
+	for (Json::Value::iterator it = same_music_users.begin();
+		  it != same_music_users.end(); ++it) {
+		Json::Value item = *it;
+		flag = 0;
+		if(str_uid!=item["userinfo"]["userid"].asString()){
+			for(Json::Value::iterator itr = user_music.begin();
+				  itr != user_music.end(); ++itr){
+				Json::Value itrem = *itr;
+				if(item["userinfo"]["userid"].asString()==itrem["userinfo"]["userid"].asString())
+					flag = 1;
+			}
+			if(flag==0){
+				//获取音乐
+				GetUserCurrentMusic(item,str_uid);
+				user_music.append(item);
+			}
+		}
+	}
+}
 
 bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 		int &status, std::string &msg) {
@@ -657,6 +687,76 @@ LBSLogic::~LBSLogic() {
 	ThreadKey::DeinitThreadKey ();
 }
 
+bool LBSLogic::GetUserCurrentMusic(Json::Value& item,const std::string& str_uid){
+	bool r = false;
+	Json::Value music;
+	std::string state;
+	std::string name;
+	std::string singer;
+	std::string mode;
+	std::string tid;
+	std::string hq_content_url;
+	std::string content_url;
+	std::string music_info;
+	std::string hot_num;
+	std::string clt_num;
+	std::string cmt_num;
+	int is_like = 0;
+	std::string uid;
+	base::MusicInfo smi;
+	std::string b64title;
+	std::string b64artist;
+	std::string b64album;
+	std::string songid = item["music"]["id"].asString();
+	r = storage::RedisComm::GetMusicInfos(songid,music_info);
+	if (!r){
+		LOG_ERROR("song no vailed");
+		return false;
+	}
+	r =smi.UnserializedJson(music_info);
+	if (!r){
+		LOG_ERROR("song parser error");
+		return false;
+	}
+
+	storage::DBComm::GetMusicAboutInfo(smi.id(),hq_content_url,content_url,clt_num,cmt_num,hot_num);
+	smi.set_hq_url(hq_content_url);
+	smi.set_url(content_url);
+	smi.set_music_time(0);
+	Base64Decode(smi.title(),&b64title);
+	Base64Decode(smi.artist(),&b64artist);
+	Base64Decode(smi.album_title(),&b64album);
+
+	uid = item["userinfo"]["userid"].asString();
+	LOG_DEBUG2("uid[%s]",uid.c_str());
+	r = storage::RedisComm::IsCollectSong(uid,songid);
+	if (r)
+		is_like = 1;
+	else
+		is_like = 0;
+
+	smi.set_music_clt(clt_num);
+	smi.set_music_cmt(cmt_num);
+	smi.set_music_hot(hot_num);
+
+	item["music"]["id"] = smi.id();
+	item["music"]["title"] = b64title;
+	item["music"]["artist"] = b64artist;
+	item["music"]["url"] = smi.url();
+	item["music"]["hqurl"] = smi.hq_url();
+	item["music"]["pub_time"] = smi.pub_time();
+	item["music"]["album"] = b64album;
+	item["music"]["pic"] = smi.pic_url();
+	item["music"]["type"] = mode;
+	item["music"]["tid"] = tid;
+	item["music"]["like"] = is_like;
+	item["music"]["hot"] = hot_num;
+	item["music"]["clt"] = clt_num;
+	item["music"]["cmt"] = cmt_num;
+	item["songstat"] = 2;
+	return r;
+}
+
 bool LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item,
 								   bool& is_user_like,
 								   std::map<std::string,std::string>* collect_musices,
@@ -716,7 +816,7 @@ bool LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 		tid = root["tid"].asString(); 
 	}
 
-	//鏄惁鏄敤鎴风孩蹇冩瓕鏇�
+
 	if (is_collect){
 		std::map<std::string,std::string>::const_iterator itr 
 				 = (*collect_musices).find(songid);
@@ -727,7 +827,7 @@ bool LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 			is_user_like = true;
 	}
 
-	if (state!="2"){//闈炴湰鍦扮紦瀛樻瓕鏇�
+	if (state!="2"){
 		r = storage::RedisComm::GetMusicInfos(songid,music_info);
 		if (!r){
 			LOG_ERROR("song no vailed");
