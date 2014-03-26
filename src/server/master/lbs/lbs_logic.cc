@@ -243,11 +243,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	  return false;
 	}
 
-	//
-	/*double latitude = atof(location_pair[1].c_str());
-	double longitude = atof(location_pair[0].c_str());
-	*/
-	//
+
 	double latitude = 0;
 	double longitude = 0;
 	r = storage::DBComm::GetUserLbsPos(atol(uid_str.c_str()),latitude,longitude);
@@ -293,9 +289,6 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	  ++it,jk++) {
 		  const Json::Value &item = *it;
 		  Json::Value val;
-		  /*if (!item.isMember("ext"))
-			  continue;
-		  std::string uid_str = item["ext"]["user_id"].asString();*/
 
 		  std::string uid_str = item["usr_id"].asString();
 		  if (uid_str.empty())
@@ -311,9 +304,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		  //获取坐标
 		  base::UserInfo usrinfo;
 		  r = base::BasicUtil::GetUserInfo(uid_str,usrinfo);
+		 // r = false;
 		  if (r){
 
-			  //
 			  const Json::Value &pos_items = item["location"];
 			  Json::Value json_latitude;
 			  Json::Value json_logitude;
@@ -325,13 +318,12 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
   				else if (index==1)
   					json_logitude = (*itr);
   				index++;
-  			  }
+			  }
 			  val["userinfo"]["latitude"] = json_latitude;
 			  val["userinfo"]["longitude"] = json_logitude;
 
 
 			  //因和百度算出的距离有差异，避免在我的好友显示距离不一样，故统一用自行计算方式
-			 // val["userinfo"]["distance"] = item["distance"];
 			  double tar_latitude 
 				  = json_latitude.asDouble();
 
@@ -385,9 +377,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		  }else{
 			  if (flag==1){//
 				//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"鑹抽槼澶�,"singer":"绐﹀敮"}
-// 				  const std::string default_content = "{\"songid\":\"0\",\"state\":\"1\",\"type\":\"mm\",\"tid\":\"1\",\"name\":\"鑹抽槼澶‐",\"singer\":\"绐﹀敮\"}";
-// 				  bool is_user_like = false;
-// 				  r = GetUserCurrentMusic(default_content,item,is_user_like);
+ 				  const std::string default_content = "{\"songid\":\"0\",\"state\":\"1\",\"type\":\"mm\",\"tid\":\"1\",\"name\":\"黑梦\",\"singer\":\"窦唯\"}";
+ 				  bool is_user_like = false;
+ 				  r = GetUserCurrentMusic(default_content,item,is_user_like);
 				  usersmusic.append(item);
 			  }else {
 				  item["music"] = 0;
@@ -398,7 +390,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 
 
 	//获取相同类型的歌曲
-	if(flag==2){
+	if(flag==2||flag==3||(flag==5)){
 		storage::DBComm::GetSameMusic(same_music_users,uid,latitude,longitude);
 		AddSameMusicUsers(same_music_users,usersmusic,uid_str);
 
@@ -838,8 +830,6 @@ bool LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 			LOG_ERROR("song parser error");
 			return false;
 		}
-		//鑾峰彇URL
-		//storage::DBComm::GetMusicUrl(smi.id(),hq_content_url,content_url);
 		storage::DBComm::GetMusicAboutInfo(smi.id(),hq_content_url,content_url,clt_num,cmt_num,hot_num);
 		smi.set_hq_url(hq_content_url);
 		smi.set_url(content_url);

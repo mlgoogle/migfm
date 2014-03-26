@@ -14,6 +14,12 @@ threadrw_t* DBComm::db_pool_lock_;
 std::list<base_storage::DBStorageEngine*>  DBComm::db_conn_pool_;
 #endif
 
+#if defined (_DB_SINGLE_)
+threadrw_t*                                DBComm::db_single_lock_;
+base_storage::DBStorageEngine*             DBComm::db_conn_single_;
+#endif
+
+
 std::list<base::ConnAddr> DBComm::addrlist_;
 
 
@@ -58,6 +64,25 @@ void DBComm::Init(std::list<base::ConnAddr>& addrlist,
 	}
 
 #endif
+
+#if defined (_DB_SINGLE_)
+	bool r =false;
+	InitThreadrw(&db_single_lock_);
+	db_conn_single_ =
+			base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
+	if (db_conn_single_==NULL){
+		assert(0);
+		LOG_ERROR("create db conntion error");
+		return ;
+	}
+
+	r = db_conn_single_->Connections(addrlist_);
+	if (!r){
+		assert(0);
+		LOG_ERROR("db conntion error");
+		return ;
+	}
+#endif
 }
 
 #if defined (_DB_POOL_)
@@ -92,7 +117,15 @@ void DBComm::Dest(){
 		}
 	}
 	DeinitThreadrw(db_pool_lock_);
+#endif
 
+#if defined (_DB_SINGLE_)
+	mig_lbs::WLockGd lk(db_single_lock_);
+	if(db_conn_single_){
+		delete db_conn_single_;
+		db_conn_single_ = NULL;
+	}
+	DeinitThreadrw(db_single_lock_);
 #endif
 }
 
@@ -141,6 +174,10 @@ bool DBComm::GetUserInfos(const std::string& uid,
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
 #endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
 	std::stringstream os;
 	bool r = false;
 	MYSQL_ROW rows;
@@ -160,7 +197,7 @@ bool DBComm::GetUserInfos(const std::string& uid,
 	}
 	int32 num = engine->RecordCount();
 	if (num > 0) {
-		if (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+		if (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
 			nickname = rows[0];
 			gender = rows[1];
 			pic = rows[2];
@@ -176,6 +213,10 @@ bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude,
 #if defined (_DB_POOL_)
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
 #endif
 	std::stringstream os;
 	bool r = false;
@@ -197,7 +238,7 @@ bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude,
 	}
 	int32 num = engine->RecordCount();
 	if (num > 0) {
-		if (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+		if (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
 			latitude = atof(rows[0]);
 			longitude = atof(rows[1]);
 		}
@@ -213,6 +254,10 @@ bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double la
 #if defined (_DB_POOL_)
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
 #endif
     bool r = false;
 	MYSQL_ROW rows;
@@ -260,6 +305,10 @@ bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
 #endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
 	std::stringstream os;
 	bool r = false;
 	MYSQL_ROW rows;
@@ -288,9 +337,17 @@ bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
 				<<","<<latitude
 				<<","<<longitude
 				<<"); ";
+			std::string sql = os.str();
+			LOG_DEBUG2("[%s]", sql.c_str());
+			r = engine->SQLExec(sql.c_str());
+			os.str("");
+			if (!r) {
+				LOG_ERROR2("exec sql error");
+				return false;
+			}
 	}
 
-	std::string sql = os.str();
+	/*std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
 
@@ -298,6 +355,7 @@ bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
 		LOG_ERROR2("exec sql error");
 		return false;
 	}
+	*/
     return true;
 }
 
@@ -308,6 +366,10 @@ bool DBComm::GetMusicUrl(const std::string &song_id, std::string &hq_url, std::s
 #if defined (_DB_POOL_)
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
 #endif
 	if (engine==NULL){
 		LOG_ERROR("engine error");
@@ -360,12 +422,17 @@ bool DBComm::GetMusicAboutInfo(const std::string& song_id,std::string& hq_url,st
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
 #endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
 	if (engine==NULL){
 		LOG_ERROR("engine error");
 		return true;
 	}
-	//call migfm.proc_GetMusicInfo(232438)
-	os<<"call migfm.proc_GetMusicInfo("<<song_id<<");";
+	//call migfm.proc_GetMusicAboutInfo(325636)
+	os<<"call proc_GetMusicAboutInfo("<<song_id<<");";
+	//os<<"select clt_num,cmt_num ,hot_num from migfm_music_about where song_id = "<<song_id;
 	LOG_DEBUG2("%s",os.str().c_str());
 	r = engine->SQLExec(os.str().c_str());
 	if(!r){
@@ -375,12 +442,18 @@ bool DBComm::GetMusicAboutInfo(const std::string& song_id,std::string& hq_url,st
 	num = engine->RecordCount();
 	if(num>0){
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			/*hq_url = "http://www.baidu.com/1.mp3";
+			song_url = "http://www.baidu.com/1.mp3";
+			clt_num = rows[0];
+			cmt_num = rows[1];
+			hot_num = rows[2];
+			*/
 			if (rows[0] !=NULL){
-				hq_url.assign(rows[2]);
+				hq_url.assign(rows[1]);
 				song_url = hq_url;
-				clt_num.assign(rows[4]);
-				cmt_num.assign(rows[5]);
-				hot_num.assign(rows[6]);
+				clt_num.assign(rows[3]);
+				cmt_num.assign(rows[4]);
+				hot_num.assign(rows[5]);
 			}
 		}
 		return true;
@@ -396,6 +469,10 @@ bool DBComm::GetMusicFriendNum(const std::string &uid,
 #if defined (_DB_POOL_)
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
 #endif
 	if (engine==NULL){
 		LOG_ERROR("engine error");
@@ -424,7 +501,7 @@ bool DBComm::GetMusicFriendNum(const std::string &uid,
 		return true;
 	}
 
-	return true;
+	return false;
 }
 
 }

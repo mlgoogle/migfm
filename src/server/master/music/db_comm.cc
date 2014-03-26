@@ -182,6 +182,7 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
  			dec_id = rows[1];
 			Base64Decode(rows[0],&dec_word);
  		}
+ 		return true;
  	}
 
 	return true;
@@ -244,36 +245,6 @@ bool DBComm::RecordMusicHistory(const std::string& uid,const std::string& songid
 		LOG_ERROR2("exec sql error");
 		return false;
 	}
-	/*os<<"select id from migfm_user_music_history where userid='10343' and songid='54583';";
-	std::string sql = os.str();
-	r = engine->SQLExec(sql.c_str());
-	LOG_DEBUG2("[%s]", sql.c_str());
-	if (!r) {
-		LOG_ERROR2("exec sql error");
-		return false;
-	}
-	std::string return_code;
-	int num = engine->RecordCount();
-	os.str("");
-	if (num>0){
-		os<<"update migfm_user_music_history set  lasttime = '12323'  where userid='10343' and songid='54583';";
-		sql = os.str();
-		r = engine->SQLExec(sql.c_str());
-		LOG_DEBUG2("[%s]", sql.c_str());
-		if (!r) {
-			LOG_ERROR2("exec sql error");
-			return false;
-		}
-	}else{
-		os<<"insert into migfm_user_music_history(userid,songid) value('10343','54583');";
-		sql = os.str();
-		r = engine->SQLExec(sql.c_str());
-		LOG_DEBUG2("[%s]", sql.c_str());
-		if (!r) {
-			LOG_ERROR2("exec sql error");
-			return false;
-		}
-	}*/
 	return true;
 }
 
@@ -304,8 +275,9 @@ bool DBComm::GetSongidFromDoubanId(const std::string& douban_songid,std::string&
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
 			songid = rows[0];
 		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool DBComm::SetMusicHostCltCmt(const std::string& songid,
@@ -373,6 +345,7 @@ bool DBComm::GetMoodParentWord(std::list<base::WordAttrInfo>& word_list){
 			base::WordAttrInfo word_attr(id,name);
 			word_list.push_back(word_attr);
 		}
+		return true;
 	}
 	return true;
 }
@@ -457,8 +430,9 @@ bool DBComm::GetDescriptionWord(std::list<base::WordAttrInfo> &word_list, int fl
 			base::WordAttrInfo word(type_id,name);
 			word_list.push_back(word);
 		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool DBComm::GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& num){
@@ -491,6 +465,7 @@ bool DBComm::GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& num){
 			base::ChannelInfo ci(id,channel_id,channel_name,channel_pic);
 			channel.push_back(ci);
 		}
+		return true;
 	}
 	return true;
 }
@@ -602,8 +577,9 @@ bool DBComm::GetMoodInfos(std::list<int> &list){
 			int channel_id = atol(rows[0]);
 			list.push_back(channel_id);
 		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool DBComm::GetSceneInfos(std::list<int> &list){
@@ -628,8 +604,9 @@ bool DBComm::GetSceneInfos(std::list<int> &list){
 			int channel_id = atol(rows[0]);
 			list.push_back(channel_id);
 		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 

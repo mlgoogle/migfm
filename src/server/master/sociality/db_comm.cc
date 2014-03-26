@@ -283,7 +283,6 @@ bool DBComm::GetUserInfos(const std::string &uid, std::string &nickname,
 			nickname = rows[2];
 			gender = rows[3];
 			head = rows[4];
-
 		}
 		return true;
 	}
@@ -497,9 +496,10 @@ bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
  			dec_id = rows[1];
 			Base64Decode(rows[0],&dec_word);
  		}
+ 		return true;
  	}
 
-	return true;
+	return false;
 }
 
 bool DBComm::AddMusciFriend(const std::string& uid, 
@@ -595,9 +595,10 @@ bool DBComm::GetFriendList(const std::string& uid, FriendInfoList& friends) {
  			finfo.type = atoi(rows[2]);
  			friends.push_back(finfo);
  		}
+ 		return true;
  	}
 
-	return true;
+	return false;
 }
 
 bool DBComm::GetUserInfos(int64 uid,

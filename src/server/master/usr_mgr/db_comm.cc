@@ -357,8 +357,9 @@ bool DBComm::CheckUserInfo(const std::string& clientid,const std::string& token,
 			head = rows[5];
 			nickname = rows[7];
 		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool DBComm::RegistUser(const char* plat_id, const char* plat_session, 
@@ -426,8 +427,9 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 			username = rows[6];
 			nickname = rows[7];
 		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 }

@@ -54,13 +54,21 @@ private:
 	static std::list<base_storage::DBStorageEngine*>  db_conn_pool_;
 	static threadrw_t*                                db_pool_lock_;
 #endif
+
+#if defined (_DB_SINGLE_)
+	static base_storage::DBStorageEngine*             db_conn_single_;
+	static threadrw_t*                                db_single_lock_;
+#endif
 };
 
 class AutoDBCommEngine{
 public:
 	AutoDBCommEngine();
 	virtual ~AutoDBCommEngine();
-	base_storage::DBStorageEngine*  GetDBEngine(){return engine_;}
+	base_storage::DBStorageEngine*  GetDBEngine(){
+		if(engine_){engine_->Release();}
+		return engine_;
+	}
 private:
 	base_storage::DBStorageEngine*  engine_;
 };

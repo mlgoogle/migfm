@@ -139,7 +139,7 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMusicChannelSong(socket,packet);
 	}else if (type=="word"){
 		GetDescriptionWord(socket,packet);
-	}else if (type=="getmssong"){ //��ȡ������������΢�Ű汾 ÿ�ν�һ��
+	}else if (type=="getmssong"){ //
 		GetMoodSceneWordSong(socket,packet);
 	}else if (type=="getsongid"){
 		GetWXMusicInfo(socket,packet);

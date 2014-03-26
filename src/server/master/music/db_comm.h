@@ -66,7 +66,10 @@ class AutoDBCommEngine{
 public:
 	AutoDBCommEngine();
 	virtual ~AutoDBCommEngine();
-	base_storage::DBStorageEngine*  GetDBEngine(){return engine_;}
+	base_storage::DBStorageEngine*  GetDBEngine(){
+		if(engine_){engine_->Release();}
+		return engine_;
+	}
 private:
 	base_storage::DBStorageEngine*  engine_;
 };
