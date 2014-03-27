@@ -12,7 +12,7 @@ RedisStorageEngineImpl::RedisStorageEngineImpl(){
 }
 
 RedisStorageEngineImpl::~RedisStorageEngineImpl(){
-
+	Release();
 }
 
 void RedisStorageEngineImpl::Init(){
@@ -28,7 +28,7 @@ bool RedisStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 		str = RedisConnections(&c_,addr.host().c_str(),addr.port());
                 MIG_INFO(USER_LEVEL,"redis ip[%s] port[%d]",addr.host().c_str(),
                          addr.port());
-		if(str!=NULL){ //Á¬½Ó´íÎó Í¨Öª¶ÏÏßµô
+		if(str!=NULL){ //ï¿½ï¿½ï¿½Ó´ï¿½ï¿½ï¿½ Í¨Öªï¿½ï¿½ï¿½ßµï¿½
 			MIG_INFO(USER_LEVEL,"Redis Conntions error %s",str);
 			return false;
 		}

@@ -16,8 +16,10 @@ static const char *POI_HASH_KEY = "lbs:poi";
 bool RedisConnector::BindUserPOI(int64 user_id, int64 poi_id) {
 	//ASSERT(IsConnected());
 
-	base_storage::DictionaryStorageEngine *redis =
-			storage::RedisComm::GetConnection();
+#if defined (_DIC_POOL_)
+	    storage::AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis  = auto_engine.GetDicEngine();
+#endif
 	if (NULL == redis)
 		return false;
 
@@ -35,8 +37,10 @@ bool RedisConnector::BindUserPOI(int64 user_id, int64 poi_id) {
 int64 RedisConnector::FindUserPOIID(int64 user_id) {
 	//ASSERT(IsConnected());
 
-	base_storage::DictionaryStorageEngine *redis =
-			storage::RedisComm::GetConnection();
+#if defined (_DIC_POOL_)
+	    storage::AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis  = auto_engine.GetDicEngine();
+#endif
 	if (NULL == redis)
 		return false;
 
@@ -58,8 +62,10 @@ int64 RedisConnector::FindUserPOIID(int64 user_id) {
 }
 
 int32 RedisConnector::GetCollect(const int64 user_id){
-	base_storage::DictionaryStorageEngine *redis =
-		storage::RedisComm::GetConnection();
+#if defined (_DIC_POOL_)
+	    storage::AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis  = auto_engine.GetDicEngine();
+#endif
 	char field[256] = {0};
 	snprintf(field, arraysize(field), "h%lldclt", user_id);
 	return redis->GetHashSize(field);
@@ -68,8 +74,10 @@ int32 RedisConnector::GetCollect(const int64 user_id){
 bool RedisConnector::DeleteUserPOI(int64 user_id) {
 	//ASSERT(IsConnected());
 
-	base_storage::DictionaryStorageEngine *redis =
-			storage::RedisComm::GetConnection();
+#if defined (_DIC_POOL_)
+	    storage::AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis  = auto_engine.GetDicEngine();
+#endif
 	if (NULL == redis)
 		return false;
 

@@ -8,17 +8,89 @@ namespace storage{
 
 std::list<base::ConnAddr>  RedisComm::addrlist_;
 base::MigRadomIn* RedisComm::radom_num_ = NULL;
-void RedisComm::Init(std::list<base::ConnAddr>& addrlist){
+
+#if defined (_DIC_POOL_)
+threadrw_t* RedisComm::dic_pool_lock_;
+std::list<base_storage::DictionaryStorageEngine*>  RedisComm::dic_conn_pool_;
+#endif
+AutoDicCommEngine::AutoDicCommEngine()
+:engine_(NULL){
+#if defined (_DIC_POOL_)
+	engine_ = storage::RedisComm::RedisConnectionPop();
+#endif
+}
+
+AutoDicCommEngine::~AutoDicCommEngine(){
+#if defined (_DIC_POOL_)
+	storage::RedisComm::RedisConnectionPush(engine_);
+#endif
+}
+
+void RedisComm::Init(std::list<base::ConnAddr>& addrlist,const int32 dic_conn_num){
 	addrlist_ = addrlist;
-	radom_num_ = new base::MigRadomIn();
+    radom_num_ = new base::MigRadomIn();
+#if defined (_DIC_POOL_)
+	bool r =false;
+	InitThreadrw(&dic_pool_lock_);
+	for (int i = 0; i<=dic_conn_num;i++){
+		base_storage::DictionaryStorageEngine* engine =
+				base_storage::DictionaryStorageEngine::Create(base_storage::IMPL_RADIES);
+
+			if (engine==NULL){
+				assert(0);
+				continue;
+			}
+			MIG_DEBUG(USER_LEVEL, "ip:%s,port:%d", addrlist_.front().host().c_str(),
+					addrlist_.front().port());
+			bool r =  engine->Connections(addrlist_);
+			if (!r)
+				continue;
+
+		dic_conn_pool_.push_back(engine);
+	}
+
+#endif
 }
 
 void RedisComm::Dest(){
-	if (radom_num_){
+#if defined (_DIC_POOL_)
+	music_logic::WLockGd lk(dic_pool_lock_);
+	while(dic_conn_pool_.size()>0){
+		base_storage::DictionaryStorageEngine* engine = dic_conn_pool_.front();
+		dic_conn_pool_.pop_front();
+		if(engine){
+			engine->Release();
+			delete engine;
+			engine =NULL;
+		}
+	}
+  if (radom_num_){
 		delete radom_num_;
 		radom_num_ = NULL;
-	}
+  }
+	DeinitThreadrw(dic_pool_lock_);
+#endif
 }
+
+#if defined (_DIC_POOL_)
+
+void RedisComm::RedisConnectionPush(base_storage::DictionaryStorageEngine* engine){
+	music_logic::WLockGd lk(dic_pool_lock_);
+	dic_conn_pool_.push_back(engine);
+}
+
+base_storage::DictionaryStorageEngine* RedisComm::RedisConnectionPop(){
+	if(dic_conn_pool_.size()<=0)
+		return NULL;
+	music_logic::WLockGd lk(dic_pool_lock_);
+    base_storage::DictionaryStorageEngine* engine = dic_conn_pool_.front();
+    dic_conn_pool_.pop_front();
+    return engine;
+}
+
+#endif
+
+
 
 base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
 
@@ -69,7 +141,10 @@ bool RedisComm::GetMusicMapRadom(const std::string &art_name,
 	char* value;
 	size_t value_len = 0;
 	bool r = false;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 	int num = radom_num_->GetPrize();
@@ -96,7 +171,10 @@ bool RedisComm:: GetUserMoodMap(const std::string& uid,std::string& mood_map){
 	std::string temp_key = uid;
 	temp_key.append("_mmp");
 	//value
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	//value ��Э��json��ʽ�洢
 	//{"day":"1","typeid:"1"},{"day":"2","typeid:"2"},{"day":"3","typeid:"1"},{"day":"4","typeid:"3"},{"day":"5","typeid:"2"},{"day":"6","typeid:"5"},{"day":"7","typeid:"6"},
 
@@ -121,7 +199,10 @@ bool RedisComm:: GetUserMoodMap(const std::string& uid,std::string& mood_map){
 bool RedisComm::GetMusicInfos(const std::string& key,std::string& music_infos){
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
@@ -147,7 +228,10 @@ bool RedisComm::SetCollectSong(const std::string &uid,const std::string& songid,
 	//std::stringstream os;
 	std::string os;
 	bool r = false;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 
@@ -206,8 +290,10 @@ bool RedisComm::GetCltAndHateSong(const std::string& uid,
 	bool r = false;
 	char* value = NULL;
 	std::list<std::string> song_list;
-	base_storage::DictionaryStorageEngine* redis_engine_ = 
-		GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (!redis_engine_)
 		return false;
 
@@ -256,8 +342,10 @@ bool RedisComm::GetCollectSongs(const std::string& uid,
 	bool r = false;
 	char* value = NULL;
 	std::list<std::string> song_list;
-	base_storage::DictionaryStorageEngine* redis_engine_ = 
-		GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (!redis_engine_)
 		return false;
 	os.append("h");
@@ -285,8 +373,10 @@ bool RedisComm::GetCollectSongs(const std::string& uid,std::list<std::string>& s
 	bool r = false;
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = 
-		GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 
 	if (redis_engine_==NULL)
 		return false;
@@ -305,7 +395,10 @@ bool RedisComm::DelCollectSong(const std::string& uid,const std::string& songid)
 	bool r = false;
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 
@@ -325,7 +418,10 @@ bool RedisComm::GetCollectSong(const std::string& uid,const std::string& songid,
 	   bool r = false;
 	   char* value;
 	   size_t value_len = 0;
-	   base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	   if (redis_engine_==NULL)
 		   return true;
 
@@ -355,7 +451,10 @@ bool RedisComm::IsCollectSong(const std::string& uid,const std::string& songid){
 	bool r = false;
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 
@@ -386,7 +485,10 @@ bool RedisComm::SetHateSong(const std::string &uid, const std::string &songid,
 	//key: huid_ht
 	std::string os;
 	bool r = false;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 	//map
@@ -407,8 +509,10 @@ bool RedisComm::GetHateSongs(const std::string& uid,
 	bool r = false;
 	char* value = NULL;
 	std::list<std::string> song_list;
-	base_storage::DictionaryStorageEngine* redis_engine_ = 
-		GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (!redis_engine_)
 		return false;
 	os.append("h");
@@ -436,7 +540,10 @@ bool RedisComm::DelHateSong(const std::string &uid, const std::string &songid){
 	bool r = false;
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 
@@ -454,7 +561,10 @@ bool RedisComm::IsHateSong(const std::string& uid,const std::string& songid){
 	bool r = false;
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 
@@ -486,7 +596,10 @@ bool RedisComm::GetDefaultSongs(const std::string &uid,
 	char* value;
 	size_t value_len = 0;
 	//duidsl(default+uid+songlist)
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 
@@ -503,7 +616,10 @@ void RedisComm::SetMusicAboutUser(const std::string& songid,const std::string& h
  
    std::string os;
    std::string key;
-   base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
    if (redis_engine_==NULL)
 	   return;
    //key: a10000t
@@ -530,7 +646,10 @@ bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content
 	char* value;
 	size_t value_len = 0;
 	std::string key;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 	key.append("a");
@@ -554,7 +673,10 @@ bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content
 
 
 int RedisComm::GetHashSize(const std::string& key){
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return 0;
 	return redis_engine_->GetHashSize(key.c_str());
@@ -565,7 +687,10 @@ bool RedisComm::GetUpdateConfig(const std::string& key,std::string& content){
 	bool r = false;
 	char* value;
 	size_t value_len = 0;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 	//LOG_DEBUG2("MgrListenSongsNum key[%s]",os.c_str());
@@ -585,7 +710,10 @@ bool RedisComm::MgrListenSongsNum(const std::string& songid,
 	//key num_songid:num_99999
 	std::string os;
 	bool r = false;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 	os.append("num_");
@@ -605,8 +733,10 @@ bool RedisComm::MgrListenSongsNum(const std::string& songid,
 void RedisComm::GetMusicInfosV2(std::list<std::string>& songlist,
 								std::list<std::string>& songinfolist){
 									
-	base_storage::DictionaryStorageEngine* redis_engine_ 
-										= GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	std::stringstream os;
 	int64 total;
 	os<<"mget";
@@ -625,8 +755,10 @@ void RedisComm::GetMusicInfosV2(std::list<std::string>& songlist,
 
 void RedisComm::GetMusicInfosV2(std::map<std::string,base::MusicCltHateInfo>& songmap, std::list<std::string>& songinfolist){
 
-	base_storage::DictionaryStorageEngine* redis_engine_ 
-		= GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 
 	//redisContext *context = (redisContext *)redis_engine_->GetContext();
 	std::stringstream os;
@@ -649,8 +781,10 @@ void RedisComm::GetMusicInfosV2(std::map<std::string,base::MusicCltHateInfo>& so
 void RedisComm::GetMusicInfosV3(const std::string& type,std::list<int>& random_list, 
 								std::list<std::string>& songinfolist){
 
-	base_storage::DictionaryStorageEngine* redis_engine_ 
-		= GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	std::stringstream os;
 	int64 total;
 	bool r = false;
@@ -693,8 +827,10 @@ void RedisComm::GetMusicInfosV3(const std::string& type,std::list<int>& random_l
 void RedisComm::GetMusicInfosV2(std::map<std::string,std::string>& songmap, 
 								std::list<std::string>& songinfolist){
 									
-	base_storage::DictionaryStorageEngine* redis_engine_ 
-		                   = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 									
 	//redisContext *context = (redisContext *)redis_engine_->GetContext();
 	std::stringstream os;

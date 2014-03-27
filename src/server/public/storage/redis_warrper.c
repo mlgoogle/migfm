@@ -121,6 +121,8 @@ int RedisIncDecValue(warrper_redis_context_t* context, const char* key,
 int RedisPingRedis(warrper_redis_context_t* context){
 	redisReply* reply;
 	reply = redisCommand(context->context,"PING");
+	if(reply==NULL)
+		return 0;
 	if(strcmp(reply->str,"PONG")==0){
 		freeReplyObject(reply);
 		return 1;

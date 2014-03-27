@@ -70,6 +70,9 @@ bool MysqlStorageEngineImpl::FreeRes(){
 }
 
 bool MysqlStorageEngineImpl::SQLExec(const char* sql){
+	bool r = CheckConnect();
+	if(!r)
+		return false;
     FreeRes();
     MYSQL* mysql = (MYSQL*)conn_.get()->proc;
     mysql_query(mysql,sql);
