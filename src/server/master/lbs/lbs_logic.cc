@@ -273,7 +273,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	std::map<std::string,std::string> collect_musices;
 	Json::Value usersmusic;
 
-
+/* 因为暂时无法判断进入范围的用户，故暂时取消
 	//对比当前距离和存储距离如果未超过500米     暂时不做请求
 	r = IsOverRange(uid,current_latitude,current_longitude); //大于500米为false 重新请求距离
 
@@ -282,7 +282,8 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		r = GetCacheLBSUserInfos(uid,latitude,longitude,temp_users,vec_users);
 		//为false 说明并未存入缓存
 	}
-
+*/
+	r = false;
 	if(!r){ //重新获取距离
 
 
