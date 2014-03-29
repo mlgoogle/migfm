@@ -207,6 +207,52 @@ bool DBComm::GetUserInfos(const std::string& uid,
 	return false;
 }
 
+bool DBComm::GetLBSAboutInfos(const std::string& uid,std::string& sex,std::string& nickname,
+							  std::string& head,std::string& birthday,
+							  double& latitude,double& longitude){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
+		std::stringstream os;
+		bool r = false;
+		MYSQL_ROW rows;
+		if (engine == NULL) {
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+		//call migfm.proc_GetLbsAboutInfos(10108);
+		os<<"call migfm.proc_GetLbsAboutInfos("
+			<<uid<<")";
+
+		const char* sql = os.str().c_str();
+		LOG_DEBUG2("[%s]",os.str().c_str());
+		r = engine->SQLExec(os.str().c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+		int32 num = engine->RecordCount();
+		if (num > 0) {
+			if (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+				sex = rows[0];
+				nickname = rows[1];
+				head = rows[2];
+				birthday = rows[3];
+				latitude = atof(rows[4]);
+				longitude = atof(rows[5]);
+			}
+			return true;
+		}
+		return false;
+
+}
+
 bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude, 
 						   double& longitude){
 							   
@@ -271,6 +317,7 @@ bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double la
 	//call migfm.proc_GetSameMusicUser(10108)
 	os<<"call proc_GetSameMusicUser("<<src_uid<<")";
 	r = engine->SQLExec(os.str().c_str());
+	LOG_DEBUG2("%s",os.str().c_str());
 	if(!r){
 		MIG_ERROR(USER_LEVEL,"sqlexec error");
 		return r;

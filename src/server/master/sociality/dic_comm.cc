@@ -656,7 +656,10 @@ bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content
 	char* value;
 	size_t value_len = 0;
 	std::string key;
-	base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	if (redis_engine_==NULL)
 		return true;
 	key.append("a");
@@ -684,7 +687,10 @@ void RedisComm::SetMusicAboutUser(const std::string& songid,const std::string& h
 
 	  std::string os;
 	  std::string key;
-	  base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
 	  if (redis_engine_==NULL)
 		  return;
 	  //key: a10000t

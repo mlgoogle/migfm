@@ -6,8 +6,8 @@
  *      Author: huaiyu
  */
 #include <string>
-#include <vector>
 #include <map>
+#include <sstream>
 #include "lbs_logic.h"
 #include "json/json.h"
 #include "log/mig_log.h"
@@ -237,12 +237,17 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	  msg = "无效uid";
 	  return false;
 	}
+
+	double current_latitude = 0;
+	double current_longitude = 0;
 	std::vector<std::string> location_pair;
 	if (2 != SplitStringChr(location_str.c_str(), ",", location_pair)) {
 	  msg = "location参数格式错误";
 	  return false;
 	}
 
+	current_latitude = atof(location_pair[1].c_str());
+	current_longitude = atof(location_pair[0].c_str());
 
 	double latitude = 0;
 	double longitude = 0;
@@ -259,86 +264,105 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	int page_size = atoi(page_size_str.c_str());
 	std::string response;
 	Json::Value content;
-	if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
-	  content, response, msg)) {
-		  return false;
-	}
-	int i = content["size"].asInt();
-	const Json::Value &items = content["contents"];
-	if (items.empty()){
-	  result["result"] = "";
-	  msg = "周围没有用户";
-	  status = 0;
-	  return true;
-	}
 
-
-
-	Json::Value usersmusic;
-	std::map<std::string, bool> mapExist;
+	Json::Value temp_users;
 	std::vector<std::string> vec_users;
 	typedef std::map<std::string, std::string> UserSongMap;
 	UserSongMap map_songs;
-	Json::Value temp_users;
 	Json::Value same_music_users;
 	std::map<std::string,std::string> collect_musices;
-	std::string nick_name, sex,pic;
-	int jk = 0;
-	for (Json::Value::iterator it = items.begin();
-	  it != items.end();
-	  ++it,jk++) {
-		  const Json::Value &item = *it;
-		  Json::Value val;
-
-		  std::string uid_str = item["usr_id"].asString();
-		  if (uid_str.empty())
-			  continue;
-		  int64 tar_uid = atoll(uid_str.c_str());
-		  if (uid==tar_uid)
-			  continue;
-		  if (mapExist.end() != mapExist.find(uid_str))
-			  continue;
-
-		  mapExist[uid_str] = true;
-		  val["userinfo"]["userid"] = uid_str;
-		  //获取坐标
-		  base::UserInfo usrinfo;
-		  r = base::BasicUtil::GetUserInfo(uid_str,usrinfo);
-		 // r = false;
-		  if (r){
-
-			  const Json::Value &pos_items = item["location"];
-			  Json::Value json_latitude;
-			  Json::Value json_logitude;
-			  int index = 0;
-			  for (Json::Value::iterator itr =pos_items.begin();
-  				itr!= pos_items.end();++itr){
-				if (index==0)
-  					json_latitude = (*itr);
-  				else if (index==1)
-  					json_logitude = (*itr);
-  				index++;
-			  }
-			  val["userinfo"]["latitude"] = json_latitude;
-			  val["userinfo"]["longitude"] = json_logitude;
+	Json::Value usersmusic;
 
 
-			  //因和百度算出的距离有差异，避免在我的好友显示距离不一样，故统一用自行计算方式
-			  double tar_latitude 
-				  = json_latitude.asDouble();
+	//对比当前距离和存储距离如果未超过500米     暂时不做请求
+	r = IsOverRange(uid,current_latitude,current_longitude); //大于500米为false 重新请求距离
 
-			  double tar_longitude 
-				  = json_logitude.asDouble();
-			  val["userinfo"]["distance"] 
-			  =  base::BasicUtil::CalcGEODistance(latitude,longitude,
+	if(r){//未超过500米 缓存获取
+		 //vec_users.push_back(uid_str);
+		r = GetCacheLBSUserInfos(uid,latitude,longitude,temp_users,vec_users);
+		//为false 说明并未存入缓存
+	}
+
+	if(!r){ //重新获取距离
+
+
+		if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
+				content, response, msg)) {
+			return false;
+		}
+		int i = content["size"].asInt();
+		const Json::Value &items = content["contents"];
+		if (items.empty()){
+			result["result"] = "";
+			msg = "周围没有用户";
+			status = 0;
+			return true;
+		}
+
+
+		std::map<std::string, bool> mapExist;
+		std::string nick_name, sex,pic;
+		int jk = 0;
+		Json::Value temp_id;
+
+		for (Json::Value::iterator it = items.begin();
+			it != items.end();
+	  	  ++it,jk++) {
+		  	  const Json::Value &item = *it;
+		  	  Json::Value val;
+
+		  	  std::string uid_str = item["usr_id"].asString();
+		  	  if (uid_str.empty())
+			  	  continue;
+		  	  int64 tar_uid = atoll(uid_str.c_str());
+		  	  if (uid==tar_uid)
+			  	  continue;
+		  	  if (mapExist.end() != mapExist.find(uid_str))
+			  	  continue;
+
+		  	  mapExist[uid_str] = true;
+		  	  val["userinfo"]["userid"] = uid_str;
+		  	  //获取坐标
+		  	  base::UserInfo usrinfo;
+		  	  r = base::BasicUtil::GetUserInfo(uid_str,usrinfo);
+		  	  if (r){
+
+			  	  const Json::Value &pos_items = item["location"];
+			  	  Json::Value json_latitude;
+			  	  Json::Value json_logitude;
+			  	  int index = 0;
+			  	  for (Json::Value::iterator itr =pos_items.begin();
+					  itr!= pos_items.end();++itr){
+				  	if (index==0)
+  						json_latitude = (*itr);
+  					else if (index==1)
+  						json_logitude = (*itr);
+  					index++;
+			  	  }
+			  	  val["userinfo"]["latitude"] = json_latitude;
+			  	  val["userinfo"]["longitude"] = json_logitude;
+
+
+			  	  //因和百度算出的距离有差异，避免在我的好友显示距离不一样，故统一用自行计算方式
+			  	  double tar_latitude
+			  	  	  = json_latitude.asDouble();
+
+			  	  double tar_longitude
+			  	  	  = json_logitude.asDouble();
+			  	  val["userinfo"]["distance"]
+			                  =  base::BasicUtil::CalcGEODistance(latitude,longitude,
 				                          tar_latitude,tar_longitude);
-			  val["userinfo"]["nickname"] = usrinfo.nickname();
-			  val["userinfo"]["sex"] = usrinfo.sex();
-			  val["userinfo"]["head"] = usrinfo.head();
-			  val["userinfo"]["birthday"] = usrinfo.birthday();
-			  vec_users.push_back(uid_str);
-			  temp_users.append(val);
-		  }
+			  	  val["userinfo"]["nickname"] = usrinfo.nickname();
+			  	  val["userinfo"]["sex"] = usrinfo.sex();
+			  	  val["userinfo"]["head"] = usrinfo.head();
+			  	  val["userinfo"]["birthday"] = usrinfo.birthday();
+			  	  vec_users.push_back(uid_str);
+			  	  temp_users.append(val);
+			  	  temp_id.append(uid_str);
+		  	  }
+		}
+		AddCacheLBSUserInfos(uid,temp_id);
+
 	}
 
 	if (temp_users.size()>0)
@@ -449,6 +473,8 @@ void LBSLogic::AddSameMusicUsers(Json::Value& same_music_users,
 		}
 	}
 }
+
+
 
 bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 		int &status, std::string &msg) {
@@ -914,5 +940,133 @@ int LBSLogic::GetMsgCount(const std::string &uid){
 	bool r = storage::RedisComm::GetMsgCount(uid,count);
 	return count;
 }
+
+bool LBSLogic::IsOverRange(const int64 uid,
+		double current_latitude,
+        double current_longitude){
+
+	double stor_latitude = 0;
+	double stor_longitude = 0;
+	//storage::DBComm::GetUserLbsPos(uid,stor_latitude,stor_longitude);
+	//获取当前存储距离
+
+	//key uidlbscurrent 10001lbscurrent
+	std::stringstream key;
+	key<<uid<<"lbscurrent";
+	char* value;
+	size_t value_len;
+	Json::Reader reader;
+	Json::Value root;
+
+	bool r = storage::MemComm::GetString(key.str().c_str(),key.str().length(),
+			  &value,&value_len);
+	//存储
+	Json::Value val;
+	Json::FastWriter wr;
+	val["latitude"] = current_latitude;
+	val["longitude"] = current_longitude;
+	std::string res = wr.write(val);
+	storage::MemComm::SetString(key.str().c_str(),key.str().length(),res.c_str(),res.length());
+
+	if(!r){
+		return false;
+	}
+
+	r = reader.parse(value,root);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"json parser error");
+		return false;
+	}
+
+	if(value){
+		delete [] value;
+		value = NULL;
+	}
+
+	stor_latitude = root["latitude"].asDouble();
+	stor_longitude = root["longitude"].asDouble();
+	//计算距离
+	double distance
+	  =  base::BasicUtil::CalcGEODistance(current_latitude,current_longitude,
+			  stor_latitude,stor_longitude);
+
+	if(distance>500)
+		return false;
+	else
+		return true;
+}
+
+bool LBSLogic::AddCacheLBSUserInfos(const int64 uid,Json::Value& temp_userid){
+
+	Json::FastWriter wr;
+	bool r = false;
+	std::string res = wr.write(temp_userid);
+	//存入memcache
+	//key uidlbs 10001lbs
+	std::stringstream key;
+	key<<uid<<"lbs";
+	LOG_DEBUG2("%s",res.c_str());
+	return storage::MemComm::SetString(key.str().c_str(),key.str().length(),res.c_str(),res.length());
+}
+
+bool LBSLogic::GetCacheLBSUserInfos(const int64 uid,const double uid_latitude,
+		const double uid_longitude,Json::Value& temp_users,
+		std::vector<std::string>& vec_users){
+
+   char* value;
+   size_t value_len;
+  	//从memcache 获取
+	//key uidlbs 10001lbs
+  std::stringstream key;
+  key<<uid<<"lbs";
+  bool r = storage::MemComm::GetString(key.str().c_str(),key.str().length(),
+		  &value,&value_len);
+  if(!r)
+  	return false;
+  //读取号码
+  Json::Reader reader;
+  Json::Value root;
+  r = reader.parse(value,root);
+  if (!r){
+	  MIG_ERROR(USER_LEVEL,"json parser error");
+	  return false;
+  }
+  for (Json::Value::iterator it = root.begin();
+  	  it != root.end();++it){
+	  const Json::Value item = (*it);
+	  std::string str_uid = item.asString();
+	  Json::Value val;
+	  //获取用户信息
+	  std::string sex;
+	  std::string nickname;
+	  std::string head;
+	  std::string birthday;
+	  double latitude;
+	  double longitude;
+	  r = storage::DBComm::GetLBSAboutInfos(str_uid,sex,nickname,head,birthday,
+			  	  latitude,longitude);
+	  if(!r)
+		  continue;
+	  vec_users.push_back(str_uid);
+	  val["userinfo"]["nickname"] = nickname;
+	  val["userinfo"]["sex"] = sex;
+	  val["userinfo"]["head"] = head;
+	  val["userinfo"]["birthday"] = birthday;
+	  val["userinfo"]["latitude"] = latitude;
+	  val["userinfo"]["longitude"] = longitude;
+	  val["userinfo"]["userid"] = str_uid;
+	  double distance = base::BasicUtil::CalcGEODistance(latitude,
+  	  	  	  longitude,uid_latitude,uid_longitude);
+	  val["userinfo"]["distance"] =  base::BasicUtil::CalcGEODistance(latitude,
+			  	  	  	  	  	  longitude,uid_latitude,uid_longitude);
+	  temp_users.append(val);
+  }
+  if(value){
+	  delete [] value;
+	  value = NULL;
+  }
+  return true;
+}
+
 
 } /* namespace mig_lbs */

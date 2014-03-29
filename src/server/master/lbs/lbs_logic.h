@@ -9,6 +9,7 @@
 #define _LBS_LOGIC_H_
 
 #include <string>
+#include <vector>
 #include "basic/basictypes.h"
 #include "baidu_lbs_connector.h"
 #include "redis_connector.h"
@@ -107,6 +108,15 @@ private:
 	void AddSameMusicUsers(Json::Value& same_music_users,
 						   Json::Value& user_music,
 						   const std::string& str_uid);
+
+	bool IsOverRange(const int64 uid,double current_latitude,
+	        double current_longitude);
+
+	bool GetCacheLBSUserInfos(const int64 uid,const double uid_latitude,
+			const double uid_longitude,Json::Value& temp_users,
+			std::vector<std::string>& vec_users);
+
+	bool AddCacheLBSUserInfos(const int64 uid,Json::Value& temp_userid);
 
 public:
 	~LBSLogic();

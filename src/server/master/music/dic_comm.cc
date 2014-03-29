@@ -257,7 +257,10 @@ bool RedisComm::GetMusicHistroyCollect(const std::string &uid,
    std::list<std::string> temp_list;
    Json::Value root;
    Json::Reader reader;
-   base_storage::DictionaryStorageEngine* redis_engine_ = GetConnection();
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
    if (redis_engine_==NULL)
 	   return false;
 	//��ȡ��ʷ������Ϣ

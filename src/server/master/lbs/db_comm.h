@@ -42,6 +42,11 @@ public:
 	static bool GetUserLbsPos(const int64 src_uid,double& latitude,
 		                      double& longitude);
 
+	static bool GetLBSAboutInfos(const std::string& uid,std::string& sex,std::string& nickname,
+							std::string& head,std::string& birthday,double& latitude,
+							double& longitude);
+
+
 
 public:
 #if defined (_DB_POOL_)
