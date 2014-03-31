@@ -357,6 +357,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  	  val["userinfo"]["sex"] = usrinfo.sex();
 			  	  val["userinfo"]["head"] = usrinfo.head();
 			  	  val["userinfo"]["birthday"] = usrinfo.birthday();
+			  	  val["userinfo"]["plat"] = usrinfo.source();
 			  	  vec_users.push_back(uid_str);
 			  	  temp_users.append(val);
 			  	  temp_id.append(uid_str);
