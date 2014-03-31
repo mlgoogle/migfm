@@ -40,6 +40,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      if((!r)||(atoll(str_platform_id.c_str())<=0)){
     	 result["status"] = "1";
     	 result["msg"] = "平台ID不存在";
+    	 content = "";
     	 goto ret;
      }
      platform_id = atoll(str_platform_id.c_str());
@@ -48,6 +49,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      if((!r)||(atoll(str_uid.c_str())<=0)){
     	 result["status"] = "1";
     	 result["msg"] = "用户ID不存在";
+    	 content = "";
     	 goto ret;
      }
      uid = atoll(str_uid.c_str());
@@ -57,6 +59,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      if((!r)||(atoll(str_oppid.c_str())<=0)){
     	 result["status"] = "1";
     	 result["msg"] = "对方ID不存在";
+    	 content = "";
     	 goto ret;
      }
      oppid = atoll(str_oppid.c_str());
@@ -79,15 +82,19 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
 
      //token
      r = pack.GetAttrib("token",token);
+     r = true;
      if(!r||(chat_logic::SomeUtils::CheckUserToken(str_platform_id,str_uid,token))){
     	 result["status"] = "1";
     	 result["msg"] = "token错误";
+    	 content = "";
+    	 goto ret;
      }
 
      r = chat_storage::DBComm::GetLeaveMessage(platform_id,uid,oppid,from,count,list);
      if(!r){
     	 result["status"] = "0";
     	 result["msg"] = "";
+    	 content = "";
 
      }
      result["status"] = "0";

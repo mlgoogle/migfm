@@ -3,6 +3,7 @@
 #include "basic/basic_info.h"
 #include "basic/base64.h"
 #include "storage/storage.h"
+
 #include <mysql.h>
 #include <sstream>
 
@@ -170,7 +171,7 @@ bool DBComm::GetLeaveMessage(const int64 platform_id,const int64 uid,const int64
 			msg->oppid = rows[3];
 			msg->message = rows[4];
 			msg->lasttime = rows[5];
-			list.push_back(msg);
+			list.push_front(msg);
 		}
 		return true;
 	}

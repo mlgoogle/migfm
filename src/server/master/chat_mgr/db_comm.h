@@ -2,10 +2,10 @@
 #define _MASTER_PLUGIN_CHAT_MGR_DB_COMM__H__
 #include "thread_handler.h"
 #include "thread_lock.h"
+#include "logic_comm.h"
 #include "storage/storage.h"
 #include "basic/basictypes.h"
 #include "basic/basic_info.h"
-#include "logic_comm.h"
 #include <list>
 namespace chat_storage{
 
@@ -39,7 +39,10 @@ class AutoDBCommEngine{
 public:
 	AutoDBCommEngine();
 	virtual ~AutoDBCommEngine();
-	base_storage::DBStorageEngine*  GetDBEngine(){return engine_;}
+	base_storage::DBStorageEngine*  GetDBEngine(){
+		if(engine_){engine_->Release();}
+		return engine_;
+	}
 private:
 	base_storage::DBStorageEngine*  engine_;
 };
