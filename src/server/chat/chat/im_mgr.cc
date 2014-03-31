@@ -34,6 +34,7 @@ bool IMSMgr::OnConfirmMessage(struct server *srv,int socket,struct PacketHead *p
 		return false;
 	struct PacketConfirm confirm;
 	MAKE_HEAD(confirm, PACKET_CONFIRM,CHAT_TYPE,0,recv_user_info.session());
+	confirm.msg_id = vPacketConfirm->private_msg_id;
 	confirm.platform_id = vPacketConfirm->platform_id;
 	confirm.recv_user_id = vPacketConfirm->recv_user_id;
 	confirm.send_user_id = vPacketConfirm->send_user_id;
@@ -56,13 +57,13 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
 
-	pc->GetUserInfos(private_send->platform_id,private_send->send_user_id,userinfo);
+	r = pc->GetUserInfos(private_send->platform_id,private_send->send_user_id,userinfo);
 
 	if(!r)
 		return false;
 
 	r = chat_logic::LogicUnit::CheckChatToken(userinfo,private_send->token);
-
+	r = true;
 	if (!r){//password error
 		//senderror(socket,USER_LOGIN_FAILED,0,vUserQuit->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
 		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,private_send->reserverd,MIG_CHAT_USER_PASSWORD_ERROR,__FILE__,__LINE__);

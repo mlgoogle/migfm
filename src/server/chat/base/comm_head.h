@@ -16,8 +16,8 @@ enum errorcode{
 
 enum operatorcode
 {
-	PACKET_CONFIRM = 100,
-	HEART_PACKET = 200,
+	HEART_PACKET = 100,
+	PACKET_CONFIRM = 200,
 	CHAT_ERROR = 300,
 	USER_LOGIN = 1000,
 	USER_LOGIN_SUCESS = 1001,
@@ -49,12 +49,13 @@ struct PacketHead{
 }; //31
 #define PACKET_HEAD_LENGTH (sizeof(int32) * 5 + sizeof(int16) + sizeof(int8) + sizeof(int64))
 
-//PACKET_CONFIRM = 100
-#define PACKET_CONFIRM_SIZE (sizeof(int64) * 4 + TOKEN_LEN)
+//PACKET_CONFIRM = 200
+#define PACKET_CONFIRM_SIZE (sizeof(int64) * 5 + TOKEN_LEN)
 struct PacketConfirm:public PacketHead{
 	int64 platform_id;
 	int64 send_user_id;
 	int64 recv_user_id;
+	int64 private_msg_id;
 	int64 session_id;
 	char token[TOKEN_LEN];
 };

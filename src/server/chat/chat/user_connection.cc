@@ -30,7 +30,7 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
 										usr_login->user_id,
 										usr_login->token);
 
-	//r = true;
+	r = true;
 
 	if (!r){//password error
 		senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
@@ -96,6 +96,7 @@ bool UserConnectionMgr::OnGetOppInfos(struct server *srv, int socket, struct Pac
 	}
 
 	r = chat_logic::LogicUnit::CheckChatToken(user_info,vReqOppstionInfo->token);
+	r = true;
 	if (!r){//password error
 		senderror(socket,USER_LOGIN_FAILED,0,vReqOppstionInfo->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
 		return false;

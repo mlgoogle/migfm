@@ -23,7 +23,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			return false;
 	}
 
-	//ÊÇ·ñÑ¹Ëõ
+	//ï¿½Ç·ï¿½Ñ¹ï¿½ï¿½
 	if (is_zip)
 		data = (char*)packet_stream + PACKET_HEAD_LENGTH;
 	else
@@ -165,7 +165,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				memcpy(vTextChatPrivateSend->token,in.ReadData(TOKEN_LEN,temp),
 					TOKEN_LEN);
 				vTextChatPrivateSend->token[TOKEN_LEN - 1] = '\0';
-				int len = vTextChatPrivateSend->data_length - sizeof(int64) * 3 - TOKEN_LEN;
+				int len = vTextChatPrivateSend->data_length - sizeof(int64) * 4 - TOKEN_LEN;
 				char* str = new char[len];
 				memcpy(str,in.ReadData(len,temp),len);
 				vTextChatPrivateSend->content.assign(str,len);
@@ -187,6 +187,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				vPacketConfirm->send_user_id = in.Read64();
 				vPacketConfirm->recv_user_id = in.Read64();
 				vPacketConfirm->session_id = in.Read64();
+				vPacketConfirm->private_msg_id = in.Read64();
 				int temp = 0;
 				memcpy(vPacketConfirm->token,
 					in.ReadData(TOKEN_LEN,temp),TOKEN_LEN);
@@ -374,6 +375,7 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 				out.Write64(vPacketConfirm->send_user_id);
 				out.Write64(vPacketConfirm->recv_user_id);
 				out.Write64(vPacketConfirm->session_id);
+				out.Write64(vPacketConfirm->private_msg_id);
 				out.WriteData(vPacketConfirm->token,TOKEN_LEN);
 				packet = (char*)out.GetData();
 			}
@@ -620,6 +622,7 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				PRINT_INT64(vPacketConfirm->send_user_id);
 				PRINT_INT64(vPacketConfirm->recv_user_id);
 				PRINT_INT64(vPacketConfirm->session_id);
+				PRINT_INT64(vPacketConfirm->private_msg_id);
 				PRINT_STRING(vPacketConfirm->token);
 				PRINT_END("struct PacketConfirm End");
 			}

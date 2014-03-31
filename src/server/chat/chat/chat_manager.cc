@@ -27,7 +27,7 @@ ChatManager::~ChatManager(){
 
 
 bool ChatManager::InitDefaultPlatformInfo(){
-	int64 platform_id = 1000;
+	int64 platform_id = 10000;
 	std::string platform_name = "miu";
 	chat_base::PlatformInfo platforminfo(platform_id,platform_name);
 	CacheManagerOp::GetPlatformChatMgrCache()->SetPlatformInfo(platform_id,platforminfo);
@@ -122,6 +122,11 @@ bool ChatManager::OnChatManagerMessage(struct server *srv,
 		case TEXT_CHAT_PRIVATE_SEND:
 			{
 				ims_mgr_.get()->OnMessage(srv,socket,packet);
+			}
+			break;
+		case PACKET_CONFIRM:
+			{
+				ims_mgr_.get()->OnConfirmMessage(srv,socket,packet);
 			}
 			break;
 		default:

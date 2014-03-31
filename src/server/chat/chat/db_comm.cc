@@ -65,15 +65,15 @@ bool DBComm::RecordMessage(const int64 platform_id,const int64 fid,const int64 t
 		LOG_ERROR("GetConnection Error");
 		return false;
 	}
-	char* temp_message = new char[message.length()];
+	/*char* temp_message = new char[message.length()];
 	memset(temp_message,'\0',message.length());
 	sprintf(temp_message,"%s",message.c_str());
-
+    */
 	LOG_DEBUG2("current_time = %s msg_id = %lld send_id = %lld recv_id = %lld content = %s",
 			current_time.c_str(),msg_id,fid,tid,message.c_str());
 	//call migfm.proc_ChatRecordMessage(10001,12321323,10013,10014,'o','2014-03-10')
 	os<<"call proc_ChatRecordMessage("<<platform_id<<","<<msg_id<<","
-			<<fid<<","<<tid<<",'"<<current_time<<"','"<<temp_message<<"');";
+			<<fid<<","<<tid<<",'"<<current_time<<"','"<<message<<"');";
 	sql = os. str();
 	LOG_DEBUG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
@@ -82,10 +82,10 @@ bool DBComm::RecordMessage(const int64 platform_id,const int64 fid,const int64 t
 		LOG_ERROR("exec sql error");
 		return false;
 	}
-	if(temp_message){
+	/*if(temp_message){
 		delete [] temp_message;
 		temp_message = NULL;
-	}
+	}*/
 	return r;
 
 }
