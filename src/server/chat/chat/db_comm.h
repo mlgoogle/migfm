@@ -14,7 +14,7 @@ public:
 	virtual ~DBComm(){};
 	static base_storage::DBStorageEngine *GetConnection();
 public:
-	static void Init(std::list<base::ConnAddr>& addrlist);
+	static void Init(std::list<base::ConnAddr>& addrlist/*,const int32 db_conn_num = 10*/);
 
 	static void Dest();
 
@@ -24,9 +24,29 @@ public:
 	static bool RecordMessage(const int64 platform_id,const int64 fid,const int64 tid,const int64 msg_id,
 							  const std::string& message,const std::string& current_time);
 
+public:
+#if defined (_DB_POOL_)
+	static base_storage::DBStorageEngine* DBConnectionPop(void);
+	static void DBConnectionPush(base_storage::DBStorageEngine* engine);
+#endif
 private:
 	static std::list<base::ConnAddr>  addrlist_;
+#if defined (_DB_POOL_)
+	static std::list<base_storage::DBStorageEngine*>  db_conn_pool_;
+	static threadrw_t*                                db_pool_lock_;
+#endif
 };
 
+class AutoDBCommEngine{
+public:
+	AutoDBCommEngine();
+	virtual ~AutoDBCommEngine();
+	base_storage::DBStorageEngine*  GetDBEngine(){
+		if(engine_){engine_->Release();}
+		return engine_;
+	}
+private:
+	base_storage::DBStorageEngine*  engine_;
+};
 }
 #endif

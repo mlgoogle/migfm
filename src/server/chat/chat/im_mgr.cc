@@ -50,7 +50,7 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	chat_base::UserInfo send_user_info;
 	chat_base::UserInfo recv_user_info;
 	chat_base::UserInfo userinfo;
-	int64 msg_id = private_send->msg_id;
+	int64 msg_id;
 	bool is_push = false;
 	time_t current_time;
 	bool r = false;
@@ -92,7 +92,8 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	}
 
 	if(is_push){
-		msg_id = base::SysRadom::GetInstance()->GetRandomID();
+		//msg_id = base::SysRadom::GetInstance()->GetRandomID();
+		chat_storage::RedisComm::GenaratePushMsgID(msg_id);
 		current_time = time(NULL);
 		PushMessage(private_send->platform_id,send_user_info,recv_user_info,private_send->content);
 	}else {
@@ -102,7 +103,8 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 		private_recv.send_user_id = private_send->send_user_id;
 		private_recv.recv_user_id = private_send->recv_user_id;
 		private_recv.content = private_send->content;
-		msg_id = private_recv.msg_id;
+		chat_storage::RedisComm::GenaratePushMsgID(msg_id);
+		private_recv.msg_id = msg_id;
 		current_time = private_recv.current_time;
 		//sendmessage(recv_user_info.socket(),&private_recv);
 		logic::SomeUtils::SendMessage(recv_user_info.socket(),&private_recv,__FILE__,__LINE__);

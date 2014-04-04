@@ -35,6 +35,8 @@ public:
 
 	static bool GetUserPushConfig(int64 uid, std::string &device_token,
 			bool &is_receive, unsigned &begin_time, unsigned &end_time);
+
+	static bool GenaratePushMsgID(int64& msg_id);
 private:
 	static std::list<base::ConnAddr>   addrlist_;
 };

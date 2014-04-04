@@ -9,6 +9,8 @@ static const char *HKEY_PUSH_CFG_IS_RECV = "soc:push.cfg:is.recv";
 static const char *HKEY_PUSH_CFG_BTIME = "soc:push.cfg:btime";
 static const char *HKEY_PUSH_CFG_ETIME = "soc:push.cfg:etime";
 
+static const char *KEY_MSG_ID_GEN = "chat:msg.id:next";
+
 base_storage::DictionaryStorageEngine* MemComm::engine_ = NULL;
 std::list<base::ConnAddr>  RedisComm::addrlist_;
 
@@ -201,6 +203,17 @@ bool RedisComm::GetUserPushConfig(int64 uid, std::string& device_token,
 	}
 
 	return true;
+}
+
+
+bool RedisComm::GenaratePushMsgID(int64& msg_id) {
+	base_storage::DictionaryStorageEngine *redis = GetConnection();
+	if (NULL == redis)
+		return false;
+
+	//char key[256] = {0};
+	//snprintf(key, KEY_MSG_ID_GEN, uid);
+	return redis->IncDecValue(KEY_MSG_ID_GEN, strlen(KEY_MSG_ID_GEN), 1, msg_id);
 }
 
 
