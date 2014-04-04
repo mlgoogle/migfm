@@ -23,6 +23,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      std::string str_oppid;
      std::string str_from;
      std::string str_count;
+     std::string str_msg_id;
      std::string token;
      std::string reponse;
      std::string utf8_reponse;
@@ -31,6 +32,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      int64 oppid = 0;
      int32 from = 0;
      int32 count = 0;
+     int64 msg_id = 0;
      int32 utf8_flag = 1;
      Json::Value result;
      Json::FastWriter wr;
@@ -64,6 +66,15 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      }
      oppid = atoll(str_oppid.c_str());
 
+     r = pack.GetAttrib("msgid",str_msg_id);
+     if((!r)||(atoll(str_msg_id.c_str())<=0)){
+    	 result["status"] = "1";
+    	 result["msg"] = "消息id不存在";
+    	 content = "";
+    	 goto ret;
+     }
+     msg_id = atoll(str_msg_id.c_str());
+
      r = pack.GetAttrib("fromid",str_from);
      if((!r)||(atoll(str_from.c_str())<=0)){
     	 from = 0;
@@ -80,6 +91,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      }
 
 
+
      //token
      r = pack.GetAttrib("token",token);
      r = true;
@@ -90,7 +102,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
     	 goto ret;
      }
 
-     r = chat_storage::DBComm::GetLeaveMessage(platform_id,uid,oppid,from,count,list);
+     r = chat_storage::DBComm::GetLeaveMessage(platform_id,uid,oppid,from,count,msg_id,list);
      if(!r){
     	 result["status"] = "0";
     	 result["msg"] = "";

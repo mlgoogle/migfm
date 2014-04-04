@@ -133,7 +133,7 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 }
 
 bool DBComm::GetLeaveMessage(const int64 platform_id,const int64 uid,const int64 oppid,
-							 const int32 from,const int32 count,
+							 const int32 from,const int32 count,const int64 msgid,
                              std::list<struct GetLeaveMessage*>& list){
 	bool r = false;
 #if defined (_DB_POOL_)
@@ -150,7 +150,7 @@ bool DBComm::GetLeaveMessage(const int64 platform_id,const int64 uid,const int64
 
     //call migfm.proc_GetChatMessage(1000,10149,10108,10,0);
 	os<<"call proc_GetChatMessage(\'"<<platform_id<<"\',\'"<<uid<<"\',\'"
-			<<oppid<<"\',\'"<<count<<"\',\'"<<from<<"\');";
+			<<oppid<<"\',\'"<<count<<"\',\'"<<from<<"\',\'"<<msgid<<"\');";
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());

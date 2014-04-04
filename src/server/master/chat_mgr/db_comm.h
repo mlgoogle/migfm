@@ -21,7 +21,7 @@ public:
 
 public:
 	static bool GetLeaveMessage(const int64 platform_id,const int64 uid,const int64 oppid,
-			 const int32 from,const int32 count,std::list<struct GetLeaveMessage*>& list);
+			 const int32 from,const int32 count,const int64 msgid,std::list<struct GetLeaveMessage*>& list);
 public:
 #if defined (_DB_POOL_)
 	static base_storage::DBStorageEngine* DBConnectionPop(void);
