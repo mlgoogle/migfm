@@ -17,7 +17,6 @@ MysqlStorageEngineImpl::~MysqlStorageEngineImpl(){
 bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
     connected_ = false;
     base::ConnAddr addr;
-    //MYSQL* mysql = (MYSQL*)conn_.get()->proc;
     MYSQL* mysql = NULL;
     mysql = mysql_init((MYSQL*)0);
     mysql_options(mysql,MYSQL_SET_CHARSET_NAME,"utf8");
@@ -55,25 +54,20 @@ bool MysqlStorageEngineImpl::Release(){
 bool MysqlStorageEngineImpl::FreeRes(){
     MYSQL_RES * result = (MYSQL_RES *)result_.get()->proc;
     MYSQL* mysql = (MYSQL*)conn_.get()->proc;
-    /*if(result){
-        mysql_free_result(result);
-        result_.get()->proc = NULL;
-    }
-*/
 	do{
-		/*/if(!(result=mysql_store_result(mysql))){
-			continue;
-		}*/
 		result = mysql_store_result(mysql);
 		mysql_free_result(result);
+		result_.get()->proc = NULL;
 	}while(!mysql_next_result(mysql));
     return true;
 }
 
 bool MysqlStorageEngineImpl::SQLExec(const char* sql){
 	bool r = CheckConnect();
-	if(!r)
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"lost connection");
 		return false;
+	}
     FreeRes();
     MYSQL* mysql = (MYSQL*)conn_.get()->proc;
     mysql_query(mysql,sql);

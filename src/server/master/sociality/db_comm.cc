@@ -1,5 +1,4 @@
 #include "db_comm.h"
-#include "logic_comm.h"
 #include "thread_handler.h"
 #include "basic/basic_info.h"
 #include "basic/base64.h"
