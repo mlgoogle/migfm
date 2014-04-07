@@ -1,5 +1,4 @@
 #include "db_comm.h"
-#include "logic_comm.h"
 #include "thread_handler.h"
 #include "basic/basic_util.h"
 #include <mysql.h>

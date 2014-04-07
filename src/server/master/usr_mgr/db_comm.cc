@@ -1,5 +1,4 @@
 #include "db_comm.h"
-#include "logic_comm.h"
 #include <mysql.h>
 #include <sstream>
 
