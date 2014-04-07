@@ -460,8 +460,8 @@ bool DBComm::GetChannelInfo(std::vector<base::ChannelInfo>& channel,int& num){
 			std::string channel_name = rows[2];
 			std::string channel_pic = rows[3];
 			std::string channel_dec = rows[4];
-			MIG_INFO(USER_LEVEL,"id[%s] channel[%s] channel_name[%s]",
-				id.c_str(),channel_id.c_str(),channel_name.c_str());
+			//MIG_INFO(USER_LEVEL,"id[%s] channel[%s] channel_name[%s]",
+				//id.c_str(),channel_id.c_str(),channel_name.c_str());
 			base::ChannelInfo ci(id,channel_id,channel_name,channel_pic);
 			channel.push_back(ci);
 		}

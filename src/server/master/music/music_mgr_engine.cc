@@ -2114,7 +2114,7 @@ bool MusicMgrEngine::CreateTypeRamdon(std::string& type,
 		if (list_size<=0)
 			continue;
 		//���������
-		LOG_DEBUG2("name[%s] list_size[%d]",os.str().c_str(),list_size);
+	//	LOG_DEBUG2("name[%s] list_size[%d]",os.str().c_str(),list_size);
 
 		base::MigRadomInV2* radomV2 = new base::MigRadomInV2((list_size));
 		if (type=="chl")

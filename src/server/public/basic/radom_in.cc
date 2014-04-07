@@ -153,7 +153,7 @@ void MigRadomInV2::Reset(){
 
 		}
 		rate_table_[liIndex] = refcount_;
-		MIG_DEBUG(USER_LEVEL,"liIndex [%d],refconut_[%d]",liIndex,refcount_);
+		//MIG_DEBUG(USER_LEVEL,"liIndex [%d],refconut_[%d]",liIndex,refcount_);
 	}
 
 }
