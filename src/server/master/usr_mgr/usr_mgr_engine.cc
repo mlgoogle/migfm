@@ -215,6 +215,7 @@ bool UsrMgrEngine::UpdateUserinfoBrief(const int socket,const packet::HttpPacket
 
 	r = storage::DBComm::UpdateUserInfos(atoll(uid.c_str()),nickname,gender,
 		                                 birthday);
+	storage::MemComm::DelUserinfo(uid);
 ret:
 	if (!r){ //vailed.
 		status = "0";

@@ -152,4 +152,15 @@ bool MemComm::GetString(const char* key,const size_t key_len,
      return engine_->GetValue(key,key_len,data,len);
 }
 
+bool MemComm::DelUserinfo(const std::string& uid){
+	//key uidinfo 10000info
+	std::string key;
+	bool r = false;
+	char* mem_value = NULL;
+	size_t mem_value_length = 0;
+	key.append(uid);
+	key.append("info");
+	return engine_->DelValue(key.c_str(),key.length());
+}
+
 }

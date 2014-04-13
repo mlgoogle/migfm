@@ -55,6 +55,8 @@ public:
 	static bool GetString(const char* key,const size_t key_len,
 		char** data,size_t* len);
 
+	static bool DelUserinfo(const std::string& uid);
+
 private:
 	static base_storage::DictionaryStorageEngine* engine_;
 };
