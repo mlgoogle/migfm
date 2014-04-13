@@ -28,7 +28,13 @@ public:
 private:
 	bool LeaveMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,
 			const chat_base::UserInfo& send_userinfo,
-			const chat_base::UserInfo& recv_userinfo,const std::string& message);
+			const chat_base::UserInfo& recv_userinfo,
+			const std::string& message);
+
+	bool OffLineMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,
+			const chat_base::UserInfo& send_userinfo,
+			const chat_base::UserInfo& recv_userinfo,
+			const std::string& message);
 
 	bool PushMessage(const int64 platform_id,const chat_base::UserInfo& send_userinfo,
 			const chat_base::UserInfo& recv_userinfo,const std::string& message);

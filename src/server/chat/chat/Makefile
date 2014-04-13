@@ -9,9 +9,9 @@ COMPILERC = gcc
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
 ## for release
-## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
+## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
 
 ## 链接选项
 ## for debug
@@ -42,7 +42,7 @@ output:	chat_basic_infos.o chat_cache_manager.o chat_manager.o db_comm.o\
 		dic_comm.o http_response.o im_mgr.o logic_unit.o user_connection.o error_code.o logic_comm.o\
 		protocol.o protocol.o thread_handler.o thread_lock.o chat_init.o basictypes.o basic_util.o\
 		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
-		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o
+		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o
 	$(LINK)
 
 clean:
@@ -107,6 +107,9 @@ basic_util.o:
 
 radom_in.o:
 	$(COMPILE) $(THIRD_PATH)/basic/radom_in.cc
+
+md5sum.o:
+	$(COMPILE) $(THIRD_PATH)/basic/md5sum.cc
 
 data_packet.o:
 	$(COMPILE) $(THIRD_PATH)/protocol/data_packet.cc

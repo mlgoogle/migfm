@@ -53,6 +53,46 @@ bool LogicUnit::CheckChatToken(const chat_base::UserInfo& userinfo,
     return false;
 }
 
+
+bool LogicUnit::MakeLeaveContent(const std::string& send_uid,const std::string& to_uid,
+		int64 msg_id,const std::string& msg,std::string& detail,std::string &summary
+		,std::string& current){
+
+	std::stringstream ss;
+	char tmp[256] = {0};
+	Json::FastWriter wr;
+	Json::Value value;
+	value["action"] = "leavemsg";
+	snprintf(tmp, arraysize(tmp), "%lld", msg_id);
+	value["msgid"] = tmp;
+	Json::Value &content = value["content"];
+	content["send_uid"] = send_uid.c_str();
+	content["to_uid"] = to_uid.c_str();
+	content["msg"] = msg;
+	content["time"] = current;
+	detail = wr.write(value);
+	return true;
+}
+
+void LogicUnit::GetCurrentTimeFormat(const time_t current,std::string& current_time)
+{
+	struct tm* local = localtime(&current);
+	std::stringstream os;
+	os<<(1900+local->tm_year)<<"-"
+	  <<(1+local->tm_mon)<<"-"
+	  <<local->tm_mday<<" "
+	  <<local->tm_hour<<":"
+	  <<local->tm_min<<":"
+	  <<local->tm_sec;
+	current_time = os.str();
+}
+
+void LogicUnit::GetCurrntTimeFormat(std::string& current_time){
+	time_t current = time(NULL);
+	GetCurrentTimeFormat(current,current_time);
+}
+
+
 bool HttpComm::PushMessage(const std::string &device_token,
 		const std::string &msg, int badge/*=1*/, const std::string &sound/*=""*/) {
 
@@ -81,7 +121,7 @@ bool HttpComm::PushMessage(const std::string &device_token,
 		Json::Reader rd;
 		Json::Value value;
 		if (!rd.parse(result, value)) {
-			LOG_DEBUG("Push msg failed: ÍÆËÍÊ§°Ü");
+			LOG_DEBUG("Push msg failed: ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½");
 			return false;
 		}
 

@@ -100,8 +100,8 @@ bool ChatManager::OnChatManagerMessage(struct server *srv,
 	assert (packet);
 	LOG_DEBUG2("packet->packet_length[%d],packet->packet_operate[%d],packet->data_length[%d]",
 			packet->packet_length,packet->operate_code,packet->data_length);
-	ProtocolPack::HexEncode(msg,len);
-	ProtocolPack::DumpPacket(packet);
+	//ProtocolPack::HexEncode(msg,len);
+	//ProtocolPack::DumpPacket(packet);
     
 	switch(packet->operate_code){
 		case USER_LOGIN:

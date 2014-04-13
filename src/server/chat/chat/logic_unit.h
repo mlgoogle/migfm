@@ -45,6 +45,14 @@ public:
 
 	static bool CheckChatToken(const chat_base::UserInfo& userinfo,const char* token);
 
+	static void GetCurrntTimeFormat(std::string& current_time);
+
+	static void GetCurrentTimeFormat(const time_t current,std::string& current_time);
+
+	static bool MakeLeaveContent(const std::string& send_uid,const std::string& to_uid,
+			int64 msg_id,const std::string& msg,std::string& detail,std::string &summary,
+			std::string& current);
+
 
 };
 

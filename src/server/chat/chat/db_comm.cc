@@ -7,14 +7,92 @@
 
 namespace chat_storage{
 
+#if defined (_DB_POOL_)
+threadrw_t* DBComm::db_pool_lock_;
+std::list<base_storage::DBStorageEngine*>  DBComm::db_conn_pool_;
+#endif
+
 std::list<base::ConnAddr> DBComm::addrlist_;
 
-void DBComm::Init(std::list<base::ConnAddr>& addrlist){
-	addrlist_ = addrlist;
+
+AutoDBCommEngine::AutoDBCommEngine()
+:engine_(NULL){
+#if defined (_DB_POOL_)
+	engine_ = chat_storage::DBComm::DBConnectionPop();
+#endif
 }
 
-void DBComm::Dest(){
+AutoDBCommEngine::~AutoDBCommEngine(){
+#if defined (_DB_POOL_)
+	chat_storage::DBComm::DBConnectionPush(engine_);
+#endif
+}
 
+
+
+void DBComm::Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num/* = 10*/){
+	addrlist_ = addrlist;
+#if defined (_DB_POOL_)
+	bool r =false;
+	InitThreadrw(&db_pool_lock_);
+	for (int i = 0; i<=db_conn_num;i++){
+		base_storage::DBStorageEngine* engine  =
+				base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
+		if (engine==NULL){
+			assert(0);
+			LOG_ERROR("create db conntion error");
+			continue;
+		}
+
+		r = engine->Connections(addrlist_);
+		if (!r){
+			assert(0);
+			LOG_ERROR("db conntion error");
+			continue;
+		}
+
+		db_conn_pool_.push_back(engine);
+
+	}
+
+#endif
+}
+
+
+#if defined (_DB_POOL_)
+
+void DBComm::DBConnectionPush(base_storage::DBStorageEngine* engine){
+	logic::WLockGd lk(db_pool_lock_);
+	db_conn_pool_.push_back(engine);
+}
+
+base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
+	if(db_conn_pool_.size()<=0)
+		return NULL;
+	logic::WLockGd lk(db_pool_lock_);
+    base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+    db_conn_pool_.pop_front();
+    return engine;
+}
+
+#endif
+
+
+void DBComm::Dest(){
+#if defined (_DB_POOL_)
+	logic::WLockGd lk(db_pool_lock_);
+	while(db_conn_pool_.size()>0){
+		base_storage::DBStorageEngine* engine = db_conn_pool_.front();
+		db_conn_pool_.pop_front();
+		if(engine){
+			engine->Release();
+			delete engine;
+			engine =NULL;
+		}
+	}
+	DeinitThreadrw(db_pool_lock_);
+
+#endif
 }
 
 base_storage::DBStorageEngine* DBComm::GetConnection(){
@@ -56,7 +134,10 @@ bool DBComm::RecordMessage(const int64 platform_id,const int64 fid,const int64 t
 					const int64 msg_id,const std::string& message,
 					const std::string& current_time){
 
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	std::string sql;
 	bool r = false;
@@ -94,7 +175,10 @@ bool DBComm::GetUserInfo(const int64 platform_id,int64 user_id,
 						 chat_base::UserInfo& userinfo){
     
      // call proc_ChatGetUserInfo(platform_id,user_id)
-	base_storage::DBStorageEngine* engine = GetConnection();
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
 	std::stringstream os;
 	bool r =false;
 	MYSQL_ROW rows;

@@ -186,11 +186,12 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 		session = base::SysRadom::GetInstance()->GetRandomID();
 		pc->AddLeaveInfos(platform_id,session,oppinfo_id,user_id);
 		userinfo.set_session(session);
-	}else{//�Ѿ����� ��session
-		oppinfo_user_info.set_session(session);
+		//LOG_DEBUG2("session %lld usrinfo %lld",session,userinfo.session());
+	}else{//session
+		//oppinfo_user_info.set_session(session);
+		userinfo.set_session(session);
+		//LOG_DEBUG2("session %lld oppinfo_user_info %lld",session,oppinfo_user_info.session());
 	}
-
-
 
 
 	struct OppositionInfo opposition_info;
