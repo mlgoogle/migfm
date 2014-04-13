@@ -41,6 +41,10 @@ public:
 		                        const std::string& location, const std::string& source,
 		                        const std::string& head);
 
+	static bool UpdateUserInfos(const int64 uid,const std::string& nickname,
+			                    const std::string& gender,
+			                    const std::string& birthday);
+
 	static bool GetUserInfos(const std::string& username,std::string& uid,
 		                        std::string& nickname,std::string& gender,
 		                        std::string& type,std::string& birthday,

@@ -93,7 +93,7 @@ bool UsrMgrEngine::OnUsrMgrMessage(struct server *srv, int socket,
 		//RegeditUsr(socket,packet);
 		RegistUser(socket,packet);
 	}else if (type=="update"){
-		UpdateUserinfo(socket,packet);
+		UpdateUserinfoBrief(socket,packet);
 	}else if (type=="get"){
 		GetUserInfo(socket,packet);
 	}else if (type=="guest"){
@@ -169,6 +169,64 @@ bool UsrMgrEngine::GetUserInfo(const int socket,const packet::HttpPacket& packet
 		<<"\"";
 	result = os.str();
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,0);
+	LOG_DEBUG2("[%s]",result_out.c_str());
+	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+}
+
+bool UsrMgrEngine::UpdateUserinfoBrief(const int socket,const packet::HttpPacket& packet){
+    bool r = false;
+	packet::HttpPacket pack = packet;
+	std::string uid;
+	std::string nickname;
+	std::string gender;
+	std::string birthday;
+	std::string result_out;
+	std::string status = "0";
+	std::string msg = "0";
+	std::string result;
+
+	r = pack.GetAttrib(UID,uid);
+	if (!r){
+		LOG_ERROR("get uid error");
+		return false;
+	}
+
+
+	r = pack.GetAttrib(NICKNAME,nickname);
+	if (!r){
+		LOG_ERROR("get nickname error");
+		goto ret;
+		return false;
+	}
+
+	r = pack.GetAttrib(GENDER,gender);
+	if (!r){
+		LOG_ERROR("get gender error");
+		goto ret;
+		return false;
+	}
+
+	r = pack.GetAttrib(BIRTHDAY,birthday);
+	if (!r){
+		LOG_ERROR("get birthday error");
+		goto ret;
+		return false;
+	}
+
+	r = storage::DBComm::UpdateUserInfos(atoll(uid.c_str()),nickname,gender,
+		                                 birthday);
+ret:
+	if (!r){ //vailed.
+		status = "0";
+		msg = "更新失败";
+		//msg = "1";
+		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
+		LOG_DEBUG2("[%s]",result_out.c_str());
+		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+		return false;
+	}
+	status = "1";
+	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
 }

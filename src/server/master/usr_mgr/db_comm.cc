@@ -206,6 +206,31 @@ bool DBComm::GetUserInfos(const std::string& username,std::string& uid,
 
 }
 
+bool DBComm::UpdateUserInfos(const int64 uid,const std::string& nickname,
+                       const std::string& gender,const std::string& birthday){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	 std::stringstream os;
+	 bool r = false;
+	 if (engine==NULL){
+		 LOG_ERROR("GetConnection Error");
+		 return false;
+	 }
+	 os<<"update "<<USERINFOS<<" set sex=\'"
+		 <<gender.c_str()<<"\',birthday=\'"<<birthday.c_str()<<"\',nickname=\'"<<nickname.c_str()
+		 <<"\' where usrid="<<uid<<";";
+	 LOG_DEBUG2("[%s]",os.str().c_str());
+	 r = engine->SQLExec(os.str().c_str());
+
+	 if (!r){
+		 LOG_ERROR2("exec sql error");
+		 return false;
+	 }
+	 return true;
+}
+
 bool DBComm::UpDateUserInfos(const int uid,const std::string& username, 
 							 const std::string& nickname,const std::string& gender, 
 							 const std::string& type,const std::string& birthday, 

@@ -45,6 +45,8 @@ private:
 
 	bool UpdateUserinfo(const int socket,const packet::HttpPacket& packet);
 
+	bool UpdateUserinfoBrief(const int socket,const packet::HttpPacket& packet);
+
 	bool GetUserInfo(const int socket,const packet::HttpPacket& packet);
 
 	bool CreateGuest(const int socket,const packet::HttpPacket& packet);
@@ -58,14 +60,14 @@ private:
 		            const std::string password,const std::string nickname,
 	                const std::string source,const std::string gender = "1",
 	                const std::string type = "1",const std::string birthday = "1986-10-01",
-	                const std::string location = "Õã½­Ê¡º¼ÖÝÊÐ",
+	                const std::string location = "ï¿½ã½­Ê¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 					const std::string head = "http://fm.miglab.com/default.jpg");
 
 	bool CreateGuest(const int socket,const int flag,const std::string username,
 		             const std::string password,const std::string nickname,
 		             const std::string source,const std::string gender = "1",
 		             const std::string type = "1",const std::string birthday = "1986-10-01",
-		             const std::string location = "Õã½­Ê¡º¼ÖÝÊÐ",
+		             const std::string location = "ï¿½ã½­Ê¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 		             const std::string head = "http://fm.miglab.com/default.jpg");
 };
 
