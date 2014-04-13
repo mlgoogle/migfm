@@ -435,7 +435,9 @@ bool RedisComm::GetStagedPushMsg(int64 uid, int page_index, int page_size, std::
 
 	char key[256] = {0};
 	snprintf(key, arraysize(key), KEY_PUSH_MSG_STAGE, uid);
-	int from = page_index * page_size;
+	//int from = page_index * page_size;
+	//int to = from + page_size;
+	int from = page_index;
 	int to = from + page_size;
 	return redis->GetListRange(key, strlen(key), from, to, msgs,0);
 }
