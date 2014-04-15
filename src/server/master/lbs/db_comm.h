@@ -47,6 +47,7 @@ public:
 							std::string& head,std::string& birthday,double& latitude,
 							double& longitude);
 
+	static bool RecordUserLbs(const int64 uid,const double latitude,const double longitude);
 
 
 public:

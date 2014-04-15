@@ -251,13 +251,19 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 
 	double latitude = 0;
 	double longitude = 0;
-	r = storage::DBComm::GetUserLbsPos(atol(uid_str.c_str()),latitude,longitude);
+	/*r = storage::DBComm::GetUserLbsPos(atol(uid_str.c_str()),latitude,longitude);
 	if (!r||((latitude==0)&&(longitude==0))){
-		result["result"] = "";
-		msg = "周围没有用户";
-		status = 0;
-		return true;
-	}
+		//result["result"] = "";
+		//msg = "周围没有用户";
+		//status = 0;
+		//return true;
+		latitude = current_latitude;
+		longitude = current_longitude;
+	}*/
+
+	latitude = current_latitude;
+	longitude = current_longitude;
+	storage::DBComm::RecordUserLbs(uid,latitude,longitude);
 
 	uint32 radius = atoi(radius_str.c_str());
 	int page_index = atoi(page_index_str.c_str());
@@ -296,7 +302,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		if (items.empty()){
 			result["result"] = "";
 			msg = "周围没有用户";
-			status = 0;
+			status = 1;
 			return true;
 		}
 

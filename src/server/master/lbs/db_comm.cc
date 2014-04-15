@@ -345,6 +345,48 @@ bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double la
 	return false;
 }
 
+
+bool DBComm::RecordUserLbs(const int64 uid,const double latitude,const double longitude){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
+
+		std::stringstream os;
+		bool r = false;
+		MYSQL_ROW rows;
+		if (engine == NULL) {
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+		char s_latitude[256];
+		char s_longitude[256];
+		snprintf(s_latitude, arraysize(s_latitude),
+			"%lf", latitude);
+		snprintf(s_longitude, arraysize(s_longitude),
+			"%lf", longitude);
+
+		LOG_DEBUG2("latitude %s longitude %s",s_latitude,s_longitude);
+		os<<"call proc_RecordUserLbsPos("
+			<<uid
+			<<","<<s_latitude
+			<<","<<s_longitude
+			<<"); ";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		r = engine->SQLExec(sql.c_str());
+		os.str("");
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+		return true;
+}
+
 bool DBComm::UpDateUserLbsPos(Json::Value& users,const int64 src_uid){
 
 #if defined (_DB_POOL_)
