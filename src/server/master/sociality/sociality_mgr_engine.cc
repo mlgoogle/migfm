@@ -330,6 +330,7 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 
 	if (msg_list.empty()) {
 		err_code = MIG_FM_MSG_LIST_EMPTY;
+		status = 1; //为空特殊处理
 		return false;
 	}
 
@@ -622,8 +623,7 @@ bool SocialityMgrEngine::OnMsgGetMusicFriend(packet::HttpPacket& packet,
 	//鑾峰彇姝屽弸淇℃伅
 	DBComm::GetMusicUser(uid_str,fromid_str,count_str,vec_users,user_list);
 	if (user_list.size()<=0){
-		//fix me
-		err_code = MIG_FM_HTTP_COMMENT_INVALID;
+		status = 1; //没有用户特殊处理
 		return false;
 	}
 
