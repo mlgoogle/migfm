@@ -33,7 +33,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      int32 from = 0;
      int32 count = 0;
      int64 msg_id = 0;
-     int32 utf8_flag = 1;
+     int32 utf8_flag = 0;
      Json::Value result;
      Json::FastWriter wr;
      Json::Value& content =  result["result"]["chat"];
@@ -67,7 +67,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      oppid = atoll(str_oppid.c_str());
 
      r = pack.GetAttrib("msgid",str_msg_id);
-     if((!r)||(atoll(str_msg_id.c_str())<=0)){
+     if((!r)||(atoll(str_msg_id.c_str())<0)){
     	 result["status"] = "1";
     	 result["msg"] = "消息id不存在";
     	 content = "";

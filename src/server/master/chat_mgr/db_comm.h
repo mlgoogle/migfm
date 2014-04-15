@@ -29,7 +29,6 @@ public:
 #endif
 public:
 	static std::list<base::ConnAddr>  addrlist_;
-private:
 #if defined (_DB_POOL_)
 	static std::list<base_storage::DBStorageEngine*>  db_conn_pool_;
 	static threadrw_t*                                db_pool_lock_;
