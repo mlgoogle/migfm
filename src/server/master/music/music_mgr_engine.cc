@@ -1020,6 +1020,21 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	//storage::RedisComm::GetCollectSongs(uid,song_map);
 	storage::RedisComm::GetCltAndHateSong(uid,clt_song_map,hate_song_map);
 
+	if (channel_flag){
+		mode = "chl";
+		//r = GetMoodScensChannelSongsV2(uid,mode,channelci.info_num(),
+		//	 channelci.info_id(),song_map,os1);//Ƶ��
+
+		r = GetMoodScensChannelSongsV3(uid,mode,channelci.info_num(),
+			channelci.info_id(),clt_song_map,hate_song_map,
+			os1);
+
+		if (r){
+				if (scens_flag!=0||mood_flag!=0)
+					os1<<",";
+			}
+	}
+
 	if (mood_flag){
 		mode = "mm";
 		//r = GetMoodScensChannelSongsV2(uid,mode,moodci.info_num(),
@@ -1037,18 +1052,19 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	if (scens_flag){
 		mode = "ms";
 		//r = GetMoodScensChannelSongsV2(uid,mode,scensci.info_num(),
-		//	scensci.info_id(),song_map,os1);//����
+		//	scensci.info_id(),song_map,os1);//
 		r = GetMoodScensChannelSongsV3(uid,mode,scensci.info_num(),
 			scensci.info_id(),clt_song_map,hate_song_map,
 			os1);
-		if (r){
+		/*if (r){
 			if (mood_flag!=0||channel_flag!=0)
 				os1<<",";
 		}
 		LOG_DEBUG2("OS1[%s]",os1.str().c_str());
+		*/
 	}
 
-	if (channel_flag){
+	/*if (channel_flag){
 		mode = "chl";
 		//r = GetMoodScensChannelSongsV2(uid,mode,channelci.info_num(),
 		//	 channelci.info_id(),song_map,os1);//Ƶ��
@@ -1056,7 +1072,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 		r = GetMoodScensChannelSongsV3(uid,mode,channelci.info_num(),
 			channelci.info_id(),clt_song_map,hate_song_map,
 			os1);
-	}
+	}*/
 
 	if (!r){
 		result = os1.str().erase(os1.str().length()-1,1);
