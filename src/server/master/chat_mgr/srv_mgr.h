@@ -11,6 +11,7 @@ public:
 	virtual ~ServerMgr();
 public:
 	bool GetBestIdle(const int socket,const packet::HttpPacket& packet);
+	bool GetBestIdleTest(const int socket,const packet::HttpPacket& packet);
 
 };
 }

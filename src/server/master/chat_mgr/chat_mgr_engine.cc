@@ -92,6 +92,8 @@ bool ChatMgrEngine::OnChatMgrMessage(struct server *srv, int socket,
 		srv_mgr_->GetBestIdle(socket,packet);
 	}else if(type=="hischat"){
 		message_mgr_->GetLeaveMessage(socket,packet);
+	}else if(type=="getsc1"){
+		srv_mgr_->GetBestIdleTest(socket,packet);
 	}
     return true;
 }
