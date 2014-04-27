@@ -124,6 +124,16 @@ int LBSLogic::SearchNearby(double longitude, double latitude, uint32 radius,
 	return 0;
 }
 
+
+int LBSLogic::SearchNearbyV2(double longitude, double latitude, uint32 radius,uint32 page_index,
+		uint32 page_size, Json::Value &result,std::string &response, std::string &err_msg){
+
+	return storage::DBComm::GetUserInfosLBS(result,latitude,longitude,
+			radius,page_size);
+
+}
+
+
 bool LBSLogic::Init() {
    return true;
 }
@@ -231,6 +241,8 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	if (!packet.GetAttrib("page_size", page_size_str)) {
 	  page_size_str = "10";
 	}
+	if(atol(page_size_str.c_str())<=0)
+		page_size_str = "10";
 
 	int64 uid = atoll(uid_str.c_str());
 	if (0 == uid) {
@@ -292,9 +304,12 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	r = false;
 	if(!r){ //重新获取距离
 
-
-		if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
+		/*if (0 != SearchNearby(longitude, latitude, radius, "", page_index, page_size,
 				content, response, msg)) {
+			return false;
+		}*/
+		if(!SearchNearbyV2(longitude, latitude, radius, page_index, page_size,
+				content, response, msg)){
 			return false;
 		}
 		int i = content["size"].asInt();
@@ -369,12 +384,12 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  	  temp_id.append(uid_str);
 		  	  }
 		}
-		AddCacheLBSUserInfos(uid,temp_id);
+		//AddCacheLBSUserInfos(uid,temp_id);
 
 	}
 
-	if (temp_users.size()>0)
-		storage::DBComm::UpDateUserLbsPos(temp_users,uid);
+	//if (temp_users.size()>0)
+		//storage::DBComm::UpDateUserLbsPos(temp_users,uid);
 
 	if (vec_users.size()>0)
 		storage::MemComm::GetUserCurrentSong(vec_users, map_songs);
@@ -511,8 +526,8 @@ bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 		return false;
 	}
 
-	double latitude = atof(location_pair[0].c_str());
-	double longitude = atof(location_pair[1].c_str());
+	double latitude = atof(location_pair[1].c_str());
+	double longitude = atof(location_pair[0].c_str());
 
 	std::string response;
 	if (0 != SetPOI(uid, longitude, latitude, "", response, msg)) {
@@ -520,7 +535,8 @@ bool LBSLogic::OnMsgSetPoi(packet::HttpPacket& packet, Json::Value &result,
 	}
 
 	//用于客户端，服务端baidu坐标有差异，所以更新自身坐标
-	UpdateUserInfoPoi(uid,latitude,longitude,msg);
+	//UpdateUserInfoPoi(uid,latitude,longitude,msg);
+	storage::DBComm::RecordUserLbs(uid,latitude,longitude);
 	status = 1;
 	return true;
 }

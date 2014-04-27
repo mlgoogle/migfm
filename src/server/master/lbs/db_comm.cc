@@ -592,4 +592,57 @@ bool DBComm::GetMusicFriendNum(const std::string &uid,
 	return false;
 }
 
+
+bool DBComm::GetUserInfosLBS(Json::Value& users,double latitude,double longitude,
+			int radius,int max_num){
+	std::stringstream os;
+	bool r = false;
+	int num;
+	MYSQL_ROW rows = NULL;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
+	if (engine==NULL){
+		LOG_ERROR("engine error");
+		return true;
+	}
+	//call migfm.proc_GetMusicAboutInfo(325636)
+	os<<"call migfm.proc_GetLbsUserInfos();";
+	int32 ticket = 0;
+	LOG_DEBUG2("%s",os.str().c_str());
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		LOG_ERROR("sqlexec error");
+		return r;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			Json::Value val;
+			Json::Value location;
+			val["usr_id"] = rows[0];
+			location.append(atof(rows[1]));
+			location.append(atof(rows[2]));
+			val["location"] = location;
+			//计算距离
+			//
+			double current_distance = base::BasicUtil::CalcGEODistance(latitude,longitude,
+					  atof(rows[1]),atof(rows[2]));
+			if((radius> current_distance)&(ticket<=max_num)){
+				users["contents"].append(val);
+				ticket++;
+			}
+		}
+		users["size"] = ticket;
+		return true;
+	}
+
+	return true;
+}
+
 }

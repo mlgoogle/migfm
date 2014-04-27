@@ -49,6 +49,9 @@ public:
 
 	static bool RecordUserLbs(const int64 uid,const double latitude,const double longitude);
 
+	static bool GetUserInfosLBS(Json::Value& users,double latitude,double longitude,
+			int radius,int max_num);
+
 
 public:
 #if defined (_DB_POOL_)

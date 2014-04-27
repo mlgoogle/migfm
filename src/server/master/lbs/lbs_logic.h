@@ -82,6 +82,9 @@ public:
 			uint32 page_index, uint32 page_size, Json::Value &result,
 			std::string &response, std::string &err_msg);
 
+	int SearchNearbyV2(double longitude, double latitude, uint32 radius,
+			uint32 page_index, uint32 page_size, Json::Value &result,
+			std::string &response, std::string &err_msg);
 
 	int SearchRegin(double longitude, double latitude,
 			std::string &response, std::string &err_msg);
