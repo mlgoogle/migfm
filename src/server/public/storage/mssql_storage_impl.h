@@ -10,13 +10,14 @@ public:
 	MssqlStorageEngineImpl(void);
 	virtual ~MssqlStorageEngineImpl(void);
 public:
-    bool Connections(std::list<base::ConnAddr>& addrlist);
+	bool Connections(std::list<base::ConnAddr>& addrlist);
 	bool Release ();
-   // bool SQLExec(const char* sql) = 0;
-	//bool Affected(unsigned long& rows) = 0;
-   // bool FreeRes() = 0;
-	//db_row_t* FetchRows(void) = 0;//get Recordset
-	//bool CheckConnect(void) =0;
+	bool SQLExec(const char* sql);
+	bool Affected(unsigned long& rows);
+	bool FreeRes();
+	uint32 RecordCount();
+	db_row_t* FetchRows(void);//get Recoder
+	bool CheckConnect(void);
 private:
 	db_conn_t*    conn_;
 	

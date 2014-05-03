@@ -16,8 +16,11 @@ public:
 
 	static bool GetUserInfo(const std::string& uid,base::UserInfo& usrinfo);
 
+	static bool CheckConnection();
+
 private:
 	static base_storage::DBStorageEngine*     mysql_engine_;
+	static std::list<base::ConnAddr>          addrlist_;
 };
 
 }

@@ -33,6 +33,8 @@ DBStorageEngine* DBStorageEngine::Create(int32 type){
 	    case IMPL_MYSQL:
 	    	engine = new MysqlStorageEngineImpl();
 	    	break;
+	    case IMPL_MSSQL:
+	    	engine = new MssqlStorageEngineImpl();
 	    default:
 	    	break;
 	}

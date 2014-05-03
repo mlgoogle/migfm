@@ -7,6 +7,8 @@
 
 namespace base_storage{
 
+std::list<base::ConnAddr> MYSQLDB::addrlist_;
+
 base_storage::DBStorageEngine*  
 		MYSQLDB::mysql_engine_ = NULL;
 
@@ -14,7 +16,22 @@ base_storage::DBStorageEngine*
 bool MYSQLDB::Init(std::list<base::ConnAddr>& addrlist){
 	mysql_engine_ = DBStorageEngine::Create(IMPL_MYSQL);
 	assert(mysql_engine_);
+	addrlist_ = addrlist;
 	return mysql_engine_->Connections(addrlist);
+}
+
+bool MYSQLDB::CheckConnection(){
+	if(mysql_engine_){
+		mysql_engine_->Release();//释放多余记录集
+		if(!mysql_engine_->CheckConnect()){//失去连接重新连接
+			//重新创建连接
+			MIG_DEBUG(USER_LEVEL,"lost connection");
+			if(!mysql_engine_->Connections(addrlist_))
+				return NULL;
+		}
+		return mysql_engine_;
+	}
+	return mysql_engine_;
 }
 
 bool MYSQLDB::GetUserInfo(const std::string& uid,base::UserInfo& usrinfo){
@@ -28,6 +45,8 @@ bool MYSQLDB::GetUserInfo(const std::string& uid,base::UserInfo& usrinfo){
 	sql<<"select usrid,username,sex,type,ctry,head,birthday,nickname,source "
 		<<"from migfm_user_infos where usrid = '"<<uid.c_str()<<"';";
 
+	//check
+	CheckConnection();
 	MIG_DEBUG(USER_LEVEL,"sql[%s]\n",sql.str().c_str());
 	r = mysql_engine_->SQLExec(sql.str().c_str());
 	if(!r)
