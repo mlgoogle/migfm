@@ -34,7 +34,7 @@ WXInfoEngine::WXInfoEngine()
 
 
 	head = "<stream:stream from=\"gmail.com\" " 
-		"id=\"1F83A90940271513\" "  //Í¨¹ıSSO»ñÈ¡ 
+		"id=\"1F83A90940271513\" "  //Í¨ï¿½ï¿½SSOï¿½ï¿½È¡ 
 		"version=\"1.0\" " 
 		"xmlns:stream=\"http://etherx.jabber.org/streams\" " 
 		"xmlns=\"jabber:client\">";
@@ -109,20 +109,11 @@ bool WXInfoEngine::InitEngine(std::string& path){
 
 bool
 WXInfoEngine::InitChannelAndMode(void){
-	/*channel_.push_back("Ò»ºÅ");
-	channel_.push_back("¶şºÅ");
-	channel_.push_back("ÈıºÅ");
-	channel_.push_back("ËÄºÅ");
-	channel_.push_back("ÎåºÅ");
-	channel_.push_back("ÁùºÅ");
-	channel_.push_back("ÆßºÅ");
-	channel_.push_back("°ËºÅ");
-	channel_.push_back("¾ÅºÅ");
-	channel_.push_back("Ê®ºÅ");*/
 	base_storage::MysqlSerial::GetChannelInfo(channel_mode_,channel_num_);
-	mode_map_["mm"] = "ĞÄÇéÄ£Ê½";
-	mode_map_["ms"] = "Çé¾°Ä£Ê½";
-	mode_map_["mn"] = "ÆÕÍ¨Ä£Ê½"; 
+	mode_map_["mm"] = "ï¿½ï¿½ï¿½ï¿½Ä£Ê½";
+	mode_map_["ms"] = "ï¿½é¾°Ä£Ê½";
+	mode_map_["mn"] = "ï¿½ï¿½Í¨Ä£Ê½"; 
+	return true;
 }
 
 bool 
@@ -169,7 +160,6 @@ WXInfoEngine::ProcessMsg(WXPacket& msg){
  	bool r = msg.GetPacketType(msgtype);
  	if (!r)
  		return;
-	/*MIG_DEBUG(USER_LEVEL,"%s",msgtype.c_str());*/
 	if (msgtype=="text")
 		ProcessMsgText(msg);
 	else if (msgtype=="event")
@@ -222,19 +212,19 @@ WXInfoEngine::ProcessEventText(WXPacket& msg){
 	msg.GetAttrib(Event,str_event);
 	std::string content;
 	if (str_event=="subscribe"){
-		/*content="MIGÒôÀÖÖúÊÖÊÇÒÔÍÆ¼öÎªÖ÷µÄÎ¢ĞÅÓ¦ÓÃ,¶øÇÒÔÚÒÆ¶¯Éè±¸ÉÏ²»ĞèÒª×°ÈÎºÎÒôÀÖapp,"
-		"±ã¿ÉÏëÌıÄãÏëÒªµÄÒôÀÖ:\n"
-		"1,ÓĞ20¸öÒôÀÖÆµµÀ,Ã¿¸öÒôÀÖÆµµÀ½«ÎªÄãÍÆ¼ö²»Í¬·ç¸ñµÄÒôÀÖ.°´·¢ËÍ×Ö·û\"n\"ºó,"
-		"ÏµÍ³»áÍÆ¼öÒ»Ê×ÒôÀÖ,Ìá¹©ÊÔÌı."
-		"Èç¹û¾õµÃ¸ÃÆµµÀ²»¶ÔÎ¶,¿É·¢ËÍ×Ö·û\"cc\",±ã¿ÉÇĞ»»ÒôÀÖÆµµÀ.ÏµÍ³Ä¬ÈÏÎªÆµµÀÒ»\n\n"
-		"2,Ìá¹©¸èÇúÍÆ¼ö,¸èÊÖÍÆ¼ö.¿ÉÊäÈë¸èÇúÃû.Èç:Èç¹ûÃ»ÓĞÄã "
-		"ÏµÍ³±ã»á×Ô¶¯ÍÆ¼öÈÎÒâÒ»¸öÑİÒï¸Ä¸èÇúµÄ¸èÊÖµÄÒôÀÖ."
-		"ÈôÊäÈë¸èÊÖÃû: ÕÅÑ§ÓÑ ÏµÍ³±ã»á×Ô¶¯ÍÆ¼öÒ»Ê×¸Ã¸èÊÖµÄÈÎÒâÒ»Ê×¸èÇú.\n\n"
-		"PS:Èç¹ûÄãÊÇÆ»¹ûÓÃ»§,ÄÇÃ´Ê¹ÓÃ¸ü¼ò±ãµÄ¹¦ÄÜ:Î¢ĞÅµÄÓïÒôÖúÊÖ²å¼ş"
-		"(ÔÚÉèÖÃÖĞ,ÕÒµ½¹¦ÄÜ°´Å¥,µã»÷È¥±ã¿ÉÌí¼Ó)."
-		"Ö»Ğè¶ÔÆäËµ:Íõ·Æ ±ã¿É»ñÈ¡µ½ÏµÍ³ÍÆ¼öµÄÍõ·ÆÒ»Ê×¸è,Ê¡È¥ÁËÊÖ¹¤ÊäÈëÂé·³.\n"
-		"ÈçÓĞÎÊÌâºÍ½¨Òé¿ÉÎ¢ĞÅÖ±½Ó»Ø¸´¸ÃºÅÂë,ÎÒÃÇ¼´¿ÉÂíÉÏÊÕµ½."
-		"¸ĞĞ»´ó¼ÒÄÚ²âµÄÖ§³Ö,ÏÂ¸öÔÂ½«·¢²¼ÕıÊ½°æ,²¢¼ÓÈëĞÄÇéÍÆ¼öºÍ³¡¾°ÍÆ¼ö\n";
+		/*content="MIGï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½Îªï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½Ó¦ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½è±¸ï¿½Ï²ï¿½ï¿½ï¿½Òª×°ï¿½Îºï¿½ï¿½ï¿½ï¿½ï¿½app,"
+		"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:\n"
+		"1,ï¿½ï¿½20ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½,Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½\"n\"ï¿½ï¿½,"
+		"ÏµÍ³ï¿½ï¿½ï¿½Æ¼ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½á¹©ï¿½ï¿½ï¿½ï¿½."
+		"ï¿½ï¿½ï¿½ï¿½ï¿½Ã¸ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¶,ï¿½É·ï¿½ï¿½ï¿½ï¿½Ö·ï¿½\"cc\",ï¿½ï¿½ï¿½ï¿½Ğ»ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½.ÏµÍ³Ä¬ï¿½ï¿½ÎªÆµï¿½ï¿½Ò»\n\n"
+		"2,ï¿½á¹©ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.ï¿½ï¿½:ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ "
+		"ÏµÍ³ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½."
+		"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½Ñ§ï¿½ï¿½ ÏµÍ³ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½Æ¼ï¿½Ò»ï¿½×¸Ã¸ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½×¸ï¿½ï¿½ï¿½.\n\n"
+		"PS:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½Ã»ï¿½,ï¿½ï¿½Ã´Ê¹ï¿½Ã¸ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½:Î¢ï¿½Åµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö²ï¿½ï¿½"
+		"(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Òµï¿½ï¿½ï¿½ï¿½Ü°ï¿½Å¥,ï¿½ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)."
+		"Ö»ï¿½ï¿½ï¿½ï¿½ï¿½Ëµ:ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½É»ï¿½È¡ï¿½ï¿½ÏµÍ³ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½×¸ï¿½,Ê¡È¥ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é·³.\n"
+		"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½Ö±ï¿½Ó»Ø¸ï¿½ï¿½Ãºï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Ç¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õµï¿½."
+		"ï¿½ï¿½Ğ»ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½Ö§ï¿½ï¿½,ï¿½Â¸ï¿½ï¿½Â½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½Í³ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½\n";
 		
 		char* utf_content = NULL;
 		size_t utf_content_size = 0;
@@ -318,31 +308,31 @@ WXInfoEngine::ProcessMsgText(WXPacket& msg){
 		 std::string url;
 		 std::stringstream os;
 		 if (content_s=="lp1"){
-			 title = "²ÁÉí¶ø¹ı";
+			 title = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp1.mp3";
 		 }else if (content_s=="lp2"){
-			 title = "³ö½ç";
+			 title = "ï¿½ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp2.mp3";
 		 }else if (content_s=="lp3"){
-			 title = "µ¹´ø";
+			 title = "ï¿½ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp3.mp3";
 		 }else if (content_s=="lp4"){
-			 title = "½âÍÑ";
+			 title = "ï¿½ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp4.mp3";
 		 }else if (content_s=="lp5"){
-			 title = "ÌìµÆ";
+			 title = "ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp5.mp3";
 		 }else if (content_s=="lp6"){
-			 title = "Óêµû";
+			 title = "ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp6.mp3";
 		 }else if (content_s=="lp7"){
-			 title = "ÈÕ²»Âä";
+			 title = "ï¿½Õ²ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp7.mp3";
 		 }else if (content_s=="lp8"){
-			 title = "Ô­À´ÄãÒ²ÔÚÕâÀï";
+			 title = "Ô­ï¿½ï¿½ï¿½ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
 			 url = "http://42.121.14.108/wx/lp8.mp3";
 		 }
-		 os<<"Ä³Ö»»á³ª¸èµÄÂÜ²·";
+		 os<<"Ä³Ö»ï¿½á³ªï¿½ï¿½ï¿½ï¿½Ü²ï¿½";
 		 char* r_title = NULL;
 		 size_t r_title_size = 0;
 		 char* r_os = NULL;
@@ -362,10 +352,10 @@ WXInfoEngine::ProcessMsgText(WXPacket& msg){
 			 delete[] r_os;
 			 r_os = NULL;
 		 }
-	}else if (content_s=="mm"||content_s=="ms"||content_s=="mn"){//ĞÄÇé
+	}else if (content_s=="mm"||content_s=="ms"||content_s=="mn"){//ï¿½ï¿½ï¿½ï¿½
 		SetUserMode(from_user,to_user,content_s);
 	}else{
-		//»ñÈ¡ÓÃ»§µ±Ç°×´Ì¬ ĞÄÇé,mm ³¡¾°ms ÆÕÍ¨mn
+		//ï¿½ï¿½È¡ï¿½Ã»ï¿½ï¿½ï¿½Ç°×´Ì¬ ï¿½ï¿½ï¿½ï¿½,mm ï¿½ï¿½ï¿½ï¿½ms ï¿½ï¿½Í¨mn
 		std::string mode;
 		r = GetUserMode(from_user,mode);
 		if (r&&(mode=="mm"||mode=="ms")){
@@ -395,7 +385,7 @@ bool WXInfoEngine::SetUserMode(std::string& from_user,std::string to_user,
 	                                         mode.c_str(),mode.length());
 
    std::map<std::string,std::string>::iterator it = mode_map_.find(mode);
-   content<<"ÇĞ»»Ä£Ê½³É¹¦£¬ÄúÒÑ¾­ÇĞ»»µ½"<<it->second.c_str();
+   content<<"ï¿½Ğ»ï¿½Ä£Ê½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½Ğ»ï¿½ï¿½ï¿½"<<it->second.c_str();
    size_t out_len;
    char* out;
    std::string str_out;
@@ -579,8 +569,8 @@ WXInfoEngine::PutDesignationMusicInfo(base::MusicInfo& mi,std::list<std::string>
 	return  r;
 }
 
-//ĞÄÇé´ÊĞÔ£ºmm 
-//³¡¾°´ÊĞÔ: ms
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½mm 
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ms
 
 bool
 WXInfoEngine::GetMoodAndScenesMusicInfos(base::MusicInfo& mi,std::string& content,
@@ -600,17 +590,17 @@ WXInfoEngine::GetMoodAndScenesMusicInfos(base::MusicInfo& mi,std::string& conten
 	if (!r)
 		return false;
 
-	//»ñÈ¡ĞÄÇé,³¡¾°´Ê¶ÔÓÚµÄĞÄÇé£¬³¡¾°ºÅ
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½é£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	r = base_storage::RedisDicSerial::GetMoodAndScensId(ms_word,ms_word_id);
 	if (!r)
 		return false;
-	//»ñÈ¡¸èÊÖ
+	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
 	std::map<std::string,std::list<std::string> >::iterator itr
 		= word_map_.find(word_mi);
 	
-	while (itr!=word_map_.end()){//Ö¸¶¨ÍÆ¼ö
+	while (itr!=word_map_.end()){//Ö¸ï¿½ï¿½ï¿½Æ¼ï¿½
 		//mapname:mmd_1
-		//»ñÈ¡¸Ä¸èÊÖ¸ÃĞÄÇé³¡¾°ÓĞ¶àÉÙ¸è
+		//ï¿½ï¿½È¡ï¿½Ä¸ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½é³¡ï¿½ï¿½ï¿½Ğ¶ï¿½ï¿½Ù¸ï¿½
 		//key:base64(astist)_wordflag
 		std::stringstream os_artist;
 		std::stringstream os_word_mapname;
@@ -707,7 +697,7 @@ WXInfoEngine::GetMusicInfos(base::MusicInfo& mi,std::string& content){
 	
 	std::map<std::string,std::list<std::string> >::iterator itr 
 		= word_map_.find(word_mt);
-	//¸èÊÖ+¸èÇú
+	//ï¿½ï¿½ï¿½ï¿½+ï¿½ï¿½ï¿½ï¿½
 	if (it!=word_map_.end()&&itr!=word_map_.end()){
 		GetMusicWordInfo(it->second,base64_artist);
 		r  = PutDesignationMusicInfo(mi,itr->second,base64_artist,content);
@@ -715,13 +705,13 @@ WXInfoEngine::GetMusicInfos(base::MusicInfo& mi,std::string& content){
 	if (r)
 		return r;
 
-	//¸èÇú
+	//ï¿½ï¿½ï¿½ï¿½
 	if (itr!=word_map_.end())
 		r = PutRadomSong(mi,itr->second,content,word_sr);
 	if (r)
 		return r;
 
-	//¸èÊÖ
+	//ï¿½ï¿½ï¿½ï¿½
 	if (it!=word_map_.end())
 		r = PutRadomSong(mi,it->second,content,word_ar);
 	if (r)
@@ -864,20 +854,20 @@ WXInfoEngine::RecommendationMusic(std::string& to_user,
 	if (content=="r1"){
 		return ;
 	}else if (content=="r2"){
-		title = "¹Â¶ÀµÄÈËÊÇ¿É³ÜµÄ";
-		decs = "ÕÅ³ş 1994 ¹Â¶ÀµÄÈËÊÇ¿É³ÜµÄ";
+		title = "ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¿É³Üµï¿½";
+		decs = "ï¿½Å³ï¿½ 1994 ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¿É³Üµï¿½";
 		url = "http://42.121.14.108/wx/r2.mp3";
 	}else if (content=="r3"){
-		title = "Ò»¿éºì²¼";
-		decs = "´Ş½¡ 1991 ½â¾ö";
+		title = "Ò»ï¿½ï¿½ì²¼";
+		decs = "ï¿½Ş½ï¿½ 1991 ï¿½ï¿½ï¿½";
 		url = "http://42.121.14.108/wx/r3.mp3";
 	}else if (content=="r4"){
-		title = "»¨Ì«Ïã";
-		decs = "ÈÎÏÍÆë 2001 ·ÉÄñ";
+		title = "ï¿½ï¿½Ì«ï¿½ï¿½";
+		decs = "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2001 ï¿½ï¿½ï¿½ï¿½";
 		url = "http://42.121.14.108/wx/r4.mp3";
 	}else if (content=="r5"){
-		title = "Â³±ù»¨";
-		decs = "ÕçÄİ 2003 Â³±ù»¨";
+		title = "Â³ï¿½ï¿½";
+		decs = "ï¿½ï¿½ï¿½ï¿½ 2003 Â³ï¿½ï¿½";
 		url = "http://42.121.14.108/wx/r5.mp3";
 	}
 	base::BasicUtil::GB2312ToUTF8(title.c_str(),title.length(),&str_title,&str_title_size);
@@ -986,7 +976,7 @@ WXInfoEngine::PullAnyMusicMsg(std::string& to_user,std::string& from_user){
 	r = GetMemMusicInfo(from_user,durl,title,decs,json_time,channel);
 
 	ci = channel_mode_[channel];
-	//ÅĞ¶ÏÊÇ·ñ´æÔÚ»òÕßÊÇ·ñ³¬Ê±
+	//ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½Ç·ï¿½Ê±
 	if ((!r)||(json_time<current_time)){
 		r = HttpGetDoubanMusicInfo(content,atol(ci.douban_index().c_str()));
 		if (r){
@@ -1231,7 +1221,7 @@ bool WXInfoEngine::GetMemMusicInfo(std::string& from_user,
 	 MIG_DEBUG(USER_LEVEL,"content %s",content.c_str());
 	 r = ParseJson(num,content,from_user,durl,title,decs);
 
-	 //ÊÇ·ñµ½´ï×îºóÒ»¸ö
+	 //ï¿½Ç·ñµ½´ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
 	 if((num+1)<5)
 		 r = SetMemMusicInfo(from_user,(num+1),atol(channel.c_str()),content,current);
 	 else{
@@ -1334,8 +1324,8 @@ void WXInfoEngine::HttpMigPicText(const std::string& title,
 								  const std::string&url,
 								  std::string& msg,const int flag){
 	std::stringstream os;
-// 	std::string title = "Mig.FM Ìı¶ÔµÄÒôÀÖ Óö¼û¶ÔµÄÈË";
-// 	std::string description = "×î¶®ÄãµÄFM,ÍÆ¼öÍÆ¼ö+ĞÄÇéÍÆ¼ö+ÆµµÀÍÆ¼ö,¶¨¸ñÊôÓÚÄãµÄÒôÀÖÊôĞÔ,·¢ÏÖÊôÓÚÄãµÄÒôÀÖ»ùÒò,µã»÷ÔÄ¶ÁÈ«ÎÄ,¿ªÆôÄãµÄÒôÀÖÖ®ÂÃ";
+// 	std::string title = "Mig.FM ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½";
+// 	std::string description = "ï¿½î¶®ï¿½ï¿½ï¿½FM,ï¿½Æ¼ï¿½ï¿½Æ¼ï¿½+ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½+Æµï¿½ï¿½ï¿½Æ¼ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½Ä¶ï¿½È«ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½";
 // 	std::string pic = "http://42.121.14.108/wx/migfm.jpg";
 // 	std::string url = "121.199.32.88";
 
@@ -1363,11 +1353,11 @@ void WXInfoEngine::HttpMigPicText(const std::string& title,
 void WXInfoEngine::MigFMShow(std::string &msg,const int flag){
  	std::string title;
 	if (flag){
-		title = "Mig.FM Ìı¶ÔµÄÒôÀÖ Óö¼û¶ÔµÄÈË ³¡¾°ÍÆ¼ö+ĞÄÇéÍÆ¼ö+ÆµµÀÍÆ¼ö";
+		title = "Mig.FM ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½+ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½+Æµï¿½ï¿½ï¿½Æ¼ï¿½";
 	}else{
-		title = "Mig.FM Ìı¶ÔµÄÒôÀÖ Óö¼û¶ÔµÄÈË,¶¨¸ñÄãµÄÒôÀÖÊôĞÔ,·¢ÏÖÄãµÄÒôÀÖ»ùÒò ³¡¾°ÍÆ¼ö+ĞÄÇéÍÆ¼ö+ÆµµÀÍÆ¼ö";
+		title = "Mig.FM ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½+ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½+Æµï¿½ï¿½ï¿½Æ¼ï¿½";
 	}
- 	std::string description = "×î¶®ÄãµÄFM,Ìı¶ÔµÄÒôÀÖ Óö¼û¶ÔµÄÈË,¶¨¸ñÊôÓÚÄãµÄÒôÀÖÊôĞÔ,·¢ÏÖÊôÓÚÄãµÄÒôÀÖ»ùÒò,µã»÷ÔÄ¶ÁÈ«ÎÄ,¿ªÆôÄãµÄÒôÀÖÖ®ÂÃ";
+ 	std::string description = "ï¿½î¶®ï¿½ï¿½ï¿½FM,ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½Ä¶ï¿½È«ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½";
  	std::string pic = "http://42.121.14.108/wx/migfm.jpg";
  	std::string url = "121.199.32.88";
 	HttpMigPicText(title,description,pic,url,msg);
