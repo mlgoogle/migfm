@@ -16,7 +16,6 @@
 #include "basic/basic_util.h"
 #include "storage/db_storage.h"
 #include "storage/dic_storage.h"
-#include "logic_comm.h"
 #include "dic_comm.h"
 #include "db_comm.h"
 
@@ -72,11 +71,12 @@ int LBSLogic::SetPOI(int64 user_id, double longitude, double latitude,
 	if (0 == user_id)
 		return -1;
 
+	WLockGd lk(lock_);
 	int64 poi_id = redis_conn_.FindUserPOIID(user_id);
 
 	if (0 == poi_id) {
 		// 不存在POI,创建
-		if (0 != bd_lbs_coon_.CreatePOI(user_id, longitude, latitude, poi_id, response, err_msg)) {
+		if (0 != bd_lbs_coon_.CreatePOI(user_id, latitude,longitude , poi_id, response, err_msg)) {
 			return -1;
 		}
 
@@ -86,7 +86,7 @@ int LBSLogic::SetPOI(int64 user_id, double longitude, double latitude,
 		redis_conn_.BindUserPOI(user_id, poi_id);
 	} else {
 		// 已存在,更新
-		bd_lbs_coon_.UpdatePOI(user_id,poi_id, longitude, latitude, response, err_msg);
+		bd_lbs_coon_.UpdatePOI(user_id,poi_id, latitude, longitude, response, err_msg);
 
 		//bd_lbs_coon_.UpdatePOIEX(poi_id, data, response, err_msg);
 	}
@@ -101,6 +101,7 @@ int LBSLogic::DelPOI(int64 user_id, std::string& response,
 	if (0 == user_id)
 		return -1;
 
+	WLockGd lk(lock_);
 	int64 poi_id = redis_conn_.FindUserPOIID(user_id);
 
 	if (0 != poi_id) {
@@ -719,6 +720,9 @@ LBSLogic::LBSLogic() {
 	storage::RedisComm::Init(config->redis_list_);
 	base_storage::MYSQLDB::Init(config->mysql_db_list_);
 	base_storage::MemDic::Init(config->mem_list_);
+
+	InitThreadrw(&lock_);
+
 }
 
 LBSLogic::~LBSLogic() {
@@ -726,6 +730,7 @@ LBSLogic::~LBSLogic() {
 	storage::MemComm::Dest();
 	storage::RedisComm::Dest();
 
+	DeinitThreadrw(lock_);
 	ThreadKey::DeinitThreadKey ();
 }
 

@@ -13,6 +13,7 @@
 #include "basic/basictypes.h"
 #include "baidu_lbs_connector.h"
 #include "redis_connector.h"
+#include "logic_comm.h"
 #include "plugins.h"
 #include "protocol/http_packet.h"
 
@@ -125,8 +126,9 @@ public:
 	~LBSLogic();
 
 private:
-	RedisConnector		redis_conn_;
-	BaiduLBSConnectorV2	bd_lbs_coon_;
+	RedisConnector		                   redis_conn_;
+	BaiduLBSConnectorV2	                   bd_lbs_coon_;
+	struct threadrw_t*                     lock_;
 
 private:
 	LBSLogic();

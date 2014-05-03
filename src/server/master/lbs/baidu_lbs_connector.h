@@ -27,7 +27,7 @@ public:
 		double latitude, int64& poi_id, std::string &response,
 		std::string &err_msg);
 
-	int UpdatePOI(int64 user_id, int64 poi_id, double longitude, double latitude,
+	int UpdatePOI(int64 user_id, int64 poi_id, double latitude, double longitude,
 		std::string &response, std::string &err_msg);
 
 	int DelPOI(int64 poi_id,std::string &response, std::string &err_msg);

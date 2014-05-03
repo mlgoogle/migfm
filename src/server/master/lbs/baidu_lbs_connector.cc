@@ -153,7 +153,7 @@ int BaiduLBSConnector::CreatePOI(int64 user_id, double longitude,
 	return ERR_SUCCESS;
 }
 
-int BaiduLBSConnector::UpdatePOI(int64 poi_id, double longitude, double latitude,
+int BaiduLBSConnector::UpdatePOI(int64 poi_id, double latitude, double longitude,
 		std::string &response, std::string &err_msg) {
 	ASSERT(poi_id != 0);
 
