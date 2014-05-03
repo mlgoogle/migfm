@@ -2,7 +2,7 @@
 #define _MASTER_PLUGIN_MANAGER_SPREAD_ENGINE_H__
 #include "weixin_mgr.h"
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 #include "basic/scoped_ptr.h"
 
 namespace spread_logic{

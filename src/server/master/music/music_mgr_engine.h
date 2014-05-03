@@ -2,7 +2,7 @@
 #define _MASTER_PLUGIN_MUSIC_MGR_MUSIC_MGR_ENGINE_H__
 #include "plugins.h"
 #include "get_song.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 #include "basic/basic_info.h"
 #include "basic/radom_in.h"
 #include "music_recording.h"
@@ -100,15 +100,15 @@ private:
 	void ChangeMusicInfos(std::map<std::string,base::MusicInfo>& music_infos,
 		                                std::list<std::string>& songinfolist);
 
-	//ÓÅ»¯°æ±¾1£¬»ñÈ¡ÒôÀÖÊý¾ÝÊ±£¬Ò»´ÎÐÔ´ÓÊý¾Ý¿âºÍredisÀïÃæ»ñÈ¡
+	//ï¿½Å»ï¿½ï¿½æ±¾1ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½redisï¿½ï¿½ï¿½ï¿½ï¿½È¡
 	bool GetMoodScensChannelSongsV2(const std::string& uid,
 		const std::string mode,const int32 num,
 		const std::string wordid,
 		std::map<std::string,base::MusicCltHateInfo>& song_map,
 		std::stringstream& result);
 
-	//ÓÅ»¯°æ±¾2£¬ÔÚ°æ±¾1µÄ»ù´¡ÉÏ¼ÓÈëÒ»´ÎÐÔ»ñÈ¡ºÚÃûµ¥¸èÇú£¬²¢Í¨¹ý×Ô½¨Ëæ»úÊý
-	//×Ô½¨²úÉúËæ»ú¸èÇú£¬´ó´ó½µµÍÖØ¸´ÐÔ£¬²¢Ò»´Î¶ÁÈ¡redis ¼õÉÙÁ¬½Ó´ÎÊý
+	//ï¿½Å»ï¿½ï¿½æ±¾2ï¿½ï¿½ï¿½Ú°æ±¾1ï¿½Ä»ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ô»ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó½µµï¿½ï¿½Ø¸ï¿½ï¿½Ô£ï¿½ï¿½ï¿½Ò»ï¿½Î¶ï¿½È¡redis ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó´ï¿½ï¿½ï¿½
 	bool GetMoodScensChannelSongsV3(const std::string& uid,
 		const std::string mode,const int32 num,
 		const std::string wordid,
@@ -121,7 +121,7 @@ private:
 		                   std::string& cmt_num,std::string& clt_num);
 
 	bool SetMusicHostCltCmt(const std::string& songid,const int32 flag,
-		                    const int32 value = 1);//1 ÈÈ¶È 2 ÊÕ²ØÊý 3ÆÀÂÛÊý 
+		                    const int32 value = 1);//1 ï¿½È¶ï¿½ 2 ï¿½Õ²ï¿½ï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
 
 	bool RestMusicListRandom();
 

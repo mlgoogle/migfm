@@ -1,7 +1,7 @@
 #ifndef _MASTER_PLUGIN_MUSIC_MGR_MUSIC_MGR_ENGINE_H__
 #define _MASTER_PLUGIN_MUSIC_MGR_MUSIC_MGR_ENGINE_H__
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 #include "basic/basic_info.h"
 #include "json/json.h"
 
@@ -111,7 +111,7 @@ private:
 	bool GetMusicInfos(const std::string& uid,const std::string& songid, Json::Value &info);
 
 	bool SetMusicHostCltCmt(const std::string& songid,const int32 flag,
-		                    std::string& json);//1 ÈÈ¶È 2 ÊÕ²ØÊý 3ÆÀÂÛÊý 
+		                    std::string& json);//1 ï¿½È¶ï¿½ 2 ï¿½Õ²ï¿½ï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
 
 	bool GetMusicHotCltCmt(const std::string &songid, std::string &hot_num, 
 		std::string &cmt_num, std::string &clt_num);

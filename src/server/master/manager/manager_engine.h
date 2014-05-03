@@ -1,7 +1,7 @@
 #ifndef _MASTER_PLUGIN_MANAGER_MANAGER_ENGINE_H__
 #define _MASTER_PLUGIN_MANAGER_MANAGER_ENGINE_H__
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 #include "basic/scoped_ptr.h"
 
 namespace manager_logic{

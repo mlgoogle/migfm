@@ -8,7 +8,7 @@ COMPIlER = g++
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-##CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DCHAR_BIT=8
+## CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DCHAR_BIT=8
 ## for release
 CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_DB_POOL_ -D_DIC_POOL_ -D_GNU_SOURCE -DROOM_LOG_ERROR -DCHAR_BIT=8  -DROOM_LOG_MSG
 
@@ -37,8 +37,8 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output: lbs_init.o mig_log.o http_response.o base64.o baidu_lbs_connector.o redis_connector.o \
-	json_reader.o json_value.o json_writer.o lbs_logic.o mem_storage_impl.o mysql_storage_impl.o \
+output: lbs_init.o mig_log.o lbs_logic.o http_response.o base64.o baidu_lbs_connector.o redis_connector.o \
+	json_reader.o json_value.o json_writer.o  mem_storage_impl.o mysql_storage_impl.o \
 	storage.o redis_storage_impl.o redis_warrper.o basic_info.o constants.o basic_util.o dic_storage.o db_storage.o\
 	db_comm.o dic_comm.o logic_comm.o thread_handler.o thread_lock.o http_packet.o basictypes.o config.o
 	$(LINK)
@@ -115,7 +115,7 @@ thread_handler.o:
 thread_lock.o:
 	$(COMPILE) ./thread_lock.cc
 http_packet.o:
-	$(COMPILE) ./../../public/basic/http_packet.cc
+	$(COMPILE) ./../../public/protocol/http_packet.cc
 
 basictypes.o:
 	$(COMPILE) ./../../public/basic/basictypes.cc

@@ -1,7 +1,7 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = ./../../bin/plugins/user_manager/user_manager.so
+OUTPUT_FILE = ./../../bin/hfcrsrv/plugins/user_manager/user_manager.so
 
 ## 编译器
 COMPIlER = g++
@@ -75,7 +75,7 @@ basic_info.o:
 	$(COMPILE) ./../../public/basic/basic_info.cc
 
 http_packet.o:
-	$(COMPILE) ./../../public/basic/http_packet.cc
+	$(COMPILE) ./../../public/protocol/http_packet.cc
 
 basictypes.o:
 	$(COMPILE) ./../../public/basic/basictypes.cc

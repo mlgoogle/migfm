@@ -93,7 +93,7 @@ basic_info.o:
 	$(COMPILE) ./../../public/basic/basic_info.cc
 
 http_packet.o:
-	$(COMPILE) ./../../public/basic/http_packet.cc
+	$(COMPILE) ./../../public/protocol/http_packet.cc
 
 
 basictypes.o:

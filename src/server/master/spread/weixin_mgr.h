@@ -2,7 +2,7 @@
 #define _MASTER_PLUGIN_WEIXIN__H__
 #include "weixin_packet.h"
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 #include "xmpp/xml_serialization.h"
 #include "xmpp/xmppstanzaparser.h"
 namespace spread_logic{

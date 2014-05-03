@@ -1,7 +1,7 @@
 #ifndef _MASTER_PLUGIN_USR_MGR_USR_MGR_ENGINE_H__
 #define _MASTER_PLUGIN_USR_MGR_USR_MGR_ENGINE_H__
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 namespace usr_logic{
 
 class UsrMgrEngine{
