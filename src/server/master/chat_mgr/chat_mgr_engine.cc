@@ -88,12 +88,10 @@ bool ChatMgrEngine::OnChatMgrMessage(struct server *srv, int socket,
 	std::string type;
 	packet.GetPacketType(type);
 
-	if (type=="getsc"){
-		srv_mgr_->GetBestIdle(socket,packet);
-	}else if(type=="hischat"){
-		message_mgr_->GetLeaveMessage(socket,packet);
-	}else if(type=="getsc1"){
+	if (type=="getsc1"){
 		srv_mgr_->GetBestIdleTest(socket,packet);
+	}else if(type=="hischat1"){
+		message_mgr_->GetLeaveMessage(socket,packet);
 	}
     return true;
 }

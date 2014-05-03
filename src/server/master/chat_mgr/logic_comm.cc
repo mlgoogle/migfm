@@ -1,8 +1,12 @@
 #include "logic_comm.h"
-#include "dic_comm.h"
+#include "storage/storage.h"
 #include "basic/basic_util.h"
+#include "log/mig_log.h"
+#include <sstream>
 #include <sys/socket.h>
-namespace chat_logic{
+#include <time.h>
+
+namespace mig_lbs {
 
 typedef struct {
 	base_storage::DBStorageEngine *conn_;
@@ -11,7 +15,6 @@ typedef struct {
 typedef struct{
 	base_storage::DictionaryStorageEngine *conn_;
 }ThreadValueDic;
-
 
 threadkey_handler_t *ThreadKey::db_key_ = NULL;
 threadkey_handler_t *ThreadKey::dic_key_ = NULL;
@@ -22,10 +25,6 @@ static void keydestdb (void *v)
 	if (tv) {
 		if (tv->conn_)
 			tv->conn_->Release();
-		if (tv->conn_){
-			delete tv->conn_;
-			tv->conn_ = NULL;
-		}
 		free (tv);
 		ThreadkeySet (NULL, ThreadKey::db_key_);
 
@@ -47,8 +46,8 @@ static void keydestdic(void *v)
 }
 
 void ThreadKey::InitThreadKey(){
-	int r = ThreadkeyInit(&db_key_,keydestdb);
-	r = ThreadkeyInit(&dic_key_,keydestdic);
+   int r = ThreadkeyInit(&db_key_,keydestdb);
+   r = ThreadkeyInit(&dic_key_,keydestdic);
 }
 
 base_storage::DBStorageEngine* ThreadKey::GetStorageDBConn(){
@@ -70,7 +69,7 @@ base_storage::DictionaryStorageEngine* ThreadKey::GetStorageDicConn(){
 }
 
 void ThreadKey::SetStorageDicConn(base_storage::DictionaryStorageEngine *conn){
-	ThreadValueDic* v = (ThreadValueDic*)ThreadkeyGet(dic_key_);
+    ThreadValueDic* v = (ThreadValueDic*)ThreadkeyGet(dic_key_);
 	if (v==NULL)
 		v = (ThreadValueDic *)calloc(1,sizeof(ThreadValueDic));
 	v->conn_ = conn;
@@ -82,22 +81,6 @@ void ThreadKey::DeinitThreadKey(){
 	ThreadkeyDeinit(dic_key_);
 }
 
-bool SomeUtils::CheckUserToken(const std::string& platform_id,
-		                      const std::string& uid,const std::string& token){
-	std::string new_token;
-	bool r = GetUserToken(platform_id,uid,new_token);
-	if(r){
-		if(new_token == token)
-			return true;
-	}
-
-	return false;
-}
-
-bool SomeUtils::GetUserToken(const std::string& platform_id,
-		                    const std::string& uid,std::string& token){
-     return chat_storage::MemComm::GetUserToken(platform_id,uid,token);
-}
 
 int SomeUtils::SendFull(int socket, const char *buffer, size_t nbytes){
 	ssize_t amt = 0;
@@ -106,7 +89,6 @@ int SomeUtils::SendFull(int socket, const char *buffer, size_t nbytes){
 
 	do {
 		amt = nbytes;
-		LOG_DEBUG2("(%s)",buf);
 		amt = send (socket, buf, amt, 0);
 		buf = buf + amt;
 		nbytes -= amt;
@@ -116,26 +98,67 @@ int SomeUtils::SendFull(int socket, const char *buffer, size_t nbytes){
 	return (int)(amt == -1 ? amt : total);
 }
 
-void SomeUtils::GetUTF8(std::string &msg,std::string &out_str,
+void SomeUtils::GetResultMsg(std::string &status, std::string &msg,
+							 std::string &result,std::string &out_str,
 							 int32 flag/* = 1*/){
 	char* out;
 	size_t out_len;
 	std::stringstream os;
+	os<<"{\"status\":\""<<status.c_str()<<"\",\"msg\":\""
+		<<msg.c_str()<<"\",\"result\":{"<<result.c_str()
+		<<"}}";
 	if (flag){
-		base::BasicUtil::GB2312ToUTF8(msg.c_str(),msg.length(),
+		base::BasicUtil::GB2312ToUTF8(os.str().c_str(),os.str().length(),
 			&out,&out_len);
 		out_str.assign(out,out_len);
-		if(out){
-			delete [] out;
-			out = NULL;
-		}
 	}else{
-		LOG_DEBUG("===========================================");
 		out_str = os.str();
 	}
 
 	LOG_DEBUG2("%s",out_str.c_str());
-
 }
 
+void SomeUtils::GetCurrntTimeFormat(std::string& current_time){
+	time_t current = time(NULL);
+	struct tm* local = localtime(&current);
+	std::stringstream os;
+	os<<(1900+local->tm_year)<<"-"
+	  <<(1+local->tm_mon)<<"-"
+	  <<local->tm_mday<<"-"
+	  <<local->tm_hour<<":"
+	  <<local->tm_min<<":"
+	  <<local->tm_sec;
+	current_time = os.str();
 }
+
+
+FILE *SomeUtils::m_urandomfp = NULL;
+
+bool SomeUtils::InitRandom (){
+
+	m_urandomfp = fopen ("/dev/urandom", "rb");
+	if (m_urandomfp == NULL) {
+		assert (0);
+		return false;
+	}
+
+	setvbuf (m_urandomfp, NULL, _IONBF, 0);
+	return true;
+}
+
+int SomeUtils::GetRandomID (){
+	int rd = 0;
+	do {
+		errno = 0;
+		fread (&rd, sizeof (rd), 1, m_urandomfp);
+	} while (errno == EINTR);
+	LOG_DEBUG2("m_urandomfp rd[%d]",rd);
+	return rd;
+}
+
+bool SomeUtils::DeinitRandom (){
+	fclose (m_urandomfp);
+	return true;
+}
+
+} // namespace mig_lbs
