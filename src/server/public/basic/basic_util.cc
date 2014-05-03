@@ -400,10 +400,10 @@ bool BasicUtil::GetUserInfo(const std::string& uid,UserInfo& usrinfo){
 	key.append("info");
 	r = base_storage::MemDic::GetString(key.c_str(),key.length(),
 										&mem_value,&mem_value_length);
-	if (r){
-		r = usrinfo.UnserializedJson(mem_value);
-		return r;
-	}
+	//if (r){
+		//r = usrinfo.UnserializedJson(mem_value);
+		//return r;
+	//}
 
 	//不存在
 	r = base_storage::MYSQLDB::GetUserInfo(uid,usrinfo);
