@@ -29,12 +29,15 @@ static char idp_url[] = "idp_url";
 static char record[] = "record";
 static char mood_path[] = "mood_path";
 static char sytle_path[] = "sytle_path";
+static char remote[] = "remote";
+static char address[] = "address";
 static int32 config_flag = 0;
 static int32 data_flag = 0;
 static int32 cached_flag = 0;
 static int32 memcached_flag = 0;
 static int32 sso_flag = 0;
 static int32 record_flag = 0;
+static int32 remote_flag = 0;
 
 FileConfig*  FileConfig::config_ = NULL;
 
@@ -130,9 +133,9 @@ static void XMLCALL OnConfigStart(void* usrData,const char* name,const char** at
         for(i=0;atts[i]!=0;i+=2){
             file_config->idp_url_.assign(atts[i+1]);
         }
-    }else if ((strcmp(name,record))){
+    }else if ((strcmp(name,record)==0)){
 		record_flag = 1;
-    }else if ((strcmp(name,mood_path))&&record_flag==1){
+    }else if ((strcmp(name,mood_path)==0)&&record_flag==1){
 		for (i=0;atts[i]!=0;i+=2){
 			if(strcmp(atts[i],path)==0){
 			    file_config->mood_path_.assign(atts[i+1]);
@@ -140,7 +143,7 @@ static void XMLCALL OnConfigStart(void* usrData,const char* name,const char** at
 				     file_config->mood_path_.c_str());
 			}
 		}
-	}else if ((strcmp(name,sytle_path))&&record_flag==1){
+	}else if ((strcmp(name,sytle_path)==0)&&record_flag==1){
 		for (i=0;atts[i]!=0;i+=2){
 			if(strcmp(atts[i],path)==0){
 			  file_config->style_path_.assign(atts[i+1]);
@@ -148,6 +151,18 @@ static void XMLCALL OnConfigStart(void* usrData,const char* name,const char** at
 				file_config->mood_path_.c_str());
 			}
 		}
+	}else if (strcmp(name,remote)==0){
+		remote_flag = 1;
+		MIG_INFO(USER_LEVEL,"name[%s] reomote[%s]",name,remote);
+	}else if ((strcmp(name,address)==0)&&remote_flag==1){
+		for (i = 0; atts[i]!=0;i+=2){
+			if (strcmp(atts[i],host)==0)
+				file_config->host_.assign(atts[i+1]);
+			else if (strcmp(atts[i],port)==0)
+				file_config->port_.assign(atts[i+1]);
+		}
+		MIG_INFO(USER_LEVEL,"host_[%s] port_[%s]",
+			file_config->host_.c_str(),file_config->port_.c_str());
 	}
 }
 

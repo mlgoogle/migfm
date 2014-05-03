@@ -29,6 +29,8 @@ public:
 	std::string      mood_path_;
 	std::string      style_path_;
 	std::string      usr_local_music_path_;
+	std::string      host_;
+	std::string      port_;
 };
 
 }
