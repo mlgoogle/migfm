@@ -218,9 +218,12 @@ bool DBComm::UpdateUserInfos(const int64 uid,const std::string& nickname,
 		 LOG_ERROR("GetConnection Error");
 		 return false;
 	 }
-	 os<<"update "<<USERINFOS<<" set sex=\'"
-		 <<gender.c_str()<<"\',birthday=\'"<<birthday.c_str()<<"\',nickname=\'"<<nickname.c_str()
-		 <<"\' where usrid="<<uid<<";";
+	// os<<"update "<<USERINFOS<<" set sex=\'"
+		// <<gender.c_str()<<"\',birthday=\'"<<birthday.c_str()<<"\',nickname=\'"<<nickname.c_str()
+	//	 <<"\' where usrid="<<uid<<";";
+	 //call migfm.proc_UpdateUserInfo(10108,1,'老K','1986-09-03');
+	 os<<"call migfm.proc_UpdateUserInfo("<<uid<<","<<gender.c_str()<<",\'"
+			 <<nickname<<"\',\'"<<birthday<<"\');";
 	 LOG_DEBUG2("[%s]",os.str().c_str());
 	 r = engine->SQLExec(os.str().c_str());
 
