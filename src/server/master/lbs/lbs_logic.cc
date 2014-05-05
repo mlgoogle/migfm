@@ -446,9 +446,12 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 
 	if (flag==3){
 		std::string str_friend_num;
+		int new_msg_num = 0;
+		storage::RedisComm::GetNewMsgNum(uid_str,new_msg_num);
 		storage::DBComm::GetMusicFriendNum(uid_str,str_friend_num);
 		int friend_num = atol(str_friend_num.c_str());
 		int near_num = temp_users.size();
+
 		//friend
 		result["result"]["fri_num"] = friend_num;
 		//same_music
@@ -457,6 +460,8 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		result["result"]["near_num"] = near_num;
 		//message_num
 		result["result"]["msg_num"] = GetMsgCount(uid_str);
+		//new message
+		result["result"]["new_msg_num"] = new_msg_num;
 	}else if (flag==5){
 		int collect_num = collect_musices.size();
 		int near_num = temp_users.size();

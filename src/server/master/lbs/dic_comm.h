@@ -27,6 +27,8 @@ public:
 	static bool RecordCommect(const std::string& uid);
 
 	static bool GetMsgCount(const std::string& uid, int& count);
+
+	static bool GetNewMsgNum(const std::string& uid, int& msg_num);
 public:
 #if defined (_DIC_POOL_)
 	static base_storage::DictionaryStorageEngine* RedisConnectionPop(void);

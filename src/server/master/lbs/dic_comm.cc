@@ -141,6 +141,38 @@ bool RedisComm::GetMusicInfos(const std::string &key, std::string &music_infos){
 	return r;
 }
 
+bool RedisComm::GetNewMsgNum(const std::string& uid, int& msg_num){
+	//"soc:%lld:new.msg";
+	std::string key;
+	char* value;
+	size_t value_len = 0;
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
+	if (redis_engine_==NULL)
+		return true;
+	key.append("soc:");
+	key.append(uid);
+	key.append(":new.msg");
+
+	bool r = redis_engine_->GetValue(key.c_str(),key.length(),
+		&value,&value_len);
+	if (r){
+		msg_num = atol(value);
+		if (value){
+			free(value);
+			value = NULL;
+		}
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key.c_str());
+		msg_num = 0;
+	}
+
+	//count  = redis_engine_->GetListSize(key.c_str());
+	return true;
+}
 bool RedisComm::GetMsgCount(const std::string& uid,int& count){
 
 	//"soc:%lld:push.msg";
