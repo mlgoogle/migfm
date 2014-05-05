@@ -23,6 +23,7 @@ static const char *HKEY_PUSH_CFG_BTIME = "soc:push.cfg:btime";
 static const char *HKEY_PUSH_CFG_ETIME = "soc:push.cfg:etime";
 static const char *KEY_PUSH_ID_GEN = "soc:%lld:push.id:next";
 static const char *KEY_PUSH_MSG_STAGE = "soc:%lld:push.msg";
+static const char* KEY_PUSH_NEW_MSG_NUM = "soc:%lld:new.msg";
 
 static const char *KEY_FRIEND_LIST = "soc:friends:%lld";
 static const char *KEY_COMMENT_ID_GEN = "soc:song:%lld:comment.id:next";
@@ -682,6 +683,26 @@ bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content
 	}
 	return r;
 }
+
+
+bool RedisComm::AddNewMessage(const int64 uid){
+	REDIS_PROC_PROLOG(redis);
+	int64 msg_id;
+	char key[256] = {0};
+	snprintf(key, arraysize(key), KEY_PUSH_NEW_MSG_NUM, uid);
+	return redis->IncDecValue(key, strlen(key), 1, msg_id);
+	//return true;
+}
+
+bool RedisComm::ClearNewMessage(const int64 uid){
+	REDIS_PROC_PROLOG(redis);
+	int64 msg_id;
+	char* value = "0";
+	char key[256] = {0};
+	snprintf(key, arraysize(key), KEY_PUSH_NEW_MSG_NUM, uid);
+	return redis->SetValue(key,strlen(key),value,strlen(value));
+}
+
 
 
 void RedisComm::SetMusicAboutUser(const std::string& songid,const std::string& hot_num, 

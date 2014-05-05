@@ -341,6 +341,7 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 			content.append(item);
 	}
 
+	RedisComm::ClearNewMessage(atoll(user_id.c_str()));
 	status = 1;
 	return true;
 }
@@ -440,6 +441,9 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		status = -1;
 		return false;
 	}
+
+	//新增消息
+	RedisComm::AddNewMessage(atoll(touid.c_str()));
 
 	DBComm::AddMusciFriend(uid,touid);
 
@@ -791,7 +795,7 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
    SomeUtils::GetCurrntTimeFormat(cur_time);
    content["time"] = cur_time;
    
-   //褰撳墠鐢ㄦ埛璇曞惉闊充箰鑾峰彇淇℃伅
+   //
    GetUserCurrentMusic(value,send_uid);
 
    detail = wr.write(value);
@@ -1381,6 +1385,9 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 		}
 
 	}
+
+	//新增消息
+	RedisComm::AddNewMessage(atoll(to_uid.c_str()));
 
 	//鍐呭
 	std::stringstream ss;
