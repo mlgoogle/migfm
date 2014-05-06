@@ -22,6 +22,7 @@ public:
     std::list<base::ConnAddr>  mysql_db_list_;
     std::list<base::ConnAddr>  mem_list_;
     std::list<base::ConnAddr>  redis_list_;
+    std::list<base::ConnAddr>  mssql_db_list_;
 public:
     std::string      certificate_path_; 
     std::string      idp_url_;

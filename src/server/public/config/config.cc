@@ -89,6 +89,9 @@ static void XMLCALL OnConfigStart(void* usrData,const char* name,const char** at
             suser.c_str(),spass.c_str(),sname.c_str());
         if(strcmp(name,mysql)==0)
             file_config->mysql_db_list_.push_back(addr);
+        else if(strcmp(name,mssql)==0)
+        	file_config->mssql_db_list_.push_back(addr);
+
         MIG_INFO(USER_LEVEL,"config name[%s] ip[%s] port[%d] user[%s] pass[%s] db[%s]",
                  name,shost.c_str(),atoi(sport.c_str()),suser.c_str(),spass.c_str(),
                  sname.c_str());
