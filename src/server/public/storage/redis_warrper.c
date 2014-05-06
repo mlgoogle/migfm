@@ -108,7 +108,7 @@ int RedisIncDecValue(warrper_redis_context_t* context, const char* key,
 		reply = redisCommand(context->context,"DECR %s",key);
 	else if (incby > 0)
 		reply = redisCommand(context->context,"INCRBY %s %lld", key, incby);
-	else // (incby < 0)
+	else if (incby < 0)
 		reply = redisCommand(context->context,"DECRBY %s %lld", key, incby);
 
 	if (result)

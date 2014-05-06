@@ -21,6 +21,17 @@ public:
 	uint32 RecordCount();
 	db_row_t* FetchRows(void);//get Recoder
 	bool CheckConnect(void);
+
+	//存储过程
+	bool StoredProcedure(){return true;}
+	bool AddSPName(const char* sp_name){return true;}
+	bool AddSPParam(const int32 var,
+					const int32 type,
+					const char* name,
+					void* param){return true;}
+
+	 char* GetEntry(db_row_t *row,int cloidx) {return NULL;}
+
 private:
 	scoped_ptr<db_conn_t>    conn_;
 	scoped_ptr<db_res_t>     result_;

@@ -2,6 +2,7 @@
 #include "storage/mem_storage_impl.h"
 #include "storage/redis_storage_impl.h"
 #include "storage/mysql_storage_impl.h"
+#include "storage/mssql_storage_impl.h"
 
 namespace base_storage{
 	

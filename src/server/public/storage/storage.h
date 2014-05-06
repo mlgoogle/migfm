@@ -24,6 +24,20 @@ enum DBImplType{
 	IMPL_MSSQL = 1
 };
 
+
+enum ParamType{
+	PARAM_IN = 0,
+	PARAM_OUT =1
+};
+
+enum VarType{
+	TYPE_INT8  = 0,
+	TYPE_INT16 = 1,
+	TYPE_INT32 = 2,
+	TYPE_INT64 = 3,
+	TYPE_CHAR = 4,
+};
+
 typedef struct db_conn_t{
     void *proc;
 }db_conn_t;
@@ -109,8 +123,17 @@ public:
 public:
 	virtual bool Release() = 0;
 	
-	virtual bool SQLExec(const char* sql) = 0;
+	virtual bool SQLExec(const char* sql) = 0; //执行语句
 	
+	virtual bool StoredProcedure() = 0; //执行存储过程
+
+	virtual bool AddSPName(const char* sp_name) = 0;//添加存储过程名
+
+	virtual bool AddSPParam(const int32 var,
+							const int32 type,
+							const char* name,
+							void* param) = 0; //添加参数
+
 	virtual bool Affected(unsigned long& rows) = 0;
 	
 	virtual uint32 RecordCount() = 0;
@@ -119,8 +142,10 @@ public:
     
 	virtual db_row_t* FetchRows(void) = 0;//get Recordset
 	
-	virtual bool CheckConnect(void) =0;
+	virtual bool CheckConnect(void) = 0;
 	
+	virtual char* GetEntry(db_row_t *row,int cloidx) = 0;
+
 };
 
 class DictionaryStorageEngine:public StorageEngine{
@@ -159,7 +184,7 @@ public:
 
 	virtual bool DecrValue(const char* key,const size_t key_len,
 		                   const char* val,const size_t val_len) = 0;
-        //list 1Ϊleft ��ͷ 0 Ϊright ��β
+        //list 1Ϊleft ��ͷ 0 Ϊright ��β
     virtual bool AddListElement(const char* key,const size_t key_len,
     						    const char* val,const size_t val_len,
 								const int flag) = 0;
@@ -205,7 +230,7 @@ public:
 		                    const size_t hash_name_len,
 							std::map<std::string,std::string>& map) = 0;
 
-	 //1Ϊleft ��ͷ 0 Ϊright ��β
+	 //1Ϊleft ��ͷ 0 Ϊright ��β
 	virtual bool GetListRange(const char* key,const size_t key_len,
 				int from, int to, std::list<std::string>& list,
 				const int flag) = 0;
