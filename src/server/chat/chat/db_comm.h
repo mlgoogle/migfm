@@ -25,6 +25,13 @@ public:
 	static bool RecordMessage(const int64 platform_id,const int64 fid,const int64 tid,const int64 msg_id,
 							  const std::string& message,const std::string& current_time);
 
+	static bool GetUserLBSPos(const int64& uid,double& latitude,double& longitude);
+
+	static bool RecordUserMessageList(const int32 type,const int64 send_uid,
+									 const int64 to_uid,
+									 const double distance,
+									 const std::string& message);
+
 public:
 #if defined (_DB_POOL_)
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

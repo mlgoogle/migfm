@@ -29,6 +29,19 @@ typedef std::map<int /*socket*/,chat_base::UserInfo/* userinfo*/> SocketMap;
 
 typedef std::map<int64 /*msg id*/,chat_base::UserInfo /*userinfo*/> ConfirmMap;
 
+#define MAX_SUMMARY_CONTENT_LEN  16
+
+enum MSG_TYPE{
+	TYPE_TEXT = 1,
+	TYPE_PIC = 2,
+	TYPE_SOUND = 3
+};
+
+enum RECORDTYPE{
+	PARENT_TYPE = 1,
+	SAYHELLO_TYPE = 2,
+	MESSAGE_TYPE = 3
+};
 
 namespace chat_logic {
 
@@ -53,6 +66,12 @@ public:
 			int64 msg_id,const std::string& msg,std::string& detail,std::string &summary,
 			std::string& current);
 
+	static bool MakeLeaveContent(const chat_base::UserInfo& send_userinfo,
+			               const chat_base::UserInfo& recv_userinfo,const std::string& msg,
+			               const int msg_type,std::string &summary,double& distance);
+
+
+
 
 };
 
@@ -60,6 +79,19 @@ class HttpComm {
 public:
 	static bool PushMessage(const std::string &device_token, const std::string &msg,
 			int badge=1, const std::string &sound="");
+};
+
+
+class SummaryContent{
+public:
+	static bool OnSummaryContent(const chat_base::UserInfo& send_userinfo,
+			                     const chat_base::UserInfo& recv_userinfo,
+					             const std::string& msg,const int msg_type,
+					             std::string & summary);
+private:
+	static bool SummaryTestContent(const chat_base::UserInfo& send_userinfo,
+            const chat_base::UserInfo& recv_userinfo,const std::string& msg,
+            std::string & summary);
 };
 
 

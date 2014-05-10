@@ -94,9 +94,12 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	if(is_push){
 		//msg_id = base::SysRadom::GetInstance()->GetRandomID();
 		chat_storage::RedisComm::GenaratePushMsgID(msg_id);
+		std::string summary;
 		current_time = time(NULL);
-		PushMessage(private_send->platform_id,send_user_info,recv_user_info,private_send->content);
-		OffLineMessage(private_send->platform_id,msg_id,current_time,send_user_info,recv_user_info,private_send->content);
+		OffLineMessage(private_send->platform_id,msg_id,current_time,send_user_info,
+				recv_user_info,private_send->content,summary);
+		PushMessage(private_send->platform_id,send_user_info,recv_user_info,summary);
+
 	}else {
 		chat_storage::RedisComm::GenaratePushMsgID(msg_id);
 		//查询是否是一个会话，如果不是放入redis 聊天的session 和用户所在会话session 匹配
@@ -104,7 +107,8 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 				recv_user_info.user_id(),recv_user_info.session(),private_send->session);
 		if(recv_user_info.session()!=private_send->session){
 			current_time = time(NULL);
-			OffLineMessage(private_send->platform_id,msg_id,current_time,send_user_info,recv_user_info,private_send->content);
+			std::string summary;
+			OffLineMessage(private_send->platform_id,msg_id,current_time,send_user_info,recv_user_info,private_send->content,summary);
 		}else{
 			struct TextChatPrivateRecv private_recv;
 			MAKE_HEAD(private_recv, TEXT_CHAT_PRIVATE_RECV,CHAT_TYPE,0,private_send->reserverd);
@@ -129,22 +133,34 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 bool IMSMgr::OffLineMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,
 		const chat_base::UserInfo& send_userinfo,
 		const chat_base::UserInfo& recv_userinfo,
-		const std::string& message){
+		const std::string& message,std::string& summary){
 
 	std::stringstream  s_send_uid;
 	std::stringstream s_recv_uid;
 	std::string detail;
-	std::string summary;
 	std::string s_current_time;
+	double distance;
 
 	chat_logic::LogicUnit::GetCurrentTimeFormat(current_time,s_current_time);
 
 	s_send_uid<<send_userinfo.user_id();
 	s_recv_uid<<recv_userinfo.user_id();
+
+	chat_logic::LogicUnit::MakeLeaveContent(send_userinfo,recv_userinfo,
+			message,TYPE_TEXT,summary,distance);
+
+
 	//缓存redis部分
+	/*
 	chat_logic::LogicUnit::MakeLeaveContent(s_send_uid.str(),s_recv_uid.str(),msg_id,
 												message,detail,summary,s_current_time);
 	chat_storage::RedisComm::StagePushMsg(recv_userinfo.user_id(),msg_id,detail);
+	*/
+	/*修改存入数据库*/
+
+	chat_storage::DBComm::RecordUserMessageList(MESSAGE_TYPE,send_userinfo.user_id(),
+			recv_userinfo.user_id(),distance,summary);
+
 
 	return true;
 }

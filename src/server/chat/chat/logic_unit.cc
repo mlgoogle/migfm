@@ -25,9 +25,9 @@ bool LogicUnit::GetUserInfo(const int64 platform_id,int64 user_id,chat_base::Use
 	bool r = false;
 	r = chat_storage::MemComm::GetUserInfo(platform_id,user_id,userinfo);
 	if (r)
-		return r;
+		return true;
 	r = chat_storage::DBComm::GetUserInfo(platform_id,user_id,userinfo);
-	return r;
+	return true;
 	
 }
 
@@ -54,11 +54,39 @@ bool LogicUnit::CheckChatToken(const chat_base::UserInfo& userinfo,
 }
 
 
+bool LogicUnit::MakeLeaveContent(const chat_base::UserInfo& send_userinfo,
+        const chat_base::UserInfo& recv_userinfo,const std::string& msg,
+        const int msg_type,std::string &summary,double& distance){
+
+	bool r = false;
+	summary.clear();
+	double uid_latitude,uid_longitude,tar_latitude,tar_longitude;
+
+	r = chat_storage::DBComm::GetUserLBSPos(send_userinfo.user_id(),
+			uid_latitude,uid_longitude);
+	if(!r){
+		uid_latitude = uid_longitude = 0;
+	}
+
+	r = chat_storage::DBComm::GetUserLBSPos(recv_userinfo.user_id(),
+			tar_latitude,tar_longitude);
+	if(!r){
+		tar_latitude = tar_longitude = 0;
+	}
+
+	SummaryContent::OnSummaryContent(send_userinfo,recv_userinfo,msg,msg_type,summary);
+	distance = base::BasicUtil::CalcGEODistance(uid_latitude,uid_longitude,tar_latitude,tar_longitude);
+	return true;
+}
+
+
+
+
 bool LogicUnit::MakeLeaveContent(const std::string& send_uid,const std::string& to_uid,
 		int64 msg_id,const std::string& msg,std::string& detail,std::string &summary
 		,std::string& current){
-
-	std::stringstream ss;
+//注释- 留言消息从redis中修改到数据库 暂不需要json 格式化
+/*	std::stringstream ss;
 	char tmp[256] = {0};
 	Json::FastWriter wr;
 	Json::Value value;
@@ -71,6 +99,7 @@ bool LogicUnit::MakeLeaveContent(const std::string& send_uid,const std::string& 
 	content["msg"] = msg;
 	content["time"] = current;
 	detail = wr.write(value);
+*/
 	return true;
 }
 
@@ -131,6 +160,60 @@ bool HttpComm::PushMessage(const std::string &device_token,
 	}catch (...) {
 		LOG_DEBUG("Push msg failed");
 		return false;
+	}
+	return true;
+}
+
+
+bool SummaryContent::OnSummaryContent(const chat_base::UserInfo& send_userinfo,
+        const chat_base::UserInfo& recv_userinfo,
+        const std::string& msg,const int msg_type,
+        std::string & summary){
+
+	switch(msg_type){
+	case TYPE_TEXT:
+		SummaryTestContent(send_userinfo,recv_userinfo,msg,summary);
+		break;
+	default:
+		break;
+	}
+	return true;
+}
+
+//文本简略
+bool SummaryContent::SummaryTestContent(const chat_base::UserInfo& send_userinfo,
+        const chat_base::UserInfo& recv_userinfo,const std::string& msg,
+        std::string & summary){
+
+	std::string content;
+	int32 flag = 0;
+	if(msg.length()<=MAX_SUMMARY_CONTENT_LEN){
+		flag = 0;
+		content = msg;
+	}else{
+		flag = 1;
+		content = msg.substr(0,MAX_SUMMARY_CONTENT_LEN);
+		//从最后一位开始检查是否为表情符号
+		//先查找"["
+
+		do{
+			size_t pos = content.rfind("[");
+			if(pos==std::string::npos)//不存在表情符号
+				break;
+			std::string rstr;
+			rstr = content.substr(pos,content.length());
+			size_t rpos = rstr.find("]");
+			if(rpos!=std::string::npos)//存在，是一个完整的表情符号
+				break;
+			//截取掉表情前一部分
+			content = content.substr(0,pos);
+		}while(0);
+	}
+
+	if(flag){
+		summary = content+"......";
+	}else{
+		summary = content;
 	}
 	return true;
 }

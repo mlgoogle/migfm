@@ -130,6 +130,40 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 	}
 }
 
+bool DBComm::RecordUserMessageList(const int32 type,const int64 send_uid,
+								const int64 to_uid,const double distance,
+								const std::string& message){
+#if defined (_DB_POOL_)
+	AutoDBCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+	char s_distance[256];
+	snprintf(s_distance, arraysize(s_distance),
+			"%lf", distance);
+
+	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'123232.09999')
+	os	<< "call proc_RecordMessageList("
+		<<type<<",\'"<<message<<"\',"<<send_uid
+		<<","<<to_uid<<",\'"<<s_distance<<"\')";
+
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return false;
+	}
+	return true;
+}
+
 bool DBComm::RecordMessage(const int64 platform_id,const int64 fid,const int64 tid,
 					const int64 msg_id,const std::string& message,
 					const std::string& current_time){
@@ -169,6 +203,44 @@ bool DBComm::RecordMessage(const int64 platform_id,const int64 fid,const int64 t
 	}*/
 	return r;
 
+}
+
+
+bool DBComm::GetUserLBSPos(const int64& uid,double& latitude,double& longitude){
+    // call proc_ChatGetUserInfo(platform_id,user_id)
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	bool r =false;
+	MYSQL_ROW rows;
+	int num;;
+	if (engine==NULL){
+	 LOG_ERROR("GetConnection Error");
+	 return false;
+	}
+
+	//call migfm.proc_GetLbsAboutInfos(10108)
+	os<<"call migfm.proc_GetLbsAboutInfos("<<uid<<");";
+
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return false;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			latitude = atof(rows[4]);
+			longitude =  atof(rows[5]);
+		}
+		return true;
+	}
+	return false;
 }
 
 bool DBComm::GetUserInfo(const int64 platform_id,int64 user_id, 
