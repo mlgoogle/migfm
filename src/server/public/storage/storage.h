@@ -134,6 +134,8 @@ public:
 							const char* name,
 							void* param) = 0; //添加参数
 
+	virtual bool CheckAffect(const int32 index,const char* name) = 0;
+
 	virtual bool Affected(unsigned long& rows) = 0;
 	
 	virtual uint32 RecordCount() = 0;

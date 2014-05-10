@@ -32,6 +32,8 @@ public:
 
 	 char* GetEntry(db_row_t *row,int cloidx) {return NULL;}
 
+	 bool CheckAffect(const int32 index,const char* name){return false;}
+
 private:
 	scoped_ptr<db_conn_t>    conn_;
 	scoped_ptr<db_res_t>     result_;

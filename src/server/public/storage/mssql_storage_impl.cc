@@ -165,6 +165,13 @@ bool MssqlStorageEngineImpl::FreeRes(){
 	return true;
 }
 
+bool MssqlStorageEngineImpl::CheckAffect(const int32 index,const char* name){
+	MIG_INFO(USER_LEVEL,"name %s name %s",dbcolname ((DBPROCESS*)(conn_.get()->proc), index),name);
+	MIG_INFO(USER_LEVEL,"result %d", strcasecmp (dbcolname ((DBPROCESS*)(conn_.get()->proc), index),name));
+	//ASSERT_CMPCOL(index,name);
+	assert((strcasecmp (dbcolname ((DBPROCESS*)(conn_.get()->proc), index),name)==0));
+	return true;
+}
 
 db_row_t* MssqlStorageEngineImpl::FetchRows(void){
     RETCODE rc;

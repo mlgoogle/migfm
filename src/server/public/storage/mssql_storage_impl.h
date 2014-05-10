@@ -5,6 +5,8 @@
 #include "basic/scoped_ptr.h"
 #include "storage/storage.h"
 
+#define ASSERT_CMPCOL(i, n)     assert (strcasecmp (dbcolname ((DBPROCESS*)(conn_.get()->proc), i), n) == 0)
+
 namespace base_storage{
 	
 
@@ -28,6 +30,9 @@ public:
 	bool CheckConnect(void);
 
 	char* GetEntry(db_row_t *row,int colidx) ;
+
+	bool CheckAffect(const int32 index,const char* name);
+
 private:
 	bool AddSPParamBigInt(const int32 var,const char* name,void* param);
 	bool AddSPParamInt(const int32 var,const char* name,void* param);
