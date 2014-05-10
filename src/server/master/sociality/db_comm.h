@@ -50,7 +50,17 @@ public:
 		const int32 flag, 
 		const int32 value=1);
 
-	static bool GetMusicOtherInfos(std::map<std::string,base::MusicInfo> &                                         song_music_infos);
+	static bool GetMusicOtherInfos(std::map<std::string,base::MusicInfo>& song_music_infos);
+
+	static bool GetLBSAboutInfos(const std::string& uid,std::string& sex,std::string& nickname,
+								std::string& head,std::string& birthday,double& latitude,
+								double& longitude);
+
+	static bool RecordUserMessageList(const int32 type,
+									 const int64 send_uid,
+									 const int64 to_uid,
+									 const double distance,
+									 const std::string& message);
 
 	struct FriendInfo {
 		std::string uid;
@@ -59,6 +69,10 @@ public:
 	};
 	typedef std::vector<FriendInfo> FriendInfoList;
 	static bool GetFriendList(const std::string &uid, FriendInfoList &friends);
+
+
+	static bool GetMessageList(const int64 uid,const int64 count,const int64 from,
+			std::list<struct MessageListInfo>& message_list);
 
 	static bool GetUserInfos(int64 uid,
 			std::string& nickname, std::string& gender,

@@ -320,7 +320,9 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 	int page_index = atoi(page_index_str.c_str());
 	int page_size = atoi(page_size_str.c_str()) -1;
 
-	typedef std::list<std::string> MsgList;
+
+//消息存储修改至数据库，从数据库读取
+  /*typedef std::list<std::string> MsgList;
 	MsgList msg_list;
 	if (!RedisComm::GetStagedPushMsg(uid, page_index, page_size, msg_list)) {
 		err_code = MIG_FM_DB_ACCESS_FAILED;
@@ -339,7 +341,10 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 		Json::Value item;
 		if (GetPushMsgDetail(user_id,*it, item))
 			content.append(item);
-	}
+	}*/
+
+
+	GetPushMessage(uid,page_index,page_size,result);
 
 	RedisComm::ClearNewMessage(atoll(user_id.c_str()));
 	status = 1;
@@ -421,26 +426,12 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		return false;
 	}
 
+	std::string summary;
 
-	int64 msg_id = 0;
-	if (!RedisComm::GenaratePushMsgID(atoll(uid.c_str()), msg_id)){
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
 
-	std::string detail,summary;
-	if (!MakeHalloContent(uid,touid,msg_id,msg,detail,summary)){
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
+	if(!RecordMessage(uid,touid,msg,summary,status,err_code))
 		return false;
-	}
 
-	if (!RedisComm::StagePushMsg(atoll(touid.c_str()),msg_id,detail)){
-		err_code = MIG_FM_DB_ACCESS_FAILED;
-		status = -1;
-		return false;
-	}
 
 	//新增消息
 	RedisComm::AddNewMessage(atoll(touid.c_str()));
@@ -491,6 +482,43 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 	}
 
 	status = 1;
+	return true;
+}
+
+bool SocialityMgrEngine::RecordMessage(const std::string& send_uid,const std::string& to_uid,
+		                             const std::string& msg,std::string& summary,
+		                             int& status, int &err_code){
+
+
+
+
+
+	/*int64 msg_id = 0;
+	  std::string detail;
+	if (!RedisComm::GenaratePushMsgID(atoll(send_uid.c_str()), msg_id)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+
+	if (!MakeHalloContent(send_uid,to_uid,msg_id,msg,detail,summary)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}
+
+	if (!RedisComm::StagePushMsg(atoll(to_uid.c_str()),msg_id,detail)){
+		err_code = MIG_FM_DB_ACCESS_FAILED;
+		status = -1;
+		return false;
+	}*/
+
+	double distance = 0;
+	bool r = MakeHalloContent(send_uid,to_uid,msg,summary,distance);
+	r = mig_sociality::DBComm::RecordUserMessageList(SAYHELLO_TYPE,
+			 atoll(send_uid.c_str()),atoll(to_uid.c_str()),distance,msg);
+
 	return true;
 }
 
@@ -760,6 +788,28 @@ bool SocialityMgrEngine::CheckAndTransHMTime(const std::string &str, unsigned &t
 	return true;
 }
 
+bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,const std::string& to_uid,
+        const std::string& msg,std::string &summary,double& distance){
+
+	summary.clear();
+	std::string sd_nick, sd_sex, sd_head;
+	std::string to_nick, to_sex, to_head;
+	double uid_latitude,uid_longitude,tar_latitude,tar_longitude;
+
+	if (!DBComm::GetUserInfos(send_uid, sd_nick, sd_sex, sd_head,uid_latitude,uid_longitude))
+		return false;
+
+	if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head,tar_latitude,tar_longitude))
+		return false;
+
+	std::stringstream ss;
+	ss << sd_nick << "(" << send_uid << ")" << "打招呼";
+	summary.assign(ss.str());
+
+	distance = base::BasicUtil::CalcGEODistance(uid_latitude,uid_longitude,tar_latitude,tar_longitude);
+	return true;
+}
+
 bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
 										  const std::string& to_uid, int64 msg_id,
 										  const std::string& msg,std::string& detail, 
@@ -798,7 +848,10 @@ bool SocialityMgrEngine::MakeHalloContent(const std::string& send_uid,
    //
    GetUserCurrentMusic(value,send_uid);
 
+
    detail = wr.write(value);
+
+
    return true;
 
 }
@@ -1302,6 +1355,93 @@ bool SocialityMgrEngine::GetUserCurrentMusic(Json::Value &value,const std::strin
 	return false;
 }
 
+
+bool SocialityMgrEngine::GetPushMessage(const int64 uid,const int64 page_index,
+		                                const int64 page_size,
+		                    			Json::Value &info){
+	bool r = false;
+	std::list<struct MessageListInfo> message_list;
+	r = mig_sociality::DBComm::GetMessageList(uid,page_size,page_index,
+			message_list);
+
+	if(!r||message_list.size()<=0){
+		return r;
+	}
+	while(message_list.size()>0){
+		Json::Value unit;
+		struct MessageListInfo message_info = message_list.front();
+		message_list.pop_front();
+		MakeJsonPacket(&message_info,unit);
+		info.append(unit);
+	}
+	return true;
+
+}
+
+void SocialityMgrEngine::MakeJsonPacket(struct MessageListInfo* msg,Json::Value &info){
+
+	if(msg->detail.message_type==PARENT_TYPE)
+		info["type"] = "presentsong";
+	else if(msg->detail.message_type==SAYHELLO_TYPE)
+		info["type"] = "sayhello";
+	else if(msg->detail.message_type==MESSAGE_TYPE)
+		info["type"] = "leavemsg";
+	MakeJsonDetailPacket(msg,info["detail"]);
+	MakeJsonUserinfoPacket(msg,info["userinfo"]);
+	MakeJsonMusicPacket(msg,info["music"]);
+}
+
+void SocialityMgrEngine::MakeJsonDetailPacket(struct MessageListInfo* msg,Json::Value &info){
+	char s_send_uid[256];
+	snprintf(s_send_uid, arraysize(s_send_uid),
+			"%lld", msg->detail.fromuid);
+	char s_to_uid[256];
+	snprintf(s_to_uid, arraysize(s_to_uid),
+			"%lld", msg->detail.uid);
+	info["msg"] = msg->detail.message;
+	info["send_uid"] = s_send_uid;
+	info["time"] = msg->detail.msg_time;
+	info["to_uid"] = s_to_uid;
+}
+
+void SocialityMgrEngine::MakeJsonMusicPacket(struct MessageListInfo* msg,Json::Value &info){
+	std::string b64title;
+	std::string b64artist;
+	std::string b64album;
+	Base64Decode(msg->musicinfo.title(),&b64title);
+	Base64Decode(msg->musicinfo.artist(),&b64artist);
+	Base64Decode(msg->musicinfo.album_title(),&b64album);
+	info["album"] = b64album;
+	info["artist"] = b64artist;
+	info["clt"] = msg->musicinfo.clt_num();
+	info["hot"] = msg->musicinfo.hot_num();
+	info["cmt"] = msg->musicinfo.cmt_num();
+	info["hqurl"] = msg->musicinfo.hq_url();
+	info["id"] = msg->musicinfo.id();
+	info["like"] = "0";
+	info["pic"] = msg->musicinfo.pic_url();
+	info["pub_time"] = msg->musicinfo.pub_time();
+	info["titile"] = b64title;
+	info["url"] = msg->musicinfo.url();
+}
+
+void SocialityMgrEngine::MakeJsonUserinfoPacket(struct MessageListInfo* msg,Json::Value &info){
+	char s_distance[256];
+	snprintf(s_distance, arraysize(s_distance),
+			"%lf", msg->detail.distance);
+	char s_send_uid[256];
+	snprintf(s_send_uid, arraysize(s_send_uid),
+			"%lld", msg->detail.fromuid);
+	info["birthday"] =msg->userinfo.birthday();
+	info["distance"] = s_distance;
+	info["head"] = msg->userinfo.head();
+	info["location"] = msg->userinfo.crty();
+	info["nickname"] = msg->userinfo.nickname();
+	info["sex"] = msg->userinfo.sex();
+	info["source"] = msg->userinfo.source();
+	info["userid"] = s_send_uid;
+}
+
 bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 										std::string& uid,std::string& to_uid,
 										int& err_code,int& status){
@@ -1322,6 +1462,8 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 ]
 }
 */
+
+/*
 	Json::Reader reader;
 	Json::Value  root;
 	std::string sd_nick, sd_sex, sd_head;
@@ -1397,6 +1539,7 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 		conver_num.append("0");
 	ss << sd_usrinfo.nickname().c_str() << "(" << uid << ")" << "赠送"<<conver_num<<"首歌";
 	summary.assign(ss.str());
+*/
 	return true;
 }
 

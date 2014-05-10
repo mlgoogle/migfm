@@ -51,12 +51,37 @@ const unsigned DEFAULT_END_TIME = 23*60;
 
 namespace mig_sociality {
 
+
+
+enum RECORDTYPE{
+	PARENT_TYPE = 1,
+	SAYHELLO_TYPE = 2,
+	MESSAGE_TYPE = 3
+};
+
+
 struct MusicFriendInfo{
 	base::UserInfo userinfo;
 	double latitude;
 	double longitude;
 	double distance;
 };
+
+struct Detail{
+	double distance;
+	int32 message_type;
+	int64 uid;
+	int64 fromuid;
+	int64 msg_id;
+	std::string msg_time;
+	std::string message;
+};
+struct MessageListInfo{
+	struct Detail   detail;
+	base::UserInfo  userinfo;
+	base::MusicInfo musicinfo;
+};
+
 
 class ThreadKey {
 public:

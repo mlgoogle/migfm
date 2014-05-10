@@ -166,6 +166,39 @@ bool DBComm::SetMusicHostCltCmt(const std::string& songid,
 		return true;
 }
 
+bool DBComm::RecordUserMessageList(const int32 type,const std::string& send_uid,
+								const std::string& to_uid,const double distance,
+								const std::string& message){
+#if defined (_DB_POOL_)
+	AutoDBCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+	char s_distance[256];
+	snprintf(s_distance, arraysize(s_distance),
+			"%lf", distance);
+
+	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'123232.09999')
+	os	<< "call proc_RecordMessageList("
+		<<type<<",\'"<<message<<"\',"<<send_uid
+		<<","<<to_uid<<",\'"<<s_distance<<"\')";
+
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+	return true;
+}
 
 bool DBComm::GetMusicUser(const std::string& uid, 
 						  const std::string& fromid, 
@@ -434,6 +467,52 @@ bool DBComm::GetMusicOtherInfos(std::map<std::string,base::MusicInfo>&song_music
 }
 
 
+bool DBComm::GetLBSAboutInfos(const std::string& uid,std::string& sex,std::string& nickname,
+							  std::string& head,std::string& birthday,
+							  double& latitude,double& longitude){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
+		std::stringstream os;
+		bool r = false;
+		MYSQL_ROW rows;
+		if (engine == NULL) {
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+		//call migfm.proc_GetLbsAboutInfos(10108);
+		os<<"call migfm.proc_GetLbsAboutInfos("
+			<<uid<<")";
+
+		const char* sql = os.str().c_str();
+		LOG_DEBUG2("[%s]",os.str().c_str());
+		r = engine->SQLExec(os.str().c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+		int32 num = engine->RecordCount();
+		if (num > 0) {
+			if (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+				sex = rows[0];
+				nickname = rows[1];
+				head = rows[2];
+				birthday = rows[3];
+				latitude = atof(rows[4]);
+				longitude = atof(rows[5]);
+			}
+			return true;
+		}
+		return false;
+
+}
+
 bool DBComm::GetWXMusicUrl(const std::string& song_id,std::string& song_url,
 						   std::string& dec,std::string& dec_id,std::string& dec_word){
 	std::stringstream os;
@@ -600,6 +679,63 @@ bool DBComm::GetFriendList(const std::string& uid, FriendInfoList& friends) {
 	return false;
 }
 
+bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
+		std::list<struct MessageListInfo>& message_list){
+
+
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	  std::stringstream os;
+	  bool r = false;
+	  MYSQL_ROW rows;
+	  if (engine==NULL){
+		  LOG_ERROR("GetConnection Error");
+		  return false;
+	  }
+
+	  //call migfm.proc_GetMessageList(10112,10,0);
+	  os<<"call migfm.proc_GetMessageList("
+			  <<uid<<","<<count<<","<<from<<")";
+	  const char* sql = os.str().c_str();
+	  LOG_DEBUG2("[%s]",os.str().c_str());
+	  r = engine->SQLExec(os.str().c_str());
+
+	  if (!r){
+		  LOG_ERROR2("exec sql error");
+		  return false;
+	  }
+	  int32 num = engine->RecordCount();
+	  if(num>0){
+		  while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			  struct MessageListInfo msg_info;
+			  msg_info.detail.uid = uid;
+			  msg_info.detail.msg_id = atoll(rows[0]);
+			  msg_info.detail.message_type = atol(rows[1]);
+			  msg_info.detail.message = rows[2];
+			  msg_info.userinfo.set_uid(atoll(rows[3]));
+			  msg_info.detail.msg_time = rows[4];
+			  msg_info.detail.distance = atof(rows[5]);
+			  std::string songid = rows[6];
+			  msg_info.musicinfo.set_id(songid);
+			  std::string name = rows[7];
+			  std::string singer = rows[8];
+			  msg_info.musicinfo.set_title(name);
+			  msg_info.musicinfo.set_artist(singer);
+			  msg_info.userinfo.set_birthday(rows[9]);
+			  msg_info.userinfo.set_head(rows[10]);
+			  msg_info.userinfo.set_crty(rows[11]);
+			  msg_info.userinfo.set_nickname(rows[12]);
+			  msg_info.userinfo.set_sex(rows[13]);
+			  msg_info.userinfo.set_source(rows[14]);
+			  message_list.push_back(msg_info);
+		  }
+		  return true;
+	  }
+	  return false;
+}
+
 bool DBComm::GetUserInfos(int64 uid,
 						  std::string& nickname,std::string& gender,
 						  std::string& type,std::string& birthday,
@@ -650,5 +786,6 @@ bool DBComm::GetUserInfos(int64 uid,
 	  return false;
 
 }
+
 
 } // mig_sociality

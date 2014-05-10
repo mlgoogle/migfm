@@ -103,6 +103,12 @@ private:
 						int64 msg_id,const std::string& msg,std::string& detail,
 						std::string &summary);
 
+	bool MakeHalloContent(const std::string& send_uid,const std::string& to_uid,
+			              const std::string& msg,std::string &summary,double& distance);
+
+	bool RecordMessage(const std::string& send_uid,const std::string& to_uid,
+            const std::string& msg,std::string& summary,int& status, int &err_code);
+
 	bool GetPushMsgDetail(const std::string& uid,
 		const std::string &msg, Json::Value &content);
 	
@@ -128,6 +134,17 @@ private:
 						int& err_code,int& status);
 
 	bool GetUserCurrentMusic(Json::Value &value,const std::string& tar_uid);
+
+	bool GetPushMessage(const int64 uid,const int64 page_index,const int64 page_size,
+			Json::Value &info);
+private:
+	void MakeJsonPacket(struct MessageListInfo* msg,Json::Value &info);
+
+	void MakeJsonDetailPacket(struct MessageListInfo* msg,Json::Value &info);
+
+	void MakeJsonUserinfoPacket(struct MessageListInfo* msg,Json::Value &info);
+
+	void MakeJsonMusicPacket(struct MessageListInfo* msg,Json::Value &info);
 };
 
 }
