@@ -343,8 +343,8 @@ bool SocialityMgrEngine::OnMsgGetPushMsg(packet::HttpPacket& packet,
 			content.append(item);
 	}*/
 
-
-	GetPushMessage(uid,page_index,page_size,result);
+	Json::Value &content = result["result"];
+	GetPushMessage(uid,page_index,page_size,content);
 
 	RedisComm::ClearNewMessage(atoll(user_id.c_str()));
 	status = 1;
@@ -1372,6 +1372,9 @@ bool SocialityMgrEngine::GetPushMessage(const int64 uid,const int64 page_index,
 		struct MessageListInfo message_info = message_list.front();
 		message_list.pop_front();
 		MakeJsonPacket(&message_info,unit);
+		Json::FastWriter wr;
+		std::string res = wr.write(unit);
+		LOG_DEBUG2("%s",res.c_str());
 		info.append(unit);
 	}
 	return true;
@@ -1421,7 +1424,7 @@ void SocialityMgrEngine::MakeJsonMusicPacket(struct MessageListInfo* msg,Json::V
 	info["like"] = "0";
 	info["pic"] = msg->musicinfo.pic_url();
 	info["pub_time"] = msg->musicinfo.pub_time();
-	info["titile"] = b64title;
+	info["title"] = b64title;
 	info["url"] = msg->musicinfo.url();
 }
 
@@ -1432,14 +1435,17 @@ void SocialityMgrEngine::MakeJsonUserinfoPacket(struct MessageListInfo* msg,Json
 	char s_send_uid[256];
 	snprintf(s_send_uid, arraysize(s_send_uid),
 			"%lld", msg->detail.fromuid);
+	std::string b64name;
+	Base64Decode(msg->detail.cur_music,&b64name);
 	info["birthday"] =msg->userinfo.birthday();
-	info["distance"] = s_distance;
+	info["distance"] = msg->detail.distance;
 	info["head"] = msg->userinfo.head();
 	info["location"] = msg->userinfo.crty();
 	info["nickname"] = msg->userinfo.nickname();
 	info["sex"] = msg->userinfo.sex();
 	info["source"] = msg->userinfo.source();
 	info["userid"] = s_send_uid;
+	info["cur_music"] = b64name;
 }
 
 bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,

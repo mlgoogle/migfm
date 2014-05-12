@@ -73,6 +73,7 @@ struct Detail{
 	int64 uid;
 	int64 fromuid;
 	int64 msg_id;
+	std::string cur_music;
 	std::string msg_time;
 	std::string message;
 };

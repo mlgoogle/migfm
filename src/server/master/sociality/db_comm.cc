@@ -166,8 +166,8 @@ bool DBComm::SetMusicHostCltCmt(const std::string& songid,
 		return true;
 }
 
-bool DBComm::RecordUserMessageList(const int32 type,const std::string& send_uid,
-								const std::string& to_uid,const double distance,
+bool DBComm::RecordUserMessageList(const int32 type,int64 send_uid,int64 to_uid,
+								const double distance,
 								const std::string& message){
 #if defined (_DB_POOL_)
 	AutoDBCommEngine auto_engine;
@@ -714,7 +714,8 @@ bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
 			  msg_info.detail.msg_id = atoll(rows[0]);
 			  msg_info.detail.message_type = atol(rows[1]);
 			  msg_info.detail.message = rows[2];
-			  msg_info.userinfo.set_uid(atoll(rows[3]));
+			  msg_info.detail.fromuid = atoll(rows[3]);
+			  msg_info.userinfo.set_uid(rows[3]);
 			  msg_info.detail.msg_time = rows[4];
 			  msg_info.detail.distance = atof(rows[5]);
 			  std::string songid = rows[6];
@@ -729,6 +730,16 @@ bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
 			  msg_info.userinfo.set_nickname(rows[12]);
 			  msg_info.userinfo.set_sex(rows[13]);
 			  msg_info.userinfo.set_source(rows[14]);
+			  msg_info.musicinfo.set_hq_url(rows[15]);
+			  msg_info.musicinfo.set_url(rows[16]);
+			  msg_info.musicinfo.set_pub_time(rows[17]);
+			  msg_info.musicinfo.set_pic_url(rows[18]);
+			  msg_info.musicinfo.set_music_clt(rows[19]);
+			  msg_info.musicinfo.set_music_cmt(rows[20]);
+			  msg_info.musicinfo.set_music_hot(rows[21]);
+			  msg_info.musicinfo.set_album_title(rows[22]);
+			  msg_info.detail.cur_music = rows[23];
+
 			  message_list.push_back(msg_info);
 		  }
 		  return true;
