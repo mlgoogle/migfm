@@ -89,7 +89,7 @@ bool ChatMgrEngine::OnChatMgrMessage(struct server *srv, int socket,
 	packet.GetPacketType(type);
 
 	if (type=="getsc1"){
-		srv_mgr_->GetBestIdleTest(socket,packet);
+		srv_mgr_->GetBestIdle(socket,packet);
 	}else if(type=="hischat1"){
 		message_mgr_->GetLeaveMessage(socket,packet);
 	}

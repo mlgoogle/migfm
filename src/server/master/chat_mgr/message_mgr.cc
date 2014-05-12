@@ -85,7 +85,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
 
      r = pack.GetAttrib("count",str_count);
      if((!r)||(atoll(str_count.c_str())<=0)){
-    	 count  = 10;
+    	 count  = 5;
      }else{
     	 count = atol(str_count.c_str());
      }

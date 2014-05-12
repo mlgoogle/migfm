@@ -3,7 +3,7 @@
 #include "plugins.h"
 #include "message_mgr.h"
 #include "srv_mgr.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 #include "basic/scoped_ptr.h"
 
 namespace chat_logic{

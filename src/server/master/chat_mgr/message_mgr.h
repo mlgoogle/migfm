@@ -2,7 +2,7 @@
 #define _MASTER_PLUGIN_CHAT_MGR_MESSAGE_MGR__H__
 #include "logic_comm.h"
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 #include "json/json.h"
 #include <list>
 namespace chat_logic{

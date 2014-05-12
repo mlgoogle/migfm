@@ -27,7 +27,7 @@ public:
 	static base_storage::DBStorageEngine* DBConnectionPop(void);
 	static void DBConnectionPush(base_storage::DBStorageEngine* engine);
 #endif
-public:
+private:
 	static std::list<base::ConnAddr>  addrlist_;
 #if defined (_DB_POOL_)
 	static std::list<base_storage::DBStorageEngine*>  db_conn_pool_;
@@ -40,16 +40,7 @@ public:
 	AutoDBCommEngine();
 	virtual ~AutoDBCommEngine();
 	base_storage::DBStorageEngine*  GetDBEngine(){
-		if(engine_){
-			engine_->Release();//释放多余记录集
-			if(!engine_->CheckConnect()){//失去连接重新连接
-				//重新创建连接
-				LOG_DEBUG("lost connection");
-				if(!engine_->Connections(DBComm::addrlist_))
-					return NULL;
-			}
-			return engine_;
-		}
+		if(engine_){engine_->Release();}
 		return engine_;
 	}
 private:

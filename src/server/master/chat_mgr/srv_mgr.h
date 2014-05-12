@@ -1,7 +1,7 @@
 #ifndef _MASTER_PLUGIN_CHAT_MGR_SRV__H__
 #define _MASTER_PLUGIN_CHAT_MGR_SRV__H__
 #include "plugins.h"
-#include "basic/http_packet.h"
+#include "protocol/http_packet.h"
 
 namespace chat_logic{
 
@@ -11,7 +11,6 @@ public:
 	virtual ~ServerMgr();
 public:
 	bool GetBestIdle(const int socket,const packet::HttpPacket& packet);
-	bool GetBestIdleTest(const int socket,const packet::HttpPacket& packet);
 
 };
 }
