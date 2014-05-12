@@ -219,6 +219,33 @@ bool DBComm::GetUserHistoryMusic(const std::string& uid,const std::string& fromi
 	 return false;
 }
 
+
+bool DBComm::UpdateLogin(const int64 uid){
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	if (engine==NULL){
+		LOG_ERROR("engine error");
+		return false;
+	}
+	/*
+	call migfm.proc_UpdateLoginTime(10108)
+	*/
+	os<<"call proc_UpdateLoginTime("<<uid<<");";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+	return true;
+}
 bool DBComm::RecordMusicHistory(const std::string& uid,const std::string& songid){
 	std::stringstream os;
 	bool r = false;

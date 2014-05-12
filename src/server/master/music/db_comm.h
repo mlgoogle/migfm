@@ -50,6 +50,8 @@ public:
 
 	static bool GetSceneInfos(std::list<int>& list);
 
+	static bool UpdateLogin(const int64 uid);
+
 public:
 #if defined (_DB_POOL_)	
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

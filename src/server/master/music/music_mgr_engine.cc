@@ -1787,6 +1787,8 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 									   const packet::HttpPacket& packet){
 	packet::HttpPacket pack = packet;
 	std::string version;
+	std::string str_uid;
+	int64 uid;
 	std::string result_out;
 	std::string status;
 	std::string msg;
@@ -1807,6 +1809,16 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 		utf8_flag =1;
 		goto ret;
 	}
+
+	r = pack.GetAttrib(UID,str_uid);
+	if (!r){
+		msg = migfm_strerror(MIG_FM_HTTP_USER_NO_EXITS);
+		status = "0";
+		utf8_flag =1;
+		goto ret;
+	}
+	uid = atoll(str_uid.c_str());
+
 	//key clic
 	key = "clic";
 	r = storage::RedisComm::GetUpdateConfig(key,content);
@@ -1819,6 +1831,8 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 
 	LOG_DEBUG2("[%s]",content.c_str());
 	content = "{\"filename\":\"channelinfo.xml\",\"version\":\"1.0.0\",\"url\":\"http://www.baidu.com/migfm\"}";
+	//更新登陆时间
+	storage::DBComm::UpdateLogin(uid);
 	//����json
 	r = reader.parse(content.c_str(),root);
 	if (!r){
