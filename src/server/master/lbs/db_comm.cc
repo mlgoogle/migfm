@@ -252,6 +252,7 @@ bool DBComm::GetLBSAboutInfos(const std::string& uid,std::string& sex,std::strin
 
 }
 
+
 bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude, 
 						   double& longitude){
 							   
@@ -292,6 +293,41 @@ bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude,
 	return false;
 }
 
+bool DBComm::GetMsgCount(const int64 uid,int32& count){
+    std::stringstream os;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+		mig_lbs::RLockGd lk(db_single_lock_);
+		base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
+    bool r = false;
+	MYSQL_ROW rows;
+	int num;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+	os<<"call proc_GetMessageCount("<<uid<<")";
+	r = engine->SQLExec(os.str().c_str());
+	LOG_DEBUG2("%s",os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error");
+		return r;
+	}
+
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			count = atol(rows[0]);
+		}
+		return true;
+	}
+	return false;
+
+}
 
 bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double latitude,
                           const double longitude){

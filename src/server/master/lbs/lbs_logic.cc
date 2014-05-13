@@ -971,7 +971,8 @@ bool LBSLogic::GetMusicHotCltCmt(const std::string &songid,
 
 int LBSLogic::GetMsgCount(const std::string &uid){
 	int count = 0;
-	bool r = storage::RedisComm::GetMsgCount(uid,count);
+	//bool r = storage::RedisComm::GetMsgCount(uid,count);
+	bool r = storage::DBComm::GetMsgCount(atoll(uid.c_str()),count);
 	return count;
 }
 

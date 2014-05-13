@@ -52,6 +52,8 @@ public:
 	static bool GetUserInfosLBS(Json::Value& users,double latitude,double longitude,
 			int radius,int max_num);
 
+	static bool GetMsgCount(const int64 uid,int32& count);
+
 
 public:
 #if defined (_DB_POOL_)
