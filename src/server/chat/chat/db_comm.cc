@@ -148,10 +148,10 @@ bool DBComm::RecordUserMessageList(const int32 type,const int64 send_uid,
 	snprintf(s_distance, arraysize(s_distance),
 			"%lf", distance);
 
-	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'123232.09999')
+	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'0','123232.09999')
 	os	<< "call proc_RecordMessageList("
 		<<type<<",\'"<<message<<"\',"<<send_uid
-		<<","<<to_uid<<",\'"<<s_distance<<"\')";
+		<<","<<to_uid<<",\'0\',\'"<<s_distance<<"\')";
 
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
