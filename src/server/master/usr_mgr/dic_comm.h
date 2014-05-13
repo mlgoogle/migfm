@@ -4,6 +4,7 @@
 #include "thread_lock.h"
 #include "storage/storage.h"
 #include "basic/basic_info.h"
+#include "basic/basictypes.h"
 #include <list>
 namespace storage{
 
@@ -16,6 +17,8 @@ public:
 	static void Init(std::list<base::ConnAddr>& addrlist,
 			const int32 dic_conn_num = 10);
 	static void Dest();
+public:
+	static bool GenaratePushMsgID(const int64 uid, int64& msg_id);
 public:
 #if defined (_DIC_POOL_)
 	static base_storage::DictionaryStorageEngine* RedisConnectionPop(void);

@@ -2,6 +2,7 @@
 #define _MASTER_PLUGIN_USR_MGR_USR_MGR_ENGINE_H__
 #include "plugins.h"
 #include "protocol/http_packet.h"
+#include "basic/basictypes.h"
 namespace usr_logic{
 
 class UsrMgrEngine{
@@ -56,6 +57,8 @@ private:
 	void GetResultMsg(std::string &status, std::string &msg,
 		              std::string &result,std::string &out_str);
 private:
+	void RegeditDefaultMsg(const int64 uid);
+
 	bool RegeditUsr(const int socket,const int flag,const std::string username,
 		            const std::string password,const std::string nickname,
 	                const std::string source,const std::string gender = "1",

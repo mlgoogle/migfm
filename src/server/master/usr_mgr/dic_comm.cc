@@ -6,6 +6,8 @@ namespace storage{
 
 std::list<base::ConnAddr>  RedisComm::addrlist_;
 
+static const char *KEY_PUSH_ID_GEN = "soc:%lld:push.id:next";
+
 #if defined (_DIC_POOL_)
 threadrw_t* RedisComm::dic_pool_lock_;
 std::list<base_storage::DictionaryStorageEngine*>  RedisComm::dic_conn_pool_;
@@ -53,7 +55,7 @@ void RedisComm::Init(std::list<base::ConnAddr>& addrlist,const int32 dic_conn_nu
 
 void RedisComm::Dest(){
 #if defined (_DIC_POOL_)
-	mig_lbs::WLockGd lk(dic_pool_lock_);
+	usr_logic::WLockGd lk(dic_pool_lock_);
 	while(dic_conn_pool_.size()>0){
 		base_storage::DictionaryStorageEngine* engine = dic_conn_pool_.front();
 		dic_conn_pool_.pop_front();
@@ -70,20 +72,31 @@ void RedisComm::Dest(){
 #if defined (_DIC_POOL_)
 
 void RedisComm::RedisConnectionPush(base_storage::DictionaryStorageEngine* engine){
-	mig_lbs::WLockGd lk(dic_pool_lock_);
+	usr_logic::WLockGd lk(dic_pool_lock_);
 	dic_conn_pool_.push_back(engine);
 }
 
 base_storage::DictionaryStorageEngine* RedisComm::RedisConnectionPop(){
 	if(dic_conn_pool_.size()<=0)
 		return NULL;
-	mig_lbs::WLockGd lk(dic_pool_lock_);
+	usr_logic::WLockGd lk(dic_pool_lock_);
     base_storage::DictionaryStorageEngine* engine = dic_conn_pool_.front();
     dic_conn_pool_.pop_front();
     return engine;
 }
 
 #endif
+
+bool RedisComm::GenaratePushMsgID(const int64 uid, int64& msg_id) {
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
+
+	char key[256] = {0};
+	snprintf(key, arraysize(key), KEY_PUSH_ID_GEN, uid);
+	return redis_engine_->IncDecValue(key, strlen(key), 1, msg_id);
+}
 
 
 base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){

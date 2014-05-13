@@ -339,6 +339,7 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	int64 type;
 	int32 utf8_flag = 0;
 	std::stringstream os;
+	int32 return_code = 0;
 
 	r = pack.GetAttrib(SOURCE,source);
 	if (!r){
@@ -427,7 +428,7 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	}
 	r = storage::DBComm::RegistUser(source.c_str(),session.c_str(),
 		           password.c_str(),sex,username,nickname,usrid,
-				   type,location,birthday,head);
+				   type,location,birthday,head,return_code);
 
 
 	if (!r){//用户存在
@@ -437,6 +438,9 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 		goto ret;
 	}
 
+	//写入默认消息
+	if(return_code==0&&atol(source.c_str())>=0)
+		RegeditDefaultMsg(usrid);
 	//获取token
 	ssuid<<usrid;
 	base::BasicUtil::GetUserToken(ssuid.str(),token);
@@ -670,6 +674,13 @@ void UsrMgrEngine::GetResultMsg(std::string &status, std::string &msg,
 		 &out,&out_len);
 	 out_str.assign(out,out_len);
 	 LOG_DEBUG2("%s",out_str.c_str());
+}
+
+void UsrMgrEngine::RegeditDefaultMsg(const int64 uid){
+	int64 msg_id;
+	bool r = storage::RedisComm::GenaratePushMsgID(uid,msg_id);
+	//
+	storage::DBComm::RecordDefaultMessage(uid,msg_id);
 }
 
 }

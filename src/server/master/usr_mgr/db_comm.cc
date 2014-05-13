@@ -206,6 +206,28 @@ bool DBComm::GetUserInfos(const std::string& username,std::string& uid,
 
 }
 
+bool DBComm::RecordDefaultMessage(const int64 uid,const int64 msg_id){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	 std::stringstream os;
+	 bool r = false;
+	 if (engine==NULL){
+		 LOG_ERROR("GetConnection Error");
+		 return false;
+	 }
+	 // call migfm.proc_RegeditDefaultMessage(10108,10000);
+	 os<<"call migfm.proc_RegeditDefaultMessage("<<uid<<","<<msg_id<<");";
+	 LOG_DEBUG2("[%s]",os.str().c_str());
+	 r = engine->SQLExec(os.str().c_str());
+
+	 if (!r){
+		 LOG_ERROR2("exec sql error");
+		 return false;
+	 }
+	 return true;
+}
 bool DBComm::UpdateUserInfos(const int64 uid,const std::string& nickname,
                        const std::string& gender,const std::string& birthday){
 #if defined (_DB_POOL_)
@@ -393,14 +415,14 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 						const char* password, int &sex, std::string &username, 
 						std::string &nickname, int64 &userid, int64& type, 
 						std::string &location, std::string &birthday, 
-						std::string &head){
+						std::string &head,int32& return_code){
 #if defined (_DB_POOL_)
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
 #endif
 	std::stringstream os;
 	bool r = false;
-	int return_code;
+	//int return_code;
 	MYSQL_ROW rows;
 	if (engine == NULL) {
 		LOG_ERROR("GetConnection Error");
@@ -441,10 +463,14 @@ bool DBComm::RegistUser(const char* plat_id, const char* plat_session,
 	if (num>0){
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
 			return_code = atoi(rows[8]);
-			if (return_code!=0){
+			if (return_code!=0&&return_code!=2){
 				LOG_ERROR2("error code [%s]",rows[9]);
 				return false;
 			}
+
+			if(return_code!=0&&atol(plat_id)==0)
+				return false;
+
 			userid = atoll(rows[0]);
 			sex = atol(rows[1]);
 			type = atoll(rows[2]);

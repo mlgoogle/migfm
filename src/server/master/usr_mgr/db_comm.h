@@ -27,7 +27,8 @@ public:
 	static bool RegistUser(const char* plat_id,const char* plat_session,
 		             const char* password,int& sex,std::string& username,
 					 std::string& nickname, int64& userid, int64& type, 
-					 std::string& location,std::string& birthday,std::string& head);
+					 std::string& location,std::string& birthday,std::string& head,
+					 int32& return_code);
 
 	static bool AddUserInfos(const int uid,const std::string& username,
 		                        const std::string& nickname,const std::string& gender,
@@ -57,6 +58,8 @@ public:
 							  std::string& gender,std::string& type,
 							  std::string& birthday,std::string& location, 
 							  std::string& source,std::string& head,int& return_code);
+
+	static bool RecordDefaultMessage(const int64 uid,const int64 msg_id);
 
 public:
 #if defined (_DB_POOL_)
