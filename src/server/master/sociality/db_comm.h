@@ -62,6 +62,9 @@ public:
 									 const double distance,
 									 const std::string& message);
 
+	static bool RecordUserMessageList(const int32 type,const int64 send_uid,
+							const int64 to_uid,std::list<struct RecordMessage>& list);
+
 	struct FriendInfo {
 		std::string uid;
 		std::string name;

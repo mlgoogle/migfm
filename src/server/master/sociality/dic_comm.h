@@ -66,6 +66,9 @@ public:
 
 	static bool ClearNewMessage(const int64 uid);
 
+	static void GetPushMessageMusicinfos(std::list<struct MessageListInfo>& list);
+
+
 	static bool GetMusicInfos(std::map<std::string,std::string>&temp_songinfo,
 		               std::map<std::string,base::MusicInfo>& songinfo);
 

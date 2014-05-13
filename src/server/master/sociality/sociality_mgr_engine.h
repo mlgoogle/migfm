@@ -47,7 +47,10 @@ private:
 								  int &err_code);
 
 	bool OnMsgPresentSong(packet::HttpPacket& packet, Json::Value &result,
-						  int &status, int &err_code);
+						  int &status, int &err_code,const int socket,int& flag);
+
+	bool OnMsgSayHello(packet::HttpPacket& packet, Json::Value &result,
+			int &status, int &err_code,const int socket,int& flag);
 
 	bool OnMsgGetPushMsg(packet::HttpPacket& packet, Json::Value &result,
 		 	             int &status, int &err_code);
@@ -62,8 +65,6 @@ private:
 	bool OnMsgSendFriendMsg(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
 
-	bool OnMsgSayHello(packet::HttpPacket& packet, Json::Value &result,
-			int &status, int &err_code);
 
 	bool OnMsgAddUserBacklist(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code);
@@ -108,6 +109,7 @@ private:
 
 	bool RecordMessage(const std::string& send_uid,const std::string& to_uid,
             const std::string& msg,std::string& summary,int& status, int &err_code);
+
 
 	bool GetPushMsgDetail(const std::string& uid,
 		const std::string &msg, Json::Value &content);

@@ -166,6 +166,44 @@ bool DBComm::SetMusicHostCltCmt(const std::string& songid,
 		return true;
 }
 
+bool DBComm::RecordUserMessageList(const int32 type,const int64 send_uid,
+						const int64 to_uid,std::list<struct RecordMessage>& list){
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+
+	while(list.size()){
+		struct RecordMessage msg = list.front();
+		char s_distance[256];
+		list.pop_front();
+		snprintf(s_distance, arraysize(s_distance),
+					"%lf", msg.distance);
+		os	<< "call proc_RecordMessageList("
+			<<type<<",\'"<<msg.message<<"\',"<<send_uid
+			<<","<<to_uid<<",\'"<<msg.songid<<"\',\'"<<s_distance<<"\');";
+	}
+	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'123232.09999')
+
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+	return true;
+
+}
 bool DBComm::RecordUserMessageList(const int32 type,int64 send_uid,int64 to_uid,
 								const double distance,
 								const std::string& message){
@@ -184,10 +222,10 @@ bool DBComm::RecordUserMessageList(const int32 type,int64 send_uid,int64 to_uid,
 	snprintf(s_distance, arraysize(s_distance),
 			"%lf", distance);
 
-	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'123232.09999')
+	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'0','123232.09999')
 	os	<< "call proc_RecordMessageList("
 		<<type<<",\'"<<message<<"\',"<<send_uid
-		<<","<<to_uid<<",\'"<<s_distance<<"\')";
+		<<","<<to_uid<<",\'0\',\'"<<s_distance<<"\')";
 
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
@@ -697,7 +735,7 @@ bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
 
 	  //call migfm.proc_GetMessageList(10112,10,0);
 	  os<<"call migfm.proc_GetMessageList("
-			  <<uid<<","<<count<<","<<from<<")";
+			  <<uid<<","<<from<<","<<count<<")";
 	  const char* sql = os.str().c_str();
 	  LOG_DEBUG2("[%s]",os.str().c_str());
 	  r = engine->SQLExec(os.str().c_str());
@@ -720,26 +758,22 @@ bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
 			  msg_info.detail.distance = atof(rows[5]);
 			  std::string songid = rows[6];
 			  msg_info.musicinfo.set_id(songid);
-			  std::string name = rows[7];
-			  std::string singer = rows[8];
-			  msg_info.musicinfo.set_title(name);
-			  msg_info.musicinfo.set_artist(singer);
-			  msg_info.userinfo.set_birthday(rows[9]);
-			  msg_info.userinfo.set_head(rows[10]);
-			  msg_info.userinfo.set_crty(rows[11]);
-			  msg_info.userinfo.set_nickname(rows[12]);
-			  msg_info.userinfo.set_sex(rows[13]);
-			  msg_info.userinfo.set_source(rows[14]);
-			  msg_info.musicinfo.set_hq_url(rows[15]);
-			  msg_info.musicinfo.set_url(rows[16]);
-			  msg_info.musicinfo.set_pub_time(rows[17]);
-			  msg_info.musicinfo.set_pic_url(rows[18]);
-			  msg_info.musicinfo.set_music_clt(rows[19]);
-			  msg_info.musicinfo.set_music_cmt(rows[20]);
-			  msg_info.musicinfo.set_music_hot(rows[21]);
-			  msg_info.musicinfo.set_album_title(rows[22]);
-			  msg_info.detail.cur_music = rows[23];
+			  msg_info.userinfo.set_birthday(rows[7]);
+			  msg_info.userinfo.set_head(rows[8]);
+			  msg_info.userinfo.set_crty(rows[9]);
+			  msg_info.userinfo.set_nickname(rows[10]);
+			  msg_info.userinfo.set_sex(rows[11]);
+			  msg_info.userinfo.set_source(rows[12]);
+			  msg_info.musicinfo.set_hq_url(rows[13]);
+			  msg_info.musicinfo.set_url(rows[14]);
+			  msg_info.musicinfo.set_music_clt(rows[15]);
+			  msg_info.musicinfo.set_music_cmt(rows[16]);
+			  msg_info.musicinfo.set_music_hot(rows[17]);
 
+			  msg_info.current_musicinfo.set_id(rows[18]);
+			  msg_info.current_musicinfo.set_title(rows[19]);
+			  msg_info.current_musicinfo.set_artist(rows[20]);
+			  msg_info.current_musicinfo.set_album_title(rows[21]);
 			  message_list.push_back(msg_info);
 		  }
 		  return true;

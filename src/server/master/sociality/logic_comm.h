@@ -77,12 +77,20 @@ struct Detail{
 	std::string msg_time;
 	std::string message;
 };
+
 struct MessageListInfo{
 	struct Detail   detail;
 	base::UserInfo  userinfo;
 	base::MusicInfo musicinfo;
+	base::MusicInfo current_musicinfo;
 };
 
+
+struct RecordMessage{
+	double distance;
+	std::string songid;
+	std::string message;
+};
 
 class ThreadKey {
 public:

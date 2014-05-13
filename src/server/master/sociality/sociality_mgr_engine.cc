@@ -101,13 +101,14 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 	std::string type;
 	packet.GetPacketType(type);
 
+	int flag = 0;
 	Json::Value root(Json::objectValue);
 	int ret_status = 0;
 	int err_code = 0;
 	if (type == "setuserconfigofpush") {
 		OnMsgSetUserConfigOfPush(packet, root, ret_status, err_code);
 	} else if (type == "presentsong") {
-		OnMsgPresentSong(packet, root, ret_status, err_code);
+		OnMsgPresentSong(packet, root, ret_status, err_code,socket,flag);
 	} else if (type == "getpushmsg") {
 		OnMsgGetPushMsg(packet, root, ret_status, err_code);
 	} else if (type == "getpushmsgsummary") {
@@ -117,7 +118,7 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 	} else if (type == "sendfriendmsg") {
 		OnMsgSendFriendMsg(packet, root, ret_status, err_code);
 	} else if (type == "sayhello") {
-		OnMsgSayHello(packet, root, ret_status, err_code);
+		OnMsgSayHello(packet, root, ret_status, err_code,socket,flag);
 	} else if (type == "adduserbacklist") {
 		OnMsgAddUserBacklist(packet, root, ret_status, err_code);
 	} else if (type == "addfriend") {
@@ -136,17 +137,18 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 		return true;
 	}
 
-	root["status"] = ret_status;
-	if (ret_status != 1)
-		root["msg"] = migfm_strerror(err_code);
-	else
-		root["msg"] = "";
+	if(flag==0){
+		root["status"] = ret_status;
+		if (ret_status != 1)
+			root["msg"] = migfm_strerror(err_code);
+		else
+			root["msg"] = "";
 
-	Json::FastWriter wr;
-	std::string res = wr.write(root);
-	SomeUtils::SendFull(socket, res.c_str(), res.length());
-
-	MIG_DEBUG(USER_LEVEL, "lbs request:%s, response:%s", type.c_str(), res.c_str());
+		Json::FastWriter wr;
+		std::string res = wr.write(root);
+		SomeUtils::SendFull(socket, res.c_str(), res.length());
+		MIG_DEBUG(USER_LEVEL, "lbs request:%s, response:%s", type.c_str(), res.c_str());
+	}
 
     return true;
 }
@@ -202,7 +204,7 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 }
 
 bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
-		Json::Value& result, int& status, int &err_code) {
+		Json::Value& result, int& status, int &err_code,const int socket,int& flag) {
 	LOGIC_PROLOG();
 
 	std::string user_id, to_user_id, song_id_str, ext_msg;
@@ -235,13 +237,28 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	//淇敼涓烘敮鎸佸棣栭煶涔�
+	//
 	std::string summary;
 	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,err_code,status))
 		return false;
 
 	//鍔犲叆鍘嗗彶璁板綍
 	DBComm::AddMusciFriend(user_id,to_user_id);
+
+
+	//回复客户端，避免客户端因推送长时间等待
+	status = 1;
+	result["status"] = status;
+	if (status != 1)
+		result["msg"] = migfm_strerror(err_code);
+	else
+		result["msg"] = "";
+
+	Json::FastWriter wr;
+	std::string res = wr.write(result);
+	SomeUtils::SendFull(socket, res.c_str(), res.length());
+	flag = 1;
+	///
 
 	//鎺ㄩ�娑堟伅閰嶇疆
 	std::string device_token;
@@ -403,7 +420,7 @@ bool SocialityMgrEngine::OnMsgSendFriendMsg(packet::HttpPacket& packet,
 }
 
 bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
-		Json::Value& result, int& status, int &err_code) {
+		Json::Value& result, int& status, int &err_code,const int socket,int& flag) {
 	LOGIC_PROLOG();
 	std::string uid;
 	std::string touid;
@@ -438,6 +455,20 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 
 	DBComm::AddMusciFriend(uid,touid);
 
+
+
+	//回复客户端，避免客户端因推送长时间等待
+	status = 1;
+	result["status"] = status;
+	if (status != 1)
+		result["msg"] = migfm_strerror(err_code);
+	else
+		result["msg"] = "";
+
+	Json::FastWriter wr;
+	std::string res = wr.write(result);
+	SomeUtils::SendFull(socket, res.c_str(), res.length());
+	flag = 1;
 
 	std::string device_token;
 	bool is_recv = false;
@@ -1367,6 +1398,9 @@ bool SocialityMgrEngine::GetPushMessage(const int64 uid,const int64 page_index,
 	if(!r||message_list.size()<=0){
 		return r;
 	}
+
+	RedisComm::GetPushMessageMusicinfos(message_list);
+
 	while(message_list.size()>0){
 		Json::Value unit;
 		struct MessageListInfo message_info = message_list.front();
@@ -1411,21 +1445,32 @@ void SocialityMgrEngine::MakeJsonMusicPacket(struct MessageListInfo* msg,Json::V
 	std::string b64title;
 	std::string b64artist;
 	std::string b64album;
-	Base64Decode(msg->musicinfo.title(),&b64title);
-	Base64Decode(msg->musicinfo.artist(),&b64artist);
-	Base64Decode(msg->musicinfo.album_title(),&b64album);
-	info["album"] = b64album;
-	info["artist"] = b64artist;
-	info["clt"] = msg->musicinfo.clt_num();
-	info["hot"] = msg->musicinfo.hot_num();
-	info["cmt"] = msg->musicinfo.cmt_num();
-	info["hqurl"] = msg->musicinfo.hq_url();
-	info["id"] = msg->musicinfo.id();
-	info["like"] = "0";
-	info["pic"] = msg->musicinfo.pic_url();
-	info["pub_time"] = msg->musicinfo.pub_time();
-	info["title"] = b64title;
-	info["url"] = msg->musicinfo.url();
+
+	if(msg->detail.message_type==PARENT_TYPE){
+		Base64Decode(msg->musicinfo.title(),&b64title);
+		Base64Decode(msg->musicinfo.artist(),&b64artist);
+		Base64Decode(msg->musicinfo.album_title(),&b64album);
+		info["album"] = b64album;
+		info["artist"] = b64artist;
+		info["clt"] = msg->musicinfo.clt_num();
+		info["hot"] = msg->musicinfo.hot_num();
+		info["cmt"] = msg->musicinfo.cmt_num();
+		info["hqurl"] = msg->musicinfo.hq_url();
+		info["id"] = msg->musicinfo.id();
+		info["like"] = "0";
+		info["pic"] = msg->musicinfo.pic_url();
+		info["pub_time"] = msg->musicinfo.pub_time();
+		info["title"] = b64title;
+		info["url"] = msg->musicinfo.url();
+	}else{
+		Base64Decode(msg->current_musicinfo.title(),&b64title);
+		Base64Decode(msg->current_musicinfo.artist(),&b64artist);
+		Base64Decode(msg->current_musicinfo.album_title(),&b64album);
+		info["album"] = b64album;
+		info["artist"] = b64artist;
+		info["title"] = b64title;
+		info["id"] = msg->current_musicinfo.id();
+	}
 }
 
 void SocialityMgrEngine::MakeJsonUserinfoPacket(struct MessageListInfo* msg,Json::Value &info){
@@ -1469,19 +1514,24 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 }
 */
 
-/*
+
 	Json::Reader reader;
 	Json::Value  root;
+	std::list<struct RecordMessage> list;
+	double distance = 0;
+
 	std::string sd_nick, sd_sex, sd_head;
 	std::string to_nick, to_sex, to_head;
-	base::UserInfo sd_usrinfo;
-	base::UserInfo to_usrinfo;
+	double uid_latitude,uid_longitude,tar_latitude,tar_longitude;
 
-	if (!base::BasicUtil::GetUserInfo(uid,sd_usrinfo))
-		return false;
-	if (!base::BasicUtil::GetUserInfo(to_uid,to_usrinfo))
+	if (!DBComm::GetUserInfos(uid, sd_nick, sd_sex, sd_head,uid_latitude,uid_longitude))
 		return false;
 
+	if (!DBComm::GetUserInfos(to_uid, to_nick, to_sex, to_head,tar_latitude,tar_longitude))
+		return false;
+
+
+	distance =  base::BasicUtil::CalcGEODistance(uid_latitude,uid_longitude,tar_latitude,tar_longitude);
 	bool r = reader.parse(msg,root);
 	if (!r){
 		err_code = MIG_FM_HTTP_JSON_ERROR;
@@ -1511,7 +1561,12 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 
 		std::string id = song[i]["songid"].asString();
 		std::string msg = song[i]["msg"].asString();
-		std::string detail, summary;
+		struct RecordMessage record_msg;
+		record_msg.songid = id;
+		record_msg.message = msg;
+		record_msg.distance = distance;
+		list.push_back(record_msg);
+	/*	std::string detail, summary;
 		int64 msg_id = 0;
 		if (!RedisComm::GenaratePushMsgID(atoll(id.c_str()), msg_id)) {
 			err_code = MIG_FM_DB_ACCESS_FAILED;
@@ -1530,10 +1585,11 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 			err_code = MIG_FM_DB_ACCESS_FAILED;
 			status = -1;
 			return false;
-		}
+		}*/
 
 	}
 
+	DBComm::RecordUserMessageList(PARENT_TYPE,atoll(uid.c_str()),atoll(to_uid.c_str()),list);
 	//新增消息
 	RedisComm::AddNewMessage(atoll(to_uid.c_str()));
 
@@ -1543,9 +1599,8 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 	r = base::BasicUtil::ConverNum(infos_size,conver_num);
 	if(!r)
 		conver_num.append("0");
-	ss << sd_usrinfo.nickname().c_str() << "(" << uid << ")" << "赠送"<<conver_num<<"首歌";
+	ss << sd_nick.c_str() << "(" << uid << ")" << "赠送"<<conver_num<<"首歌";
 	summary.assign(ss.str());
-*/
 	return true;
 }
 
