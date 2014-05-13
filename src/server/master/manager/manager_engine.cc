@@ -110,6 +110,7 @@ bool ManagerEngine::PushAllUserMsg(const int socket,const packet::HttpPacket& pa
     packet::HttpPacket pack = packet;
     std::string str_tid;
     std::string message;
+    std::string summary;
     std::string is_record;
     std::string is_push;
     std::string token;
@@ -131,7 +132,7 @@ bool ManagerEngine::PushAllUserMsg(const int socket,const packet::HttpPacket& pa
     }
 
     //消息
-    r = manager_storage::DBComm::GetPushMessage(message);
+    r = manager_storage::DBComm::GetPushMessage(summary,message);
     if(!r)
     	return false;
 
@@ -140,8 +141,8 @@ bool ManagerEngine::PushAllUserMsg(const int socket,const packet::HttpPacket& pa
     while(userinfo_list.size()>0){
     	int64 uid = userinfo_list.front();
     	userinfo_list.pop_front();
-    	//if(uid==10108||uid ==10161||uid==10150||uid==10203)
-    		PushUserMessage(uid,message,atol(is_record.c_str()),atol(is_push.c_str()));
+    	if(uid==10108||uid ==10161||uid==10150||uid==10203)
+    		PushUserMessage(uid,summary,message,atol(is_record.c_str()),atol(is_push.c_str()));
     }
 
 ret:
@@ -164,6 +165,7 @@ bool ManagerEngine::PushUserMsg(const int socket,const packet::HttpPacket& packe
     bool r = false;
     packet::HttpPacket pack = packet;
     std::string str_tid;
+    std::string summary;
     std::string message;
     std::string is_record;
     std::string is_push;
@@ -206,7 +208,7 @@ bool ManagerEngine::PushUserMsg(const int socket,const packet::HttpPacket& packe
     	 is_push = "1";
     }
 
-    PushUserMessage(tid,message,atol(is_record.c_str()),atol(is_push.c_str()));
+    PushUserMessage(tid,summary,message,atol(is_record.c_str()),atol(is_push.c_str()));
 
 ret:
 	reponse = wr.write(result);
@@ -216,14 +218,13 @@ ret:
 	return true;
 }
 
-void ManagerEngine::PushUserMessage(const int64 recvid,
+void ManagerEngine::PushUserMessage(const int64 recvid,const std::string& summary,
 		const std::string& message,const int32 is_record,
 		const int32 is_push){
 
 	int64 msg_id;
 	time_t current_time;
 
-	std::string summary = "出去人多，家里无聊.怎么办？小哟来教你如何真正的恋(yue)爱(pao)！";
 	if(is_record){
 		manager_storage::RedisComm::GenaratePushMsgID(msg_id);
 		current_time = time(NULL);

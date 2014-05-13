@@ -97,7 +97,7 @@ void DBComm::Dest(){
 }
 
 
-bool  DBComm::GetPushMessage(std::string& message){
+bool  DBComm::GetPushMessage(std::string& summary,std::string& message){
 #if defined (_DB_POOL_)
 		AutoDBCommEngine auto_engine;
 		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
@@ -124,7 +124,8 @@ bool  DBComm::GetPushMessage(std::string& message){
 		int num = engine->RecordCount();
 		if (num>0){
 			while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
-				message = rows[0];
+				summary = rows[0];
+				message = rows[1];
 			}
 			return true;
 		}

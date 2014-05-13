@@ -28,7 +28,7 @@ public:
 								  const std::string& message,const std::string& current_time);
 
 	static bool GetUsersInfo(const int64 from,const int64 count,std::list<int64>& userinfo);
-	static bool GetPushMessage(std::string& message);
+	static bool GetPushMessage(std::string& summary,std::string& message);
 public:
 	static std::list<base::ConnAddr>  addrlist_;
 #if defined (_DB_POOL_)

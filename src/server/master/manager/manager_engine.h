@@ -45,7 +45,7 @@ private:
 	bool PushAllUserMsg(const int socket,const packet::HttpPacket& packet);
 
 private:
-	void PushUserMessage(const int64 recvid,
+	void PushUserMessage(const int64 recvid,const std::string& summary,
 				const std::string& message,const int32 is_record,
 				const int32 is_push);
 
