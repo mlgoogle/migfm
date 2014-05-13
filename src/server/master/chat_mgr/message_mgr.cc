@@ -40,7 +40,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
 
      r = pack.GetAttrib("platformid",str_platform_id);
      if((!r)||(atoll(str_platform_id.c_str())<=0)){
-    	 result["status"] = "1";
+    	 result["status"] = 0;
     	 result["msg"] = "平台ID不存在";
     	 content = "";
     	 goto ret;
@@ -49,7 +49,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
 
      r = pack.GetAttrib("uid",str_uid);
      if((!r)||(atoll(str_uid.c_str())<=0)){
-    	 result["status"] = "1";
+    	 result["status"] = 0;
     	 result["msg"] = "用户ID不存在";
     	 content = "";
     	 goto ret;
@@ -59,7 +59,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
 
      r = pack.GetAttrib("tid",str_oppid);
      if((!r)||(atoll(str_oppid.c_str())<=0)){
-    	 result["status"] = "1";
+    	 result["status"] = 0;
     	 result["msg"] = "对方ID不存在";
     	 content = "";
     	 goto ret;
@@ -68,7 +68,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
 
      r = pack.GetAttrib("msgid",str_msg_id);
      if((!r)||(atoll(str_msg_id.c_str())<0)){
-    	 result["status"] = "1";
+    	 result["status"] = 0;
     	 result["msg"] = "消息id不存在";
     	 content = "";
     	 goto ret;
@@ -96,7 +96,7 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
      r = pack.GetAttrib("token",token);
      r = true;
      if(!r||(chat_logic::SomeUtils::CheckUserToken(str_platform_id,str_uid,token))){
-    	 result["status"] = "1";
+    	 result["status"] = 0;
     	 result["msg"] = "token错误";
     	 content = "";
     	 goto ret;
@@ -104,12 +104,12 @@ bool MessageMgr::GetLeaveMessage(const int socket,const packet::HttpPacket& pack
 
      r = chat_storage::DBComm::GetLeaveMessage(platform_id,uid,oppid,from,count,msg_id,list);
      if(!r){
-    	 result["status"] = "0";
+    	 result["status"] = 0;
     	 result["msg"] = "";
     	 content = "";
 
      }
-     result["status"] = "0";
+     result["status"] = 1;
      result["msg"] = "";
 
      PacketLeaveMessage(list,content);

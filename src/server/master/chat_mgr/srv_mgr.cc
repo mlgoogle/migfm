@@ -40,9 +40,9 @@ bool ServerMgr::GetBestIdle(const int socket,const packet::HttpPacket& packet){
     platform_id = atoll(str_platform_id.c_str());
 
 
-  	 result["status"] = "0";
+  	 result["status"] = 1;
   	 result["msg"] = "";
-  	 result["result"]["host"] = "112.124.49.59";
+  	 result["result"]["host"] = "42.121.14.108";
   	 result["result"]["port"] = 17000;
 
 ret:
