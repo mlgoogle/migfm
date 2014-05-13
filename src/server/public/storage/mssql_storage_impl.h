@@ -21,7 +21,7 @@ public:
 	bool AddSPName(const char* sp_name);//添加存储过程名
 	bool StoredProcedure(); //执行存储过程
 	bool AddSPParam(const int32 var,const int32 type,const char* name,
-			        void* param); //添加参数
+			        void* param,const int32 outstrlen = 0); //添加参数
 
 	bool Affected(unsigned long& rows);
 	bool FreeRes();
@@ -31,12 +31,14 @@ public:
 
 	char* GetEntry(db_row_t *row,int colidx) ;
 
+	char* GetResult(int colidx);
+
 	bool CheckAffect(const int32 index,const char* name);
 
 private:
-	bool AddSPParamBigInt(const int32 var,const char* name,void* param);
-	bool AddSPParamInt(const int32 var,const char* name,void* param);
-	bool AddSPParamStr(const int32 var,const char* name,void* param);
+	bool AddSPParamBigInt(const int32 var,const char* name,void* param,const int32 outstrlen = 0);
+	bool AddSPParamInt(const int32 var,const char* name,void* param,const int32 outstrlen = 0);
+	bool AddSPParamStr(const int32 var,const char* name,void* param,const int32 outstrlen = 0);
 private:
 	//scoped_ptr<db_conn_t>    conn_;
 	scoped_ptr<db_conn_t>      conn_;

@@ -129,10 +129,8 @@ public:
 
 	virtual bool AddSPName(const char* sp_name) = 0;//添加存储过程名
 
-	virtual bool AddSPParam(const int32 var,
-							const int32 type,
-							const char* name,
-							void* param) = 0; //添加参数
+	virtual bool AddSPParam(const int32 var,const int32 type,const char* name,
+	        void* param,const int32 outstrlen = 0) = 0; //添加参数
 
 	virtual bool CheckAffect(const int32 index,const char* name) = 0;
 
@@ -147,6 +145,8 @@ public:
 	virtual bool CheckConnect(void) = 0;
 	
 	virtual char* GetEntry(db_row_t *row,int cloidx) = 0;
+
+	virtual char* GetResult(int colidx) = 0;
 
 };
 

@@ -218,7 +218,7 @@ bool MssqlStorageEngineImpl::SQLExec(const char* sql){
 
 //添加参数
 bool MssqlStorageEngineImpl::AddSPParam(const int32 var,const int32 type,const char* name,
-        void* param){
+        void* param,const int32 outstrlen){
 
 	bool r = false;
 	switch(type){
@@ -229,7 +229,7 @@ bool MssqlStorageEngineImpl::AddSPParam(const int32 var,const int32 type,const c
 			r = AddSPParamInt(var,name,param);
 			break;
 		case TYPE_CHAR:
-			r = AddSPParamStr(var,name,param);
+			r = AddSPParamStr(var,name,param,outstrlen);
 			break;
 		default:
 			r = false;
@@ -239,6 +239,22 @@ bool MssqlStorageEngineImpl::AddSPParam(const int32 var,const int32 type,const c
 		// return false;
 
 	return true;
+}
+
+char* MssqlStorageEngineImpl::GetResult(int colidx){
+    char *buf;
+    int l = dbretlen ((DBPROCESS *)(result_.get()->proc), colidx + 1);
+
+    if (l <= 0)
+        return NULL;
+
+    buf = (char *) malloc (l + 1);
+    if (buf == NULL)
+        return NULL;
+
+    memcpy (buf, (DBCHAR *) dbretdata ((DBPROCESS *)(result_.get()->proc), colidx + 1), l);
+    buf[l] = '\0';
+    return buf;
 }
 
 char* MssqlStorageEngineImpl::GetEntry(db_row_t *row,int colidx){
@@ -295,7 +311,7 @@ bool MssqlStorageEngineImpl::StoredProcedure(){
 
 
 //添加整型参数
-bool MssqlStorageEngineImpl::AddSPParamBigInt(const int32 var,const char* name,void* param){
+bool MssqlStorageEngineImpl::AddSPParamBigInt(const int32 var,const char* name,void* param,const int32 outstrlen){
 	DBPROCESS* proc = (DBPROCESS*)(conn_.get()->proc);
 	switch(var){
 		case PARAM_IN:
@@ -303,7 +319,7 @@ bool MssqlStorageEngineImpl::AddSPParamBigInt(const int32 var,const char* name,v
 		        return false;
 		    break;
 		case PARAM_OUT:
-		    if (dbrpcparam (proc, name, (BYTE) DBRPCRETURN, SYBINT8, -1, -1, (BYTE *)param) == FAIL)
+		    if (dbrpcparam (proc, name, (BYTE) DBRPCRETURN, SYBINT8, -1, 0, (BYTE *)NULL) == FAIL)
 		        return false;
 		    break;
 		default:
@@ -312,7 +328,7 @@ bool MssqlStorageEngineImpl::AddSPParamBigInt(const int32 var,const char* name,v
 	return true;
 }
 
-bool MssqlStorageEngineImpl::AddSPParamInt(const int32 var,const char* name,void* param){
+bool MssqlStorageEngineImpl::AddSPParamInt(const int32 var,const char* name,void* param,const int32 outstrlen){
 	DBPROCESS* proc = (DBPROCESS*)(conn_.get()->proc);
 	switch(var){
 		case PARAM_IN:
@@ -320,7 +336,7 @@ bool MssqlStorageEngineImpl::AddSPParamInt(const int32 var,const char* name,void
 				return false;
 			break;
 		case PARAM_OUT:
-		    if (dbrpcparam (proc, name, (BYTE) DBRPCRETURN, SYBINT4, -1, -1, (BYTE *)param) == FAIL)
+		    if (dbrpcparam (proc, name,(BYTE) DBRPCRETURN, SYBINT4, -1, 0, (BYTE *)NULL) == FAIL)
 		    	return false;
 		    break;
 		default:
@@ -330,7 +346,7 @@ bool MssqlStorageEngineImpl::AddSPParamInt(const int32 var,const char* name,void
 }
 
 //添加字符串参数
-bool MssqlStorageEngineImpl::AddSPParamStr(const int32 var,const char* name,void* param){
+bool MssqlStorageEngineImpl::AddSPParamStr(const int32 var,const char* name,void* param,const int32 outstrlen){
 	DBPROCESS* proc = (DBPROCESS*)(conn_.get()->proc);
 	switch(var){
 		case PARAM_IN:
@@ -338,7 +354,7 @@ bool MssqlStorageEngineImpl::AddSPParamStr(const int32 var,const char* name,void
 		        return false;
 		    break;
 		case PARAM_OUT:
-		    if (dbrpcparam (proc, name, (BYTE) DBRPCRETURN, SYBCHAR, 0, strlen ((char*)param), (BYTE *)param) == FAIL)
+		    if (dbrpcparam (proc, name, (BYTE) DBRPCRETURN, SYBCHAR, outstrlen, 0, (BYTE *)NULL) == FAIL)
 		        return false;
 		    break;
 	}
