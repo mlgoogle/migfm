@@ -84,6 +84,7 @@ public:
 		                        std::list<std::string>& songinfolist);
 
 
+	static bool GetNewMsgNum(const std::string& uid, int& msg_num);
 
 	static void GetMusicInfosV2(std::list<std::string>& songlist,
 		                        std::list<std::string>& songinfolist);

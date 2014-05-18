@@ -1196,7 +1196,6 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	std::string result_out;
 	std::string status;
 	std::string msg;
-	std::string result;
 	std::string songid;
 	std::string lastsongid;
 	std::string name;
@@ -1204,6 +1203,10 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 	std::string state;
 	int32 utf8_flag = 0;
 	int32 recording_flag = 1;
+	int new_msg_num = 0;
+	Json::FastWriter wr;
+	Json::Value value;
+	std::string response;
 
 	r = pack.GetAttrib(UID,uid);
 	if (!r){
@@ -1280,13 +1283,24 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		goto ret;
 	}
 
+	// 返回最新消息个数
+	storage::RedisComm::GetNewMsgNum(uid,new_msg_num);
+
 	msg = "0";
 	status = "1";
 	utf8_flag = 0;
+
+
 ret:
-    music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
-	LOG_DEBUG2("[%s]",result_out.c_str());
-	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	value["reslut"]["new_msg_num"] = new_msg_num;
+	value["msg"] = msg;
+	value["status"] = status;
+
+	response = wr.write(value);
+
+   // music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	//LOG_DEBUG2("[%s]",result_out.c_str());
+	music_logic::SomeUtils::SendFull(socket,response.c_str(),response.length());
 	//recording mood and current songid
 	if (recording_flag){
 		//ֻ��¼����
@@ -1536,6 +1550,10 @@ bool MusicMgrEngine::GetMoodScensChannelSongsV3(const std::string& uid,
 				is_like = 1;
 			else
 				is_like = 0;
+
+			std::string test_url = "http://res2.imuapp.cn/resource1/b/1090/mp3/00/60/56/1090006056000800.mp3";
+			smi.set_url(test_url);
+			smi.set_hq_url(test_url);
 
 			result<<"{\"id\":\""<<smi.id().c_str()
 				<<"\",\"title\":\""<<b64title.c_str()
