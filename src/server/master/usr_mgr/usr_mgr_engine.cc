@@ -337,6 +337,7 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	int64 usrid;
 	int sex;
 	int64 type;
+	int64 new_msg_num = 0;
 	int32 utf8_flag = 0;
 	std::stringstream os;
 	int32 return_code = 0;
@@ -444,11 +445,15 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	//获取token
 	ssuid<<usrid;
 	base::BasicUtil::GetUserToken(ssuid.str(),token);
+	//获取最新消息
+	storage::RedisComm::GetNewMsgNum(usrid,new_msg_num);
+
 	os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
 		<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<sex
 		<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
 		<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
-		<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\"";
+		<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\",\"new_msg_num\":"
+		<<new_msg_num;
 
 	result = os.str();
 	status = "1";
@@ -481,6 +486,7 @@ bool UsrMgrEngine::UserLogin(const int socket,const packet::HttpPacket& packet){
 	std::string head;
 	std::string type;
 	int32 return_code;
+	int64 new_msg_num = 0;
 	std::string result_out;
 	int32 utf8_flag = 0;
 
@@ -501,11 +507,15 @@ bool UsrMgrEngine::UserLogin(const int socket,const packet::HttpPacket& packet){
 	if (r&&(return_code==0)){
 		//获取token
 		base::BasicUtil::GetUserToken(userid,token);
+		//获取最新消息
+		storage::RedisComm::GetNewMsgNum(atoll(userid.c_str()),new_msg_num);
+
 		os<<"\"userid\":\""<<userid<<"\",\"username\":\""<<username.c_str()
 			<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<s_sex
 			<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
 			<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
-			<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\"";
+			<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\",\"new_msg_num\":"
+			<<new_msg_num;
 		result = os.str();
 		status = "1";
 	}else{

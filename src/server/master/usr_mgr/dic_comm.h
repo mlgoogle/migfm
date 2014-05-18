@@ -19,6 +19,7 @@ public:
 	static void Dest();
 public:
 	static bool GenaratePushMsgID(const int64 uid, int64& msg_id);
+	static void GetNewMsgNum(const int64 uid, int64& msg_num);
 public:
 #if defined (_DIC_POOL_)
 	static base_storage::DictionaryStorageEngine* RedisConnectionPop(void);

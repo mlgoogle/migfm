@@ -87,6 +87,32 @@ base_storage::DictionaryStorageEngine* RedisComm::RedisConnectionPop(){
 
 #endif
 
+void RedisComm::GetNewMsgNum(const int64 uid, int64& msg_num){
+	char key[256] = {0};
+	char* value;
+	size_t value_len = 0;
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
+	if (redis_engine_==NULL)
+		return;
+
+	snprintf(key, arraysize(key), "soc:%lld:new.msg", uid);
+	bool r = redis_engine_->GetValue(key,strlen(key),&value,&value_len);
+	if (r){
+		msg_num = atol(value);
+		if (value){
+			free(value);
+			value = NULL;
+		}
+
+	}else{
+		MIG_ERROR(USER_LEVEL,"GetValue error[%s]",key);
+		msg_num = 0;
+	}
+}
+
 bool RedisComm::GenaratePushMsgID(const int64 uid, int64& msg_id) {
 #if defined (_DIC_POOL_)
 		AutoDicCommEngine auto_engine;
