@@ -6,15 +6,6 @@
 #include "linuxlist.h"
 
 struct server;
-struct socket_adapter {
-    struct list_head  link;
-    int sock;
-};
-
-struct netaio {
-    struct list_head  link;
-    struct aiocb cb;
-};
 
 #define AIOCBMAX 	2048
 

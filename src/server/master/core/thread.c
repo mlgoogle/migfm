@@ -75,6 +75,8 @@ static void *sys_trun(base_thread_t *thd,int flag,void *data)
 static int user_addtask(struct server *srv,int fd,struct plugin *pl)
 {
     int ret;
+    if(srv==NULL||pl==NULL)
+    	return 0;
     struct thread_adapter *thr_srv = (struct thread_adapter*)malloc(sizeof(*thr_srv));
     thr_srv->srv = srv;
     thr_srv->data = pl;
@@ -85,7 +87,7 @@ static int user_addtask(struct server *srv,int fd,struct plugin *pl)
 static int sys_addtask(struct server *srv,int fd,void *data)
 {
     int ret = 0;
-	if (data==NULL){
+	if (data==NULL||srv==NULL){
 		MIG_ERROR(USER_LEVEL,"data null==========");
 		return 0;
 	}
@@ -100,6 +102,8 @@ static int sys_addtask(struct server *srv,int fd,void *data)
 
 static int time_addtask(struct server* srv,void* data){
 	int ret;
+	if(srv==NULL||data==NULL)
+		return 0;
 	struct time_task* task = (struct time_task*)data;
 	struct time_task* new_task = (struct time_task*)malloc(sizeof(struct time_task));
 	new_task->id = (char*)malloc(strlen(task->id)+1);

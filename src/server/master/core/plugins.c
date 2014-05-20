@@ -108,7 +108,7 @@ handler_t plugins_call_handler_init_time(struct server *srv){
      struct plugin* p;
      handler_t r;
      if(!srv->plugins_slot) return HANDLER_GO_ON;
-     slot = ((struct plugin***)srv->plugins_slot)[11];
+     slot = ((struct plugin***)srv->plugins_slot)[PLUGIN_FUNC_TIME_INIT];
      if(!slot) return HANDLER_GO_ON;
      for(j=0;j<srv->plugins.used&&slot[j];j++){
          p=slot[j];
@@ -189,6 +189,7 @@ PLUGIN_TO_SLOT(PLUGIN_FUNC_HANDLER_READ,handler_read);
 PLUGIN_TO_SLOT(PLUGIN_FUNC_CONNECTION_SRV, connection_srv);
 PLUGIN_TO_SLOT(PLUGIN_FUNC_HANDLER_READ_SRV,handler_read_srv);
 PLUGIN_TO_SLOT(PLUGIN_FUNC_HANDLER_READ_OTHER,handler_read_other);
+PLUGIN_TO_SLOT(PLUGIN_FUNC_TIME_INIT,init_time);
 #undef PLUGIN_TO_SLOT
 
 

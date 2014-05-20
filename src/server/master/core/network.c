@@ -1131,6 +1131,8 @@ int create_reconnects(struct server *srv){
     struct sock_adapter* tmp_sa = NULL;
     int n =srv->ncount_connect;
     int index = 0;
+    if(srv==NULL)
+    	return 0;
     if(list_empty(&srv->srv_conf.remotes)){
     	 MIG_ERROR(USER_LEVEL,"srv->srv_conf.remotes empty");
          return 0;
@@ -1189,6 +1191,8 @@ int register_event(struct server *srv,int fd,short events){
 	struct sock_adapter* conn = NULL;
 	int rc;
 	int flags;
+	if(srv==NULL)
+		return 0;
 	conn = alloc_sock_adapter(srv);
 	if(conn==NULL){
 	    MIG_ERROR(USER_LEVEL,"alloc sock adapter failed");

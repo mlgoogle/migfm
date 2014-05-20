@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
-#include "macro.h"
+#include "common.h"
 int netaio_init(struct server *srv)
 {
     srv->network_write = netaio_send;

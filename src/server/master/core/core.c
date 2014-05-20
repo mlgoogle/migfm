@@ -5,6 +5,7 @@
 #include "thread.h"
 #include "network.h"
 #include "clock_task.h"
+#include "buffer.h"
 #include "log/mig_log.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,10 +19,11 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/resource.h>
-#include "client/linux/handler/exception_handler.h"
+//#include "client/linux/handler/exception_handler.h"
 
 static struct server *srvt = NULL;
 
+/*
 static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 						 void* contect,bool succeeded){
 
@@ -29,7 +31,7 @@ static bool DumpCallBack(const char* dump_path,const char* minidump_id,
 
 	return succeeded;
 }
-
+*/
 static struct server* server_init(void){
 
 	struct server  *srv; 
@@ -309,17 +311,22 @@ int core_main(int agrc,char* argv[]){
 		MIG_ERROR(USER_LEVEL,"initialization of threadpool error");
 		goto rel_plugins;
 	}
+
+	///test threadpool
+
 	srvt->state = SERVER_INIT_TP;
 	MIG_INFO(USER_LEVEL,"init threadpool success");
+
 
 
 	if (init_clock(srvt)<0){
 		MIG_ERROR(USER_LEVEL,"initialization of clock error");
 		goto rel_plugins;
 	}
-	
+
 	srvt->state = SERVER_INIT_CLOCK;
 	MIG_INFO(USER_LEVEL,"init clock success");
+
 
 	if (network_init(srvt)<0){
 		MIG_ERROR(USER_LEVEL,"initialization of network init error");

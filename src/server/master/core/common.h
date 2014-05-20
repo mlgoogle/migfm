@@ -287,6 +287,8 @@ struct plugin {
 
 	handler_t (*connection_close)(struct server *srv,int fd);
 
+	handler_t (*init_time)(struct server *srv,int fd,void* data,int len);
+
 	handler_t (*connection_srv)(struct server *srv,int fd,void* data,int len);
 
 	handler_t (*connection_close_srv)(struct server* srv,int fd);
@@ -331,22 +333,6 @@ struct server{
 	int                      ncount_connect;
 
 	struct sock_adapter**    connect_pool;
-
-	int (*network_write) (struct server *srv, 
-	                      struct netaio **aio, 
-                          struct socket_adapter *sa, 
-						  void *data,size_t len);
-
-	int (*network_write_all) (struct server *srv,struct list_head *listaio, 
-		                      int *done, int *complet_nums,struct list_head *listsa, 
-		                      void *data, size_t len);
-
-	int (*network_write_return) (struct server *srv, struct netaio *aio, int *len);
-
-	int (*network_send) (struct server *srv,int sock,void *data, size_t len);
-
-	int (*network_multicast) (struct server *srv, struct list_head *listsa, 
-		                      void *data, size_t len); 
 
 	int (*user_addtask)(struct server *srv,int fd,struct plugin *pl);
 

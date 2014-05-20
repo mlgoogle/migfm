@@ -6,9 +6,11 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <signal.h>
+#include "log/mig_log.h"
 #include "common.h"
 #include "linuxlist.h"
 #include "plugins.h"
+
 
 static struct list_head time_task;
 static struct server* srvt = NULL;
@@ -17,8 +19,10 @@ static void on_time_msg(int num){
 	struct list_head *tmp;
 	struct list_head *n;
 	struct time_task *task = NULL;
+	//MIG_INFO(USER_LEVEL,"timer_task");
 	if(list_empty(&time_task)) return ;
 	
+
 	list_for_each_safe(tmp,n,&time_task){
 		task = list_entry(tmp,struct time_task,list);
 		task->current_time++;
@@ -61,8 +65,8 @@ static void del_time_task(struct server* srv,char* id,int opcode){
 
 static int add_time_task(struct server* srv,char* id,int opcode,
 		             int time,int ncount){
-    struct time_task *task = new struct time_task;
-	if(!task)
+    struct time_task *task =  ((struct time_task*)malloc(sizeof(struct time_task)));
+	if(!task||srv==NULL)
 		return 0;
 	task->id = (char*)malloc(strlen(id)+1);
 	strcpy(task->id,id);
@@ -80,12 +84,16 @@ int init_clock(struct server* srv){
     //srv->set_time_event = set_time_event;
 	srv->add_time_task = add_time_task;
 	srv->del_time_task = del_time_task;
+
     signal(SIGALRM,on_time_msg);
 	struct itimerval tick;
 	tick.it_value.tv_sec = 1;
 	tick.it_value.tv_usec = 0;
 	tick.it_interval.tv_sec = 1;
 	tick.it_interval.tv_usec = 0;
+
+
+	INIT_LIST_HEAD(&time_task);
 
 	//setitimer SIGALRM
 	int ret = setitimer(ITIMER_REAL,&tick,NULL);
@@ -94,7 +102,10 @@ int init_clock(struct server* srv){
 // 				strerror(errno));
 		return -1;
 	}
-    INIT_LIST_HEAD(&time_task);	
+
+
+
 	plugins_call_handler_init_time(srv);
+
     return 1;
 }
