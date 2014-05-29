@@ -122,6 +122,9 @@ private:
 
 	bool AddCacheLBSUserInfos(const int64 uid,Json::Value& temp_userid);
 
+
+	int32 GetEffectCollectNum(std::map<std::string,std::string>& songs);
+
 public:
 	~LBSLogic();
 

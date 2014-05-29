@@ -293,6 +293,50 @@ bool DBComm::GetUserLbsPos(const int64 src_uid,double& latitude,
 	return false;
 }
 
+
+bool DBComm::GetEffectCollectCount(std::map<std::string,std::string>& songs,int32& count){
+    std::stringstream os;
+#if defined (_DB_POOL_)
+	AutoDBCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+#if defined (_DB_SINGLE_)
+	mig_lbs::RLockGd lk(db_single_lock_);
+	base_storage::DBStorageEngine* engine = db_conn_single_;
+#endif
+	bool r = false;
+	MYSQL_ROW rows;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+	int num = songs.size();
+	if (num==0)
+		return false;
+	os<<"call proc_GetEffectUrlCount('";
+	for(std::map<std::string,std::string>::iterator it = songs.begin();
+		it!=songs.end();++it){
+
+		os<<it->first;
+		num--;
+		if (num!=0){
+			os<<",";
+		}
+	}
+
+	os<<"');";
+	LOG_DEBUG2("%s",os.str().c_str());
+	r = engine->SQLExec(os.str().c_str());
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			count = atol(rows[0]);
+		}
+		return true;
+	}
+	return false;
+
+}
 bool DBComm::GetMsgCount(const int64 uid,int32& count){
     std::stringstream os;
 #if defined (_DB_POOL_)
@@ -370,6 +414,7 @@ bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double la
 			val["userinfo"]["nickname"] = rows[6];
 			val["userinfo"]["sex"] = rows[7];
 			val["userinfo"]["userid"] = rows[8];
+			val["userinfo"]["plat"]  = rows[10];
 			val["music"]["id"] = rows[9];
 			val["userinfo"]["distance"]
 			  =  base::BasicUtil::CalcGEODistance(latitude,longitude,
@@ -563,27 +608,32 @@ bool DBComm::GetMusicAboutInfo(const std::string& song_id,std::string& hq_url,st
 		LOG_ERROR("sqlexec error");
 		return r;
 	}
-	num = engine->RecordCount();
-	if(num>0){
-		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+
+	unsigned long rows_num = 0;
+	engine->Affected(rows_num);
+	if(rows_num>0){
+		num = engine->RecordCount();
+		if(num>0){
+			while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
 			/*hq_url = "http://www.baidu.com/1.mp3";
 			song_url = "http://www.baidu.com/1.mp3";
 			clt_num = rows[0];
 			cmt_num = rows[1];
 			hot_num = rows[2];
 			*/
-			if (rows[0] !=NULL){
-				hq_url.assign(rows[1]);
-				song_url = hq_url;
-				clt_num.assign(rows[3]);
-				cmt_num.assign(rows[4]);
-				hot_num.assign(rows[5]);
+				if (rows[0] !=NULL){
+					hq_url.assign(rows[1]);
+					song_url = hq_url;
+					clt_num.assign(rows[3]);
+					cmt_num.assign(rows[4]);
+					hot_num.assign(rows[5]);
+				}
 			}
 		}
 		return true;
 	}
 
-	return true;
+	return false;
 
 }
 bool DBComm::GetMusicFriendNum(const std::string &uid,

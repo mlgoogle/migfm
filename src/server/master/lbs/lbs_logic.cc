@@ -66,6 +66,7 @@ void LBSLogic::FreeInstance() {
 
 int LBSLogic::SetPOI(int64 user_id, double longitude, double latitude,
 		const std::string& data, std::string& response, std::string& err_msg) {
+	return 0;
 	using namespace std;
 
 	if (0 == user_id)
@@ -428,7 +429,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
  				  const std::string default_content = "{\"songid\":\"0\",\"state\":\"1\",\"type\":\"mm\",\"tid\":\"1\",\"name\":\"黑梦\",\"singer\":\"窦唯\"}";
  				  bool is_user_like = false;
  				  r = GetUserCurrentMusic(default_content,item,is_user_like);
-				  usersmusic.append(item);
+ 				  if(r)
+ 					  usersmusic.append(item);
+
 			  }else {
 				  item["music"] = 0;
 			  }
@@ -457,15 +460,15 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		//same_music
 		result["result"]["music_num"] = usersmusic.size();
 		//near friend
-		result["result"]["near_num"] = near_num;
+		result["result"]["near_num"] = usersmusic.size();
 		//message_num
 		result["result"]["msg_num"] = GetMsgCount(uid_str);
 		//new message
 		result["result"]["new_msg_num"] = new_msg_num;
 	}else if (flag==5){
-		int collect_num = collect_musices.size();
-		int near_num = temp_users.size();
-		int music_num = map_songs.size();
+		int collect_num = GetEffectCollectNum(collect_musices)/*collect_musices.size()*/;
+		int near_num = usersmusic.size();
+		int music_num = usersmusic.size();
 		result["result"]["mynum"] = collect_num;
 		result["result"]["nearnum"] = music_num;
 	}
@@ -478,6 +481,12 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 }
 
 
+
+int32 LBSLogic::GetEffectCollectNum(std::map<std::string,std::string>& songs){
+	int32 count = 0;
+	storage::DBComm::GetEffectCollectCount(songs,count);
+	return count;
+}
 void LBSLogic::AddSameMusicUsers(Json::Value& same_music_users,
 		   Json::Value& user_music,
 		   const std::string& str_uid){
@@ -890,7 +899,9 @@ bool LBSLogic::GetUserCurrentMusic(const std::string &content, Json::Value &item
 			LOG_ERROR("song parser error");
 			return false;
 		}
-		storage::DBComm::GetMusicAboutInfo(smi.id(),hq_content_url,content_url,clt_num,cmt_num,hot_num);
+		r = storage::DBComm::GetMusicAboutInfo(smi.id(),hq_content_url,content_url,clt_num,cmt_num,hot_num);
+		if(!r)
+			return r;
 		smi.set_hq_url(hq_content_url);
 		smi.set_url(content_url);
 		smi.set_music_time(0);

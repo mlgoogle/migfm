@@ -54,6 +54,8 @@ public:
 
 	static bool GetMsgCount(const int64 uid,int32& count);
 
+	static bool GetEffectCollectCount(std::map<std::string,std::string>& songs,int32& count);
+
 
 public:
 #if defined (_DB_POOL_)
