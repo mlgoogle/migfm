@@ -182,7 +182,7 @@ bool PlatformChatCacheManager::IsExitsLeaveInfos(const int64 platform_id,const i
 	if (pl==NULL)
 	   return false;
 
-	//查询自己是否已经和对方产生会话
+	//
 	SessionInfosMap session_infos;
 	r = base::MapGet<LeaveInfosMap,LeaveInfosMap::iterator,SessionInfosMap>(pl->leave_infos_map_,mid,session_infos);
 

@@ -102,7 +102,7 @@ bool UserConnectionMgr::OnGetOppInfos(struct server *srv, int socket, struct Pac
 		return false;
 	}
 
-	if(vReqOppstionInfo->type==1)//���û�
+	if(vReqOppstionInfo->type==1)//
 		return OnGetUserInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
 							 vReqOppstionInfo->oppostion_id,vReqOppstionInfo->type,
 							 vReqOppstionInfo->reserverd);
