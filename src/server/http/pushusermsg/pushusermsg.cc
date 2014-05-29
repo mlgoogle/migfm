@@ -5,6 +5,10 @@
 #include <sstream>
 //#include "client/linux/handler/exception_handler.h"
 
+// TODO: 设置请求类型
+#define GET_TYPE		"pushusermsg"
+#define POST_TYPE		"pushusermsg"
+
 #if defined (FCGI_STD)
 #include "fcgi_stdio.h"
 #elif defined(FCGI_PLUS)
@@ -44,7 +48,7 @@ static void GetRequestMethod(const char* query){
 	int code;
 	bool r = false;
 	content.assign(query);
-	content.append("&type=searchcollect\n");
+	content.append("&type=" GET_TYPE "\n");
 	MIG_INFO(USER_LEVEL,"%s",content.c_str());
 	r = net::core_get(0,content.c_str(),content.length(),
 		respone,flag,code);
@@ -60,11 +64,10 @@ static void PostRequestMethod(std::string& content){
   int flag;
   int code;
   bool r = false;
-  content.append("&type=word\n");
+  content.append("&type=" POST_TYPE "\n");
   MIG_DEBUG(USER_LEVEL,"%s",content.c_str());
   r = net::core_get(0,content.c_str(),content.length(),
 	            respone,flag,code);
-  MIG_DEBUG(USER_LEVEL,"r[%d] response[%s]",r,respone.c_str());
   if (!respone.empty()&&r)
 	printf("Content-type: text/html\r\n"
 		  "\r\n"
@@ -93,7 +96,7 @@ static void PostRequestMethod(FCGX_Request * request){
         clen = std::cin.gcount();
        // UserMgr::GetInstance()->PostUserInfo(content,clen);
         if(content){
-            delete content;
+            delete []content;
             content = NULL;
         }
     }
