@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="test"
-	ProjectGUID="{A41CDDB8-A622-495C-8DFE-4CF7F0E0F590}"
+	Name="sociality"
+	ProjectGUID="{2BE2C486-C230-4A17-A830-8FD427CECC7B}"
 	>
 	<Platforms>
 		<Platform
@@ -140,12 +140,80 @@
 		<Filter
 			Name="include"
 			>
+			<File
+				RelativePath=".\db_comm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dic_comm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\http_comm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\http_response.h"
+				>
+			</File>
+			<File
+				RelativePath=".\logic_comm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sociality_mgr_engine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sociality_mgr_init.h"
+				>
+			</File>
+			<File
+				RelativePath=".\thread_handler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\thread_lock.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="source"
 			>
 			<File
-				RelativePath=".\test.cc"
+				RelativePath=".\db_comm.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\dic_comm.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\http_comm.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\http_response.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\logic_comm.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\sociality_mgr_engine.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\sociality_mgr_init.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\thread_handler.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\thread_lock.cc"
 				>
 			</File>
 		</Filter>
