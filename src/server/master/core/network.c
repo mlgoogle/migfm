@@ -712,13 +712,43 @@ void server_write_buffer(int fd, short which, void *arg) {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-static int  create_socket(){
+
+//临时解决方案 //外连socket 单独创建 。但不接受数据处理，除非数据格式和监听socket 一样
+
+static int create_connect_socket(){
     int sock;
     struct sockaddr_in sai;
     int rc,opt;
+    sock =socket(AF_INET,SOCK_STREAM,0);
+
+	if(sock<0){
+        MIG_ERROR(USER_LEVEL,"unable to create server socket[%d]]\n",errno);
+        return 0;
+    }
+    opt = 1;
+    rc = setsockopt(sock,SOL_SOCKET,SO_KEEPALIVE,&opt,sizeof(opt));
+    if(rc!=0){
+        MIG_ERROR(USER_LEVEL,"unable to set SO_KEEPALIVE on server socket%d\n",errno);
+        close(sock);
+        return 0;
+    }
+    rc = setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
+    if(rc!=0){
+        MIG_ERROR(USER_LEVEL,"unable to set SO_REUSEADDR on servert socket:%d\n",errno);
+        return 0;
+    }
+    return sock;
+}
+
+static int  create_socket(){ // 0 net_work  1,process_work
+    int sock;
+    struct sockaddr_in sai;
+    int rc,opt;
+
 #if defined (NET_WORK)
     sock =socket(AF_INET,SOCK_STREAM,0);
 #endif
+
 #if defined (PROCESS_WORK)
 	sock =socket(AF_UNIX,SOCK_STREAM,0);
 #endif
@@ -763,7 +793,7 @@ struct sock_adapter* create_connect_socket(struct server* srv,
     
     conn->ip = buffer_init_string(host);
     
-    sock = create_socket();
+    sock = create_connect_socket();
     opt = 1;
     sai.sin_family = AF_INET;
     sai.sin_port = htons(atoi(port));
@@ -778,13 +808,13 @@ struct sock_adapter* create_connect_socket(struct server* srv,
 
     rc = connect(sock,(const struct sockaddr *)&sai,sizeof(sai));
     if(rc!=0){
-        MIG_ERROR(USER_LEVEL,"connect error (%d)\n",errno);
+        MIG_ERROR(USER_LEVEL,"connect error (%d)  (%s)\n",errno,strerror(errno));
         free_sock_adapter(conn,srv);
         close(sock);
         return NULL;
     }
     
-    plugins_call_connection_srv(srv,sock,(void*)host,strlen(host));
+    plugins_call_connection_srv(srv,sock,(void*)host,atoi(port));
 
     sc->psc_sock = sock;
     sc->psc_scheduler = &srv->one_scheduler;
