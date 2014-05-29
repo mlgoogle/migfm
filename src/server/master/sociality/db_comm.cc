@@ -774,6 +774,10 @@ bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
 			  msg_info.current_musicinfo.set_title(rows[19]);
 			  msg_info.current_musicinfo.set_artist(rows[20]);
 			  msg_info.current_musicinfo.set_album_title(rows[21]);
+			  //若送歌的url 不存在则不添加
+			  if((msg_info.musicinfo.hq_url().empty()||msg_info.musicinfo.hq_url()=="0")
+					  && msg_info.detail.message_type==PARENT_TYPE)
+				  continue;
 			  message_list.push_back(msg_info);
 		  }
 		  return true;
