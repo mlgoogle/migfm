@@ -37,7 +37,7 @@ LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 output:	dic_comm.o logic_comm.o thread_handler.o spread_engine.o weixin_mgr.o weixin_packet.o\
-	spread_init.o thread_lock.o db_comm.o http_response.o\
+	spread_init.o thread_lock.o db_comm.o http_response.o spread_basic_infos.o\
 	basic_info.o http_packet.o basictypes.o config.o \
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o storage.o constants.o basic_util.o errno_comm.o json_reader.o\
@@ -67,6 +67,9 @@ weixin_mgr.o:
 	
 weixin_packet.o:
 	$(COMPILE) ./weixin_packet.cc
+	
+spread_basic_infos.o:
+	$(COMPILE) ./spread_basic_infos.cc
 	
 db_comm.o:
 	$(COMPILE) ./db_comm.cc

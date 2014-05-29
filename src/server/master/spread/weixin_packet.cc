@@ -25,8 +25,9 @@ WXPacket::IncomingStanza(const base::XmlElement *pelStanza){
 	const base::XmlChild* child = pelStanza->FirstChild();
 	do {
 		std::string name = child->AsElement()->Name().LocalPart();
-		if (name=="EventKey")
+		/*if (name=="EventKey")
 			continue;
+			*/
 		std::string name_content = child->AsElement()->FirstChild()->AsText()->Text();
 		PutAttrib(name,name_content);
 	} while ((child=child->NextChild())!=NULL);
