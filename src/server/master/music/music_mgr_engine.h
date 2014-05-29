@@ -6,6 +6,7 @@
 #include "basic/basic_info.h"
 #include "basic/radom_in.h"
 #include "music_recording.h"
+#include "json/json.h"
 #include "thread_lock.h"
 
 namespace music_logic{
@@ -100,15 +101,14 @@ private:
 	void ChangeMusicInfos(std::map<std::string,base::MusicInfo>& music_infos,
 		                                std::list<std::string>& songinfolist);
 
-	//�Ż��汾1����ȡ�������ʱ��һ���Դ���ݿ��redis�����ȡ
+
 	bool GetMoodScensChannelSongsV2(const std::string& uid,
 		const std::string mode,const int32 num,
 		const std::string wordid,
 		std::map<std::string,base::MusicCltHateInfo>& song_map,
 		std::stringstream& result);
 
-	//�Ż��汾2���ڰ汾1�Ļ��ϼ���һ���Ի�ȡ�������ͨ���Խ������
-	//�Խ������������󽵵��ظ��ԣ���һ�ζ�ȡredis �������Ӵ���
+
 	bool GetMoodScensChannelSongsV3(const std::string& uid,
 		const std::string mode,const int32 num,
 		const std::string wordid,
@@ -116,6 +116,12 @@ private:
 		std::map<std::string,base::MusicCltHateInfo>& hate_song_map,
 		std::stringstream& result);
 
+	bool GetMoodScensChannelSongsV4(const std::string& uid,
+		const std::string mode,const int32 num,
+		const std::string wordid,
+		std::map<std::string,base::MusicCltHateInfo>& clt_song_map,
+		std::map<std::string,base::MusicCltHateInfo>& hate_song_map,
+		Json::Value &result);
 
 	bool GetMusicHotCltCmt(const std::string& songid,std::string& hot_num,
 		                   std::string& cmt_num,std::string& clt_num);
