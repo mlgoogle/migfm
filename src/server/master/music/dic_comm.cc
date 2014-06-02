@@ -852,6 +852,9 @@ void RedisComm::GetMusicInfosV3(const std::string& type,std::list<int>& random_l
 		temp_list.pop_front();
 		os<<" "<<songid;
 	}
+	//text
+	os<<" 699212 699213 699214 699215";
+	//os<<" 699215 699215 699215 699215";
 	LOG_DEBUG2("%s",os.str().c_str());
 
 
