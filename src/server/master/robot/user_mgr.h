@@ -18,6 +18,22 @@ public:
 private:
 	void GetUserInfoMail(std::list<robot_base::MailUserInfo>& list, Json::Value& value);
 	bool CheckUserInfo(const std::string& username);
+
+	std::string PrepNode(const std::string str, std::string::const_iterator start,
+		    std::string::const_iterator end, bool *valid);
+
+	std::string PrepDomain(const std::string str, std::string::const_iterator start,
+	    std::string::const_iterator end, bool *valid);
+
+	void PrepDomain(const std::string str, std::string::const_iterator start,
+		    std::string::const_iterator end, std::string *buf, bool *valid);
+
+	void PrepDomainLabel(const std::string str, std::string::const_iterator start,
+		    std::string::const_iterator end, std::string *buf, bool *valid) ;
+
+	char PrepNodeAscii(char ch, bool *valid);
+
+	char PrepDomainLabelAscii(char ch, bool *valid) ;
 };
 }
 #endif
