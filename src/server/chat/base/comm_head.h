@@ -27,7 +27,9 @@ enum operatorcode
 	REQ_OPPOSITION_INFO = 1020,
 	GET_OPPOSITION_INFO = 1021,
 	TEXT_CHAT_PRIVATE_SEND = 1100,
-	TEXT_CHAT_PRIVATE_RECV = 1101
+	TEXT_CHAT_PRIVATE_RECV = 1101,
+	MULTI_SOUND_SEND = 2100,
+	MULTI_SOUND_RECV = 2101
 };
 
 enum msgtype
@@ -35,6 +37,7 @@ enum msgtype
 	ERROR_TYPE = 0,
 	USER_TYPE = 1,
 	CHAT_TYPE = 2,
+	MEDIA_TYPE = 3,
 };
 
 struct PacketHead{
@@ -158,5 +161,26 @@ struct TextChatPrivateRecv:public PacketHead{
 	int64 send_user_id;
 	int64 recv_user_id;
 	std::string content;
+};
+
+//MULTI_SOUND_SEND = 2100
+#define MULTISOUNDSEND_SIZE (sizeof(int64) * 4 + sizeof(int16) + TOKEN_LEN + vMultiSoundSend->sound_path.length())
+struct MultiSoundSend:public PacketHead{
+	int64 platform_id;
+	int64 multi_id;// 由客户端产生，同一个类型进入相同的会话
+	int16 multi_type;
+	int64 send_user_id;
+	int64 session;
+	char token[TOKEN_LEN];
+	std::string sound_path; //文件名: 讨论组id/发送者id/声音文件名(讨论组，发送者，当前时间拼装)
+};
+
+//MULTI_SOUND_RECV = 2101
+#define MULTISOUNDRECV_SIZE (sizeof(int64) * 3 + vMultiSoundRecv->sound_path.length())
+struct MultiSoundRecv:public PacketHead{
+	int64 platform_id;
+	int64 multi_id;
+	int64 send_user_id;
+	std::string sound_path;
 };
 #endif

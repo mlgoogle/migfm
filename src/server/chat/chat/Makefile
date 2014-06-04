@@ -39,7 +39,7 @@ LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 output:	chat_basic_infos.o chat_cache_manager.o chat_manager.o db_comm.o\
-		dic_comm.o http_response.o im_mgr.o logic_unit.o user_connection.o error_code.o logic_comm.o\
+		dic_comm.o http_response.o im_mgr.o file_mgr.o logic_unit.o user_connection.o error_code.o logic_comm.o\
 		protocol.o protocol.o thread_handler.o thread_lock.o chat_init.o basictypes.o basic_util.o\
 		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
 		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o
@@ -75,9 +75,12 @@ dic_comm.o:
 http_response.o:
 	$(COMPILE) ./http_response.cc
 
+file_mgr.o:
+	$(COMPILE) ./file_mgr.cc
+
 im_mgr.o:
 	$(COMPILE) ./im_mgr.cc
-
+	
 logic_comm.o:
 	$(COMPILE) ./../base/logic_comm.cc
 	

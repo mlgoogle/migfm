@@ -238,6 +238,51 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 
 			}
 			break;
+		case MULTI_SOUND_SEND:
+			{
+				struct MultiSoundSend* vMultiSoundSend = new struct MultiSoundSend;
+				*packhead = (struct PacketHead*)vMultiSoundSend;
+				BUILDPACKHEAD();
+				vMultiSoundSend->platform_id = in.Read64();
+				vMultiSoundSend->multi_id = in.Read64();
+				vMultiSoundSend->multi_type = in.Read16();
+				vMultiSoundSend->send_user_id = in.Read64();
+				vMultiSoundSend->session = in.Read64();
+				int temp = 0;
+				memcpy(vMultiSoundSend->token,
+					in.ReadData(TOKEN_LEN,temp),TOKEN_LEN);
+				vMultiSoundSend->token[TOKEN_LEN - 1] = '\0';
+
+				int len = vMultiSoundSend->data_length  - sizeof(int64) * 4 - sizeof(int16) - TOKEN_LEN;
+				char* str = new char[len];
+				memcpy(str,in.ReadData(len,temp),len);
+				vMultiSoundSend->sound_path.assign(str,len);
+				if(str){
+					delete [] str;
+					str = NULL;
+				}
+
+			}
+			break;
+		case MULTI_SOUND_RECV:
+			{
+				struct MultiSoundRecv* vMultiSoundRecv = new struct MultiSoundRecv;
+				*packhead = (struct PacketHead*) vMultiSoundRecv;
+				BUILDPACKHEAD();
+				vMultiSoundRecv->platform_id = in.Read64();
+				vMultiSoundRecv->multi_id = in.Read64();
+				vMultiSoundRecv->send_user_id = in.Read64();
+				int temp = 0;
+				int len = vMultiSoundRecv->data_length  - sizeof(int64) * 3;
+				char* str = new char[len];
+				memcpy(str,in.ReadData(len,temp),len);
+				vMultiSoundRecv->sound_path.assign(str,len);
+				if(str){
+					delete [] str;
+					str = NULL;
+				}
+			}
+			break;
 		default:
 			r = false;
 			break;
@@ -404,6 +449,33 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 
 				packet = (char*)out.GetData();
 
+			}
+			break;
+		case MULTI_SOUND_SEND:
+			{
+				struct MultiSoundSend* vMultiSoundSend =
+						(struct MultiSoundSend*)packhead;
+				BUILDHEAD(MULTISOUNDSEND_SIZE);
+				out.Write64(vMultiSoundSend->platform_id);
+				out.Write64(vMultiSoundSend->multi_id);
+				out.Write16(vMultiSoundSend->multi_type);
+				out.Write64(vMultiSoundSend->send_user_id);
+				out.Write64(vMultiSoundSend->session);
+				out.WriteData(vMultiSoundSend->token,TOKEN_LEN);
+				out.WriteData(vMultiSoundSend->sound_path.c_str(),vMultiSoundSend->sound_path.length());
+				packet = (char*)out.GetData();
+			}
+			break;
+		case MULTI_SOUND_RECV:
+			{
+				struct MultiSoundRecv* vMultiSoundRecv =
+						(struct MultiSoundRecv*) packhead;
+				BUILDHEAD(MULTISOUNDRECV_SIZE);
+				out.Write64(vMultiSoundRecv->platform_id);
+				out.Write64(vMultiSoundRecv->multi_id);
+				out.Write64(vMultiSoundRecv->send_user_id);
+				out.WriteData(vMultiSoundRecv->sound_path.c_str(),vMultiSoundRecv->sound_path.length());
+				packet = (char*)out.GetData();
 			}
 			break;
 		default:
@@ -625,6 +697,35 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				PRINT_INT64(vPacketConfirm->private_msg_id);
 				PRINT_STRING(vPacketConfirm->token);
 				PRINT_END("struct PacketConfirm End");
+			}
+			break;
+		case MULTI_SOUND_SEND:
+			{
+				struct MultiSoundSend* vMultiSoundSend =
+						(struct MultiSoundSend*)packhead;
+				PRINT_TITLE("struct MultiSoundSend Dump Begin");
+				DUMPHEAD();
+				PRINT_INT64(vMultiSoundSend->platform_id);
+				PRINT_INT64(vMultiSoundSend->multi_id);
+				PRINT_INT(vMultiSoundSend->multi_type);
+				PRINT_INT64(vMultiSoundSend->send_user_id);
+				PRINT_STRING(vMultiSoundSend->token);
+				PRINT_STRING(vMultiSoundSend->sound_path.c_str());
+				PRINT_END("struct MultiSoundSend End");
+			}
+			break;
+		case MULTI_SOUND_RECV:
+			{
+				struct MultiSoundRecv* vMultiSoundRecv =
+						(struct MultiSoundRecv*)packhead;
+				PRINT_TITLE("struct MultiSoundRecv Dump Begin");
+				DUMPHEAD ();
+				PRINT_INT64(vMultiSoundRecv->platform_id);
+				PRINT_INT64(vMultiSoundRecv->msg_type);
+				PRINT_INT64(vMultiSoundRecv->send_user_id);
+				PRINT_STRING(vMultiSoundRecv->sound_path.c_str());
+				PRINT_END("struct MultiSoundRecv End");
+
 			}
 			break;
 		default:

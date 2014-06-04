@@ -64,6 +64,33 @@ bool PlatformChatCacheManager::DelConfirmMessage(const int64 platform_id,const i
 	return base::MapDel<ConfirmMap,ConfirmMap::iterator>(pl->confirm_message_map_,msg_id);
 }
 
+bool PlatformChatCacheManager::AddGroupInfos(const int64 platform_id,const int64 group_id,
+		const chat_base::GroupInfo& groupinfo){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if (pl==NULL)
+		return false;
+	return base::MapAdd<GroupInfosMap,chat_base::GroupInfo>(pl->group_infos_map_,group_id,groupinfo);
+}
+
+bool PlatformChatCacheManager::GetGroupInfos(const int64 platform_id,const int64 group_id,
+						chat_base::GroupInfo& groupinfo){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if (pl==NULL)
+		return false;
+	return base::MapGet<GroupInfosMap,GroupInfosMap::iterator,chat_base::GroupInfo>(pl->group_infos_map_,group_id,groupinfo);
+}
+
+bool PlatformChatCacheManager::DelGroupInfos(const int64 platform_id,const int64 group_id){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if (pl==NULL)
+		return false;
+	return base::MapDel<GroupInfosMap,GroupInfosMap::iterator>(pl->group_infos_map_,group_id);
+}
+
+
 bool PlatformChatCacheManager::AddUserInfos(const int64 platform_id,
 											const int64 user_id, 
 											const chat_base::UserInfo& userinfo){
@@ -95,6 +122,26 @@ bool PlatformChatCacheManager::DelUserInos(const int64 platform_id,
 	return base::MapDel<UserInfosMap,UserInfosMap::iterator>(pl->user_infos_map_,user_id);
 }
 
+bool PlatformChatCacheManager::AddMeetingInfos(const int64 platform_id,const int64 session,
+							const int64 uid){//������ʱ������ session ����ʱ���䣬����Ⱥ���죬��session ��Ⱥ��
+	logic::WLockGd lk(lock_);
+	bool r = false;
+	MeetingSession meeting_session;
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if(pl==NULL)
+		return false;
+
+	//���ҴλỰ�Ƿ��Ѿ�����
+	r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,session,meeting_session);
+	//
+	if(r){//���� ����
+		meeting_session[uid] = uid;
+		return base::MapAdd(pl->meeting_infos_map_,session,meeting_session);
+	}else{
+		meeting_session[uid] = uid;
+		return base::MapAdd(pl->meeting_infos_map_,session,meeting_session);
+	}
+}
 
 bool PlatformChatCacheManager::AddMeetingInfos(const int64 platform_id,const int64 session,
 							const int64 tid,const int64 mid){
@@ -127,6 +174,26 @@ bool PlatformChatCacheManager::DelMeetingInfos(const int64 platform_id,const int
 		return base::MapAdd(pl->meeting_infos_map_,session,meeting_session);
 	else
 		return base::MapDel<MeetingMap,MeetingMap::iterator>(pl->meeting_infos_map_,session);
+}
+
+bool PlatformChatCacheManager::SendMeetingMessage(const int64 platform_id,const int64 group_id,
+		const int64 session,struct PacketHead *packet){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if (pl==NULL)
+		return false;
+	MeetingSession meeting_session;
+	bool r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,session,meeting_session);
+
+	for(MeetingSession::iterator it = meeting_session.begin();it!=meeting_session.end();++it){
+		chat_base::UserInfo userinfo;
+		int id = it->first;
+		r = base::MapGet<UserInfosMap,UserInfosMap::iterator,chat_base::UserInfo>(pl->user_infos_map_,id,userinfo);
+		if(r){
+			logic::SomeUtils::SendMessage(userinfo.socket(),packet,__FILE__,__LINE__);
+		}
+	}
+	return true;
 }
 
 bool PlatformChatCacheManager::SendQuitInfoSession(const int64 platform_id,const int64 session,const int32 uid){
@@ -216,6 +283,39 @@ bool PlatformChatCacheManager::DelLeaveInfos(const int64 platform_id,const int64
 	return r;
 }
 
+
+bool PlatformChatCacheManager::GetGroupListUserInfo(const int64 platform_id,const int64 group_id,const int64 session,
+			std::list<struct Oppinfo*>& oppoinfo_list){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	MeetingSession meeting_session;
+	if (pl==NULL)
+	   return false;
+	bool r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,
+			session,meeting_session);
+	if(!r)
+		return false;
+	for(MeetingSession::iterator it = meeting_session.begin();
+			it!=meeting_session.end();++it){
+		int64 uid = it->second;
+		chat_base::UserInfo userinfo;
+		r = base::MapGet<UserInfosMap,UserInfosMap::iterator,chat_base::UserInfo>(pl->user_infos_map_,uid,
+				userinfo);
+		if(r){
+			struct Oppinfo* oppinfo = new struct Oppinfo;
+		    oppinfo->user_id = userinfo.user_id();
+		    oppinfo->user_nicknumber = userinfo.nicknumber();
+			logic::SomeUtils::SafeStrncpy(oppinfo->nickname,NICKNAME_LEN,
+					userinfo.nickname().c_str(),userinfo.nickname().length());
+
+		    logic::SomeUtils::SafeStrncpy(oppinfo->user_head,HEAD_URL_LEN,
+		    		userinfo.head_url().c_str(),userinfo.head_url().length());
+
+		    oppoinfo_list.push_back(oppinfo);
+		}
+	}
+	return true;
+}
 
 CacheManagerOp::CacheManagerOp(){
 	InitThreadrw(&lock_);

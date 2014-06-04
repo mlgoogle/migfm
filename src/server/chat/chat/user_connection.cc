@@ -102,10 +102,14 @@ bool UserConnectionMgr::OnGetOppInfos(struct server *srv, int socket, struct Pac
 		return false;
 	}
 
-	if(vReqOppstionInfo->type==1)//
+	if(vReqOppstionInfo->type==1)//点对点聊天
 		return OnGetUserInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
 							 vReqOppstionInfo->oppostion_id,vReqOppstionInfo->type,
 							 vReqOppstionInfo->reserverd);
+	else if(vReqOppstionInfo->type==3)//临时会话组
+		return OnGetTempGroupInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
+				 vReqOppstionInfo->oppostion_id,vReqOppstionInfo->type,
+				 vReqOppstionInfo->reserverd);
 }
 
 bool UserConnectionMgr::OnAberrant(const int socket){
@@ -150,6 +154,41 @@ bool UserConnectionMgr::OnUserQuit(struct server *srv, int socket, struct Packet
 
 	return ClearUserinfo(vUserQuit->platform_id,vUserQuit->user_id,vUserQuit->session);
 
+}
+
+
+bool UserConnectionMgr::OnGetTempGroupInfo(const int socket,const int64 platform_id,
+		const int64 user_id,const int64 oppinfo_id,const int32 type,const int64 usr_session){
+
+	//临时会话组 群号即是临时会话号
+	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	//暂时不做离线保存
+	chat_base::GroupInfo groupinfo;
+	bool r = pc->GetGroupInfos(platform_id,oppinfo_id,groupinfo);
+	if(!r){//不存在,创建群组组及创建会话
+		r = OnCreateGroupInfo(groupinfo,platform_id,oppinfo_id,type,oppinfo_id);
+	}
+	//加入会话
+	pc->AddMeetingInfos(platform_id,oppinfo_id,user_id);
+
+	//发送群组消息
+	struct OppositionInfo opposition_info;
+	MAKE_HEAD(opposition_info, GET_OPPOSITION_INFO,USER_TYPE,0,usr_session);
+	opposition_info.platform_id = platform_id;
+	opposition_info.oppo_id = groupinfo.groupid();
+	opposition_info.oppo_nick_number = groupinfo.nicknumber();
+	opposition_info.oppo_type = type;
+	opposition_info.session = oppinfo_id;
+
+	logic::SomeUtils::SafeStrncpy(opposition_info.oppo_nickname,NICKNAME_LEN,
+			groupinfo.name().c_str(),groupinfo.name().length());
+
+    logic::SomeUtils::SafeStrncpy(opposition_info.oppo_user_head,HEAD_URL_LEN,
+    		groupinfo.head_url().c_str(),groupinfo.head_url().length());
+
+    pc->GetGroupListUserInfo(platform_id,groupinfo.groupid(),oppinfo_id,opposition_info.opponfo_list);
+    struct Oppinfo* oppinfo = opposition_info.opponfo_list.front();
+    return logic::SomeUtils::SendMessage(socket,&opposition_info,__FILE__,__LINE__);
 }
 
 bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,const int64 user_id,
@@ -232,6 +271,19 @@ bool UserConnectionMgr::ClearUserinfo(const int64 platform_id,const int64 user_i
 	pc->DelMeetingInfos(platform_id,session,user_id);
 	pc->SendQuitInfoSession(platform_id,session,user_id);
 	return pc->DelUserInos(platform_id,user_id);
+}
+
+
+bool UserConnectionMgr::OnCreateGroupInfo(chat_base::GroupInfo& group_info,const int64 platform_id,const int64 group_id,
+		const int16 type,const int64 session,const std::string& name,
+		const std::string& head_url){
+	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	if(pc==NULL)
+		return false;
+	chat_base::GroupInfo temp_group_info(platform_id,group_id,type,group_id,session,name,head_url);
+	pc->AddGroupInfos(platform_id,group_id,temp_group_info);
+	group_info = temp_group_info;
+	return true;
 }
 
 }

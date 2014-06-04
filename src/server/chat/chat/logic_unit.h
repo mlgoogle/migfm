@@ -13,7 +13,15 @@ static char *PLUGIN_NAME = "chat_manager";
 static char *PLUGIN_VERSION = "1.0.0";
 static char *PLUGIN_PROVIDER = "kerry";
 
-#define DEFAULT_CONFIG_PATH     "./plugins/chat_manager/chat_manager_config.xml"
+
+static char *default_group_name = "临时讨论组";
+static char *default_group_url = "http://face.miu.miglab.com/default.jpg";
+static char *sound_url = "http://sound.miglab.com/";
+
+#define DEFAULT_CONFIG_PATH     "./plugins/chat_manager/chat_manager_config.xml";
+
+
+typedef std::map<int64/*group_id*/,chat_base::GroupInfo/*groupinfo*/> GroupInfosMap;
 
 typedef std::map<int64/* user_id */,chat_base::UserInfo/* userinfo*/> UserInfosMap;
 

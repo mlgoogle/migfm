@@ -3,6 +3,7 @@
 
 #include "user_connection.h"
 #include "im_mgr.h"
+#include "file_mgr.h"
 #include "basic/scoped_ptr.h"
 #include "plugins.h"
 #include "common.h"
@@ -46,6 +47,7 @@ private:
 private:
 	scoped_ptr<chat_logic::UserConnectionMgr>    usr_connection_mgr_;
 	scoped_ptr<chat_logic::IMSMgr>               ims_mgr_;
+	scoped_ptr<chat_logic::FileMgr>              file_mgr_;
 };
 
 

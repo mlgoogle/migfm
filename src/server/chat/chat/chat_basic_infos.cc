@@ -4,6 +4,38 @@
 #include "log/mig_log.h"
 namespace chat_base{
 
+
+GroupInfo::GroupInfo(){
+	data_ = new Data();
+}
+
+GroupInfo::GroupInfo(const int64 platform_id,const int64 group_id,const int16 group_type,
+		const int64 nicknumber,const int64 session,const std::string& name,
+		const std::string& head_url){
+
+	data_ = new Data(platform_id,group_id,group_type,nicknumber,session,name,head_url);
+}
+
+GroupInfo::GroupInfo(const GroupInfo& group_info)
+:data_(group_info.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+GroupInfo& GroupInfo::operator =(const GroupInfo& group_info){
+
+	if (group_info.data_!=NULL){
+		group_info.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = group_info.data_;
+	return *this;
+}
+
+
 UserInfo::UserInfo(){
 	data_ = new Data();
 }

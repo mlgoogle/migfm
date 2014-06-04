@@ -51,6 +51,7 @@ bool ChatManager::Init(){
 
 	usr_connection_mgr_.reset(new chat_logic::UserConnectionMgr());
 	ims_mgr_.reset(new chat_logic::IMSMgr());
+	file_mgr_.reset(new chat_logic::FileMgr());
 	base::SysRadom::GetInstance()->InitRandom();
 
 	return true;
@@ -100,6 +101,7 @@ bool ChatManager::OnChatManagerMessage(struct server *srv,
 	assert (packet);
 	LOG_DEBUG2("packet->packet_length[%d],packet->packet_operate[%d],packet->data_length[%d]",
 			packet->packet_length,packet->operate_code,packet->data_length);
+
 	//ProtocolPack::HexEncode(msg,len);
 	//ProtocolPack::DumpPacket(packet);
     
@@ -127,6 +129,11 @@ bool ChatManager::OnChatManagerMessage(struct server *srv,
 		case PACKET_CONFIRM:
 			{
 				ims_mgr_.get()->OnConfirmMessage(srv,socket,packet);
+			}
+			break;
+		case MULTI_SOUND_SEND:
+			{
+				file_mgr_.get()->OnGroupSound(srv,socket,packet);
 			}
 			break;
 		default:

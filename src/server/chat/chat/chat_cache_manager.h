@@ -13,6 +13,8 @@ public:
 
 	UserInfosMap              user_infos_map_;
 
+	GroupInfosMap             group_infos_map_;
+
 	LeaveInfosMap             leave_infos_map_;
 
 	MeetingMap                meeting_infos_map_;
@@ -41,6 +43,14 @@ public:
 
 	bool DelUserInos(const int64 platform_id,const int64 user_id);
 
+	bool AddGroupInfos(const int64 platform_id,const int64 group_id,
+						const chat_base::GroupInfo& groupinfo);
+
+	bool GetGroupInfos(const int64 platform_id,const int64 group_id,
+						chat_base::GroupInfo& groupinfo);
+
+	bool DelGroupInfos(const int64 platform_id,const int64 group_id);
+
 	bool AddLeaveInfos(const int64 platform_id,const int64 session,
 						const int64 tid,const int64 mid);
 
@@ -53,11 +63,22 @@ public:
 	bool AddMeetingInfos(const int64 platform_id,const int64 session,
 							const int64 tid,const int64 mid);
 
+	bool AddMeetingInfos(const int64 platform_id,const int64 session,
+							const int64 tid);
+
 	bool DelMeetingInfos(const int64 platform_id,const int64 session,
 							const int64 uid);
 
+
+	bool SendMeetingMessage(const int64 platform_id,const int64 group_id,
+							const int64 session,struct PacketHead *packet);
+
+
 	bool SendQuitInfoSession(const int64 platform_id,const int64 session,const int32 uid);
 
+
+	bool GetGroupListUserInfo(const int64 platform_id,const int64 group_id,	const int64 session,
+			std::list<struct Oppinfo*>& oppoinfo_list);
 
 private:
 	std::map<int64,PlatformCache*>             platform_cache_;
