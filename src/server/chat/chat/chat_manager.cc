@@ -103,7 +103,7 @@ bool ChatManager::OnChatManagerMessage(struct server *srv,
 			packet->packet_length,packet->operate_code,packet->data_length);
 
 	//ProtocolPack::HexEncode(msg,len);
-	//ProtocolPack::DumpPacket(packet);
+	ProtocolPack::DumpPacket(packet);
     
 	switch(packet->operate_code){
 		case USER_LOGIN:

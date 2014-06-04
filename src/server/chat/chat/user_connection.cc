@@ -162,15 +162,24 @@ bool UserConnectionMgr::OnGetTempGroupInfo(const int socket,const int64 platform
 
 	//临时会话组 群号即是临时会话号
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+
+	//get userinfo
+	chat_base::UserInfo userinfo;
+	bool r = pc->GetUserInfos(platform_id,user_id,userinfo);
+	if(!r){
+		return false;
+	}
+
 	//暂时不做离线保存
 	chat_base::GroupInfo groupinfo;
-	bool r = pc->GetGroupInfos(platform_id,oppinfo_id,groupinfo);
+	r = pc->GetGroupInfos(platform_id,oppinfo_id,groupinfo);
 	if(!r){//不存在,创建群组组及创建会话
 		r = OnCreateGroupInfo(groupinfo,platform_id,oppinfo_id,type,oppinfo_id);
 	}
 	//加入会话
 	pc->AddMeetingInfos(platform_id,oppinfo_id,user_id);
 
+	userinfo.set_session(oppinfo_id);
 	//发送群组消息
 	struct OppositionInfo opposition_info;
 	MAKE_HEAD(opposition_info, GET_OPPOSITION_INFO,USER_TYPE,0,usr_session);
