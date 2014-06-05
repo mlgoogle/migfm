@@ -7,6 +7,46 @@
 #include "basic/basictypes.h"
 namespace robot_base{
 
+class RobotInfo{
+public:
+	explicit RobotInfo();
+	explicit RobotInfo(const int64 uid,const std::string& nickname,const std::string& sex,
+				const std::string& head_url);
+
+	RobotInfo(const RobotInfo& robot_info);
+	RobotInfo& operator=(const RobotInfo& robotinfo);
+
+	const int64 uid() const {return data_->uid_;}
+	const std::string& nickname() const {return data_->nickname_;}
+	const std::string& sex() const {return data_->sex_;}
+	const std::string& head_url() const {return data_->head_url_;}
+
+private:
+	class Data{
+	public:
+		Data():uid_(0)
+			,refcount_(1){}
+		Data(const int64 uid,const std::string& nickname,const std::string& sex,
+				const std::string& head_url)
+			:refcount_(1)
+			,uid_(uid)
+			,nickname_(nickname)
+			,sex_(sex)
+			,head_url_(head_url){}
+		void AddRef(){refcount_++;}
+		void Release(){if (!--refcount_)delete this;}
+	public:
+		const int64 uid_;
+		std::string nickname_;
+		std::string  sex_;
+		std::string head_url_;
+	private:
+		int            refcount_;
+	};
+	Data*                    data_;
+};
+
+
 class MailUserInfo{
 public:
 	explicit MailUserInfo();

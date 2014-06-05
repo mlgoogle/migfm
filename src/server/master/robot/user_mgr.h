@@ -15,8 +15,11 @@ public:
 public:
 	bool GetUserInfoMail(const int socket,const packet::HttpPacket& packet);
 
+	bool GetRobotsInfo(const int socket,const packet::HttpPacket& packet);
+
 private:
 	void GetUserInfoMail(std::list<robot_base::MailUserInfo>& list, Json::Value& value);
+	void GetRobotInfo(std::list<robot_base::RobotInfo>& list, Json::Value& value);
 	bool CheckUserInfo(const std::string& username);
 
 	std::string PrepNode(const std::string str, std::string::const_iterator start,

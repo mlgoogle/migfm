@@ -31,13 +31,13 @@ AutoDBCommEngine::~AutoDBCommEngine(){
 }
 
 void DBComm::Init(std::list<base::ConnAddr>& addrlist,
-				  const int32 db_conn_num/* = 10*/){
+				  const int32 db_conn_num/* = 5*/){
 	addrlist_ = addrlist;
 
 #if defined (_DB_POOL_)
 	bool r =false;
 	InitThreadrw(&db_pool_lock_);
-	for (int i = 0; i<=db_conn_num;i++){
+	for (int i = 0; i<db_conn_num;i++){
 		base_storage::DBStorageEngine* engine  =
 				base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
 		if (engine==NULL){
@@ -95,6 +95,48 @@ void DBComm::Dest(){
 
 #endif
 }
+
+
+bool DBComm::GetRobotsInfo(const int64 count, const int64 from,
+		std::list<robot_base::RobotInfo>& user_list){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+		std::stringstream os;
+		MYSQL_ROW rows;
+
+		if (engine==NULL){
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+		//call migfm.proc_GetRobotsInfo(10,0)
+		os<<"call migfm.proc_GetRobotsInfo("
+			<<from<<","<<count<<");";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		bool r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+
+		int num = engine->RecordCount();
+		if(num>0){
+			while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+				int64 uid = atoll(rows[0]);
+				std::string nickname = rows[1];
+				std::string sex = rows[2];
+				std::string head_url = rows[3];
+				robot_base::RobotInfo robotinfo(uid,nickname,sex,head_url);
+				user_list.push_back(robotinfo);
+			}
+			return true;
+		}
+		return false;
+}
+
 
 bool DBComm::GetMailUserInfo(const int64 count,const int64 from,
 					std::list<robot_base::MailUserInfo>& user_list){

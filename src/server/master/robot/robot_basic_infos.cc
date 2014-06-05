@@ -4,6 +4,33 @@
 #include "log/mig_log.h"
 namespace robot_base{
 
+RobotInfo::RobotInfo(){
+	data_ = new Data();
+}
+RobotInfo::RobotInfo(const int64 uid,const std::string& nickname,const std::string& sex,
+		const std::string& head_url){
+	data_ = new Data(uid,nickname,sex,head_url);
+}
+
+RobotInfo::RobotInfo(const RobotInfo& robotinfo)
+:data_(robotinfo.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+RobotInfo& RobotInfo::operator =(const RobotInfo& robotinfo){
+
+	if (robotinfo.data_!=NULL){
+		robotinfo.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = robotinfo.data_;
+	return *this;
+}
+
 
 MailUserInfo::MailUserInfo(){
 	data_ = new Data();

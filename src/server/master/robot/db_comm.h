@@ -17,7 +17,7 @@ public:
 	virtual ~DBComm();
 	static base_storage::DBStorageEngine *GetConnection();
 public:
-	static void Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num = 10);
+	static void Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num = 5);
 
 	static void Dest();
 
@@ -26,6 +26,9 @@ public:
 
 	static bool GetMailUserInfo(const int64 count,const int64 from,
 					std::list<robot_base::MailUserInfo>& user_list);
+
+	static bool GetRobotsInfo(const int64 count, const int64 from,
+			std::list<robot_base::RobotInfo>& user_list);
 
 	static bool GetSpreadMail(std::string& title,std::string& content);
 
