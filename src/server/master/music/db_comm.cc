@@ -30,7 +30,7 @@ AutoDBCommEngine::~AutoDBCommEngine(){
 }
 
 void DBComm::Init(std::list<base::ConnAddr>& addrlist,
-				  const int32 db_conn_num/* = 10*/){
+				  const int32 db_conn_num/* = 5*/){
 	addrlist_ = addrlist;
 
 #if defined (_DB_POOL_)
