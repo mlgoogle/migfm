@@ -30,12 +30,12 @@ AutoDBCommEngine::~AutoDBCommEngine(){
 
 
 
-void DBComm::Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num/* = 10*/){
+void DBComm::Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num/* = 5*/){
 	addrlist_ = addrlist;
 #if defined (_DB_POOL_)
 	bool r =false;
 	InitThreadrw(&db_pool_lock_);
-	for (int i = 0; i<=db_conn_num;i++){
+	for (int i = 0; i<db_conn_num;i++){
 		base_storage::DBStorageEngine* engine  =
 				base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
 		if (engine==NULL){
