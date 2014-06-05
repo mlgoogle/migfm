@@ -15,7 +15,7 @@ public:
 	virtual ~DBComm();
 	static base_storage::DBStorageEngine *GetConnection();
 public:
-	static void Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num = 10);
+	static void Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num = 5);
 
 	static void Dest();
 
