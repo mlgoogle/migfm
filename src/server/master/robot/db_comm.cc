@@ -112,7 +112,7 @@ bool DBComm::GetRobotsInfo(const int64 count, const int64 from,
 		}
 		//call migfm.proc_GetRobotsInfo(10,0)
 		os<<"call migfm.proc_GetRobotsInfo("
-			<<from<<","<<count<<");";
+			<<count<<","<<from<<");";
 		std::string sql = os.str();
 		LOG_DEBUG2("[%s]", sql.c_str());
 		bool r = engine->SQLExec(sql.c_str());
@@ -126,6 +126,7 @@ bool DBComm::GetRobotsInfo(const int64 count, const int64 from,
 		if(num>0){
 			while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
 				int64 uid = atoll(rows[0]);
+				LOG_DEBUG2("uid %d",uid);
 				std::string nickname = rows[1];
 				std::string sex = rows[2];
 				std::string head_url = rows[3];
@@ -291,6 +292,32 @@ bool DBComm::GetNewMusicInfo(std::list<robot_base::NewMusicInfo>& music_list){
 		return true;
 	}
 	return false;
+}
+
+bool DBComm::UpdateHeadUrl(const int64 id,const std::string& head_url){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+		std::stringstream os;
+		MYSQL_ROW rows;
+
+		if (engine==NULL){
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+
+	    //call migfm.proc_UpdateHeadUrl(10001,'http://pic.headurl.com/1.jpg')
+		os<<"call proc_UpdateHeadUrl("<<id<<",\'"<<head_url<<"\');";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		bool r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+		return true;
 }
 
 base_storage::DBStorageEngine* DBComm::GetConnection(){

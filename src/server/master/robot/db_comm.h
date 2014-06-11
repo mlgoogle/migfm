@@ -35,6 +35,8 @@ public:
 	static bool AddMusicInfo(const int64 id,const std::string& title,const std::string& album,const std::string& artist,
 			const std::string& pub_time,const std::string& album_pic,
 			const std::string& mp3_url,std::string& songid);
+
+	static bool UpdateHeadUrl(const int64 id,const std::string& head_url);
 public:
 #if defined (_DB_POOL_)
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

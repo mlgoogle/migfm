@@ -38,8 +38,12 @@ private:
 	public:
 		const int64 uid_;
 		std::string nickname_;
-		std::string  sex_;
+		std::string sex_;
 		std::string head_url_;
+		std::map<int64,int32>  say_hello_map_;
+		std::map<int64,int32>  send_music_map_;
+		std::map<int64,int32>  leave_mgr_map_;
+
 	private:
 		int            refcount_;
 	};

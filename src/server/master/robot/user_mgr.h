@@ -17,7 +17,10 @@ public:
 
 	bool GetRobotsInfo(const int socket,const packet::HttpPacket& packet);
 
+	bool UpdateRobotsHeadUrl(const int socket,const packet::HttpPacket& packet);
+
 private:
+	void UpdateRobotsHeadurl(const std::string& content);
 	void GetUserInfoMail(std::list<robot_base::MailUserInfo>& list, Json::Value& value);
 	void GetRobotInfo(std::list<robot_base::RobotInfo>& list, Json::Value& value);
 	bool CheckUserInfo(const std::string& username);

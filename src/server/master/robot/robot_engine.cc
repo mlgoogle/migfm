@@ -92,6 +92,9 @@ bool RobotEngine::OnRobotMessage(struct server *srv, int socket,
 		util_mgr_->GetSpreadMail(socket,packet);
 	else if(type=="getrobots")
 		user_mgr_->GetRobotsInfo(socket,packet);
+	else if(type=="updaterobotpic")
+		user_mgr_->UpdateRobotsHeadUrl(socket,packet);
+
     return true;
 }
 

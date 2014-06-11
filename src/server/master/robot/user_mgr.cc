@@ -14,6 +14,28 @@ UserMgr::~UserMgr(){
 
 }
 
+//updaterobotpic.fcgi
+bool UserMgr::UpdateRobotsHeadUrl(const int socket,const packet::HttpPacket& packet){
+	bool r = false;
+	packet::HttpPacket pack = packet;
+	std::string reponse;
+    Json::Value result;
+    Json::FastWriter wr;
+    std::string ext_msg;
+    Json::Value& content = result["result"];
+    if (!pack.GetAttrib("content", ext_msg)) {
+	    result["status"] = 0;
+	    result["msg"] = "无新增歌曲";
+    }
+
+    UpdateRobotsHeadurl(ext_msg);
+    result["status"] = 1;
+ret:
+	reponse = wr.write(result);
+	r =  robot_logic::SomeUtils::SendFull(socket, reponse.c_str(),
+       		 reponse.length());
+	return r;
+}
 //getrobots.fcgi
 // token ="31231231231232132"
 // count = 10
@@ -152,6 +174,23 @@ void UserMgr::GetUserInfoMail(std::list<robot_base::MailUserInfo>& list, Json::V
 			info["nickname"] = mailinfo.nickname().c_str();
 			value.append(info);
 		}
+	}
+}
+
+void UserMgr::UpdateRobotsHeadurl(const std::string& content){
+	Json::Reader reader;
+	Json::Value  root;
+	LOG_DEBUG2("%s",content.c_str());
+	bool r = reader.parse(content,root);
+	if (!r)
+		return ;
+	int32 content_size = root.size();
+	if(content_size<=0)
+		return ;
+	for (int i = 0;i<content_size;i++){
+		int64 id = root[i]["id"].asInt64();
+		std::string head_url = root[i]["url"].asString();
+		robot_storage::DBComm::UpdateHeadUrl(id,head_url);
 	}
 }
 
