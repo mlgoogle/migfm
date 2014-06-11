@@ -69,7 +69,7 @@ struct UserLogin:public PacketHead{
 	int64 platform_id;
 	int64 user_id;
 	int8  net_type;
-	int8  user_type;
+	int8  user_type; //0,游客，1，用户 2，机器人
 	int8  device;
 	char  token[TOKEN_LEN];
 };

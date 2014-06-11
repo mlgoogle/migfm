@@ -161,7 +161,7 @@ bool SomeUtils::SendMessage(int socket, struct PacketHead *packet,
 	}
 
 	//LOG_DEBUG2("opcode[%d]\n",packet->operate_code);
-	//ProtocolPack::DumpPacket(packet);
+	ProtocolPack::DumpPacket(packet);
 	ret = SendFull (socket, (char *) packet_stream, packet_stream_length);
 	//ProtocolPack::HexEncode(packet_stream,packet_stream_length);
 	if (ret != packet_stream_length) {
@@ -201,6 +201,7 @@ bool SomeUtils::SendErrorCode(int socket,int32 operate_code,int16 msg_type,
 	MAKE_HEAD(chat_failed,operate_code,msg_type,is_zip,session);
 	//logic::SomeUtils::SafeStrncpy(chat_failed.error_msg.c_str(),chat_failed.error_msg.length(),
 		//						error_msg,strlen(error_msg));
+	chat_failed.platform_id = 10000;
 	chat_failed.error_msg.assign(error_msg);
 	return SendMessage(socket,&chat_failed,file,line);
 }
