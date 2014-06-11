@@ -54,7 +54,7 @@ proc: robotproc chatmgrproc usrmgrproc spreadproc socialityproc musicproc lbspro
 
 
 #####################robot################################################
-robotproc:getnewmusic.fcgi addnewmusic.fcgi getmailinfo.fcgi getspreadmail.fcgi getrobots.fcgi
+robotproc:getnewmusic.fcgi addnewmusic.fcgi getmailinfo.fcgi getspreadmail.fcgi getrobots.fcgi updaterobotpic.fcgi
 
 getspreadmail.fcgi: getspreadmail.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getspreadmail.fcgi
@@ -71,6 +71,9 @@ addnewmusic.fcgi: addnewmusic.o $(POBJ)
 getrobots.fcgi: getrobots.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getrobots.fcgi
 
+updaterobotpic.fcgi: updaterobotpic.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./updaterobotpic.fcgi
+
 ### 编译
 getspreadmail.o:
 	$(COMPILE) ./getspreadmail/getspreadmail.cc
@@ -86,6 +89,9 @@ addnewmusic.o:
 	
 getrobots.o:
 	$(COMPILE) ./getrobots/getrobots.cc
+
+updaterobotpic.o:
+	$(COMPILE) ./updaterobotpic/updaterobotpic.cc
 	
 #####################chat_mgr#############################################
 chatmgrproc:getsc.fcgi hischat.fcgi getsc1.fcgi
