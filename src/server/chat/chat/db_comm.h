@@ -22,6 +22,9 @@ public:
 	static bool GetUserInfo(const int64 platform_id,int64 user_id,
 		                     chat_base::UserInfo& userinfo);
 
+	static bool GetRobotsUserInfo(const int64 platform_id,int64 user_id,
+							 chat_base::UserInfo& userinfo);
+
 	static bool RecordMessage(const int64 platform_id,const int64 fid,const int64 tid,const int64 msg_id,
 							  const std::string& message,const std::string& current_time);
 

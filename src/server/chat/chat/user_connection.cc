@@ -36,6 +36,8 @@ bool UserConnectionMgr::OnUserLogin(struct server *srv, int socket,
 		senderror(socket,USER_LOGIN_FAILED,0,usr_login->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
 		return false;
 	}
+
+
 	r = chat_logic::LogicUnit::GetUserInfo(usr_login->platform_id,
 			                               usr_login->user_id,userinfo);
 	if (!r){//user vailed

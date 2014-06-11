@@ -27,7 +27,12 @@ bool LogicUnit::GetUserInfo(const int64 platform_id,int64 user_id,chat_base::Use
 	if (r)
 		return true;
 	r = chat_storage::DBComm::GetUserInfo(platform_id,user_id,userinfo);
-	return true;
+	/*if(type==1)
+		r = chat_storage::DBComm::GetUserInfo(platform_id,user_id,userinfo);
+	else if(type==2)
+		r = chat_storage::DBComm::GetRobotsUserInfo(platform_id,user_id,userinfo);
+	*/
+	return r;
 	
 }
 

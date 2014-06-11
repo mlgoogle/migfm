@@ -243,6 +243,51 @@ bool DBComm::GetUserLBSPos(const int64& uid,double& latitude,double& longitude){
 	return false;
 }
 
+
+bool DBComm::GetRobotsUserInfo(const int64 platform_id,int64 user_id,
+							 chat_base::UserInfo& userinfo){
+//call migfm.proc_GetRobotInfo(169111)
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	bool r =false;
+	MYSQL_ROW rows;
+	int num;;
+	if (engine==NULL){
+	 LOG_ERROR("GetConnection Error");
+	 return false;
+	}
+
+	os<<"call proc_GetRobotInfo("<<platform_id
+		<<","<<user_id<<");";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return false;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			//song_url = rows[0];
+			int64 nicknumber = atoll(rows[0]);
+			std::string nickname = rows[1];
+			std::string sex = rows[2];
+			std::string head_url = rows[3];
+			chat_base::UserInfo current_userinfo(platform_id,user_id,
+				                            nicknumber,nickname,
+									        head_url);
+			userinfo = current_userinfo;
+		}
+		return true;
+	}
+	return false;
+}
+
 bool DBComm::GetUserInfo(const int64 platform_id,int64 user_id, 
 						 chat_base::UserInfo& userinfo){
     
