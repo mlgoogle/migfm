@@ -23,7 +23,7 @@ RobotManager::RobotManager(){
 }
 
 RobotManager::~RobotManager(){
-	//base::SysRadom::GetInstance()->DeinitRandom();
+	base::SysRadom::GetInstance()->DeinitRandom();
 }
 
 
