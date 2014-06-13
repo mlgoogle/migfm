@@ -35,9 +35,12 @@ struct PacketHead{
 #define PACKET_HEAD_LENGTH (sizeof(int32) * 5 + sizeof(int16) + sizeof(int8) + sizeof(int64))
 
 
-#define ROBOTINFO_SIZE (sizeof(int64) + NICKNAME_LEN)
+#define ROBOTINFO_SIZE (sizeof(int64) * 2 + sizeof(int32) * 2 + NICKNAME_LEN)
 struct RobotInfo{
 	int64 uid;
+	int64  songid;
+	double latitude;
+	double longitude;
 	char nickname[NICKNAME_LEN];
 };
 

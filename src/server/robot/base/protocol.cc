@@ -47,6 +47,8 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				struct RobotInfo* robotinfo = new struct RobotInfo;
 				int temp = 0;
 				robotinfo->uid = in.Read64();
+				robotinfo->latitude = in.Read32();
+				robotinfo->longitude = in.Read32();
 				memcpy(robotinfo->nickname,in.ReadData(NICKNAME_LEN,temp),
 						NICKNAME_LEN);
 				robotinfo->nickname[NICKNAME_LEN - 1] = '\0';
@@ -87,6 +89,8 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			std::list<struct RobotInfo*>::iterator it = vNoticeUserLogin->robot_list.begin();
 			for(;it!=vNoticeUserLogin->robot_list.end();it++){
 				out.Write64((*it)->uid);
+				out.Write64((*it)->latitude);
+				out.Write64((*it)->longitude);
 				out.WriteData((*it)->nickname,NICKNAME_LEN);
 			}
 			packet = (char*)out.GetData();
@@ -173,6 +177,8 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_INT64(vNoticeUserLogin->uid);
 			for(;it!=vNoticeUserLogin->robot_list.end();it++){
 				PRINT_INT64((*it)->uid);
+				PRINT_INT((*it)->latitude);
+				PRINT_INT((*it)->longitude);
 				PRINT_STRING((*it)->nickname);
 			}
 			PRINT_END("struct NoticeUserLogin DumpEnd");
