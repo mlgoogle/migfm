@@ -37,7 +37,20 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			*packhead = (struct PacketHead*)vNoticeUserLogin;
 			BUILDPACKHEAD();
 
+			vNoticeUserLogin->platform_id = in.Read64();
 			vNoticeUserLogin->uid = in.Read64();
+			vNoticeUserLogin->latitude = in.Read32();
+			vNoticeUserLogin->longitude = in.Read32();
+		}
+		break;
+		case NOTICE_USER_ROBOT_LOGIN:
+		{
+			struct NoticeRobotLogin* vNoticeRobotLogin =
+					new struct NoticeRobotLogin;
+			*packhead = (struct PacketHead*)vNoticeRobotLogin;
+			BUILDPACKHEAD();
+
+			vNoticeRobotLogin->uid = in.Read64();
 			int list_size = data_length - sizeof(int64);
 			int i = 0;
 			int nums = list_size/ROBOTINFO_SIZE;
@@ -52,7 +65,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				memcpy(robotinfo->nickname,in.ReadData(NICKNAME_LEN,temp),
 						NICKNAME_LEN);
 				robotinfo->nickname[NICKNAME_LEN - 1] = '\0';
-				vNoticeUserLogin->robot_list.push_back(robotinfo);
+				vNoticeRobotLogin->robot_list.push_back(robotinfo);
 			}
 		}
 		break;
@@ -82,12 +95,25 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 		{
 			struct NoticeUserLogin* vNoticeUserLogin =
 					(struct NoticeUserLogin*)packhead;
-			int len = 0;
-			data_length = vNoticeUserLogin->robot_list.size() * ROBOTINFO_SIZE + sizeof(int64);
-			BUILDHEAD(data_length);
+			BUILDHEAD(NOTICEUSERLOGIN_SIZE);
+			out.Write64(vNoticeUserLogin->platform_id);
 			out.Write64(vNoticeUserLogin->uid);
-			std::list<struct RobotInfo*>::iterator it = vNoticeUserLogin->robot_list.begin();
-			for(;it!=vNoticeUserLogin->robot_list.end();it++){
+			out.Write32(vNoticeUserLogin->latitude);
+			out.Write32(vNoticeUserLogin->longitude);
+			packet = (char*)out.GetData();
+		}
+		break;
+
+		case NOTICE_USER_ROBOT_LOGIN:
+		{
+			struct NoticeRobotLogin* vNoticeRobotLogin =
+					(struct NoticeRobotLogin*)packhead;
+			int len = 0;
+			data_length = vNoticeRobotLogin->robot_list.size() * ROBOTINFO_SIZE + sizeof(int64);
+			BUILDHEAD(data_length);
+			out.Write64(vNoticeRobotLogin->uid);
+			std::list<struct RobotInfo*>::iterator it = vNoticeRobotLogin->robot_list.begin();
+			for(;it!=vNoticeRobotLogin->robot_list.end();it++){
 				out.Write64((*it)->uid);
 				out.Write64((*it)->latitude);
 				out.Write64((*it)->longitude);
@@ -169,11 +195,25 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 	switch(operate_code){
 		case NOTICE_USER_LOGIN:
 		{
-			struct NoticeUserLogin* vNoticeUserLogin =
+			struct NoticeUserLogin*  vNoticeUserLogin =
 					(struct NoticeUserLogin*)packhead;
-			std::list<struct RobotInfo*>::iterator it = vNoticeUserLogin->robot_list.begin();
 			DUMPHEAD();
 			PRINT_TITLE("struct NoticeUserLogin DumpBegin");
+			PRINT_INT64(vNoticeUserLogin->platform_id);
+			PRINT_INT64(vNoticeUserLogin->uid);
+			PRINT_INT(vNoticeUserLogin->latitude);
+			PRINT_INT(vNoticeUserLogin->longitude);
+			PRINT_END("struct NoticeUserLogin DumpEnd");
+
+		}
+		break;
+		case NOTICE_USER_ROBOT_LOGIN:
+		{
+			struct NoticeRobotLogin* vNoticeUserLogin =
+					(struct NoticeRobotLogin*)packhead;
+			std::list<struct RobotInfo*>::iterator it = vNoticeUserLogin->robot_list.begin();
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeRobotLogin DumpBegin");
 			PRINT_INT64(vNoticeUserLogin->uid);
 			for(;it!=vNoticeUserLogin->robot_list.end();it++){
 				PRINT_INT64((*it)->uid);
@@ -181,7 +221,7 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				PRINT_INT((*it)->longitude);
 				PRINT_STRING((*it)->nickname);
 			}
-			PRINT_END("struct NoticeUserLogin DumpEnd");
+			PRINT_END("struct NoticeRobotLogin DumpEnd");
 		}
 		break;
 		default:
