@@ -224,7 +224,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				for (;i<nums;i++){
 					struct Oppinfo* opp_info = new struct Oppinfo;
 					int temp = 0;
-					opp_info->user_id - in.Read64();
+					opp_info->user_id = in.Read64();
 					opp_info->user_nicknumber = in.Read64();
 					memcpy(opp_info->nickname,in.ReadData(NICKNAME_LEN,temp),
 						NICKNAME_LEN);

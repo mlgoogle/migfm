@@ -38,8 +38,8 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output:	robot_manager.o logic_comm.o thread_handler.o thread_lock.o protocol.o\
-		robot_init.o basictypes.o basic_util.o\
+output:	robot_cache_manager.o robot_manager.o logic_comm.o thread_handler.o thread_lock.o protocol.o \
+		robot_init.o db_comm.o basictypes.o basic_util.o robot_basic_info.o logic_unit.o \
 		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
 		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o
 	$(LINK)
@@ -62,6 +62,12 @@ robot_manager.o:
 db_comm.o:
 	$(COMPILE) ./db_comm.cc
 
+robot_cache_manager.o:
+	$(COMPILE) ./robot_cache_manager.cc
+	
+robot_basic_info.o:
+	$(COMPILE) ./robot_basic_info.cc
+	
 dic_comm.o:
 	$(COMPILE) ./dic_comm.cc
 

@@ -1,8 +1,8 @@
 #ifndef __ROBOT_LOGIC_UNIT_H__
 #define __ROBOT_LOGIC_UNIT_H__
 
-/*#include "chat_basic_infos.h"
-#include "dic_comm.h"*/
+#include "robot_basic_info.h"
+/*#include "dic_comm.h"*/
 #include "log/mig_log.h"
 #include "basic/basictypes.h"
 #include "plugins.h"
@@ -17,6 +17,7 @@ static char *PLUGIN_PROVIDER = "kerry";
 
 #define DEFAULT_CONFIG_PATH     "./plugins/robot_manager/robot_manager_config.xml";
 
+typedef std::map<int64,robot_base::RobotBasicInfo> RobotInfosMap;
 
 /*
 namespace chat_logic {
@@ -72,4 +73,5 @@ private:
 
 
 }*/
+
 #endif
