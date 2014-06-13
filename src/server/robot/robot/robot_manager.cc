@@ -1,15 +1,14 @@
 #include "robot_manager.h"
-/*
+#include "robot_cache_manager.h"
 #include "logic_unit.h"
 #include "db_comm.h"
-#include "dic_comm.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
 #include "base/logic_comm.h"
 #include "basic/radom_in.h"
 #include "config/config.h"
 #include "common.h"
-*/
+
 namespace robot_logic{
 
 
@@ -17,29 +16,24 @@ RobotManager::RobotManager(){
 
 	if(!Init())
 		assert(0);
-	/*
 	InitDefaultPlatformInfo();
-	*/
 }
 
 RobotManager::~RobotManager(){
-	//base::SysRadom::GetInstance()->DeinitRandom();
+	base::SysRadom::GetInstance()->DeinitRandom();
 }
 
 
 bool RobotManager::InitDefaultPlatformInfo(){
-	/*
 	int64 platform_id = 10000;
 	std::string platform_name = "miu";
-	chat_base::PlatformInfo platforminfo(platform_id,platform_name);
-	CacheManagerOp::GetPlatformChatMgrCache()->SetPlatformInfo(platform_id,platforminfo);
-	*/
+	robot_base::PlatformInfo platforminfo(platform_id,platform_name);
+	CacheManagerOp::GetRobotCacheMgr()->SetPlatformInfo(platform_id,platforminfo);
 	return true;
 }
 
 bool RobotManager::Init(){
 
-	/*
 	bool r = false;
 	std::string path = DEFAULT_CONFIG_PATH;
 	logic::ThreadKey::InitThreadKey();
@@ -49,8 +43,8 @@ bool RobotManager::Init(){
 	}
 
 	r = config->LoadConfig(path);
-	chat_storage::DBComm::Init(config->mysql_db_list_);
-	chat_storage::MemComm::Init(config->mem_list_);
+	robot_storage::DBComm::Init(config->mysql_db_list_);
+	/*chat_storage::MemComm::Init(config->mem_list_);
 	chat_storage::RedisComm::Init(config->redis_list_);
 
 	usr_connection_mgr_.reset(new chat_logic::UserConnectionMgr());

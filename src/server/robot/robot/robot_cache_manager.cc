@@ -1,5 +1,6 @@
 #include "robot_cache_manager.h"
 #include "robot_basic_info.h"
+#include "db_comm.h"
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
@@ -27,6 +28,8 @@ void RobotCacheManager::SetPlatformInfo(const int64 platform_id,robot_base::Plat
 		platform_cache_[platform_id] = pc;
 	}
 	pc->platform_info_ = platform;
+	robot_storage::DBComm::GetRobotInfos(0,10000,pc->idle_robot_infos);
+	LOG_DEBUG2("pc->idle_robot_infos %ld",pc->idle_robot_infos.size());
 }
 
 bool RobotCacheManager::GetPlatformInfo(const int64 platform_id,robot_base::PlatformInfo& platform){

@@ -8,9 +8,6 @@
 
 namespace robot_base{
 
-
-
-
 class PlatformInfo{
 public:
 	explicit PlatformInfo();
