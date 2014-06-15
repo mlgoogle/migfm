@@ -23,6 +23,13 @@ namespace base{
 		return true;
 	}
 
+	template<typename MapType,typename KeyType,typename ValType>
+	static bool MapAdd(MapType &map,KeyType id,const ValType &val)
+	{
+		map[id] = val;
+		return true;
+	}
+
 	template <typename MapType, typename MapTypeIT>
 	static bool MapDel (MapType &map, int idx)
 	{
@@ -30,6 +37,16 @@ namespace base{
 		if (it == map.end ())
 			return false;
 		map.erase (it);
+		return true;
+	}
+
+	template <typename MapType,typename MapTypeIT,typename KeyType>
+	static bool MapDel(MapType &map,KeyType id)
+	{
+		MapTypeIT it = map.find(id);
+		if(it==map.end())
+			return false;
+		map.erase(it);
 		return true;
 	}
 
