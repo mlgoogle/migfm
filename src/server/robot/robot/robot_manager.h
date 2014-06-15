@@ -1,6 +1,8 @@
 #ifndef _ROBOT_ROBOT_MANAGER_H__
 #define _ROBOT_ROBOT_MANAGER_H__
 
+#include "scheduler_mgr.h"
+#include "robot_connection.h"
 #include "basic/scoped_ptr.h"
 #include "plugins.h"
 #include "common.h"

@@ -105,7 +105,7 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 	ProtocolPack::DumpPacket(packet);
 	switch(packet->operate_code){
 	case SCHEDULER_LOGIN:
-		scheduler_mgr_->OnSchedulerMgrLogin(srv,packet);
+		scheduler_mgr_.get()->OnSchedulerMgrLogin(srv,socket,packet);
 		break;
 	default:
 		break;
