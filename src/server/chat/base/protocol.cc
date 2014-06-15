@@ -23,7 +23,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			return false;
 	}
 
-	//�Ƿ�ѹ��
+	//
 	if (is_zip)
 		data = (char*)packet_stream + PACKET_HEAD_LENGTH;
 	else
