@@ -106,6 +106,59 @@ private:
 
 		Data*        data_;
 	};
+
+
+class SchedulerInfo{
+public:
+	SchedulerInfo(const int64 platform_id,const int socket,const std::string& ip,
+			const std::string& machine_id);
+	SchedulerInfo();
+	SchedulerInfo(const SchedulerInfo& scheduler_info);
+	SchedulerInfo& operator = (const SchedulerInfo& scheduler_info);
+public:
+	const std::string& machine_id() const {return data_->machine_id_;}
+	const std::string& ip() const {return data_->ip_;}
+	const int socket() const {return data_->socket_;}
+	const int client_count() const {return data_->client_count_;}
+
+	void add_client_count(){data_->client_count_++;}
+	void relase_client_count(){data_->client_count_--;}
+
+	void set_machine_id(const std::string& machine_id){data_->machine_id_ = machine_id;}
+	void set_ip(const std::string& ip){data_->ip_ = ip;}
+	void set_socket(const int socket){data_->socket_ = socket;}
+
+public:
+	class Data{
+	public:
+		Data(const int64 platform_id,const int socket,const std::string& ip,
+				const std::string& machine_id)
+		:refcount_(1)
+		,platform_id_(platform_id)
+		,socket_(socket)
+		,ip_(ip)
+		,client_count_(0)
+		,machine_id_(machine_id){}
+
+		Data():refcount_(1),platform_id_(0),client_count_(0){}
+
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
+
+	public:
+		int64 platform_id_;
+		int socket_;
+		int client_count_;
+		std::string ip_;
+		std::string machine_id_;
+	private:
+		int refcount_;
+
+	};
+	Data*   data_;
+};
+
+
 }
 
 #endif

@@ -44,6 +44,7 @@ bool RobotManager::Init(){
 
 	r = config->LoadConfig(path);
 	robot_storage::DBComm::Init(config->mysql_db_list_);
+	scheduler_mgr_.reset(new robot_logic::SchedulerMgr());
 	/*chat_storage::MemComm::Init(config->mem_list_);
 	chat_storage::RedisComm::Init(config->redis_list_);
 
@@ -81,7 +82,7 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 										 const int socket, 
 										 const void *msg, 
 										 const int len){
-   /* bool r = false;
+    bool r = false;
 	struct PacketHead *packet = NULL;
 	if (srv == NULL
 		||socket<=0
@@ -102,7 +103,13 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 
 	//ProtocolPack::HexEncode(msg,len);
 	ProtocolPack::DumpPacket(packet);
-	*/
+	switch(packet->operate_code){
+	case SCHEDULER_LOGIN:
+		scheduler_mgr_->OnSchedulerMgrLogin(srv,packet);
+		break;
+	default:
+		break;
+	}
     
     return true;
 }

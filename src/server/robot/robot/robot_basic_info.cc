@@ -6,6 +6,35 @@
 namespace robot_base{
 
 
+SchedulerInfo::SchedulerInfo(){
+	data_ = new Data();
+}
+
+SchedulerInfo::SchedulerInfo(const int64 platform_id,const int socket,const std::string& ip,
+		const std::string& machine_id){
+	data_ = new Data(platform_id,socket,ip,machine_id);
+}
+
+SchedulerInfo::SchedulerInfo(const SchedulerInfo& scheduler_info)
+:data_(scheduler_info.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+SchedulerInfo& SchedulerInfo::operator =(const SchedulerInfo& scheduler_info){
+
+	if (scheduler_info.data_!=NULL){
+		scheduler_info.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = scheduler_info.data_;
+	return *this;
+}
+
+
 RobotBasicInfo::RobotBasicInfo(){
 	data_ = new Data();
 }
