@@ -1,11 +1,12 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = ./robot_interface.so
+OUTPUT_FILE = ./../../lib/robot_interface.a
 
 ## 编译器
 COMPIlER = g++
 COMPILERC = gcc
+AR = ar cr
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
@@ -15,7 +16,7 @@ CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_DB_POOL_ -D_DIC_POOL_ -
 
 ## 链接选项
 ## for debug
-LINK_FLAGS = -g -shared -fPIC
+LINK_FLAGS = 
 ## for release
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
@@ -35,13 +36,13 @@ THIRD_PATH = ../../public
 COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 
 # 链接
-LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
+LINK = $(AR)  $(OUTPUT_FILE) $? 
 
 all: clean output delete-temp-file
 output:	robot_interface.o protocol.o logic_comm.o\
 		basictypes.o basic_util.o \
-		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
-		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o
+		radom_in.o data_packet.o constants.o mig_log.o \
+		json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o
 	$(LINK)
 
 clean:

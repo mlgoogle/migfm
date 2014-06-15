@@ -19,6 +19,8 @@ static char *PLUGIN_PROVIDER = "kerry";
 
 typedef std::map<int64,robot_base::RobotBasicInfo> RobotInfosMap;
 
+typedef std::map<int,robot_base::SchedulerInfo> SchedulerMap;
+
 /*
 namespace chat_logic {
 
