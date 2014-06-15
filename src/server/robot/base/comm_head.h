@@ -12,6 +12,7 @@ enum operatorcode
 	HEART_PACKET = 100,//与机器人客户端保持心跳连接，如果接收不到收回改机器人
 	NOTICE_USER_ROBOT_LOGIN = 1000,//通知客户端用户登录，并保存两个机器人个人信息
 	NOTICE_USER_LOGIN = 1001,//咪呦通知机器人服务器用户已经登录
+	SCHEDULER_LOGIN = 2000,//机器人调度器登录
 
 };
 
@@ -43,12 +44,12 @@ struct RobotInfo{
 	double longitude;
 	char nickname[NICKNAME_LEN];
 };
-
+//NOTICE_USER_ROBOT_LOGIN
 struct NoticeRobotLogin:public PacketHead{
 	int64 uid;
 	std::list<struct RobotInfo*> robot_list;
 };
-
+//NOTICE_USER_LOGIN
 #define NOTICEUSERLOGIN_SIZE (sizeof(int64) * 2 + sizeof(double) * 2)
 struct NoticeUserLogin:public PacketHead{
 	int64 platform_id;
@@ -57,4 +58,10 @@ struct NoticeUserLogin:public PacketHead{
 	double longitude;
 };
 
+//SCHEDULER_LOGIN
+#define SCHEDULER_LOGIN_SIZE (sizeof(int64) + vSchedulerLogin->machine_id.length())
+struct SchedulerLogin:public PacketHead{
+	int64 platform_id;
+	std::string machine_id;
+};
 #endif

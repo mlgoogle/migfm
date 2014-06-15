@@ -3,6 +3,7 @@
 #include "dic_comm.h"
 #include "logic_comm.h"
 #include "music_cache_mgr.h"
+#include "intertface/robot_interface.h"
 #include "basic/constants.h"
 #include "basic/basic_util.h"
 #include "config/config.h"
@@ -59,7 +60,7 @@ bool MusicMgrEngine::Init(){
 	InitThreadrw(&mood_random_lock_);
 	InitThreadrw(&scene_random_lock_);
 
-	////��ʼ��������б�
+	////
 	RestMusicListRandom();
 
 }
@@ -99,6 +100,7 @@ bool MusicMgrEngine::OnBroadcastClose(struct server *srv, int socket){
 
 bool MusicMgrEngine::OnBroadcastConnect(struct server *srv, int socket, 
 									  void *data, int len){
+	robot_server_socket_ = socket;
     return true;
 }
 
@@ -147,18 +149,18 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		GetMoodMap(socket,packet);
 	}else if (type=="getmparent"){
 		GetMoodParent(socket,packet);
-	}else if (type=="setcltsong"){//��¼�ղض�
+	}else if (type=="setcltsong"){//
 		PostCollectAndHateSong(socket,packet,1);
 	}else if (type=="getcltsongs"){
 		//GetSongList(socket,packet,1);
 		GetSongListV2(socket,packet,1);
-	}else if (type=="delcltsong"){//ȡ���ղظ���
+	}else if (type=="delcltsong"){//
 		DelCollectAndHateSong(socket,packet,1);
-	}else if (type=="sethtsong"){//�����������
+	}else if (type=="sethtsong"){//
 		PostCollectAndHateSong(socket,packet,0);
 	}else if (type=="delthsong"){
 		DelCollectAndHateSong(socket,packet,0);
-	}else if (type=="recordcursong"){//��¼�ȶ�
+	}else if (type=="recordcursong"){//
 		SetMoodRecording(socket,packet);
 	}else if (type=="getdefsongs"){
 		GetSongList(socket,packet,0);
@@ -835,7 +837,7 @@ bool MusicMgrEngine::GetSongList(const int socket,const packet::HttpPacket& pack
 		if (!r)
 			continue;
 
-		//��ȡ�ղ���//��ȡ������//�ȶ�
+		//
 		GetMusicHotCltCmt(songid,hot_num,cmt_num,clt_num);
 		smi.set_music_clt(clt_num);
 		smi.set_music_cmt(cmt_num);
@@ -1981,7 +1983,10 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 	content = "{\"filename\":\"channelinfo.xml\",\"version\":\"1.0.0\",\"url\":\"http://www.baidu.com/migfm\"}";
 	//更新登陆时间
 	storage::DBComm::UpdateLogin(uid);
-	//����json
+	//通知机器人服务器用户登录
+	LOG_DEBUG2("[robot_server_socket_%d]",robot_server_socket_);
+	NoticeUserLogin(robot_server_socket_,10000,uid,0,0);
+	//json
 	r = reader.parse(content.c_str(),root);
 	if (!r){
 		LOG_ERROR("parser json error");

@@ -69,6 +69,27 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			}
 		}
 		break;
+		case SCHEDULER_LOGIN:
+		{
+			struct SchedulerLogin* vSchedulerLogin =
+					new struct SchedulerLogin;
+			*packhead = (struct PacketHead*)vSchedulerLogin;
+			BUILDPACKHEAD();
+			vSchedulerLogin->platform_id = in.Read64();
+			int temp = 0;
+			int len = vSchedulerLogin->data_length  - sizeof(int64);
+			char* str = new char[len];
+			memcpy(str,in.ReadData(len,temp),len);
+			vSchedulerLogin->machine_id.assign(str,len);
+			if(str){
+				delete [] str;
+				str = NULL;
+			}
+		}
+		break;
+		default:
+			r = false;
+			break;
 
 	}
 	return r;
@@ -119,6 +140,17 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 				out.Write64((*it)->longitude);
 				out.WriteData((*it)->nickname,NICKNAME_LEN);
 			}
+			packet = (char*)out.GetData();
+		}
+		break;
+		case SCHEDULER_LOGIN:
+		{
+			struct SchedulerLogin* vSchedulerLogin =
+					(struct SchedulerLogin*)packhead;
+			BUILDHEAD(data_length);
+			out.Write64(vSchedulerLogin->platform_id);
+			out.WriteData(vSchedulerLogin->machine_id.c_str(),
+					vSchedulerLogin->machine_id.length());
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -222,6 +254,17 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				PRINT_STRING((*it)->nickname);
 			}
 			PRINT_END("struct NoticeRobotLogin DumpEnd");
+		}
+		break;
+		case SCHEDULER_LOGIN:
+		{
+			struct SchedulerLogin* vSchedulerLogin =
+					(struct SchedulerLogin*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct SchedulerLogin DumpBegin");
+			PRINT_INT64(vSchedulerLogin->platform_id);
+			PRINT_STRING(vSchedulerLogin->machine_id.c_str());
+			PRINT_END("struct SchedulerLogin DumpEnd");
 		}
 		break;
 		default:

@@ -140,6 +140,7 @@ private:
 	music_logic::GetSongUrl*                         get_song_engine_;
 	music_record::MoodRecordingEngine*               mood_record_engine_;
 	music_record::UserLocalMusicRecodingEngine*      user_local_music_engine_;
+	int                                              robot_server_socket_;
 private:
 	std::map<int,base::MigRadomInV2*>                       channel_random_map_;
 	std::map<int,base::MigRadomInV2*>                       mood_random_map_;
