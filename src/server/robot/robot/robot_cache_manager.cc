@@ -59,6 +59,23 @@ bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,
 	return true;
 }
 
+bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid){
+	logic::WLockGd lk(lock_);
+	robot_base::RobotBasicInfo robot_info;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	//删除临时表机器人，放入正式表
+	bool r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->temp_robot_infos,robot_uid,robot_info);
+	if(!r)
+		return false;
+	robot_info.set_socket(socket);
+	robot_info.set_follow_uid(uid);
+	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->temp_robot_infos,robot_uid);
+	base::MapAdd(pc->idle_robot_infos,robot_uid,robot_info);
+	return AddUserFollowRobot(pc->user_follow_infos,uid,robot_info);
+}
+
 bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info){
 	logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -138,4 +155,13 @@ bool RobotCacheManager::GetIdleScheduler(SchedulerMap& schduler_infos,robot_base
 	return true;
 }
 
+bool RobotCacheManager::AddUserFollowRobot(UserFollowMap& usr_follow,const int64 uid,
+		const robot_base::RobotBasicInfo& robotinfo){
+	RobotInfosMap robotinfos;
+	bool r = base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(usr_follow,uid,robotinfos);
+	robotinfos[robotinfo.uid()] = robotinfo;
+	usr_follow[uid] = robotinfos;
+	return base::MapAdd<UserFollowMap,RobotInfosMap>(usr_follow,uid,robotinfos);
+
+}
 }

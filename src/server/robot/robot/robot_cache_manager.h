@@ -17,6 +17,7 @@ public:
 	RobotInfosMap    idle_robot_infos;
 	RobotInfosMap    used_robot_infos;
 	RobotInfosMap    temp_robot_infos;
+	UserFollowMap    user_follow_infos;
 	SchedulerMap     schduler_infos;
 };
 
@@ -40,10 +41,14 @@ public:
 
 	bool SchedulerSendMessage(const int64 platform_id,struct PacketHead* packet);
 
+	bool RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid);
+
 private://内置函数，自身不能加锁
 	bool GetRobot(RobotInfosMap& idle_robot,RobotInfosMap& temp_robot,
 				std::list<robot_base::RobotBasicInfo>& list);
 	bool GetIdleScheduler(SchedulerMap& schduler_infos,robot_base::SchedulerInfo& scheduler_info);
+
+	bool AddUserFollowRobot(UserFollowMap& usr_follow,const int64 uid,const robot_base::RobotBasicInfo& robotinfo);
 
 private:
 	std::map<int64,PlatformCache*>             platform_cache_;

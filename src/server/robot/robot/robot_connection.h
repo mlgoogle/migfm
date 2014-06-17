@@ -16,6 +16,8 @@ public:
 public:
 	bool OnUserLogin(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg = NULL, int len = 0);//真实用户登录
+	bool OnRobotLogin(struct server *srv, int socket, struct PacketHead *packet,
+	        const void *msg = NULL, int len = 0);//机器人登陆
 };
 }
 

@@ -18,7 +18,7 @@ static char *PLUGIN_PROVIDER = "kerry";
 #define DEFAULT_CONFIG_PATH     "./plugins/robot_manager/robot_manager_config.xml";
 
 typedef std::map<int64,robot_base::RobotBasicInfo> RobotInfosMap;
-
+typedef std::map<int64,RobotInfosMap> UserFollowMap;
 typedef std::map<int,robot_base::SchedulerInfo> SchedulerMap;
 
 /*

@@ -45,4 +45,12 @@ bool RobotConnection::OnUserLogin(struct server *srv, int socket, struct PacketH
 	return true;
 }
 
+bool RobotConnection::OnRobotLogin(struct server *srv, int socket, struct PacketHead *packet,
+        const void *msg, int len){
+	bool r = false;
+	struct RobotLogin* vRobotLogin= (struct RobotLogin*)packet;
+	r = CacheManagerOp::GetRobotCacheMgr()->RobotLoginSucess(vRobotLogin->platform_id,
+							vRobotLogin->robot_id,socket,vRobotLogin->uid);
+	return r;
+}
 }
