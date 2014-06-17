@@ -52,6 +52,7 @@ bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,
 		return false;
 	while(i>0){
 		r = GetRobot(pc->idle_robot_infos,pc->temp_robot_infos,list);
+		i--;
 		if(!r)
 			return r;
 	}
@@ -133,6 +134,7 @@ bool RobotCacheManager::GetIdleScheduler(SchedulerMap& schduler_infos,robot_base
 			scheduler = it->second;
 		}
 	}
+	scheduler_info = scheduler;
 	return true;
 }
 

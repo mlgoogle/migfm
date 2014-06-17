@@ -45,6 +45,7 @@ private:
 	bool InitDefaultPlatformInfo();
 private:
 	scoped_ptr<robot_logic::SchedulerMgr>    scheduler_mgr_;
+	scoped_ptr<robot_logic::RobotConnection>  robot_mgr_;
 };
 
 
