@@ -87,6 +87,17 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			}
 		}
 		break;
+		case ROBOT_LOGIN:
+		{
+			struct RobotLogin* vRobotLogin =
+					new struct RobotLogin;
+			*packhead = (struct RobotLogin*)vRobotLogin;
+			BUILDPACKHEAD();
+			vRobotLogin->platform_id = in.Read64();
+			vRobotLogin->uid = in.Read64();
+			vRobotLogin->robot_id = in.Read64();
+		}
+		break;
 		default:
 			r = false;
 			break;
@@ -151,6 +162,17 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			out.Write64(vSchedulerLogin->platform_id);
 			out.WriteData(vSchedulerLogin->machine_id.c_str(),
 					vSchedulerLogin->machine_id.length());
+			packet = (char*)out.GetData();
+		}
+		break;
+		case ROBOT_LOGIN:
+		{
+			struct RobotLogin* vRobotLogin =
+					(struct RobotLogin*)packhead;
+			BUILDHEAD(data_length);
+			out.Write64(vRobotLogin->platform_id);
+			out.Write64(vRobotLogin->uid);
+			out.Write64(vRobotLogin->robot_id);
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -254,6 +276,18 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				PRINT_STRING((*it)->nickname);
 			}
 			PRINT_END("struct NoticeRobotLogin DumpEnd");
+		}
+		break;
+		case ROBOT_LOGIN:
+		{
+			struct RobotLogin* vRobotLogin =
+					(struct RobotLogin*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct RobotLogin DumpBegin");
+			PRINT_INT64(vRobotLogin->platform_id);
+			PRINT_INT64(vRobotLogin->uid);
+			PRINT_INT64(vRobotLogin->robot_id);
+			PRINT_END("struct RobotLogin DumpEnd");
 		}
 		break;
 		case SCHEDULER_LOGIN:
