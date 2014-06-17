@@ -5,6 +5,7 @@
 #include <string>
 
 #include "basic/basictypes.h"
+#include <map>
 
 namespace robot_base{
 
@@ -59,6 +60,7 @@ public:
 	const double longitude() const {return data_->longitude_;}
 	const std::string& nickname() const {return data_->nickname_;}
 	const std::string& head_url() const {return data_->head_url_;}
+	const int socket() const {return data_->socket_;}
 
 
 	void set_sex(const int32 sex) {data_->sex_ = sex;}
@@ -67,6 +69,8 @@ public:
 	void set_longitude(const double longitude) {data_->longitude_ = longitude;}
 	void set_nickname(const std::string& nickname) {data_->nickname_ = nickname;}
 	void set_head_url(const std::string& head_url) {data_->head_url_ = head_url;}
+	void set_socket(const int socket){data_->socket_ = socket;}
+	void set_follow_uid(const int64 uid){data_->follow_map_[uid] = uid;}
 private:
 		class Data{
 		public:
@@ -75,7 +79,8 @@ private:
 				,sex_(0)
 				,latitude_(0)
 				,longitude_(0)
-				,songid_(0){}
+				,songid_(0)
+				,socket_(0){}
 
 
 			Data(const int64 uid,const int32 sex,const double latitude,const double longitude,
@@ -87,7 +92,8 @@ private:
 			,longitude_(longitude)
 			,songid_(songid)
 			,nickname_(nickname)
-			,head_url_(head_url){}
+			,head_url_(head_url)
+			,socket_(0){}
 
 			void AddRef(){refcount_ ++;}
 			void Release(){if (!--refcount_)delete this;}
@@ -98,8 +104,10 @@ private:
 			double latitude_;
 			double longitude_;
 			int64 songid_;
+			int socket_;
 			std::string nickname_;
 			std::string head_url_;
+			std::map<int64,int64> follow_map_;
 		private:
 			int refcount_;
 		};

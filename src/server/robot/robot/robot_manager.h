@@ -3,6 +3,7 @@
 
 #include "scheduler_mgr.h"
 #include "robot_connection.h"
+#include "robot_connection.h"
 #include "basic/scoped_ptr.h"
 #include "plugins.h"
 #include "common.h"
@@ -45,6 +46,7 @@ private:
 	bool InitDefaultPlatformInfo();
 private:
 	scoped_ptr<robot_logic::SchedulerMgr>    scheduler_mgr_;
+	scoped_ptr<robot_logic::RobotConnection> robot_conn_mgr_;
 };
 
 
