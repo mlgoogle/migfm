@@ -43,6 +43,29 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			vNoticeUserLogin->longitude = in.Read32();
 		}
 		break;
+		case NOTICE_USER_DEFAULT_SONG:
+		{
+			struct NoticeUserDefaultSong* vNoticeUserDefaultSong =
+					new struct NoticeUserDefaultSong;
+			*packhead = (struct PacketHead*)vNoticeUserDefaultSong;
+			BUILDPACKHEAD();
+
+			vNoticeUserDefaultSong->platform_id = in.Read64();
+			vNoticeUserDefaultSong->uid = in.Read64();
+			vNoticeUserDefaultSong->songid = in.Read64();
+			vNoticeUserDefaultSong->type_id = in.Read32();
+			int temp = 0;
+			int len = vNoticeUserDefaultSong->data_length  - sizeof(int64) * 3 - sizeof(int32);
+			char* str = new char[len];
+			memcpy(str,in.ReadData(len,temp),len);
+			vNoticeUserDefaultSong->mode.assign(str,len);
+			if(str){
+				delete [] str;
+				str = NULL;
+			}
+
+		}
+		break;
 		case NOTICE_USER_ROBOT_LOGIN:
 		{
 			struct NoticeRobotLogin* vNoticeRobotLogin =
@@ -98,6 +121,18 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			vRobotLogin->robot_id = in.Read64();
 		}
 		break;
+		case NOTICE_USER_ROBOT_HANDSEL_SONG:
+		{
+			struct NoticeUserRobotHandselSong* vNoticeUserRobotHandselSong =
+					new struct NoticeUserRobotHandselSong;
+			*packhead = (struct NoticeUserRobotHandselSong*)vNoticeUserRobotHandselSong;
+			BUILDPACKHEAD();
+			vNoticeUserRobotHandselSong->platform_id = in.Read64();
+			vNoticeUserRobotHandselSong->uid = in.Read64();
+			vNoticeUserRobotHandselSong->robot_id = in.Read64();
+			vNoticeUserRobotHandselSong->robot_id = in.Read64();
+		}
+		break;
 		default:
 			r = false;
 			break;
@@ -136,6 +171,20 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 		}
 		break;
 
+		case NOTICE_USER_DEFAULT_SONG:
+		{
+			struct NoticeUserDefaultSong* vNoticeUserDefaultSong =
+					(struct NoticeUserDefaultSong*)packhead;
+			BUILDHEAD(NOTICEUSERDEFAULTSONG_SIZE);
+			out.Write64(vNoticeUserDefaultSong->platform_id);
+			out.Write64(vNoticeUserDefaultSong->uid);
+			out.Write64(vNoticeUserDefaultSong->songid);
+			out.Write32(vNoticeUserDefaultSong->type_id);
+			out.WriteData(vNoticeUserDefaultSong->mode.c_str(),vNoticeUserDefaultSong->mode.length());
+			packet = (char*)out.GetData();
+		}
+		break;
+
 		case NOTICE_USER_ROBOT_LOGIN:
 		{
 			struct NoticeRobotLogin* vNoticeRobotLogin =
@@ -158,7 +207,7 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 		{
 			struct SchedulerLogin* vSchedulerLogin =
 					(struct SchedulerLogin*)packhead;
-			BUILDHEAD(data_length);
+			BUILDHEAD(SCHEDULER_LOGIN_SIZE);
 			out.Write64(vSchedulerLogin->platform_id);
 			out.WriteData(vSchedulerLogin->machine_id.c_str(),
 					vSchedulerLogin->machine_id.length());
@@ -169,10 +218,22 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 		{
 			struct RobotLogin* vRobotLogin =
 					(struct RobotLogin*)packhead;
-			BUILDHEAD(data_length);
+			BUILDHEAD(ROBOT_LOGIN_SIZE);
 			out.Write64(vRobotLogin->platform_id);
 			out.Write64(vRobotLogin->uid);
 			out.Write64(vRobotLogin->robot_id);
+			packet = (char*)out.GetData();
+		}
+		break;
+		case NOTICE_USER_ROBOT_HANDSEL_SONG:
+		{
+			struct NoticeUserRobotHandselSong* vNoticeUserRobotHandselSong =
+					(struct NoticeUserRobotHandselSong*)packhead;
+			BUILDHEAD(NOTICEUSERROBOTHANDSELSONG_SIZE);
+			out.Write64(vNoticeUserRobotHandselSong->platform_id);
+			out.Write64(vNoticeUserRobotHandselSong->uid);
+			out.Write64(vNoticeUserRobotHandselSong->robot_id);
+			out.Write64(vNoticeUserRobotHandselSong->song_id);
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -261,6 +322,20 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 
 		}
 		break;
+		case  NOTICE_USER_DEFAULT_SONG:
+		{
+			struct NoticeUserDefaultSong* vNoticeUserDefaultSong =
+					(struct NoticeUserDefaultSong*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeUserDefaultSong DumpBegin");
+			PRINT_INT64(vNoticeUserDefaultSong->platform_id);
+			PRINT_INT64(vNoticeUserDefaultSong->uid);
+			PRINT_INT64(vNoticeUserDefaultSong->songid);
+			PRINT_INT64(vNoticeUserDefaultSong->type_id);
+			PRINT_STRING(vNoticeUserDefaultSong->mode.c_str());
+			PRINT_END("struct NoticeUserDefaultSong DumpEnd");
+		}
+		break;
 		case NOTICE_USER_ROBOT_LOGIN:
 		{
 			struct NoticeRobotLogin* vNoticeUserLogin =
@@ -288,6 +363,19 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_INT64(vRobotLogin->uid);
 			PRINT_INT64(vRobotLogin->robot_id);
 			PRINT_END("struct RobotLogin DumpEnd");
+		}
+		break;
+		case NOTICE_USER_ROBOT_HANDSEL_SONG:
+		{
+			struct NoticeUserRobotHandselSong* vNoticeUserRobotHandselSong =
+					(struct NoticeUserRobotHandselSong*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeUserRobotHandselSong DumpBegin");
+			PRINT_INT64(vNoticeUserRobotHandselSong->platform_id);
+			PRINT_INT64(vNoticeUserRobotHandselSong->uid);
+			PRINT_INT64(vNoticeUserRobotHandselSong->robot_id);
+			PRINT_INT64(vNoticeUserRobotHandselSong->song_id);
+			PRINT_END("struct NoticeUserRobotHandselSong DumpEnd");
 		}
 		break;
 		case SCHEDULER_LOGIN:

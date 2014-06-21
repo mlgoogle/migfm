@@ -10,10 +10,12 @@
 enum operatorcode
 {
 	HEART_PACKET = 100,//与机器人客户端保持心跳连接，如果接收不到收回改机器人
-	NOTICE_USER_ROBOT_LOGIN = 1000,//通知客户端用户登录，并保存两个机器人个人信息
-	NOTICE_USER_LOGIN = 1001,//咪呦通知机器人服务器用户已经登录
-	ROBOT_LOGIN = 1002,//机器人登陆成功
+	NOTICE_USER_ROBOT_LOGIN = 1000,//通知客户端用户登录，并发送两个机器人个人信息
+	NOTICE_USER_ROBOT_HANDSEL_SONG = 1001,//通知机器人客户端赠送歌曲
 	SCHEDULER_LOGIN = 2000,//机器人调度器登录
+	ROBOT_LOGIN = 3000,//机器人登陆成功
+	NOTICE_USER_LOGIN = 4000,//咪呦通知机器人服务器用户已经登录
+	NOTICE_USER_DEFAULT_SONG = 4001,//咪呦通知机器人服务器用户听的歌
 
 };
 
@@ -59,13 +61,32 @@ struct NoticeUserLogin:public PacketHead{
 	double longitude;
 };
 
+//NOTICE_USER_DEFAULT_SONG
+#define NOTICEUSERDEFAULTSONG_SIZE (sizeof(int64) * 3 + sizeof(int32) +vNoticeUserDefaultSong->mode.length())
+struct NoticeUserDefaultSong: public PacketHead{
+	int64 platform_id;
+	int64 uid;
+	int64 songid;
+	int32 type_id;
+	std::string mode;
+};
 //ROBOT_LOGIN
-#define ROBOT_LOGIN_SIZE (sizeof(int64) * 2)
+#define ROBOT_LOGIN_SIZE (sizeof(int64) * 3)
 struct RobotLogin:public PacketHead{
 	int64 platform_id;
 	int64 uid;
 	int64 robot_id;
 };
+
+//NOTICE_USER_ROBOT_HANDSEL_SONG
+#define NOTICEUSERROBOTHANDSELSONG_SIZE  (sizeof(int64) * 4)
+struct NoticeUserRobotHandselSong:public PacketHead{
+	int64 platform_id;
+	int64 uid;
+	int64 robot_id;
+	int64 song_id;
+};
+
 
 //SCHEDULER_LOGIN
 #define SCHEDULER_LOGIN_SIZE (sizeof(int64) + vSchedulerLogin->machine_id.length())
