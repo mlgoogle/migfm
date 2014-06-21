@@ -10,6 +10,9 @@ extern "C" {
 int NoticeUserLogin(int socket,	int64 platform_id,int64 uid,
 					double latitude,double longitude);//通知用户登录接口
 
+int NoticeUserDefaultSong(const int socket,const int64 platform_id,const int64 uid,
+			const int64 songid,const int32 type_id,const char* mode);
+
 #ifdef __cplusplus 
 }
 #endif
