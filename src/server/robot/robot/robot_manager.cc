@@ -46,6 +46,7 @@ bool RobotManager::Init(){
 	robot_storage::DBComm::Init(config->mysql_db_list_);
 	scheduler_mgr_.reset(new robot_logic::SchedulerMgr());
 	robot_mgr_.reset(new robot_logic::RobotConnection());
+	robot_song_mgr_.reset(new robot_logic::RobotSongMgr());
 	/*chat_storage::MemComm::Init(config->mem_list_);
 	chat_storage::RedisComm::Init(config->redis_list_);
 
@@ -112,6 +113,9 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 		robot_mgr_.get()->OnUserLogin(srv,socket,packet);
 	case ROBOT_LOGIN:
 		robot_mgr_.get()->OnRobotLogin(srv,socket,packet);
+		break;
+	case NOTICE_USER_DEFAULT_SONG:
+		robot_song_mgr_.get()->OnUserDefaultSong(srv,socket,packet);
 		break;
 	default:
 		break;

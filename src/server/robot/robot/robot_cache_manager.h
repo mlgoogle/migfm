@@ -31,7 +31,8 @@ public:
 
 	bool GetPlatformInfo(const int64 platform_id,robot_base::PlatformInfo& platform);
 
-	bool GetIdleRobot(const int64 platform_id,const int64 uid,std::list<robot_base::RobotBasicInfo>& list);
+	bool GetIdleRobot(const int64 platform_id,const int64 uid,const double latitude,const double longitude,
+			 std::list<robot_base::RobotBasicInfo>& list);
 
 	bool SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info);
 
@@ -43,12 +44,18 @@ public:
 
 	bool RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid);
 
+	bool GetUserFolowRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo);
+
 private://内置函数，自身不能加锁
-	bool GetRobot(RobotInfosMap& idle_robot,RobotInfosMap& temp_robot,
+	bool GetRobot(const double latitude,const double longitude,RobotInfosMap& idle_robot,RobotInfosMap& temp_robot,
 				std::list<robot_base::RobotBasicInfo>& list);
 	bool GetIdleScheduler(SchedulerMap& schduler_infos,robot_base::SchedulerInfo& scheduler_info);
 
 	bool AddUserFollowRobot(UserFollowMap& usr_follow,const int64 uid,const robot_base::RobotBasicInfo& robotinfo);
+
+	bool GetTaskRobot(RobotInfosMap& robot_map,const int32 task,robot_base::RobotBasicInfo& robotinfo);
+
+
 
 private:
 	std::map<int64,PlatformCache*>             platform_cache_;

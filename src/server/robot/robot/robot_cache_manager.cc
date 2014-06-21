@@ -42,8 +42,8 @@ bool RobotCacheManager::GetPlatformInfo(const int64 platform_id,robot_base::Plat
 }
 
 
-bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,
-		                         std::list<robot_base::RobotBasicInfo>& list){
+bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,const double latitude,const double longitude,
+		 std::list<robot_base::RobotBasicInfo>& list){
 	logic::WLockGd lk(lock_);
 	int i = 2;
 	bool r = false;
@@ -51,7 +51,7 @@ bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,
 	if(pc==NULL)
 		return false;
 	while(i>0){
-		r = GetRobot(pc->idle_robot_infos,pc->temp_robot_infos,list);
+		r = GetRobot(latitude,longitude,pc->idle_robot_infos,pc->temp_robot_infos,list);
 		i--;
 		if(!r)
 			return r;
@@ -72,8 +72,23 @@ bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 rob
 	robot_info.set_socket(socket);
 	robot_info.set_follow_uid(uid);
 	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->temp_robot_infos,robot_uid);
-	base::MapAdd(pc->idle_robot_infos,robot_uid,robot_info);
+	base::MapAdd(pc->used_robot_infos,robot_uid,robot_info);
+	//更新机器人坐标
+	robot_storage::DBComm::UpdateRobotLbsPos(robot_uid,robot_info.latitude(),robot_info.longitude());
 	return AddUserFollowRobot(pc->user_follow_infos,uid,robot_info);
+}
+
+bool RobotCacheManager::GetUserFolowRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	RobotInfosMap robotinfos;
+	bool r = base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(pc->user_follow_infos,uid,robotinfos);
+	if(!r)
+		return false;
+	GetTaskRobot(robotinfos,task,robotinfo);
+	return true;
 }
 
 bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info){
@@ -123,14 +138,17 @@ PlatformCache* RobotCacheManager::GetPlatformCache(int64 platform_id){
 }
 
 
-bool RobotCacheManager::GetRobot(RobotInfosMap& idle_robot,
-		RobotInfosMap& temp_robot,
+bool RobotCacheManager::GetRobot(const double latitude,const double longitude,RobotInfosMap& idle_robot,RobotInfosMap& temp_robot,
 		std::list<robot_base::RobotBasicInfo>& list){
 	RobotInfosMap::iterator it = idle_robot.begin();
 	if(it!=idle_robot.end()){
+		//修改坐标
+		it->second.set_latitude(latitude);
+		it->second.set_longitude(longitude);
 		list.push_back(it->second);
 		//存入临时表中，待机器人登录成功后，放入运行表中
 		temp_robot[it->first] = it->second;
+		LOG_DEBUG2("id %lld",it->first);
 		idle_robot.erase(it);
 		return true;
 	}
@@ -164,4 +182,21 @@ bool RobotCacheManager::AddUserFollowRobot(UserFollowMap& usr_follow,const int64
 	return base::MapAdd<UserFollowMap,RobotInfosMap>(usr_follow,uid,robotinfos);
 
 }
+
+bool RobotCacheManager::GetTaskRobot(RobotInfosMap& robot_map,const int32 task,robot_base::RobotBasicInfo& robotinfo){
+	//暂时以总任务数比较，
+	RobotInfosMap::iterator it = robot_map.begin();
+	robot_base::RobotBasicInfo robot;
+	robot = it->second;
+	for(;it!=robot_map.end();++it){
+		robot_base::RobotBasicInfo temp_robot;
+		temp_robot = it->second;
+		if(temp_robot.task_count()>robot.task_count()){
+			robot = it->second;
+		}
+	}
+	robotinfo = robot;
+	return true;
+}
+
 }

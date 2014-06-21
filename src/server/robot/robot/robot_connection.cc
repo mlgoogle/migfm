@@ -1,6 +1,7 @@
 #include "robot_connection.h"
 #include "robot_cache_manager.h"
 #include "robot_basic_info.h"
+#include "db_comm.h"
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
 namespace robot_logic{
@@ -17,9 +18,14 @@ bool RobotConnection::OnUserLogin(struct server *srv, int socket, struct PacketH
         const void *msg, int len){
 	//读取空闲机器人数据
 	bool r = false;
+	double latitude = 0;
+	double longitude = 0;
 	struct NoticeUserLogin* vNoticeUserLogin = (struct NoticeUserLogin*)packet;
 	std::list<robot_base::RobotBasicInfo> list;
-	r = CacheManagerOp::GetRobotCacheMgr()->GetIdleRobot(vNoticeUserLogin->platform_id,vNoticeUserLogin->uid,list);
+	//获取改用户的坐标
+	robot_storage::DBComm::GetUserLbsPos(vNoticeUserLogin->uid,latitude,longitude);
+	r = CacheManagerOp::GetRobotCacheMgr()->GetIdleRobot(vNoticeUserLogin->platform_id,vNoticeUserLogin->uid,
+			latitude,longitude,list);
 	if(list.size()<=0)
 		return false;
 
