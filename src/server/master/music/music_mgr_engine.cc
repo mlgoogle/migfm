@@ -1330,7 +1330,9 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 
 	// 返回最新消息个数
 	storage::RedisComm::GetNewMsgNum(uid,new_msg_num);
-
+	//通知机器人服务器
+	NoticeUserDefaultSong(robot_server_socket_,10000,atoll(uid.c_str()),
+			atoll(songid.c_str()),atoll(wordid.c_str()),mode.c_str());
 	msg = "0";
 	status = "1";
 	utf8_flag = 0;
