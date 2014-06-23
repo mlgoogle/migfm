@@ -206,6 +206,41 @@ bool DBComm::GetRobotInfos(const int from,const int count,RobotInfosMap& robot_i
 	return false;
 }
 
+//获取当前机器人试听的歌曲
+bool DBComm::GetRobotLoginListenSong(const int64 uid,int64& songid){
+#if defined (_DB_POOL_)
+	AutoDBCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	bool r = false;
+	MYSQL_ROW rows;
+	int num;
+	if (engine == NULL) {
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+	//call migfm.proc_GetRobotLoginListenSong(100008);
+	os<<"call migfm.proc_GetRobotLoginListenSong("<<uid<<");";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return false;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			songid = atoll(rows[0]);
+		}
+		return true;
+	}
+	return false;
+
+}
+
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
 	try{

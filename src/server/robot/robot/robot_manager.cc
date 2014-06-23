@@ -2,6 +2,7 @@
 #include "robot_cache_manager.h"
 #include "logic_unit.h"
 #include "db_comm.h"
+#include "dic_comm.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
 #include "base/logic_comm.h"
@@ -47,9 +48,10 @@ bool RobotManager::Init(){
 	scheduler_mgr_.reset(new robot_logic::SchedulerMgr());
 	robot_mgr_.reset(new robot_logic::RobotConnection());
 	robot_song_mgr_.reset(new robot_logic::RobotSongMgr());
-	/*chat_storage::MemComm::Init(config->mem_list_);
-	chat_storage::RedisComm::Init(config->redis_list_);
+	robot_storage::RedisComm::Init(config->redis_list_);
+	/*chat_storage::MemComm::Init(config->mem_list_);*/
 
+/*
 	usr_connection_mgr_.reset(new chat_logic::UserConnectionMgr());
 	ims_mgr_.reset(new chat_logic::IMSMgr());
 	file_mgr_.reset(new chat_logic::FileMgr());
@@ -113,6 +115,7 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 		robot_mgr_.get()->OnUserLogin(srv,socket,packet);
 	case ROBOT_LOGIN:
 		robot_mgr_.get()->OnRobotLogin(srv,socket,packet);
+		robot_song_mgr_.get()->OnRobotLoginSong(srv,socket,packet);
 		break;
 	case NOTICE_USER_DEFAULT_SONG:
 		robot_song_mgr_.get()->OnUserDefaultSong(srv,socket,packet);

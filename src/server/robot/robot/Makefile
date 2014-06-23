@@ -39,9 +39,9 @@ LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 output:	robot_cache_manager.o robot_manager.o robot_basic_info.o  robot_connection.o robot_song_mgr.o scheduler_mgr.o protocol.o \
-		robot_init.o db_comm.o basictypes.o basic_util.o logic_unit.o logic_comm.o thread_handler.o thread_lock.o\
+		robot_init.o db_comm.o dic_comm.o basictypes.o basic_util.o logic_unit.o logic_comm.o thread_handler.o thread_lock.o\
 		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
-		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o
+		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o  base64.o
 	$(LINK)
 
 clean:
@@ -70,7 +70,7 @@ scheduler_mgr.o:
 
 db_comm.o:
 	$(COMPILE) ./db_comm.cc
-
+	
 robot_cache_manager.o:
 	$(COMPILE) ./robot_cache_manager.cc
 	
@@ -146,6 +146,9 @@ config.o:
 basic_info.o:
 	$(COMPILE) $(THIRD_PATH)/basic/basic_info.cc
 
+base64.o:
+	$(COMPILE) $(THIRD_PATH)/basic/base64.cc
+	
 redis_warrper.o:
 	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb $(THIRD_PATH)/storage/redis_warrper.c
 

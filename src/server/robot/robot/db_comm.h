@@ -25,6 +25,8 @@ public:
 
 	static bool UpdateRobotLbsPos(const int64 uid,double latitude,double longitude);
 
+	static bool GetRobotLoginListenSong(const int64 uid,int64& songid);
+
 public:
 #if defined (_DB_POOL_)
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

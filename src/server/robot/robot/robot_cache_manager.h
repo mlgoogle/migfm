@@ -34,6 +34,8 @@ public:
 	bool GetIdleRobot(const int64 platform_id,const int64 uid,const double latitude,const double longitude,
 			 std::list<robot_base::RobotBasicInfo>& list);
 
+	bool GetUserFollower(const int64 platform_id,const int64 uid,RobotInfosMap& robotinfos);
+
 	bool SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info);
 
 	bool GetScheduler(const int64 platform_id,const int socket,robot_base::SchedulerInfo& scheduler_info);
@@ -44,7 +46,7 @@ public:
 
 	bool RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid);
 
-	bool GetUserFolowRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo);
+	bool GetUserFollowTaskRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo);
 
 private://内置函数，自身不能加锁
 	bool GetRobot(const double latitude,const double longitude,RobotInfosMap& idle_robot,RobotInfosMap& temp_robot,

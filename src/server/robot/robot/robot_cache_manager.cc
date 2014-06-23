@@ -78,7 +78,16 @@ bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 rob
 	return AddUserFollowRobot(pc->user_follow_infos,uid,robot_info);
 }
 
-bool RobotCacheManager::GetUserFolowRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo){
+bool RobotCacheManager::GetUserFollower(const int64 platform_id,const int64 uid,RobotInfosMap& robotinfos){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	bool r = base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(pc->user_follow_infos,uid,robotinfos);
+	return r;
+}
+
+bool RobotCacheManager::GetUserFollowTaskRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo){
 	logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
