@@ -42,9 +42,10 @@ bool MYSQLDB::GetUserInfo(const std::string& uid,base::UserInfo& usrinfo){
 	MYSQL_ROW rows;
 	//select usrid,sex,extadd,street,locality,region,pcode,
 	//ctry,head,birthday,nickname from migfm_user_infos where usrid =10000
-	sql<<"select usrid,username,sex,type,ctry,head,birthday,nickname,source "
-		<<"from migfm_user_infos where usrid = '"<<uid.c_str()<<"';";
-
+	//sql<<"select usrid,username,sex,type,ctry,head,birthday,nickname,source "
+	//	<<"from migfm_user_infos where usrid = '"<<uid.c_str()<<"';";
+	//call migfm.proc_GetUserBasicInfo(10000013)
+	sql<<"call migfm.proc_GetUserBasicInfo("<<uid<<")";
 	//check
 	CheckConnection();
 	MIG_DEBUG(USER_LEVEL,"sql[%s]\n",sql.str().c_str());
