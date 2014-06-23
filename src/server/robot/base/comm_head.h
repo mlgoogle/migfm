@@ -4,14 +4,19 @@
 #include <list>
 #include <string>
 #define  TOKEN_LEN 32
+#define  MODE_LEN 32
 #define  NICKNAME_LEN 48
 #define  HEAD_URL_LEN 64
+#define  NAME_LEN 128
+#define  SINGER_LEN 128
 
 enum operatorcode
 {
 	HEART_PACKET = 100,//与机器人客户端保持心跳连接，如果接收不到收回改机器人
 	NOTICE_USER_ROBOT_LOGIN = 1000,//通知客户端用户登录，并发送两个机器人个人信息
 	NOTICE_USER_ROBOT_HANDSEL_SONG = 1001,//通知机器人客户端赠送歌曲
+	NOTICE_USER_ROBOT_HANDSEL_SONG_SUCCESS = 1002,//赠送歌曲成功通知服务端
+	NOTICE_USER_ROBOT_LISTEN_SONG = 1003,//通知机器人客户端试听歌曲
 	SCHEDULER_LOGIN = 2000,//机器人调度器登录
 	ROBOT_LOGIN = 3000,//机器人登陆成功
 	NOTICE_USER_LOGIN = 4000,//咪呦通知机器人服务器用户已经登录
@@ -94,4 +99,16 @@ struct SchedulerLogin:public PacketHead{
 	int64 platform_id;
 	std::string machine_id;
 };
+
+//NOTICE_USER_ROBOT_LISTEN_SONG
+#define NOTICEUSERROBOTLISTENSONG_SIZE (sizeof(int64) * 2 + sizeof(int32) + MODE_LEN + NAME_LEN + SINGER_LEN)
+struct NoticeUserListenSong:public PacketHead{
+	int64 platform_id;
+	int64 songid;
+	int32 typid;
+	char mode[MODE_LEN];
+	char name[NAME_LEN];
+	char singer[SINGER_LEN];
+};
+
 #endif
