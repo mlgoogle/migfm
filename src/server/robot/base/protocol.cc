@@ -66,6 +66,27 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 
 		}
 		break;
+		case NOTICE_USER_CURRENT_SONG:
+		{
+			struct NoticeUserCurrentSong* vNoticeUserCurrentSong =
+					new struct NoticeUserCurrentSong;
+			*packhead = (struct PacketHead*)vNoticeUserCurrentSong;
+			BUILDPACKHEAD();
+
+			vNoticeUserCurrentSong->platform_id = in.Read64();
+			vNoticeUserCurrentSong->uid = in.Read64();
+			vNoticeUserCurrentSong->songid = in.Read64();
+			vNoticeUserCurrentSong->type_id = in.Read32();
+			int temp = 0;
+			int len = vNoticeUserCurrentSong->data_length  - sizeof(int64) * 3 - sizeof(int32);
+			char* str = new char[len];
+			memcpy(str,in.ReadData(len,temp),len);
+			vNoticeUserCurrentSong->mode.assign(str,len);
+			if(str){
+				delete [] str;
+				str = NULL;
+			}
+		}
 		case NOTICE_USER_ROBOT_LOGIN:
 		{
 			struct NoticeRobotLogin* vNoticeRobotLogin =
@@ -202,6 +223,20 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			out.Write64(vNoticeUserDefaultSong->songid);
 			out.Write32(vNoticeUserDefaultSong->type_id);
 			out.WriteData(vNoticeUserDefaultSong->mode.c_str(),vNoticeUserDefaultSong->mode.length());
+			packet = (char*)out.GetData();
+		}
+		break;
+
+		case NOTICE_USER_CURRENT_SONG:
+		{
+			struct NoticeUserCurrentSong* vNoticeUserCurrentSong =
+					(struct NoticeUserCurrentSong*)packhead;
+			BUILDHEAD(NOTICEUSERCURRENTSONG_SIZE);
+			out.Write64(vNoticeUserCurrentSong->platform_id);
+			out.Write64(vNoticeUserCurrentSong->uid);
+			out.Write64(vNoticeUserCurrentSong->songid);
+			out.Write32(vNoticeUserCurrentSong->type_id);
+			out.WriteData(vNoticeUserCurrentSong->mode.c_str(),vNoticeUserCurrentSong->mode.length());
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -369,6 +404,20 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_INT64(vNoticeUserDefaultSong->type_id);
 			PRINT_STRING(vNoticeUserDefaultSong->mode.c_str());
 			PRINT_END("struct NoticeUserDefaultSong DumpEnd");
+		}
+		break;
+		case  NOTICE_USER_CURRENT_SONG:
+		{
+			struct NoticeUserCurrentSong* vNoticeUserCurrentSong =
+					(struct NoticeUserCurrentSong*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeUserCurrentSong DumpBegin");
+			PRINT_INT64(vNoticeUserCurrentSong->platform_id);
+			PRINT_INT64(vNoticeUserCurrentSong->uid);
+			PRINT_INT64(vNoticeUserCurrentSong->songid);
+			PRINT_INT64(vNoticeUserCurrentSong->type_id);
+			PRINT_STRING(vNoticeUserCurrentSong->mode.c_str());
+			PRINT_END("struct NoticeUserCurrentSong DumpEnd");
 		}
 		break;
 		case NOTICE_USER_ROBOT_LOGIN:

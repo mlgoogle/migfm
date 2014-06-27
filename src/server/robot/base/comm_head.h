@@ -21,7 +21,7 @@ enum operatorcode
 	ROBOT_LOGIN = 3000,//机器人登陆成功
 	NOTICE_USER_LOGIN = 4000,//咪呦通知机器人服务器用户已经登录
 	NOTICE_USER_DEFAULT_SONG = 4001,//咪呦通知机器人服务器用户听的歌
-
+	NOTICE_USER_CURRENT_SONG = 4002,//咪呦通知机器人服务器用户听歌的变化
 };
 
 enum msgtype
@@ -75,6 +75,17 @@ struct NoticeUserDefaultSong: public PacketHead{
 	int32 type_id;
 	std::string mode;
 };
+
+//NOTICE_USER_CURRENT_SONG
+#define NOTICEUSERCURRENTSONG_SIZE (sizeof(int64) * 3 + sizeof(int32) +vNoticeUserCurrentSong->mode.length())
+struct NoticeUserCurrentSong: public PacketHead{
+	int64 platform_id;
+	int64 uid;
+	int64 songid;
+	int32 type_id;
+	std::string mode;
+};
+
 //ROBOT_LOGIN
 #define ROBOT_LOGIN_SIZE (sizeof(int64) * 3)
 struct RobotLogin:public PacketHead{

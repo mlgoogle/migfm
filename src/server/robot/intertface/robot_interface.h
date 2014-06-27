@@ -13,6 +13,8 @@ int NoticeUserLogin(int socket,	int64 platform_id,int64 uid,
 int NoticeUserDefaultSong(const int socket,const int64 platform_id,const int64 uid,
 			const int64 songid,const int32 type_id,const char* mode);
 
+int NoticeUserCurrentSong(const int socket,const int64 platform_id,const int64 uid,
+			const int64 songid,const int32 type_id,const char* mode);
 #ifdef __cplusplus 
 }
 #endif
