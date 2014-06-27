@@ -1066,6 +1066,12 @@ bool MemComm::SetUsrCurrentSong(const std::string& uid,
 	value.append("\",\"tid\":\"");
 	value.append(tid);
 	value.append("\"}");
+	LOG_DEBUG("++++++++++++++++++++++++++++");
+	LOG_DEBUG2("name %s",name.c_str());
+	LOG_DEBUG2("singer %s",singer.c_str());
+	LOG_DEBUG2("mode %s",mode.c_str());
+	LOG_DEBUG2("value：%s",value.c_str());
+	LOG_DEBUG("++++++++++++++++++++++++++++");
 	r = engine_->SetValue(key.c_str(),key.length(),
 							value.c_str(),value.length());
 	return r;
