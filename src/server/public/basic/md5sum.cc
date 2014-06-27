@@ -1,4 +1,5 @@
 #include "basic/md5sum.h"
+#include<stdio.h>
 
 typedef unsigned char *POINTER;
 typedef unsigned short int UINT2;

@@ -7,6 +7,7 @@
 #include <iconv.h>
 #include <vector>
 #include <assert.h>
+#include "zlib.h"
 #include "basic/basictypes.h"
 #include "basic/md5sum.h"
 #include "basic/basic_info.h"
@@ -60,6 +61,8 @@ public:
 	static bool GetUserInfo(const std::string& uid,UserInfo& usrinfo);
 
 	static bool ConverNum(const int num,std::string& conver_num);
+
+	static int HttpgzdeCompress(Byte *zdata, uLong nzdata, Byte *data, uLong *ndata);
 };
 
 }
