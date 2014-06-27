@@ -1330,7 +1330,9 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 
 	// 返回最新消息个数
 	storage::RedisComm::GetNewMsgNum(uid,new_msg_num);
-
+	//通知机器人服务器
+	NoticeUserCurrentSong(robot_server_socket_,10000,atoll(uid.c_str()),
+			atoll(songid.c_str()),atoll(wordid.c_str()),mode.c_str());
 	msg = "0";
 	status = "1";
 	utf8_flag = 0;
@@ -1986,6 +1988,9 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 	//通知机器人服务器用户登录
 	LOG_DEBUG2("[robot_server_socket_%d]",robot_server_socket_);
 	NoticeUserLogin(robot_server_socket_,10000,uid,0,0);
+	//通知机器人服务器
+	NoticeUserDefaultSong(robot_server_socket_,10000,atoll(uid.c_str()),
+			atoll(songid.c_str()),atoll(wordid.c_str()),mode.c_str());
 	//json
 	r = reader.parse(content.c_str(),root);
 	if (!r){

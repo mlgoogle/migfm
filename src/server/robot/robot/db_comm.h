@@ -21,6 +21,19 @@ public:
 
 	static bool GetRobotInfos(const int from,const int count,RobotInfosMap& robot_infos);
 
+	static bool GetUserLbsPos(const int64 uid,double& latitude,double& longitude);
+
+	static bool UpdateRobotLbsPos(const int64 uid,double latitude,double longitude);
+
+	static bool GetRobotLoginListenSong(const int64 uid,int64& songid);
+
+	static bool GetChannelInfos(std::list<int>& list);
+
+	static bool GetMoodInfos(std::list<int>& list);
+
+	static bool GetSceneInfos(std::list<int>& list);
+
+
 public:
 #if defined (_DB_POOL_)
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

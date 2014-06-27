@@ -6,6 +6,8 @@
 #include "base/comm_head.h"
 #include "base/thread_handler.h"
 #include "base/thread_lock.h"
+#include "basic/scoped_ptr.h"
+#include "basic/radom_in.h"
 #include <list>
 
 namespace robot_logic{
@@ -13,12 +15,16 @@ namespace robot_logic{
 
 class PlatformCache{
 public:
-	robot_base::PlatformInfo   platform_info_;
-	RobotInfosMap    idle_robot_infos;
-	RobotInfosMap    used_robot_infos;
-	RobotInfosMap    temp_robot_infos;
-	UserFollowMap    user_follow_infos;
-	SchedulerMap     schduler_infos;
+	robot_base::PlatformInfo                                platform_info_;
+	RobotInfosMap                                           idle_robot_infos_;
+	RobotInfosMap                                           used_robot_infos_;
+	RobotInfosMap                                           temp_robot_infos_;
+	UserFollowMap                                           user_follow_infos_;
+	SchedulerMap                                            schduler_infos_;
+	scoped_ptr<base::MigRadomIn>                            radom_in_;
+	std::map<int,base::MigRadomInV2*>                       channel_random_map_;
+	std::map<int,base::MigRadomInV2*>                       mood_random_map_;
+	std::map<int,base::MigRadomInV2*>                       scene_random_map_;
 };
 
 
@@ -31,7 +37,10 @@ public:
 
 	bool GetPlatformInfo(const int64 platform_id,robot_base::PlatformInfo& platform);
 
-	bool GetIdleRobot(const int64 platform_id,const int64 uid,std::list<robot_base::RobotBasicInfo>& list);
+	bool GetIdleRobot(const int64 platform_id,const int64 uid,const double latitude,const double longitude,
+			 std::list<robot_base::RobotBasicInfo>& list);
+
+	bool GetUserFollower(const int64 platform_id,const int64 uid,RobotInfosMap& robotinfos);
 
 	bool SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info);
 
@@ -43,12 +52,32 @@ public:
 
 	bool RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid);
 
+	bool GetUserFollowTaskRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo);
+
+	void RestMusicListRandom(PlatformCache* pc);
+
+	bool GetModeRadomSong(const int64 platform_id,const std::string& type,const int32& type_id,
+			int num,std::list<int>& list);
+
 private://内置函数，自身不能加锁
-	bool GetRobot(RobotInfosMap& idle_robot,RobotInfosMap& temp_robot,
-				std::list<robot_base::RobotBasicInfo>& list);
+
+	bool CreateTypeRamdon(PlatformCache* pc,std::string& type,std::list<int>& list);
+
+	bool GetTypeRamdon(PlatformCache* pc,const std::string& type,const int32& wordid,
+	        int num,std::list<int>& list);
+
+	bool GetRobotLbsPos(base::MigRadomIn* radomin,const double& latitude,const double& longitude,double& robot_latitude,
+			double& robot_longitude);
+
+	bool GetRobot(const double latitude,const double longitude,RobotInfosMap& idle_robot,RobotInfosMap& temp_robot,
+				std::list<robot_base::RobotBasicInfo>& list,base::MigRadomIn* radomin);
 	bool GetIdleScheduler(SchedulerMap& schduler_infos,robot_base::SchedulerInfo& scheduler_info);
 
 	bool AddUserFollowRobot(UserFollowMap& usr_follow,const int64 uid,const robot_base::RobotBasicInfo& robotinfo);
+
+	bool GetTaskRobot(RobotInfosMap& robot_map,const int32 task,robot_base::RobotBasicInfo& robotinfo);
+
+
 
 private:
 	std::map<int64,PlatformCache*>             platform_cache_;

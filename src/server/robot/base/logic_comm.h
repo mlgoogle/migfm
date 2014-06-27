@@ -117,6 +117,9 @@ public:
 	static bool SendErrorCode(int socket,int32 operate_code,int16 msg_type,int8 is_zip,
 			int32 session,const int32 error_code,const char *file,long line);
 
+	static bool GetRobotLbsPos(const double& latitude,const double& longitude,double& robot_latitude,
+			double& robot_longitude);
+
 };
 
 }

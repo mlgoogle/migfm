@@ -61,6 +61,11 @@ public:
 	const std::string& nickname() const {return data_->nickname_;}
 	const std::string& head_url() const {return data_->head_url_;}
 	const int socket() const {return data_->socket_;}
+	const int32 task_count() const {return data_->task_count_;}
+	const int32 song_task_count() const {return data_->song_task_count_;}
+	const int32 say_hello_count() const {return data_->say_hello_count_;}
+	const int32 listen_task_count() const {return data_->listen_task_count_;}
+
 
 
 	void set_sex(const int32 sex) {data_->sex_ = sex;}
@@ -71,6 +76,11 @@ public:
 	void set_head_url(const std::string& head_url) {data_->head_url_ = head_url;}
 	void set_socket(const int socket){data_->socket_ = socket;}
 	void set_follow_uid(const int64 uid){data_->follow_map_[uid] = uid;}
+
+	void add_task_count(){data_->task_count_++;}
+	void add_song_task_count(){data_->song_task_count_++;add_task_count();}
+	void add_hello_task_count(){data_->say_hello_count_++;add_task_count();}
+	void add_listen_task_count(){data_->listen_task_count_++;add_task_count();}
 private:
 		class Data{
 		public:
@@ -86,6 +96,10 @@ private:
 			Data(const int64 uid,const int32 sex,const double latitude,const double longitude,
 	                const int64 songid,const std::string nickname,const std::string& head_url)
 			:refcount_(1)
+			,task_count_(0)
+			,song_task_count_(0)
+			,say_hello_count_(0)
+			,listen_task_count_(0)
 			,uid_(uid)
 			,sex_(sex)
 			,latitude_(latitude)
@@ -105,6 +119,10 @@ private:
 			double longitude_;
 			int64 songid_;
 			int socket_;
+			int task_count_;
+			int song_task_count_;
+			int say_hello_count_;
+			int listen_task_count_;
 			std::string nickname_;
 			std::string head_url_;
 			std::map<int64,int64> follow_map_;
