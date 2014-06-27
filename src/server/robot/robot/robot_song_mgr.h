@@ -18,6 +18,10 @@ public:
 
 	bool OnRobotLoginSong(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg = NULL, int len = 0);
+
+	bool OnNoticeUserChangerSong(struct server *srv, int socket, struct PacketHead *packet,
+	        const void *msg = NULL, int len = 0);
+
 private:
 	bool ResolveJsonMusic(const std::string& musicinfo,Json::Value& value);
 };

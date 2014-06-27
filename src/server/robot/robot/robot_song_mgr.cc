@@ -37,6 +37,17 @@ bool RobotSongMgr::OnUserDefaultSong(struct server *srv, int socket, struct Pack
 }
 
 
+bool OnNoticeUserChangerSong(struct server *srv, int socket, struct PacketHead *packet,
+	        const void *msg/* = NULL*/, int len/* = 0*/){
+	struct NoticeUserCurrentSong* current_song = (struct NoticeUserCurrentSong*)packet;
+	bool r = false;
+	std::list<int> list;
+	r = CacheManagerOp::GetRobotCacheMgr()->GetModeRadomSong(current_song->platform_id,
+			current_song->mode,current_song->type_id,2,list);
+	return r;
+
+}
+
 bool RobotSongMgr::OnRobotLoginSong(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg/* = NULL*/, int len/* = 0*/){
 

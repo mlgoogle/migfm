@@ -175,6 +175,16 @@ bool RedisComm::GetMusicInfos(const int64 songid,std::string& musicinfo) {
 	return true;
 }
 
+int RedisComm::GetHashSize(const std::string& key){
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
+	if (redis_engine_==NULL)
+		return 0;
+	return redis_engine_->GetHashSize(key.c_str());
+}
+
 
 
 

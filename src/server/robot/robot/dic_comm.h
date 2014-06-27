@@ -34,6 +34,8 @@ public:
 
 	static bool GetMusicInfos(const int64 songid,std::string& musicinfo);
 
+	static int  GetHashSize(const std::string& key);
+
 private:
 	static std::list<base::ConnAddr>   addrlist_;
 #if defined (_DIC_POOL_)
