@@ -1989,8 +1989,8 @@ bool MusicMgrEngine:: UpdateConfigFile(const int socket,
 	LOG_DEBUG2("[robot_server_socket_%d]",robot_server_socket_);
 	NoticeUserLogin(robot_server_socket_,10000,uid,0,0);
 	//通知机器人服务器
-	NoticeUserDefaultSong(robot_server_socket_,10000,atoll(uid.c_str()),
-			atoll(songid.c_str()),atoll(wordid.c_str()),mode.c_str());
+	//NoticeUserDefaultSong(robot_server_socket_,10000,atoll(uid.c_str()),
+		//	atoll(songid.c_str()),atoll(wordid.c_str()),mode.c_str());
 	//json
 	r = reader.parse(content.c_str(),root);
 	if (!r){
