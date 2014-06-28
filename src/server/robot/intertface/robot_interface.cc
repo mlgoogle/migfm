@@ -9,7 +9,7 @@
 __attribute__((visibility("default")))
 int NoticeUserLogin(int socket,	int64 platform_id,int64 uid,
 					double latitude,double longitude){
-	if(socket<=0)
+	if(socket<=0||uid>=10000000)
 		return 0;
 	struct NoticeUserLogin notice_user_login;
 	MAKE_HEAD(notice_user_login, NOTICE_USER_LOGIN,USER_TYPE,0,0);
@@ -23,7 +23,7 @@ int NoticeUserLogin(int socket,	int64 platform_id,int64 uid,
 
 int NoticeUserDefaultSong(const int socket,const int64 platform_id,const int64 uid,
 			const int64 songid,const int32 type_id,const char* mode){
-	if(socket<=0)
+	if(socket<=0||uid>=10000000)
 		return 0;
 	struct NoticeUserDefaultSong notice_user_default_song;
 	MAKE_HEAD(notice_user_default_song,NOTICE_USER_DEFAULT_SONG,USER_TYPE,0,0);
@@ -37,7 +37,7 @@ int NoticeUserDefaultSong(const int socket,const int64 platform_id,const int64 u
 
 int NoticeUserCurrentSong(const int socket,const int64 platform_id,const int64 uid,
 			const int64 songid,const int32 type_id,const char* mode){
-	if(socket<=0)
+	if(socket<=0||uid>=10000000)
 		return 0;
 	struct NoticeUserCurrentSong notice_user_current_song;
 	MAKE_HEAD(notice_user_current_song,NOTICE_USER_CURRENT_SONG,USER_TYPE,0,0);
