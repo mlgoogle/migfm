@@ -87,6 +87,7 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				str = NULL;
 			}
 		}
+		break;
 		case NOTICE_USER_ROBOT_LOGIN:
 		{
 			struct NoticeRobotLogin* vNoticeRobotLogin =
