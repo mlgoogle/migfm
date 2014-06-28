@@ -27,11 +27,11 @@ public:
 
 	static bool GetRobotLoginListenSong(const int64 uid,int64& songid);
 
-	static bool GetChannelInfos(std::list<int>& list);
+	static bool GetChannelInfos(std::list<int64>& list);
 
-	static bool GetMoodInfos(std::list<int>& list);
+	static bool GetMoodInfos(std::list<int64>& list);
 
-	static bool GetSceneInfos(std::list<int>& list);
+	static bool GetSceneInfos(std::list<int64>& list);
 
 
 public:

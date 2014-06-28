@@ -241,7 +241,7 @@ bool DBComm::GetRobotLoginListenSong(const int64 uid,int64& songid){
 
 }
 
-bool DBComm::GetChannelInfos(std::list<int>& list){
+bool DBComm::GetChannelInfos(std::list<int64>& list){
 	std::stringstream os;
 	bool r = false;
 	int num = 0;
@@ -261,14 +261,14 @@ bool DBComm::GetChannelInfos(std::list<int>& list){
 	num = engine->RecordCount();
 	if(num>0){
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
-			int channel_id = atol(rows[0]);
+			int64 channel_id = atol(rows[0]);
 			list.push_back(channel_id);
 		}
 	}
 	return true;
 }
 
-bool DBComm::GetMoodInfos(std::list<int> &list){
+bool DBComm::GetMoodInfos(std::list<int64> &list){
 	std::stringstream os;
 	bool r = false;
 	int num = 0;
@@ -295,7 +295,7 @@ bool DBComm::GetMoodInfos(std::list<int> &list){
 	return false;
 }
 
-bool DBComm::GetSceneInfos(std::list<int> &list){
+bool DBComm::GetSceneInfos(std::list<int64> &list){
 	std::stringstream os;
 	bool r = false;
 	int num = 0;

@@ -54,17 +54,19 @@ public:
 
 	bool GetUserFollowTaskRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo);
 
+	bool GetUserFollowAllRobot(const int64 platform_id,const int64 uid,RobotInfosMap& map);
+
 	void RestMusicListRandom(PlatformCache* pc);
 
 	bool GetModeRadomSong(const int64 platform_id,const std::string& type,const int32& type_id,
-			int num,std::list<int>& list);
+			int num,std::list<int64>& list);
 
 private://内置函数，自身不能加锁
 
-	bool CreateTypeRamdon(PlatformCache* pc,std::string& type,std::list<int>& list);
+	void CreateTypeRamdon(PlatformCache* pc,std::string& type,std::list<int64>& list);
 
 	bool GetTypeRamdon(PlatformCache* pc,const std::string& type,const int32& wordid,
-	        int num,std::list<int>& list);
+	        int num,std::list<int64>& list);
 
 	bool GetRobotLbsPos(base::MigRadomIn* radomin,const double& latitude,const double& longitude,double& robot_latitude,
 			double& robot_longitude);

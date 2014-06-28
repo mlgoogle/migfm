@@ -62,9 +62,9 @@ bool RobotCacheManager::GetPlatformInfo(const int64 platform_id,robot_base::Plat
 
 void RobotCacheManager::RestMusicListRandom(PlatformCache* pc){
 	bool r = false;
-	std::list<int> channel_list;
-	std::list<int> mood_list;
-	std::list<int> scene_list;
+	std::list<int64> channel_list;
+	std::list<int64> mood_list;
+	std::list<int64> scene_list;
 	r = robot_storage::DBComm::GetChannelInfos(channel_list);
 	if (!r)
 		assert(0);
@@ -84,7 +84,7 @@ void RobotCacheManager::RestMusicListRandom(PlatformCache* pc){
 }
 
 bool RobotCacheManager::GetModeRadomSong(const int64 platform_id,const std::string& type,const int32& type_id,
-		int num,std::list<int>& list){
+		int num,std::list<int64>& list){
 	logic::RLockGd lk(lock_);
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -150,6 +150,18 @@ bool RobotCacheManager::GetUserFollowTaskRobot(const int64 platform_id,const int
 	if(!r)
 		return false;
 	GetTaskRobot(robotinfos,task,robotinfo);
+	return true;
+}
+
+bool RobotCacheManager::GetUserFollowAllRobot(const int64 platform_id,const int64 uid,RobotInfosMap& map){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	RobotInfosMap robotinfos;
+	bool r = base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(pc->user_follow_infos_,uid,map);
+	if(!r)
+		return false;
 	return true;
 }
 
@@ -284,8 +296,8 @@ bool RobotCacheManager::GetRobotLbsPos(base::MigRadomIn* radomin,const double& l
 
 }
 
-bool RobotCacheManager::CreateTypeRamdon(PlatformCache* pc,std::string& type,
-									  std::list<int> &list){
+void RobotCacheManager::CreateTypeRamdon(PlatformCache* pc,std::string& type,
+									  std::list<int64> &list){
 	while(list.size()>0){
 		int id = list.front();
 		list.pop_front();
@@ -309,7 +321,7 @@ bool RobotCacheManager::CreateTypeRamdon(PlatformCache* pc,std::string& type,
 }
 
 bool RobotCacheManager::GetTypeRamdon(PlatformCache* pc,const std::string& type,const int32& wordid,
-        int num,std::list<int>& list){
+        int num,std::list<int64>& list){
 	int* rands = NULL;
 	rands = new int[num];
 	if (rands==NULL)

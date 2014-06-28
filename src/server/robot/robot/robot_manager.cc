@@ -120,6 +120,8 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 	case NOTICE_USER_DEFAULT_SONG:
 		robot_song_mgr_.get()->OnUserDefaultSong(srv,socket,packet);
 		break;
+	case NOTICE_USER_CURRENT_SONG:
+		robot_song_mgr_.get()->OnNoticeUserChangerSong(srv,socket,packet);
 	default:
 		break;
 	}
