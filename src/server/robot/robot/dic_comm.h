@@ -3,6 +3,7 @@
 #include "base/logic_comm.h"
 #include "storage/storage.h"
 #include "basic/basic_info.h"
+#include <hiredis.h>
 #include <libmemcached/memcached.h>
 
 namespace robot_storage{
@@ -36,8 +37,13 @@ public:
 
 	static int  GetHashSize(const std::string& key);
 
-	static void GetMusicInfos(const std::string& type,std::list<int64>& random_list,
+	static bool GetBatchMusicInfos(const std::string& type,std::list<int64>& random_list,
 			                  std::list<std::string>& songinfolist);
+
+	static bool GetBatchInfos(base_storage::DictionaryStorageEngine*engine,
+	                      const std::string& command,std::list<std::string>& batchinfolist);
+
+	static base_storage::CommandReply* _CreateReply(redisReply* reply);
 
 private:
 	static std::list<base::ConnAddr>   addrlist_;
