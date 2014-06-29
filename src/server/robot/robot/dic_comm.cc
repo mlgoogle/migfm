@@ -175,6 +175,90 @@ bool RedisComm::GetMusicInfos(const int64 songid,std::string& musicinfo) {
 	return true;
 }
 
+bool RedisComm::GetBatchMusicInfos(const std::string& type,std::list<int64>& random_list,
+        std::list<std::string>& batchinfolist){
+#if defined (_DIC_POOL_)
+		AutoDicCommEngine auto_engine;
+		base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
+	std::stringstream os;
+	int64 total;
+	bool r = false;
+	std::list<std::string> temp_list;
+
+	os<<"hmget";
+	if (random_list.size()<=0)
+		return false;
+	os<<" "<<type;
+
+	while(random_list.size()>0){
+		int num = random_list.front();
+		random_list.pop_front();
+		os<<" "<<num;
+	}
+	LOG_DEBUG2("%s",os.str().c_str());
+	//获取到相对应音乐id
+	r = GetBatchInfos(redis_engine_,os.str(),temp_list);
+	os.str("");
+	if(!r)
+		return false;
+
+	os<<"mget";
+	if (temp_list.size()<=0)
+		return false;
+
+	while(temp_list.size()>0){
+		std::string songid = temp_list.front();
+		temp_list.pop_front();
+		os<<" "<<songid;
+	}
+	LOG_DEBUG2("%s",os.str().c_str());
+
+
+	//获取音乐信息
+	r = GetBatchInfos(redis_engine_,os.str(),batchinfolist);
+	if(!r)
+		return false;
+
+	return r;
+}
+
+
+
+bool RedisComm::GetBatchInfos(base_storage::DictionaryStorageEngine*engine,
+                              const std::string& command,
+                              std::list<std::string>& songinfolist){
+
+    redisContext *context = (redisContext *)engine->GetContext();
+	LOG_DEBUG2("%s",command.c_str());
+	if (NULL == context)
+		return false;
+	{
+		redisReply *rpl = (redisReply *) redisCommand(context,command.c_str());
+		base_storage::CommandReply *reply = _CreateReply(rpl);
+		freeReplyObject(rpl);
+		if (NULL == reply)
+			return false;
+
+		if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
+			base_storage::ArrayReply *arep =
+				static_cast<base_storage::ArrayReply *>(reply);
+			base_storage::ArrayReply::value_type &items = arep->value;
+			for (base_storage::ArrayReply::iterator it = items.begin();
+				it != items.end();++it) {
+					base_storage::CommandReply *item = (*it);
+					if (base_storage::CommandReply::REPLY_STRING == item->type) {
+						base_storage::StringReply *srep = static_cast<base_storage::StringReply *>(item);
+						songinfolist.push_back(srep->value);
+					}
+			}
+		}
+		reply->Release();
+	}
+	return true;
+
+}
+
 int RedisComm::GetHashSize(const std::string& key){
 #if defined (_DIC_POOL_)
 		AutoDicCommEngine auto_engine;
@@ -186,6 +270,31 @@ int RedisComm::GetHashSize(const std::string& key){
 }
 
 
-
+base_storage::CommandReply* RedisComm::_CreateReply(redisReply* reply) {
+	using namespace base_storage;
+	switch (reply->type) {
+	case REDIS_REPLY_ERROR:
+		return new ErrorReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_NIL:
+		return new CommandReply(CommandReply::REPLY_NIL);
+	case REDIS_REPLY_STATUS:
+		return new StatusReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_INTEGER:
+		return new IntegerReply(reply->integer);
+	case REDIS_REPLY_STRING:
+		return new StringReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_ARRAY: {
+		ArrayReply *rep = new ArrayReply();
+		for (size_t i = 0; i < reply->elements; ++i) {
+			if (CommandReply *cr = _CreateReply(reply->element[i]))
+				rep->value.push_back(cr);
+		}
+		return rep;
+							}
+	default:
+		break;
+	}
+	return NULL;
+}
 
 }

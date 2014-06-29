@@ -8,7 +8,7 @@ COMPILERC = gcc
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -rdynamic -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DPROCESS_WORK
+CPP_FLAG = -g -Wall -w -fPIC -c -rdynamic -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DNET_WORK
 ## for release
 ##CPP_FLAG = -O3 -Wall -s -w -fPIC -c -rdynamic -D_LINUX -DNDEBUG -D_REENTRANT -D_GNU_SOURCE -DFCGI_STD
 

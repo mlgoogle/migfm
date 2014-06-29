@@ -18,6 +18,8 @@ public:
 	        const void *msg = NULL, int len = 0);//真实用户登录
 	bool OnRobotLogin(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg = NULL, int len = 0);//机器人登陆
+
+	bool OnClearRobotConnection(const int socket);//清理连接
 };
 }
 

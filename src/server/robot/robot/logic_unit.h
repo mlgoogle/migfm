@@ -21,6 +21,11 @@ typedef std::map<int64,robot_base::RobotBasicInfo> RobotInfosMap;
 typedef std::map<int64,RobotInfosMap> UserFollowMap;
 typedef std::map<int,robot_base::SchedulerInfo> SchedulerMap;
 
+typedef std::map<int,robot_base::RobotBasicInfo>  SocketRobotInfosMap;
+typedef std::map<int,robot_base::SchedulerInfo>  SocketSchedulerMap;
+
+
+
 /*
 namespace chat_logic {
 

@@ -176,6 +176,14 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			vNoticeUserListenSong->singer[SINGER_LEN - 1] = '\0';
 		}
 		break;
+		case HEART_PACKET:
+		{
+			r = true;
+			struct PacketHead* packet = new struct PacketHead;
+			*packhead = packet;
+			BUILDPACKHEAD();
+		}
+		break;
 		default:
 			r = false;
 			break;
@@ -305,6 +313,12 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			out.WriteData(vNoticeUserListenSong->mode,MODE_LEN);
 			out.WriteData(vNoticeUserListenSong->name,NAME_LEN);
 			out.WriteData(vNoticeUserListenSong->singer,SINGER_LEN);
+			packet = (char*)out.GetData();
+		}
+		break;
+		case HEART_PACKET:
+		{
+			BUILDHEAD(0);
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -487,6 +501,12 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_STRING(vNoticeUserListenSong->name);
 			PRINT_STRING(vNoticeUserListenSong->singer);
 			PRINT_END("struct NoticeUserListenSong DumpEnd");
+		}
+		break;
+		case HEART_PACKET:
+		{
+			PRINT_TITLE("struct HEART_PACKET DumpBegin");
+			PRINT_END("struct HEART_PACKET DumpEnd");
 		}
 		break;
 		default:

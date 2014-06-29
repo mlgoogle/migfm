@@ -112,7 +112,8 @@ bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,con
 	return true;
 }
 
-bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid){
+bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid,
+		robot_base::RobotBasicInfo& robot){
 	logic::WLockGd lk(lock_);
 	robot_base::RobotBasicInfo robot_info;
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -124,10 +125,12 @@ bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 rob
 		return false;
 	robot_info.set_socket(socket);
 	robot_info.set_follow_uid(uid);
+	robot_info.set_recv_last_time(time(NULL));
 	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->temp_robot_infos_,robot_uid);
-	base::MapAdd(pc->used_robot_infos_,robot_uid,robot_info);
+	base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->used_robot_infos_,robot_uid,robot_info);
 	//更新机器人坐标
 	robot_storage::DBComm::UpdateRobotLbsPos(robot_uid,robot_info.latitude(),robot_info.longitude());
+	robot = robot_info;
 	return AddUserFollowRobot(pc->user_follow_infos_,uid,robot_info);
 }
 
@@ -165,6 +168,33 @@ bool RobotCacheManager::GetUserFollowAllRobot(const int64 platform_id,const int6
 	return true;
 }
 
+bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::RobotBasicInfo& robotinfo){
+	logic::WLockGd lk(lock_);
+	std::map<int64,int64> follow_uid;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	//int64 uid = robotinfo.uid();
+	follow_uid = robotinfo.follow_uid();
+	if(follow_uid.size()<=0)
+		return false;
+	//清理对应的机器人信息
+	for(std::map<int64,int64>::iterator it = follow_uid.begin();it!=follow_uid.end();++it){
+		//获取用户信息
+		int64 uid = it->second;
+		RobotInfosMap robotinfos;
+		base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(pc->user_follow_infos_,uid,robotinfos);
+		if(robotinfos.size()<=0)
+			continue;
+		//删除跟随机器人
+		base::MapDel<UserFollowMap,UserFollowMap::iterator>(pc->user_follow_infos_,robotinfo.uid());
+	}
+	//从正在使用中放入空闲的底部
+	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->used_robot_infos_,robotinfo.uid());
+	base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->idle_robot_infos_,robotinfo.uid(),robotinfo);
+	return true;
+}
+
 bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info){
 	logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -174,7 +204,7 @@ bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::Schedul
 }
 
 bool RobotCacheManager::GetScheduler(const int64 platform_id,const int socket,robot_base::SchedulerInfo& scheduler_info){
-	logic::WLockGd lk(lock_);
+	logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -200,6 +230,53 @@ bool RobotCacheManager::SchedulerSendMessage(const int64 platform_id,struct Pack
 		return false;
 
 	return sendmessage(scheduler_info.socket(),packet);
+}
+
+void RobotCacheManager::CheckRobotConnect(const int64 platform_id){
+	logic::WLockGd lk(lock_);
+	bool r = false;
+	robot_base::SchedulerInfo scheduler_info;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return;
+	time_t current_time = time(NULL);
+	RobotInfosMap::iterator it = pc->used_robot_infos_.begin();
+	for(;it!=pc->used_robot_infos_.end();++it){
+		robot_base::RobotBasicInfo robot_info = it->second;
+		//先检测是否超过三次
+		LOG_DEBUG2("robot_info.send_error_count %d",robot_info.send_error_count());
+		if(robot_info.send_error_count()>1){
+			//断掉连接
+			LOG_DEBUG("close connection");
+			closelockconnect(robot_info.socket());
+			continue;
+			//通过响应事件将无响应模拟客户端移除，这里不移除
+		}
+		//检测当前接收时间是否大于20s//检测发送时间是否大于20s 若一个小于20s 皆不需要心跳包发送
+		//LOG_DEBUG2("recv_last_time %lld send_last_time %lld current_time %lld recv_differ_time %lld send_differ_time %lld",robot_info.recv_last_time(),
+		//		robot_info.send_last_time(),current_time,(current_time - robot_info.recv_last_time()),
+		//		(current_time -robot_info.send_last_time()));
+		if((current_time - robot_info.recv_last_time()>20)&&(current_time -robot_info.send_last_time()>20)){
+			//发送心跳包
+			struct PacketHead heart_packet;
+			MAKE_HEAD(heart_packet, HEART_PACKET,USER_TYPE,0,0);
+			sendrobotmssage(robot_info,&heart_packet);
+			r = false;
+			if(!r)
+				robot_info.add_send_error_count();
+		}
+	}
+
+}
+
+void RobotCacheManager::Dump(){
+	logic::RLockGd lk(lock_);
+	int64 platform_id =10000;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return;
+	LOG_DEBUG2("pc->used_robot_infos_.size() %lld,pc->idle_robot_infos_.size()) %lld",
+			pc->used_robot_infos_.size(),pc->idle_robot_infos_.size());
 }
 
 PlatformCache* RobotCacheManager::GetPlatformCache(int64 platform_id){
@@ -296,6 +373,7 @@ bool RobotCacheManager::GetRobotLbsPos(base::MigRadomIn* radomin,const double& l
 
 }
 
+
 void RobotCacheManager::CreateTypeRamdon(PlatformCache* pc,std::string& type,
 									  std::list<int64> &list){
 	while(list.size()>0){
@@ -358,5 +436,31 @@ bool RobotCacheManager::GetTypeRamdon(PlatformCache* pc,const std::string& type,
 
 	return r;
 }
+
+
+/****************CacheManagerOp*****************/
+CacheManagerOp::CacheManagerOp() {
+	InitThreadrw(&lock_);
+}
+
+CacheManagerOp::~CacheManagerOp() {
+	DeinitThreadrw(lock_);
+}
+
+bool CacheManagerOp::SetRobotInfo(const int socket,const robot_base::RobotBasicInfo& robotinfo){
+	logic::WLockGd lk(lock_);
+	return base::MapAdd<SocketRobotInfosMap,const int,const robot_base::RobotBasicInfo>(socket_robot_map_,socket,robotinfo);
+}
+
+bool CacheManagerOp::DelRobotInfo(const int socket){
+	logic::WLockGd lk(lock_);
+	return base::MapDel<SocketRobotInfosMap,SocketRobotInfosMap::iterator,int>(socket_robot_map_,socket);
+}
+
+bool CacheManagerOp::GetRobotInfo(const int socket,robot_base::RobotBasicInfo& robotinfo){
+	logic::RLockGd lk(lock_);
+	return base::MapGet<SocketRobotInfosMap,SocketRobotInfosMap::iterator,robot_base::RobotBasicInfo>(socket_robot_map_,socket,robotinfo);
+}
+
 
 }

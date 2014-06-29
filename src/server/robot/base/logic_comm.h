@@ -117,8 +117,12 @@ public:
 	static bool SendErrorCode(int socket,int32 operate_code,int16 msg_type,int8 is_zip,
 			int32 session,const int32 error_code,const char *file,long line);
 
+	static void CloseSocket(int socket);
+
 	static bool GetRobotLbsPos(const double& latitude,const double& longitude,double& robot_latitude,
 			double& robot_longitude);
+
+
 
 };
 
@@ -135,6 +139,16 @@ public:
 
 #define senderror(socket,operate_code,is_zip,session,error_code)  \
 	logic::SomeUtils::SendErrorCode(socket,operate_code,ERROR_TYPE,is_zip,session,error_code,__FILE__,__LINE__)
+
+#define closeconnect(socket) \
+	logic::SomeUtils::CloseSocket(socket)
+
+#define closelockconnect(socket) \
+	shutdown(socket, SHUT_RDWR);
+
+#define sendrobotmssage(robot_info,packet) \
+	robot_info.set_send_last_time(time(NULL));\
+	r = logic::SomeUtils::SendMessage(robot_info.socket(),packet,__FILE__,__LINE__)
 
 
 

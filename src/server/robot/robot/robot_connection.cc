@@ -54,9 +54,26 @@ bool RobotConnection::OnUserLogin(struct server *srv, int socket, struct PacketH
 bool RobotConnection::OnRobotLogin(struct server *srv, int socket, struct PacketHead *packet,
         const void *msg, int len){
 	bool r = false;
+	robot_base::RobotBasicInfo robot_info;
 	struct RobotLogin* vRobotLogin= (struct RobotLogin*)packet;
 	r = CacheManagerOp::GetRobotCacheMgr()->RobotLoginSucess(vRobotLogin->platform_id,
-							vRobotLogin->robot_id,socket,vRobotLogin->uid);
+							vRobotLogin->robot_id,socket,vRobotLogin->uid,robot_info);
+	//获取机器人信息
+	//保存socket
+	r = CacheManagerOp::GetCacheManagerOp()->SetRobotInfo(socket,robot_info);
 	return r;
 }
+
+bool RobotConnection::OnClearRobotConnection(const int socket){
+	//
+	bool r = false;
+	robot_base::RobotBasicInfo robot_info;
+	r = CacheManagerOp::GetCacheManagerOp()->GetRobotInfo(socket,robot_info);
+	if(!r)
+		return r;
+	r = CacheManagerOp::GetRobotCacheMgr()->ClearRobot(10000,robot_info);
+	CacheManagerOp::GetCacheManagerOp()->DelRobotInfo(socket);
+	return true;
+}
+
 }

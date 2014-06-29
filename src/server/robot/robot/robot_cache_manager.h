@@ -50,16 +50,24 @@ public:
 
 	bool SchedulerSendMessage(const int64 platform_id,struct PacketHead* packet);
 
-	bool RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid);
+	bool RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid,
+			robot_base::RobotBasicInfo& robot);
 
 	bool GetUserFollowTaskRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo);
 
 	bool GetUserFollowAllRobot(const int64 platform_id,const int64 uid,RobotInfosMap& map);
 
+	bool ClearRobot(const int64 platform_id,const robot_base::RobotBasicInfo& robotinfo);
+
 	void RestMusicListRandom(PlatformCache* pc);
 
 	bool GetModeRadomSong(const int64 platform_id,const std::string& type,const int32& type_id,
 			int num,std::list<int64>& list);
+
+	void CheckRobotConnect(const int64 platform_id);
+
+
+	void Dump();
 
 private://内置函数，自身不能加锁
 
@@ -93,9 +101,10 @@ private:
 	static RobotCacheManager  *robot_cache_mgr_;
 	static CacheManagerOp     *cache_manager_op_;
 
+public:
+	CacheManagerOp();
+	virtual ~CacheManagerOp();
 
-	CacheManagerOp() {}
-	virtual ~CacheManagerOp() {}
 public:
 	static RobotCacheManager* GetRobotCacheMgr(){
 		if (robot_cache_mgr_ == NULL)
@@ -119,8 +128,17 @@ public:
 		delete cache_manager_op_;
 	}
 
+public:
+	bool SetRobotInfo(const int socket,const robot_base::RobotBasicInfo& robotinfo);
+	bool GetRobotInfo(const int socket,robot_base::RobotBasicInfo& robotinfo);
+	bool DelRobotInfo(const int socket);
+private:
+	SocketRobotInfosMap                        socket_robot_map_;
+	struct threadrw_t*                         lock_;
+
 
 };
+
 }
 
 #endif

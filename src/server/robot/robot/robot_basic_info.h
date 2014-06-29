@@ -65,6 +65,10 @@ public:
 	const int32 song_task_count() const {return data_->song_task_count_;}
 	const int32 say_hello_count() const {return data_->say_hello_count_;}
 	const int32 listen_task_count() const {return data_->listen_task_count_;}
+	const time_t send_last_time() const {return data_->send_last_time_;}
+	const time_t recv_last_time() const {return data_->recv_last_time_;}
+	const int32 send_error_count() const {return data_->send_error_count_;}
+	const std::map<int64,int64>& follow_uid() const {return data_->follow_map_; }
 
 
 
@@ -76,11 +80,16 @@ public:
 	void set_head_url(const std::string& head_url) {data_->head_url_ = head_url;}
 	void set_socket(const int socket){data_->socket_ = socket;}
 	void set_follow_uid(const int64 uid){data_->follow_map_[uid] = uid;}
+	void set_send_last_time(const time_t send_last_time){data_->send_last_time_ = send_last_time;}
+	void set_recv_last_time(const time_t recv_last_time){data_->recv_last_time_ = recv_last_time;}
+	void set_send_error_count(const int32 send_error_count){data_->send_error_count_ = send_error_count;}
 
 	void add_task_count(){data_->task_count_++;}
 	void add_song_task_count(){data_->song_task_count_++;add_task_count();}
 	void add_hello_task_count(){data_->say_hello_count_++;add_task_count();}
 	void add_listen_task_count(){data_->listen_task_count_++;add_task_count();}
+
+	void add_send_error_count(){data_->send_error_count_++;}
 private:
 		class Data{
 		public:
@@ -90,7 +99,10 @@ private:
 				,latitude_(0)
 				,longitude_(0)
 				,songid_(0)
-				,socket_(0){}
+				,socket_(0)
+				,send_last_time_(time(NULL))
+				,recv_last_time_(time(NULL))
+				,send_error_count_(0){}
 
 
 			Data(const int64 uid,const int32 sex,const double latitude,const double longitude,
@@ -107,7 +119,10 @@ private:
 			,songid_(songid)
 			,nickname_(nickname)
 			,head_url_(head_url)
-			,socket_(0){}
+			,socket_(0)
+			,send_last_time_(time(NULL))
+			,recv_last_time_(time(NULL))
+			,send_error_count_(0){}
 
 			void AddRef(){refcount_ ++;}
 			void Release(){if (!--refcount_)delete this;}
@@ -123,9 +138,12 @@ private:
 			int song_task_count_;
 			int say_hello_count_;
 			int listen_task_count_;
+			int send_error_count_;
 			std::string nickname_;
 			std::string head_url_;
 			std::map<int64,int64> follow_map_;
+			time_t send_last_time_;
+			time_t recv_last_time_;
 		private:
 			int refcount_;
 		};

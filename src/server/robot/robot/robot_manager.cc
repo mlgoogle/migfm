@@ -10,6 +10,8 @@
 #include "config/config.h"
 #include "common.h"
 
+
+#define TIME_CHECK_CONNECT    10025//检测连接
 namespace robot_logic{
 
 
@@ -131,7 +133,7 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 
 bool RobotManager::OnRobotManagerClose(struct server *srv,
 									 const int socket){
-
+	robot_mgr_.get()->OnClearRobotConnection(socket);
     return true;
 }
 
@@ -155,12 +157,24 @@ bool RobotManager::OnBroadcastClose(struct server *srv,
 }
 
 bool RobotManager::OnIniTimer(struct server *srv){
+	//检测心跳包 发给机器人和控制器
+	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_CONNECT,20,-1);
 	return true;
 }
 
 bool RobotManager::OnTimeout(struct server *srv, char *id,
 							int opcode, int time){
+	switch(opcode){
+	case TIME_CHECK_CONNECT:
+			LOG_DEBUG2("TIME_CHECK_CONNECT :%d",TIME_CHECK_CONNECT);
+			CacheManagerOp::GetRobotCacheMgr()->CheckRobotConnect(10000);
+			CacheManagerOp::GetRobotCacheMgr()->Dump();
+		break;
+	default:
+		LOG_ERROR2("unkown code :%d",opcode);
+	}
     return true;
 }
+
 
 }

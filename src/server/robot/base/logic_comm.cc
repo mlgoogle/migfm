@@ -147,7 +147,7 @@ bool SomeUtils::SendMessage(int socket, struct PacketHead *packet,
 	}
 
 	//LOG_DEBUG2("opcode[%d]\n",packet->operate_code);
-	ProtocolPack::DumpPacket(packet);
+	//ProtocolPack::DumpPacket(packet);
 	ret = SendFull (socket, (char *) packet_stream, packet_stream_length);
 	ProtocolPack::HexEncode(packet_stream,packet_stream_length);
 	if (ret != packet_stream_length) {
@@ -177,6 +177,10 @@ bool SomeUtils::SendHeadMessage(int socket, int32 operate_code, int16 msg_type,
 	//MAKE_FAIL_HEAD(head, _operate_code,_msg_type,_is_zip,_reserverd)
 	MAKE_FAIL_HEAD(packet,operate_code,msg_type,is_zip,session);
 	return SendMessage (socket, &packet, file, line);
+}
+
+void SomeUtils::CloseSocket(int socket){
+	close(socket);
 }
 
 bool SomeUtils::SendErrorCode(int socket,int32 operate_code,int16 msg_type,

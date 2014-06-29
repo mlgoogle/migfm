@@ -6,6 +6,7 @@
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
 #include "basic/base64.h"
+#include <sstream>
 namespace robot_logic{
 
 RobotSongMgr::RobotSongMgr(){
@@ -33,7 +34,8 @@ bool RobotSongMgr::OnUserDefaultSong(struct server *srv, int socket, struct Pack
 	notice_handsel_song.uid = vNoticeUserDefaultSong->uid;
 	notice_handsel_song.robot_id = robotinfo.uid();
 	notice_handsel_song.song_id = vNoticeUserDefaultSong->songid;
-	return sendmessage(robotinfo.socket(),&notice_handsel_song);
+	sendrobotmssage(robotinfo,&notice_handsel_song);
+	return r;
 }
 
 
@@ -41,7 +43,10 @@ bool RobotSongMgr::OnNoticeUserChangerSong(struct server *srv, int socket, struc
 	        const void *msg/* = NULL*/, int len/* = 0*/){
 	struct NoticeUserCurrentSong* current_song = (struct NoticeUserCurrentSong*)packet;
 	bool r = false;
+	std::stringstream os;
 	std::list<int64> list;
+	std::list<std::string> songinfolist;
+	std::map<std::string,base::MusicInfo>  musicinfomap;
 	RobotInfosMap robot_infos;
 	//获取用户对应的机器人
 	r = CacheManagerOp::GetRobotCacheMgr()->GetUserFollowAllRobot(current_song->platform_id,
@@ -50,17 +55,42 @@ bool RobotSongMgr::OnNoticeUserChangerSong(struct server *srv, int socket, struc
 		return false;
 
 	r = CacheManagerOp::GetRobotCacheMgr()->GetModeRadomSong(current_song->platform_id,
-			current_song->mode,current_song->type_id,robot_infos.size(),list);
+			current_song->mode,current_song->type_id,robot_infos.size(),list); //获取随机ID
 	if(!r)
 		return false;
+	os<<current_song->mode<<"_r"<<current_song->type_id;
+	//获取音乐信息
+	r = robot_storage::RedisComm::GetBatchMusicInfos(os.str(),list,songinfolist);
+	if(!r)
+		return false;
+	//转化音乐信息
+	FormateMusicInfo(songinfolist,musicinfomap);
 	RobotInfosMap::iterator it = robot_infos.begin();
-	std::list<int64>::iterator itr = list.begin();
+	std::map<std::string,base::MusicInfo>::iterator itr = musicinfomap.begin();
 	//遍历发送机器人
-	for(;it!=robot_infos.end()&&itr!=list.end();it++,itr++){
-		int64 songid = (*itr);
+	for(;it!=robot_infos.end()&&itr!=musicinfomap.end();it++,itr++){
+		base::MusicInfo musicinfo = itr->second;
 		robot_base::RobotBasicInfo robot = it->second;
-		SendRobotListenSong(current_song->platform_id,songid,
-				current_song->type_id,current_song->mode,robot.socket());
+		struct NoticeUserListenSong notice_user_listen;
+		MAKE_HEAD(notice_user_listen, NOTICE_USER_ROBOT_LISTEN_SONG,USER_TYPE,0,0);
+		notice_user_listen.platform_id = current_song->platform_id;
+		notice_user_listen.songid = atoll(musicinfo.id().c_str());
+		notice_user_listen.typid = current_song->type_id;
+
+		std::string b64title;
+		std::string b64artist;
+		Base64Decode(musicinfo.title(),&b64title);
+		Base64Decode(musicinfo.artist(),&b64artist);
+		memset(&notice_user_listen.mode,'\0',MODE_LEN);
+		snprintf(notice_user_listen.mode, arraysize(notice_user_listen.mode),
+				current_song->mode.c_str());
+		memset(&notice_user_listen.singer,'\0',SINGER_LEN);
+		snprintf(notice_user_listen.singer, arraysize(notice_user_listen.singer),
+					"%s",b64artist.c_str());
+		memset(&notice_user_listen.name,'\0',NAME_LEN);
+		snprintf(notice_user_listen.name, arraysize(notice_user_listen.name),
+						"%s",b64title.c_str());
+		sendrobotmssage(robot,&notice_user_listen);
 	}
 	return r;
 }
@@ -81,7 +111,7 @@ bool RobotSongMgr::OnRobotLoginSong(struct server *srv, int socket, struct Packe
 	r = robot_storage::RedisComm::GetMusicInfos(songid,musicinfo);
 	if(!r)
 		return false;
-
+	//刚刚登陆成功 故不需要修改时间
 	SendRobotListenSong(vRobotLogin->platform_id,songid,1,mode,socket);
 
 /*
@@ -126,6 +156,17 @@ bool RobotSongMgr::ResolveJsonMusic(const std::string& musicinfo,Json::Value& va
 	   return r;
 }
 
+void RobotSongMgr::FormateMusicInfo(std::list<std::string>& songinfolist,
+			 std::map<std::string,base::MusicInfo>& music_infos){
+	  while(songinfolist.size()>0){
+		  base::MusicInfo music_info;
+		  std::string info = songinfolist.front();
+		  music_info.UnserializedJson(info);
+		  songinfolist.pop_front();
+		  music_infos[music_info.id()] = music_info;
+	  }
+
+}
 bool RobotSongMgr::SendRobotListenSong(const int64 platform_id,const int64 songid,const int64 type_id,
 		const std::string& mode,int socket){
 
