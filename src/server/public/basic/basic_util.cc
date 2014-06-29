@@ -431,6 +431,15 @@ int BasicUtil::HttpgzdeCompress(Byte *zdata, uLong nzdata, Byte *data, uLong *nd
     return 0;
 }
 
+void  BasicUtil::ResplaceString(const char* str,int len,const char c,std::string& dest_string){
+	for (int index =0; index<len;index++){
+		if (str[index]!=c)
+			dest_string.append(1,str[index]);
+	}
+	MIG_DEBUG(USER_LEVEL,"%s",dest_string.c_str());
+}
+
+
 bool BasicUtil::GetUserInfo(const std::string& uid,UserInfo& usrinfo){
 	//memcached
 	//key uidinfo 10000info

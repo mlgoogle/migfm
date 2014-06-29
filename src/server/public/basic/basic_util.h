@@ -45,6 +45,8 @@ public:
 
     static int32 php_htoi(char *s);
 
+    static void ResplaceString(const char* str,int len,const char c,std::string& dest_string);
+
 	static bool GB2312ToUTF8 (const char *input, size_t inlen, char **output /* free */, size_t *outlen);
 
 	static bool UTF8ToGB2312 (const char *input, size_t inlen, char **output /* free */, size_t *outlen);
