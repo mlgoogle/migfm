@@ -1345,12 +1345,12 @@ ret:
 
 	response = wr.write(value);
 
+	//
    // music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	//LOG_DEBUG2("[%s]",result_out.c_str());
 	music_logic::SomeUtils::SendFull(socket,response.c_str(),response.length());
 	//recording mood and current songid
 	if (recording_flag){
-		//ֻ��¼����
 		if(mode=="mm")
 		   mood_record_engine_->RecordingMood(atoll(uid.c_str()),
 		                                   atol(wordid.c_str()));

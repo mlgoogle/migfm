@@ -1,6 +1,7 @@
 #include "dic_comm.h"
 #include "logic_comm.h"
 #include "json/json.h"
+#include "basic/basic_util.h"
 #include <sstream>
 #include <assert.h>
 
@@ -1053,16 +1054,23 @@ bool MemComm::SetUsrCurrentSong(const std::string& uid,
 	std::string value;
 	key.append(uid);
 	//value {"songid":"10000","state":"1","type":"mm","tid":"1","name":"������","singer":"�Ψ"}
+	//检测是否有'\n'
+	std::string replace_name;
+	std::string replace_singer;
+	std::string replace_mode;
+	base::BasicUtil::ResplaceString(name.c_str(),name.length(),'\0',replace_name);
+	base::BasicUtil::ResplaceString(singer.c_str(),singer.length(),'\0',replace_singer);
+	base::BasicUtil::ResplaceString(mode.c_str(),mode.length(),'\0',replace_mode);
 	value.append("{\"songid\":\"");
 	value.append(songid);
 	value.append("\",\"state\":\"");
 	value.append(netstat);
 	value.append("\",\"name\":\"");
-	value.append(name);
+	value.append(replace_name);
 	value.append("\",\"singer\":\"");
-	value.append(singer);
+	value.append(replace_singer);
 	value.append("\",\"type\":\"");
-	value.append(mode);
+	value.append(replace_mode);
 	value.append("\",\"tid\":\"");
 	value.append(tid);
 	value.append("\"}");
