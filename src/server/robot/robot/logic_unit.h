@@ -7,6 +7,7 @@
 #include "basic/basictypes.h"
 #include "plugins.h"
 #include <map>
+#include <list>
 
 static char *PLUGIN_ID = "robot_manager";
 static char *PLUGIN_NAME = "robot_manager";
@@ -24,11 +25,22 @@ typedef std::map<int,robot_base::SchedulerInfo> SchedulerMap;
 typedef std::map<int,robot_base::RobotBasicInfo>  SocketRobotInfosMap;
 typedef std::map<int,robot_base::SchedulerInfo>  SocketSchedulerMap;
 
+enum {
+	RAIN = 0,
+};
 
+int caiyuncode(const char* status);
+const char* codotodesc(const int32 code);
+namespace robot_logic {
+class ResolveJson{
+public:
+	static bool ReolveJsonCaiYunJson(const std::string& content,std::string& status,
+			std::string& skycon,int32& temp,std::list<double>& dataseries_list);
 
+	static bool ReolveJsonBaiduAddress(const std::string& content,std::string& city,
+			std::string& district,std::string& province,std::string& street);
+};
 /*
-namespace chat_logic {
-
 class LogicUnit{
 public:
 
@@ -77,8 +89,8 @@ private:
             const chat_base::UserInfo& recv_userinfo,const std::string& msg,
             std::string & summary);
 };
+*/
 
-
-}*/
+}
 
 #endif

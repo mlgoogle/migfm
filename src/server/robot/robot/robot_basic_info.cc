@@ -94,4 +94,32 @@ PlatformInfo& PlatformInfo::operator =(const PlatformInfo& platfrom_info){
 }
 
 
+UserLbsInfo::UserLbsInfo(){
+    data_ = new Data();
+}
+
+UserLbsInfo::UserLbsInfo(const int64 uid,const std::string& latitude,const std::string& longitude){
+	data_ = new Data(uid,latitude,longitude);
+}
+
+UserLbsInfo::UserLbsInfo(const UserLbsInfo& userlbs_info)
+:data_(userlbs_info.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+UserLbsInfo& UserLbsInfo::operator =(const UserLbsInfo& userlbs_info){
+
+	if (userlbs_info.data_!=NULL){
+		userlbs_info.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = userlbs_info.data_;
+	return *this;
+}
+
+
 }

@@ -33,6 +33,8 @@ public:
 
 	static bool GetSceneInfos(std::list<int64>& list);
 
+	static bool GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list);
+
 
 public:
 #if defined (_DB_POOL_)

@@ -12,6 +12,7 @@
 
 
 #define TIME_CHECK_CONNECT    10025//检测连接
+#define TIME_CHECK_WEATCHER   10026//检测天气
 namespace robot_logic{
 
 
@@ -47,10 +48,11 @@ bool RobotManager::Init(){
 
 	r = config->LoadConfig(path);
 	robot_storage::DBComm::Init(config->mysql_db_list_);
+	robot_storage::RedisComm::Init(config->redis_list_);
 	scheduler_mgr_.reset(new robot_logic::SchedulerMgr());
 	robot_mgr_.reset(new robot_logic::RobotConnection());
 	robot_song_mgr_.reset(new robot_logic::RobotSongMgr());
-	robot_storage::RedisComm::Init(config->redis_list_);
+	robot_weather_mgr_.reset(new robot_logic::RobotWeatherMgr());
 	/*chat_storage::MemComm::Init(config->mem_list_);*/
 
 /*
@@ -59,6 +61,7 @@ bool RobotManager::Init(){
 	file_mgr_.reset(new chat_logic::FileMgr());
 	base::SysRadom::GetInstance()->InitRandom();
 */
+	robot_weather_mgr_.get()->OnPullWeatherInfo();
 	return true;
 }
 

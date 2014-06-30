@@ -322,6 +322,36 @@ bool DBComm::GetSceneInfos(std::list<int64> &list){
 	return false;
 }
 
+bool DBComm::GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list){
+	std::stringstream os;
+	bool r = false;
+	int num = 0;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	os<<"call migfm.proc_GetUserLBSPos(0,1000)";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			int64 uid = atoll(rows[0]);
+			std::string latitude = rows[1];
+			std::string longitude = rows[2];
+			robot_base::UserLbsInfo lbs_info(uid,latitude,longitude);
+			//int channel_id = atol(rows[0]);
+			user_lbs_list.push_back(lbs_info);
+		}
+		return true;
+	}
+	return false;
+}
 
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 

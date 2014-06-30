@@ -40,6 +40,42 @@ private:
 	Data*                    data_;
 };
 
+class UserLbsInfo{
+public:
+	explicit UserLbsInfo();
+	explicit UserLbsInfo(const int64 uid,const std::string& latitude,const std::string& longitude);
+
+	UserLbsInfo(const UserLbsInfo& lbs_info);
+	UserLbsInfo& operator = (const UserLbsInfo& lbs_info);
+
+	const int64 uid() const {return data_->uid_;}
+	const std::string& latitude() const {return data_->latitude_;}
+	const std::string& longitude() const {return data_->longitude_;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(0)
+			,uid_(0){}
+		Data(const int64 uid,const std::string& latitude,const std::string& longitude)
+			:refcount_(0)
+			,latitude_(latitude)
+			,longitude_(longitude){}
+
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
+
+	public:
+		int64   uid_;
+		const std::string latitude_;
+		const std::string longitude_;
+	private:
+		int                  refcount_;
+	};
+
+	Data*                  data_;
+
+};
 
 class RobotBasicInfo{
 public:
