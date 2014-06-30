@@ -11,7 +11,7 @@
 #include "json/json.h"
 #include <sstream>
 
-#define		TIME_TEST		1025
+#define TIME_CALLBACK_USER    10025
 
 namespace manager_logic{
 
@@ -64,12 +64,19 @@ bool ManagerEngine::OnBroadcastMessage(struct server *srv, int socket, void *msg
 
 bool ManagerEngine::OnIniTimer(const struct server *srv){
 	//srv->add_time_task(srv, "user_manager", TIME_TEST, 300, 1);
+	srv->add_time_task((struct server*)srv,"manager",TIME_CALLBACK_USER,20,-1);
     return true;
 }
 
 bool ManagerEngine::OnTimeout(struct server *srv, char *id, int opcode, int time){
-
-	return true;
+	switch(opcode){
+	case TIME_CALLBACK_USER:
+		OnCallBackUserInfo();
+		break;
+	default:
+		LOG_ERROR2("unkown code :%d",opcode);
+	}
+    return true;
 }
 
 bool ManagerEngine::OnManagerClose(struct server *srv, int socket){
@@ -216,6 +223,22 @@ ret:
     return r;
 
 	return true;
+}
+
+void ManagerEngine::OnCallBackUserInfo(){
+
+	std::list<int64> userinfo_list;
+	bool r = false;
+	r = manager_storage::DBComm::GetUsersInfo(0,1000,userinfo_list);
+	std::string summary="快回来吧...";
+	std::string message = "快回来吧...";
+	while(userinfo_list.size()>0){
+		int64 uid = userinfo_list.front();
+	    userinfo_list.pop_front();
+	    if(uid==10108||uid ==10161||uid==10150||uid==10203)
+	    	PushUserMessage(uid,summary,message,0,1);
+	}
+
 }
 
 void ManagerEngine::PushUserMessage(const int64 recvid,const std::string& summary,

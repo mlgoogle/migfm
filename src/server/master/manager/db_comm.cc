@@ -132,6 +132,45 @@ bool  DBComm::GetPushMessage(std::string& summary,std::string& message){
 		return false;
 
 }
+
+//超过多少时间未登录的用户
+bool DBComm::GetOverTimeNoLogin(const int64 from,const int64 count,std::list<int64>& userinfo){
+
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+		std::stringstream os;
+		bool r = false;
+		int64 uid;
+		MYSQL_ROW rows;
+		int return_code = 0;
+		if(engine == NULL){
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+		os<<"call proc_GetOverTimeUser("<<from<<","<<count<<")";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+
+		int num = engine->RecordCount();
+		if (num>0){
+			while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+				uid = atoll(rows[0]);
+				userinfo.push_back(uid);
+			}
+			return true;
+		}
+		return false;
+}
+
+
 bool DBComm::GetUsersInfo(const int64 from,const int64 count,std::list<int64>& userinfo){
 
 #if defined (_DB_POOL_)
