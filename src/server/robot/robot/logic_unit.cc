@@ -12,12 +12,50 @@
 int caiyuncode(const char* status){
 	if(strcmp(status,"RAIN")==0)
 		return RAIN;
+	else if(strcmp(status,"CLEAR_DAY") == 0)
+		return CLEAR_DAY;
+	else if(strcmp(status,"CLEAR_NIGHT") == 0)
+		return CLEAR_NIGHT;
+	else if(strcmp(status,"PARTLY_CLOUDY_DAY") == 0)
+		return PARTLY_CLOUDY_DAY;
+	else if(strcmp(status,"PARTLY_CLOUDY_NIGHT") == 0)
+		return PARTLY_CLOUDY_NIGHT;
+	else if(strcmp(status,"CLOUDY") == 0)
+		return CLOUDY;
+	else if(strcmp(status,"SLEET") == 0)
+		return SLEET;
+	else if(strcmp(status,"SNOW") == 0)
+		return SNOW;
+	else if(strcmp(status,"WIND") == 0)
+		return WIND;
+	else if(strcmp(status,"FOG") == 0)
+		return FOG;
+	else
+		return UNKONW;
 }
 
 const char* codotodesc(const int32 code){
 	switch(code){
 	case RAIN:
 		return "下雨";
+	case CLEAR_DAY:
+		return "晴朗的白天";
+	case CLEAR_NIGHT:
+		return "晴朗的夜晚";
+	case PARTLY_CLOUDY_DAY:
+		return "阴天白天";
+	case PARTLY_CLOUDY_NIGHT:
+		return "阴天夜晚";
+	case CLOUDY:
+		return "多云";
+	case SLEET:
+		return "雨雪";
+	case SNOW:
+		return "下雪";
+	case WIND:
+		return "风";
+	case FOG:
+		return "雾";
 	}
 }
 
@@ -98,5 +136,18 @@ bool ResolveJson::ReolveJsonBaiduAddress(const std::string& content,std::string&
 		street = addressComponent["street"].asString();
 
 	return true;
+}
+
+
+void LogicUnit::FormateMusicInfo(std::list<std::string>& songinfolist,
+			 std::map<std::string,base::MusicInfo>& music_infos){
+	  while(songinfolist.size()>0){
+		  base::MusicInfo music_info;
+		  std::string info = songinfolist.front();
+		  music_info.UnserializedJson(info);
+		  songinfolist.pop_front();
+		  music_infos[music_info.id()] = music_info;
+	  }
+
 }
 }

@@ -16,7 +16,12 @@ public:
 	bool OnSchedulerMgrLogin(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg = NULL, int len = 0);
 
+	bool OnNoticeAssistant(struct server *srv, int socket, struct PacketHead *packet,
+	        const void *msg = NULL, int len = 0);
+
 	bool OnDisQuiteScheduler(const int socket);
+
+	bool NoticeAssistant();
 };
 }
 #endif

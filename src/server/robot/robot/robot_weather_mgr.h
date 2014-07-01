@@ -23,6 +23,7 @@ private:
 	bool RequestBaiduAddress(const std::string& latitude,const std::string& longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street);
 	bool CalculateOneHourWeather(std::list<double>& dataseries_list);
+	bool GetWeatherMusic(const int type_id,int64& songid,std::string& singer,std::string& song);
 };
 }
 

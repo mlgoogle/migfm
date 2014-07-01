@@ -5,6 +5,7 @@
 /*#include "dic_comm.h"*/
 #include "log/mig_log.h"
 #include "basic/basictypes.h"
+#include "basic/basic_info.h"
 #include "plugins.h"
 #include <map>
 #include <list>
@@ -25,8 +26,20 @@ typedef std::map<int,robot_base::SchedulerInfo> SchedulerMap;
 typedef std::map<int,robot_base::RobotBasicInfo>  SocketRobotInfosMap;
 typedef std::map<int,robot_base::SchedulerInfo>  SocketSchedulerMap;
 
+//便于不可之前场景冲突 故+100
+
 enum {
-	RAIN = 0,
+	RAIN = 100,
+	CLEAR_DAY = 101,
+	CLEAR_NIGHT = 102,
+	PARTLY_CLOUDY_DAY = 103,
+	PARTLY_CLOUDY_NIGHT = 104,
+	CLOUDY = 105,
+	SLEET = 106,
+	SNOW = 107,
+	WIND = 108,
+	FOG = 109,
+	UNKONW
 };
 
 int caiyuncode(const char* status);
@@ -39,6 +52,12 @@ public:
 
 	static bool ReolveJsonBaiduAddress(const std::string& content,std::string& city,
 			std::string& district,std::string& province,std::string& street);
+};
+
+class LogicUnit{
+public:
+	static void FormateMusicInfo(std::list<std::string>& songinfolist,
+				 std::map<std::string,base::MusicInfo>& music_infos);
 };
 /*
 class LogicUnit{

@@ -19,6 +19,8 @@ public:
 
 	static void Dest();
 
+	static bool GetAssistant(RobotInfosMap& robot_infos);
+
 	static bool GetRobotInfos(const int from,const int count,RobotInfosMap& robot_infos);
 
 	static bool GetUserLbsPos(const int64 uid,double& latitude,double& longitude);

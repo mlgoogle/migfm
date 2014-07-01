@@ -25,6 +25,7 @@ public:
 	std::map<int,base::MigRadomInV2*>                       channel_random_map_;
 	std::map<int,base::MigRadomInV2*>                       mood_random_map_;
 	std::map<int,base::MigRadomInV2*>                       scene_random_map_;
+	RobotInfosMap                                           assistant_;
 };
 
 
@@ -39,6 +40,12 @@ public:
 
 	bool GetIdleRobot(const int64 platform_id,const int64 uid,const double latitude,const double longitude,
 			 std::list<robot_base::RobotBasicInfo>& list);
+
+	bool GetIdleAssistant(const int64 platform_id,robot_base::RobotBasicInfo& assistant);
+
+	bool NoticeAssistantLogin(const int64 platform_id);
+
+	bool GetAssistantInfo(const int64 platform_id,const int64& uid,robot_base::RobotBasicInfo& assistant);
 
 	bool GetUserFollower(const int64 platform_id,const int64 uid,RobotInfosMap& robotinfos);
 

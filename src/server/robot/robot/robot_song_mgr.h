@@ -26,9 +26,6 @@ public:
 private:
 	bool ResolveJsonMusic(const std::string& musicinfo,Json::Value& value);
 
-	void FormateMusicInfo(std::list<std::string>& songinfolist,
-			 std::map<std::string,base::MusicInfo>& music_infos);
-
 	bool SendRobotListenSong(const int64 platform_id,const int64 songid,const int64 type_id,
 			const std::string& mode,int socket);
 };

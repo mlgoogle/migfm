@@ -3,6 +3,7 @@
 #include "robot_basic_info.h"
 #include "db_comm.h"
 #include "dic_comm.h"
+#include "logic_unit.h"
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
 #include "basic/base64.h"
@@ -64,7 +65,7 @@ bool RobotSongMgr::OnNoticeUserChangerSong(struct server *srv, int socket, struc
 	if(!r)
 		return false;
 	//转化音乐信息
-	FormateMusicInfo(songinfolist,musicinfomap);
+	robot_logic::LogicUnit::FormateMusicInfo(songinfolist,musicinfomap);
 	RobotInfosMap::iterator it = robot_infos.begin();
 	std::map<std::string,base::MusicInfo>::iterator itr = musicinfomap.begin();
 	//遍历发送机器人
@@ -156,17 +157,7 @@ bool RobotSongMgr::ResolveJsonMusic(const std::string& musicinfo,Json::Value& va
 	   return r;
 }
 
-void RobotSongMgr::FormateMusicInfo(std::list<std::string>& songinfolist,
-			 std::map<std::string,base::MusicInfo>& music_infos){
-	  while(songinfolist.size()>0){
-		  base::MusicInfo music_info;
-		  std::string info = songinfolist.front();
-		  music_info.UnserializedJson(info);
-		  songinfolist.pop_front();
-		  music_infos[music_info.id()] = music_info;
-	  }
 
-}
 bool RobotSongMgr::SendRobotListenSong(const int64 platform_id,const int64 songid,const int64 type_id,
 		const std::string& mode,int socket){
 

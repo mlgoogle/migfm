@@ -61,7 +61,6 @@ bool RobotManager::Init(){
 	file_mgr_.reset(new chat_logic::FileMgr());
 	base::SysRadom::GetInstance()->InitRandom();
 */
-	robot_weather_mgr_.get()->OnPullWeatherInfo();
 	return true;
 }
 
@@ -162,6 +161,7 @@ bool RobotManager::OnBroadcastClose(struct server *srv,
 bool RobotManager::OnIniTimer(struct server *srv){
 	//检测心跳包 发给机器人和控制器
 	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_CONNECT,20,-1);
+	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_WEATCHER,40,-1);
 	return true;
 }
 
@@ -172,6 +172,9 @@ bool RobotManager::OnTimeout(struct server *srv, char *id,
 			LOG_DEBUG2("TIME_CHECK_CONNECT :%d",TIME_CHECK_CONNECT);
 			CacheManagerOp::GetRobotCacheMgr()->CheckRobotConnect(10000);
 			CacheManagerOp::GetRobotCacheMgr()->Dump();
+		break;
+	case TIME_CHECK_WEATCHER:
+		robot_weather_mgr_.get()->OnPullWeatherInfo();
 		break;
 	default:
 		LOG_ERROR2("unkown code :%d",opcode);

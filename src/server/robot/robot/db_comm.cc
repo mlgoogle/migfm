@@ -164,6 +164,46 @@ bool DBComm::UpdateRobotLbsPos(const int64 uid,double latitude,double longitude)
 	return true;
 }
 
+bool DBComm::GetAssistant(RobotInfosMap& robot_infos){
+	#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+	#endif
+		std::stringstream os;
+		bool r = false;
+		MYSQL_ROW rows;
+		int num;
+		if (engine == NULL) {
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+
+
+		//call migfm.proc_GetRobotsInfo(100,0);
+		os<<"call migfm.GetAssistant()";
+
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR("exec sql error");
+			return false;
+		}
+		num = engine->RecordCount();
+		if(num>0){
+			while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+				int64 uid = atoll(rows[0]);
+				std::string nickname = rows[1];
+				int32 sex = atoi(rows[2]);
+				std::string head_url = rows[3];
+				robot_base::RobotBasicInfo robot_info(uid,sex,0,0,0,nickname,head_url);
+				robot_infos[uid] = robot_info;
+			}
+			return true;
+		}
+		return false;
+}
 
 bool DBComm::GetRobotInfos(const int from,const int count,RobotInfosMap& robot_infos){
 #if defined (_DB_POOL_)

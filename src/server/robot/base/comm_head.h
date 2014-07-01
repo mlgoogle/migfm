@@ -18,6 +18,8 @@ enum operatorcode
 	NOTICE_USER_ROBOT_HANDSEL_SONG_SUCCESS = 1002,//赠送歌曲成功通知服务端
 	NOTICE_USER_ROBOT_LISTEN_SONG = 1003,//通知机器人客户端试听歌曲
 	SCHEDULER_LOGIN = 2000,//机器人调度器登录
+	NOTICE_ASSISTANT_LOGIN = 2100,//通知机器人调度器咪呦助手登陆
+	ASSISTANT_LOGIN_SUCCESS = 2101,//咪呦助手登陆成功
 	ROBOT_LOGIN = 3000,//机器人登陆成功
 	NOTICE_USER_LOGIN = 4000,//咪呦通知机器人服务器用户已经登录
 	NOTICE_USER_DEFAULT_SONG = 4001,//咪呦通知机器人服务器用户听的歌
@@ -120,6 +122,21 @@ struct NoticeUserListenSong:public PacketHead{
 	char mode[MODE_LEN];
 	char name[NAME_LEN];
 	char singer[SINGER_LEN];
+};
+
+//NOTICE_ASSISTANT_LOGIN
+#define NOTICEASSISTANTLOGIN_SIZE (sizeof(int64) * 2 + NICKNAME_LEN)
+struct NoticeAssistantLogin:public PacketHead{
+	int64 platform_id;
+	int64 assistant_id;
+	char nickname[NICKNAME_LEN];
+};
+
+//ASSISTANT_LOGIN_SUCCESS
+#define ASSISTANTLOGINSUCCESS_SIZE (sizeof(int64) * 2)
+struct AssistantLoginSuccess:public PacketHead{
+	int64 platform_id;
+	int64 assistant_id;
 };
 
 #endif

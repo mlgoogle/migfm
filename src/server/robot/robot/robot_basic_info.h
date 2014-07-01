@@ -119,11 +119,13 @@ public:
 	void set_send_last_time(const time_t send_last_time){data_->send_last_time_ = send_last_time;}
 	void set_recv_last_time(const time_t recv_last_time){data_->recv_last_time_ = recv_last_time;}
 	void set_send_error_count(const int32 send_error_count){data_->send_error_count_ = send_error_count;}
+	void set_login_status(const int32 login_status){data_->login_ = login_status;}
 
 	void add_task_count(){data_->task_count_++;}
 	void add_song_task_count(){data_->song_task_count_++;add_task_count();}
 	void add_hello_task_count(){data_->say_hello_count_++;add_task_count();}
 	void add_listen_task_count(){data_->listen_task_count_++;add_task_count();}
+
 
 	void add_send_error_count(){data_->send_error_count_++;}
 private:
@@ -136,6 +138,7 @@ private:
 				,longitude_(0)
 				,songid_(0)
 				,socket_(0)
+				,login_(0)
 				,send_last_time_(time(NULL))
 				,recv_last_time_(time(NULL))
 				,send_error_count_(0){}
@@ -156,6 +159,7 @@ private:
 			,nickname_(nickname)
 			,head_url_(head_url)
 			,socket_(0)
+			,login_(0)
 			,send_last_time_(time(NULL))
 			,recv_last_time_(time(NULL))
 			,send_error_count_(0){}
@@ -175,6 +179,7 @@ private:
 			int say_hello_count_;
 			int listen_task_count_;
 			int send_error_count_;
+			int login_;
 			std::string nickname_;
 			std::string head_url_;
 			std::map<int64,int64> follow_map_;

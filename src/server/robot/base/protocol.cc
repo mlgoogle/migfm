@@ -176,6 +176,30 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			vNoticeUserListenSong->singer[SINGER_LEN - 1] = '\0';
 		}
 		break;
+		case NOTICE_ASSISTANT_LOGIN:
+		{
+			struct NoticeAssistantLogin* vNoticeAssistantLogin =
+					new struct NoticeAssistantLogin;
+			*packhead = (struct PacketHead*)vNoticeAssistantLogin;
+			BUILDPACKHEAD();
+			vNoticeAssistantLogin->platform_id = in.Read64();
+			vNoticeAssistantLogin->assistant_id = in.Read64();
+			int temp = 0;
+			memcpy(vNoticeAssistantLogin->nickname,in.ReadData(NICKNAME_LEN,temp),
+					NICKNAME_LEN);
+			vNoticeAssistantLogin->nickname[NICKNAME_LEN - 1] = '\0';
+		}
+		break;
+		case ASSISTANT_LOGIN_SUCCESS:
+		{
+			struct AssistantLoginSuccess* vAssistantLoginSuccess =
+					new struct AssistantLoginSuccess;
+			*packhead = (struct AssistantLoginSuccess*)vAssistantLoginSuccess;
+			BUILDPACKHEAD();
+			vAssistantLoginSuccess->platform_id = in.Read64();
+			vAssistantLoginSuccess->assistant_id = in.Read64();
+		}
+		break;
 		case HEART_PACKET:
 		{
 			r = true;
@@ -313,6 +337,27 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			out.WriteData(vNoticeUserListenSong->mode,MODE_LEN);
 			out.WriteData(vNoticeUserListenSong->name,NAME_LEN);
 			out.WriteData(vNoticeUserListenSong->singer,SINGER_LEN);
+			packet = (char*)out.GetData();
+		}
+		break;
+		case NOTICE_ASSISTANT_LOGIN:
+		{
+			struct NoticeAssistantLogin* vNoticeAssistantLogin =
+					(struct NoticeAssistantLogin*)packhead;
+			BUILDHEAD(NOTICEASSISTANTLOGIN_SIZE);
+			out.Write64(vNoticeAssistantLogin->platform_id);
+			out.Write64(vNoticeAssistantLogin->assistant_id);
+			out.WriteData(vNoticeAssistantLogin->nickname,NICKNAME_LEN);
+			packet = (char*)out.GetData();
+		}
+		break;
+		case ASSISTANT_LOGIN_SUCCESS:
+		{
+			struct AssistantLoginSuccess* vAssistantLoginSuccess =
+					(struct AssistantLoginSuccess*)packhead;
+			BUILDHEAD(ASSISTANTLOGINSUCCESS_SIZE);
+			out.Write64(vAssistantLoginSuccess->platform_id);
+			out.Write64(vAssistantLoginSuccess->assistant_id);
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -501,6 +546,29 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_STRING(vNoticeUserListenSong->name);
 			PRINT_STRING(vNoticeUserListenSong->singer);
 			PRINT_END("struct NoticeUserListenSong DumpEnd");
+		}
+		break;
+		case NOTICE_ASSISTANT_LOGIN:
+		{
+			struct NoticeAssistantLogin* vNoticeAssistantLogin =
+					(struct NoticeAssistantLogin*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeAssistantLogin DumpBegin");
+			PRINT_INT64(vNoticeAssistantLogin->platform_id);
+			PRINT_INT64(vNoticeAssistantLogin->assistant_id);
+			PRINT_STRING(vNoticeAssistantLogin->nickname);
+			PRINT_END("struct NoticeAssistantLogin DumpEnd");
+		}
+		break;
+		case ASSISTANT_LOGIN_SUCCESS:
+		{
+			struct AssistantLoginSuccess* vAssistantLoginSuccess =
+					(struct AssistantLoginSuccess*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct AssistantLoginSuccess DumpBegin");
+			PRINT_INT64(vAssistantLoginSuccess->platform_id);
+			PRINT_INT64(vAssistantLoginSuccess->assistant_id);
+			PRINT_END("struct AssistantLoginSuccess DumpEnd");
 		}
 		break;
 		case HEART_PACKET:

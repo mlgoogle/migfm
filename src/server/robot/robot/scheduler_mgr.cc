@@ -24,7 +24,21 @@ bool SchedulerMgr::OnSchedulerMgrLogin(struct server *srv, int socket, struct Pa
 }
 
 bool SchedulerMgr::OnDisQuiteScheduler(const int socket){
-	return robot_logic::CacheManagerOp::GetRobotCacheMgr()->DeleteScheduler(1000,socket);
+	return robot_logic::CacheManagerOp::GetRobotCacheMgr()->DeleteScheduler(10000,socket);
+}
+
+bool SchedulerMgr::NoticeAssistant(){
+	return robot_logic::CacheManagerOp::GetRobotCacheMgr()->NoticeAssistantLogin(10000);
+}
+
+bool SchedulerMgr::OnNoticeAssistant(struct server *srv, int socket, struct PacketHead *packet,
+	        const void *msg, int len){
+	robot_base::RobotBasicInfo robot_info;
+	struct AssistantLoginSuccess * assistant_login_success = (struct AssistantLoginSuccess*)packet;
+	bool r = robot_logic::CacheManagerOp::GetRobotCacheMgr()->GetAssistantInfo(assistant_login_success->platform_id,
+			assistant_login_success->assistant_id,robot_info);
+	robot_info.set_login_status(1);
+	return true;
 }
 
 }

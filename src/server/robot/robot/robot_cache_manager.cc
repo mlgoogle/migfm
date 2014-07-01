@@ -46,6 +46,7 @@ void RobotCacheManager::SetPlatformInfo(const int64 platform_id,robot_base::Plat
 	}
 	pc->platform_info_ = platform;
 	robot_storage::DBComm::GetRobotInfos(0,10000,pc->idle_robot_infos_);
+	robot_storage::DBComm::GetAssistant(pc->assistant_);
 	LOG_DEBUG2("pc->idle_robot_infos %ld",pc->idle_robot_infos_.size());
 	RestMusicListRandom(pc);
 }
@@ -192,6 +193,48 @@ bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::Rob
 	//从正在使用中放入空闲的底部
 	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->used_robot_infos_,robotinfo.uid());
 	base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->idle_robot_infos_,robotinfo.uid(),robotinfo);
+	return true;
+}
+
+bool RobotCacheManager::GetIdleAssistant(const int64 platform_id,robot_base::RobotBasicInfo& assistant){
+	logic::RLockGd lk(lock_);
+	bool r = false;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	return base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->assistant_,10000,assistant);
+}
+
+bool RobotCacheManager::GetAssistantInfo(const int64 platform_id,const int64& uid,robot_base::RobotBasicInfo& assistant){
+	logic::RLockGd lk(lock_);
+	bool r = false;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	return base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->assistant_,uid,assistant);
+}
+
+bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
+	logic::RLockGd lk(lock_);
+	int i = 2;
+	bool r = false;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	RobotInfosMap::iterator it = pc->assistant_.begin();
+	for(;it!=pc->assistant_.end();++it){
+		robot_base::RobotBasicInfo robot = it->second;
+		struct NoticeAssistantLogin notice_assistant_login;
+		MAKE_HEAD(notice_assistant_login, NOTICE_ASSISTANT_LOGIN,USER_TYPE,0,0);
+		notice_assistant_login.platform_id = platform_id;
+		notice_assistant_login.assistant_id = robot.uid();
+		memset(&notice_assistant_login.nickname,'\0',NICKNAME_LEN);
+		snprintf(notice_assistant_login.nickname, arraysize(notice_assistant_login.nickname),
+						"%s",robot.nickname().c_str());
+		//snprintf(notice_assistant_login.nickname, arraysize(notice_assistant_login.nickname),
+		//		"%s",robot.nickname().c_str());
+		sendrobotmssage(robot,&notice_assistant_login);
+	}
 	return true;
 }
 
