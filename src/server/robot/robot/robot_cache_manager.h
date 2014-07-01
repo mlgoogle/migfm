@@ -45,7 +45,11 @@ public:
 
 	bool NoticeAssistantLogin(const int64 platform_id);
 
+	bool SetAssistantLogin(const int64 platform_id,const int64 assistant_id,const int32 socket);
+
 	bool GetAssistantInfo(const int64 platform_id,const int64& uid,robot_base::RobotBasicInfo& assistant);
+
+	bool SendAssistantHandlseSong(const int64 platform_id,std::list<struct HandleSongInfo*>& list);
 
 	bool GetUserFollower(const int64 platform_id,const int64 uid,RobotInfosMap& robotinfos);
 

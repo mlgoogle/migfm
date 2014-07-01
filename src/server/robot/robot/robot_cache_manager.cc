@@ -214,12 +214,50 @@ bool RobotCacheManager::GetAssistantInfo(const int64 platform_id,const int64& ui
 	return base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->assistant_,uid,assistant);
 }
 
+bool RobotCacheManager::SetAssistantLogin(const int64 platform_id,const int64 assistant_id,const int32 socket){
+	bool r = false;
+	robot_base::RobotBasicInfo assistant;
+	logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->assistant_,assistant_id,assistant);
+	if(!r)
+		return r;
+	assistant.set_login_status(1);
+	assistant.set_socket(socket);
+	return base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->assistant_,assistant_id,assistant);
+
+}
+
+bool RobotCacheManager::SendAssistantHandlseSong(const int64 platform_id,std::list<struct HandleSongInfo*>& list){
+	logic::RLockGd lk(lock_);
+	bool r = false;
+	robot_base::RobotBasicInfo assistant;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->assistant_,10000,assistant);
+	if(!r)
+		return false;
+	struct NoticeAssistantHandselSong notice_assistant_handselsong;
+	MAKE_HEAD(notice_assistant_handselsong, NOTICE_ASSISTANT_HANDSEL_SONG,USER_TYPE,0,0);
+	notice_assistant_handselsong.platform_id = platform_id;
+	notice_assistant_handselsong.assistant_id = assistant.uid();
+	notice_assistant_handselsong.list = list;
+	return sendmessage(assistant.socket(),&notice_assistant_handselsong);
+}
+
 bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
 	logic::RLockGd lk(lock_);
 	int i = 2;
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
+		return false;
+	robot_base::SchedulerInfo scheduler_info;
+	r = GetIdleScheduler(pc->schduler_infos_,scheduler_info);
+	if(!r)
 		return false;
 	RobotInfosMap::iterator it = pc->assistant_.begin();
 	for(;it!=pc->assistant_.end();++it){
@@ -231,9 +269,10 @@ bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
 		memset(&notice_assistant_login.nickname,'\0',NICKNAME_LEN);
 		snprintf(notice_assistant_login.nickname, arraysize(notice_assistant_login.nickname),
 						"%s",robot.nickname().c_str());
+		//通知调度
 		//snprintf(notice_assistant_login.nickname, arraysize(notice_assistant_login.nickname),
 		//		"%s",robot.nickname().c_str());
-		sendrobotmssage(robot,&notice_assistant_login);
+		sendmessage(scheduler_info.socket(),&notice_assistant_login);
 	}
 	return true;
 }

@@ -22,6 +22,7 @@ RobotWeatherMgr::~RobotWeatherMgr(){
 bool RobotWeatherMgr::OnPullWeatherInfo(void){
 	bool r = false;
 	std::list<robot_base::UserLbsInfo> user_lbs_list;
+	std::list<struct HandleSongInfo*> list;
 	r = robot_storage::DBComm::GetUsersLBSPos(user_lbs_list);
 	if(!r)
 		return false;
@@ -29,12 +30,30 @@ bool RobotWeatherMgr::OnPullWeatherInfo(void){
 	while(user_lbs_list.size()>0){
 		robot_base::UserLbsInfo user_lbs = user_lbs_list.front();
 		user_lbs_list.pop_front();
-		PackageWeatherInfo(user_lbs.uid(),user_lbs.latitude(),user_lbs.longitude());
+		int64 songid;
+		std::string message;
+		r = PackageWeatherInfo(user_lbs.uid(),user_lbs.latitude(),user_lbs.longitude(),songid,message);
+		//批量发给咪呦助手
+		if(r){
+			struct HandleSongInfo* handlse_song = new struct HandleSongInfo;
+			handlse_song->uid = user_lbs.uid();
+			handlse_song->songid = songid;
+			memset(&handlse_song->message,'\0',MESSAGE_LEN);
+			snprintf(handlse_song->message, arraysize(handlse_song->message),
+					message.c_str());
+			LOG_DEBUG2("uid :%d songid %d message:%s",handlse_song->uid,handlse_song->songid,
+					handlse_song->message);
+			list.push_back(handlse_song);
+		}
+
 	}
+	//发送给咪呦助手
+	CacheManagerOp::GetRobotCacheMgr()->SendAssistantHandlseSong(10000,list);
 	return true;
 }
 
-bool RobotWeatherMgr::PackageWeatherInfo(const int64 uid,const std::string& latitude,const std::string& longitude){
+bool RobotWeatherMgr::PackageWeatherInfo(const int64 uid,const std::string& latitude,
+		const std::string& longitude,int64& songid,std::string& message){
 	bool r = false;
 	std::stringstream os;
 	int32 temp;
@@ -44,7 +63,7 @@ bool RobotWeatherMgr::PackageWeatherInfo(const int64 uid,const std::string& lati
 	std::string district;
 	std::string province;
 	std::string street;
-	int64 songid;
+	//int64 songid;
 	std::string artist;
 	std::string title;
 
@@ -60,7 +79,8 @@ bool RobotWeatherMgr::PackageWeatherInfo(const int64 uid,const std::string& lati
 	const char* current_weather_desc = codotodesc(curret_weather);
 	os<<"一个"<<temp<<"°"<<current_weather_desc<<"的天气,助理小哟为你带来一首"<<artist<<"的"<<title<<".(位于"<<province
 			<<city<<district<<street<<")";
-	LOG_DEBUG2("%s",os.str().c_str());
+	message = os.str();
+
 	return true;
 
 }

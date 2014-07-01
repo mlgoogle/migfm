@@ -59,6 +59,7 @@ private:
 			,uid_(0){}
 		Data(const int64 uid,const std::string& latitude,const std::string& longitude)
 			:refcount_(0)
+			,uid_(uid)
 			,latitude_(latitude)
 			,longitude_(longitude){}
 

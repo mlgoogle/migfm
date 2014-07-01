@@ -126,6 +126,11 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 		break;
 	case NOTICE_USER_CURRENT_SONG:
 		robot_song_mgr_.get()->OnNoticeUserChangerSong(srv,socket,packet);
+		break;
+	case ASSISTANT_LOGIN_SUCCESS:
+		scheduler_mgr_.get()->OnNoticeAssistant(srv,socket,packet);
+		break;
+
 	default:
 		break;
 	}

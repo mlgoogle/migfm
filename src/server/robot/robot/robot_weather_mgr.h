@@ -17,7 +17,8 @@ public:
 public:
 	bool OnPullWeatherInfo(void);
 private:
-	bool PackageWeatherInfo(const int64 uid,const std::string& latitude,const std::string& longitude);
+	bool PackageWeatherInfo(const int64 uid,const std::string& latitude,const std::string& longitude,
+			int64& songid,std::string& message);
 	bool RequestCaiYunWeather(const std::string& latitude,const std::string& longitude,int32& temp,
 			int32& curret_weather,int32& future_weather);
 	bool RequestBaiduAddress(const std::string& latitude,const std::string& longitude,

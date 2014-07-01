@@ -179,8 +179,8 @@ bool DBComm::GetAssistant(RobotInfosMap& robot_infos){
 		}
 
 
-		//call migfm.proc_GetRobotsInfo(100,0);
-		os<<"call migfm.GetAssistant()";
+		//call migfm.proc_GetAssistant();
+		os<<"call migfm.proc_GetAssistant()";
 
 		std::string sql = os.str();
 		LOG_DEBUG2("[%s]", sql.c_str());
