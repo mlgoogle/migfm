@@ -200,6 +200,31 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			vAssistantLoginSuccess->assistant_id = in.Read64();
 		}
 		break;
+		case NOTICE_ASSISTANT_HANDSEL_SONG:
+		{
+			struct NoticeAssistantHandselSong* vNoticeAssistanHandselSong =
+					new struct NoticeAssistantHandselSong;
+			*packhead = (struct NoticeAssistantHandselSong*)vNoticeAssistanHandselSong;
+			BUILDPACKHEAD();
+			vNoticeAssistanHandselSong->platform_id = in.Read64();
+			vNoticeAssistanHandselSong->assistant_id = in.Read64();
+
+			int list_size = data_length - sizeof(int64) * 2;
+			int i = 0;
+			int nums = list_size / HANDLESONG_SIZE;
+			int len = 0;
+			for(;i<nums;i++){
+				struct HandleSongInfo * handlesong = new struct HandleSongInfo;
+				int temp = 0;
+				handlesong->uid = in.Read64();
+				handlesong->songid = in.Read8();
+				memcpy(handlesong->message,in.ReadData(MESSAGE_LEN,temp),
+						MESSAGE_LEN);
+				handlesong->message[MESSAGE_LEN - 1] = '\0';
+				vNoticeAssistanHandselSong->list.push_back(handlesong);
+			}
+		}
+		break;
 		case HEART_PACKET:
 		{
 			r = true;
@@ -358,6 +383,24 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			BUILDHEAD(ASSISTANTLOGINSUCCESS_SIZE);
 			out.Write64(vAssistantLoginSuccess->platform_id);
 			out.Write64(vAssistantLoginSuccess->assistant_id);
+			packet = (char*)out.GetData();
+		}
+		break;
+		case NOTICE_ASSISTANT_HANDSEL_SONG:
+		{
+			struct NoticeAssistantHandselSong* vNoticeAssistanHandselSong =
+					(struct NoticeAssistantHandselSong*)packhead;
+			int len = 0;
+			data_length = vNoticeAssistanHandselSong->list.size() * HANDLESONG_SIZE + sizeof(int64) * 2;
+			BUILDHEAD(data_length);
+			out.Write64(vNoticeAssistanHandselSong->platform_id);
+			out.Write64(vNoticeAssistanHandselSong->assistant_id);
+			std::list<struct HandleSongInfo*>::iterator it = vNoticeAssistanHandselSong->list.begin();
+			for(;it!=vNoticeAssistanHandselSong->list.end();it++){
+				out.Write64((*it)->uid);
+				out.Write64((*it)->songid);
+				out.WriteData((*it)->message,MESSAGE_LEN);
+			}
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -569,6 +612,23 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_INT64(vAssistantLoginSuccess->platform_id);
 			PRINT_INT64(vAssistantLoginSuccess->assistant_id);
 			PRINT_END("struct AssistantLoginSuccess DumpEnd");
+		}
+		break;
+		case NOTICE_ASSISTANT_HANDSEL_SONG:
+		{
+			struct NoticeAssistantHandselSong* vNoticeAssistanHandselSong=
+					(struct NoticeAssistantHandselSong*)packhead;
+			DUMPHEAD();
+			std::list<HandleSongInfo*>::iterator it = vNoticeAssistanHandselSong->list.begin();
+			PRINT_TITLE("struct NoticeAssistanHandselSong DumpBegin");
+			PRINT_INT64(vNoticeAssistanHandselSong->platform_id);
+			PRINT_INT64(vNoticeAssistanHandselSong->assistant_id);
+			for(;it!=vNoticeAssistanHandselSong->list.end();it++){
+				PRINT_INT64((*it)->uid);
+				PRINT_INT64((*it)->songid);
+				PRINT_STRING((*it)->message);
+			}
+			PRINT_END("struct NoticeAssistanHandselSong DumpEnd");
 		}
 		break;
 		case HEART_PACKET:

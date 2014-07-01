@@ -9,6 +9,7 @@
 #define  HEAD_URL_LEN 64
 #define  NAME_LEN 128
 #define  SINGER_LEN 128
+#define  MESSAGE_LEN 512
 
 enum operatorcode
 {
@@ -20,6 +21,7 @@ enum operatorcode
 	SCHEDULER_LOGIN = 2000,//机器人调度器登录
 	NOTICE_ASSISTANT_LOGIN = 2100,//通知机器人调度器咪呦助手登陆
 	ASSISTANT_LOGIN_SUCCESS = 2101,//咪呦助手登陆成功
+	NOTICE_ASSISTANT_HANDSEL_SONG = 2110,//通知咪呦助手音乐
 	ROBOT_LOGIN = 3000,//机器人登陆成功
 	NOTICE_USER_LOGIN = 4000,//咪呦通知机器人服务器用户已经登录
 	NOTICE_USER_DEFAULT_SONG = 4001,//咪呦通知机器人服务器用户听的歌
@@ -137,6 +139,20 @@ struct NoticeAssistantLogin:public PacketHead{
 struct AssistantLoginSuccess:public PacketHead{
 	int64 platform_id;
 	int64 assistant_id;
+};
+
+#define HANDLESONG_SIZE (sizeof(int64) * 2 + MESSAGE_LEN)
+struct HandleSongInfo{
+	int64 uid;
+	int64  songid;
+	char message[MESSAGE_LEN];
+};
+
+//NOTICE_ASSISTANT_HANDSEL_SONG
+struct NoticeAssistantHandselSong:public PacketHead{
+	int64 platform_id;
+	int64 assistant_id;
+	std::list<struct HandleSongInfo*> list;
 };
 
 #endif
