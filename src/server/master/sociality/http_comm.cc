@@ -45,7 +45,7 @@ bool mig_sociality::HttpComm::PushMessage(const std::string &device_token,
 	post_cont << "&devicetoken=" << device_token;*/
 
 	LOG_DEBUG2("Push msg post:%s", post_str.c_str());
-	int port = 9090;
+	/*int port = 9090;
 	try {
 		post.Post(post_str.c_str(),port);
 		std::string result;
@@ -64,13 +64,13 @@ bool mig_sociality::HttpComm::PushMessage(const std::string &device_token,
 			LOG_DEBUG2("Push msg failed:推送失败,%d", ret_code);
 			return false;
 		}*/
-	} catch (const std::exception &ex) {
+	/*} catch (const std::exception &ex) {
 		LOG_DEBUG2("Push msg failed:%s", ex.what());
 		return false;
 	}catch (...) {
 		LOG_DEBUG("Push msg failed");
 		return false;
-	}
+	}*/
 
 	return true;
 }
