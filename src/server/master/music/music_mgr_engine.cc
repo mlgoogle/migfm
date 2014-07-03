@@ -1339,7 +1339,7 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 
 
 ret:
-	value["reslut"]["new_msg_num"] = new_msg_num;
+	value["result"]["new_msg_num"] = new_msg_num;
 	value["msg"] = msg;
 	value["status"] = status;
 
