@@ -466,7 +466,8 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		//new message
 		result["result"]["new_msg_num"] = new_msg_num;
 	}else if (flag==5){
-		int collect_num = GetEffectCollectNum(collect_musices)/*collect_musices.size()*/;
+		//int collect_num = GetEffectCollectNum(collect_musices)/*collect_musices.size()*/;
+		int collect_num = collect_musices.size();
 		int near_num = usersmusic.size();
 		int music_num = usersmusic.size();
 		result["result"]["mynum"] = collect_num;
