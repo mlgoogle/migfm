@@ -92,6 +92,14 @@ bool RobotSongMgr::OnNoticeUserChangerSong(struct server *srv, int socket, struc
 		snprintf(notice_user_listen.name, arraysize(notice_user_listen.name),
 						"%s",b64title.c_str());
 		sendrobotmssage(robot,&notice_user_listen);
+
+		struct NoticeUserRobotHandselSong notice_handsel_song;
+		MAKE_HEAD(notice_handsel_song, NOTICE_USER_ROBOT_HANDSEL_SONG,USER_TYPE,0,0);
+		notice_handsel_song.platform_id = current_song->platform_id;
+		notice_handsel_song.uid = current_song->uid;
+		notice_handsel_song.robot_id = robot.uid();
+		notice_handsel_song.song_id = atoll(musicinfo.id().c_str());
+		sendrobotmssage(robot,&notice_handsel_song);
 	}
 	return r;
 }

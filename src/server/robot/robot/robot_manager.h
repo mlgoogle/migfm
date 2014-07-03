@@ -50,6 +50,7 @@ private:
 	scoped_ptr<robot_logic::RobotConnection>  robot_mgr_;
 	scoped_ptr<robot_logic::RobotSongMgr>   robot_song_mgr_;
 	scoped_ptr<robot_logic::RobotWeatherMgr> robot_weather_mgr_;
+
 };
 
 

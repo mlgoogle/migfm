@@ -362,7 +362,8 @@ bool DBComm::GetSceneInfos(std::list<int64> &list){
 	return false;
 }
 
-bool DBComm::GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list){
+bool DBComm::GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list,const int from,
+		int count){
 	std::stringstream os;
 	bool r = false;
 	int num = 0;
@@ -372,7 +373,7 @@ bool DBComm::GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list){
 #endif
 	base_storage::db_row_t* db_rows;
 	MYSQL_ROW rows = NULL;
-	os<<"call migfm.proc_GetUserLBSPos(0,1000)";
+	os<<"call migfm.proc_GetUserLBSPos("<<from<<","<<count<")";
 	r = engine->SQLExec(os.str().c_str());
 	if(!r){
 		MIG_ERROR(USER_LEVEL,"sqlexec error ");

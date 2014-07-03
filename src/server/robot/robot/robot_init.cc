@@ -101,7 +101,7 @@ static handler_t OnIniTimer (struct server *srv){
 
 static handler_t OnTimeOut (struct server *srv, char* id, 
 							int opcode, int time){
-    LOG_DEBUG ("OnTimeout");
+    //LOG_DEBUG ("OnTimeout");
     robot_logic::RobotManager::GetInstance()->OnTimeout(srv,id,opcode,time);
 	return HANDLER_GO_ON;
 }

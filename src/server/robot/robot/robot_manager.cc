@@ -110,7 +110,7 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 			packet->packet_length,packet->operate_code,packet->data_length);
 
 	//ProtocolPack::HexEncode(msg,len);
-	ProtocolPack::DumpPacket(packet);
+	//ProtocolPack::DumpPacket(packet);
 	switch(packet->operate_code){
 	case SCHEDULER_LOGIN:
 		scheduler_mgr_.get()->OnSchedulerMgrLogin(srv,socket,packet);
@@ -166,7 +166,7 @@ bool RobotManager::OnBroadcastClose(struct server *srv,
 bool RobotManager::OnIniTimer(struct server *srv){
 	//检测心跳包 发给机器人和控制器
 	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_CONNECT,20,-1);
-	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_WEATCHER,40,-1);
+	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_WEATCHER,400,-1);
 	return true;
 }
 
@@ -174,9 +174,9 @@ bool RobotManager::OnTimeout(struct server *srv, char *id,
 							int opcode, int time){
 	switch(opcode){
 	case TIME_CHECK_CONNECT:
-			LOG_DEBUG2("TIME_CHECK_CONNECT :%d",TIME_CHECK_CONNECT);
+			//LOG_DEBUG2("TIME_CHECK_CONNECT :%d",TIME_CHECK_CONNECT);
 			CacheManagerOp::GetRobotCacheMgr()->CheckRobotConnect(10000);
-			CacheManagerOp::GetRobotCacheMgr()->Dump();
+			//CacheManagerOp::GetRobotCacheMgr()->Dump();
 		break;
 	case TIME_CHECK_WEATCHER:
 		robot_weather_mgr_.get()->OnPullWeatherInfo();

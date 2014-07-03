@@ -273,6 +273,7 @@ bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
 		//snprintf(notice_assistant_login.nickname, arraysize(notice_assistant_login.nickname),
 		//		"%s",robot.nickname().c_str());
 		sendmessage(scheduler_info.socket(),&notice_assistant_login);
+		LOG_DEBUG2("scheduler socket %d",scheduler_info.socket());
 	}
 	return true;
 }
@@ -311,6 +312,7 @@ bool RobotCacheManager::SchedulerSendMessage(const int64 platform_id,struct Pack
 	if(!r)
 		return false;
 
+	LOG_DEBUG2("scheduler socket %d",scheduler_info.socket());
 	return sendmessage(scheduler_info.socket(),packet);
 }
 
@@ -343,7 +345,7 @@ void RobotCacheManager::CheckRobotConnect(const int64 platform_id){
 			struct PacketHead heart_packet;
 			MAKE_HEAD(heart_packet, HEART_PACKET,USER_TYPE,0,0);
 			sendrobotmssage(robot_info,&heart_packet);
-			r = false;
+			//r = false;
 			if(!r)
 				robot_info.add_send_error_count();
 		}

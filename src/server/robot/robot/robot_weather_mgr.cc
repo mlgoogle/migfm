@@ -11,7 +11,9 @@
 
 namespace robot_logic{
 
-RobotWeatherMgr::RobotWeatherMgr(){
+RobotWeatherMgr::RobotWeatherMgr()
+:get_user_from_tick_(0)
+,get_user_count_tick_(10){
 
 }
 
@@ -23,10 +25,9 @@ bool RobotWeatherMgr::OnPullWeatherInfo(void){
 	bool r = false;
 	std::list<robot_base::UserLbsInfo> user_lbs_list;
 	std::list<struct HandleSongInfo*> list;
-	r = robot_storage::DBComm::GetUsersLBSPos(user_lbs_list);
+	r = robot_storage::DBComm::GetUsersLBSPos(user_lbs_list,get_user_from_tick_,get_user_count_tick_);
 	if(!r)
 		return false;
-
 	while(user_lbs_list.size()>0){
 		robot_base::UserLbsInfo user_lbs = user_lbs_list.front();
 		user_lbs_list.pop_front();

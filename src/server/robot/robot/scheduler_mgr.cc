@@ -1,6 +1,7 @@
 #include "scheduler_mgr.h"
 #include "robot_cache_manager.h"
 #include "robot_basic_info.h"
+#include "base/logic_comm.h"
 #include "base/comm_head.h"
 
 namespace robot_logic{
@@ -34,16 +35,12 @@ bool SchedulerMgr::NoticeAssistant(){
 }
 
 bool SchedulerMgr::OnNoticeAssistant(struct server *srv, int socket, struct PacketHead *packet,
-	        const void *msg, int len){
+	        const void *msg, int len){//咪呦助手登陆成功
 	robot_base::RobotBasicInfo robot_info;
 	struct AssistantLoginSuccess * assistant_login_success = (struct AssistantLoginSuccess*)packet;
 	bool r = robot_logic::CacheManagerOp::GetRobotCacheMgr()->SetAssistantLogin(assistant_login_success->platform_id,
 	assistant_login_success->assistant_id,socket);
-
-	//bool r = robot_logic::CacheManagerOp::GetRobotCacheMgr()->GetAssistantInfo(assistant_login_success->platform_id,
-		//	assistant_login_success->assistant_id,robot_info);
-	//robot_info.set_login_status(1);
-	//robot_info.set_socket(socket);
+	LOG_DEBUG2("assistant socket %d",socket);
 	return true;
 }
 

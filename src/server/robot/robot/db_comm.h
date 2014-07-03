@@ -35,7 +35,8 @@ public:
 
 	static bool GetSceneInfos(std::list<int64>& list);
 
-	static bool GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list);
+	static bool GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list,const int from,
+			const int count);
 
 
 public:
