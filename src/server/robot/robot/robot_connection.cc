@@ -73,6 +73,7 @@ bool RobotConnection::OnClearRobotConnection(const int socket){
 		return r;
 	r = CacheManagerOp::GetRobotCacheMgr()->ClearRobot(10000,robot_info);
 	CacheManagerOp::GetCacheManagerOp()->DelRobotInfo(socket);
+
 	return true;
 }
 

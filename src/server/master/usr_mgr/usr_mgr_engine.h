@@ -72,6 +72,8 @@ private:
 		             const std::string type = "1",const std::string birthday = "1986-10-01",
 		             const std::string location = "�㽭ʡ������",
 		             const std::string head = "http://fm.miglab.com/default.jpg");
+private:
+	int                                              robot_server_socket_;
 };
 
 }

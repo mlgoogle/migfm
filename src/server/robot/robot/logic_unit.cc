@@ -152,9 +152,11 @@ void LogicUnit::FormateMusicInfo(std::list<std::string>& songinfolist,
 }
 
 void LogicUnit::CalculateOneHourWeather(std::list<double>& dataseries_list,
-		double& weather_result){
+		double& weather_result,int& furture_time){
 	int rain_flag = 0;
+	furture_time = 0;
 	while(dataseries_list.size()>0){
+		furture_time++;
 		double result = dataseries_list.front();
 		dataseries_list.pop_front();
 		if(result>0){//雨天

@@ -61,7 +61,7 @@ public:
 				 std::map<std::string,base::MusicInfo>& music_infos);
 
 	static void CalculateOneHourWeather(std::list<double>& dataseries_list,
-			double& weather_result);
+			double& weather_result,int& furture_time);
 
 	static int ResultWeather(const double result);
 };

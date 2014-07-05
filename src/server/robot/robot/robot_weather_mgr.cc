@@ -60,6 +60,7 @@ bool RobotWeatherMgr::PackageWeatherInfo(const int64 uid,const std::string& lati
 	int32 temp;
 	int32 curret_weather;
 	int32 future_weather;
+	int32 future_time;
 	std::string city;
 	std::string district;
 	std::string province;
@@ -68,27 +69,43 @@ bool RobotWeatherMgr::PackageWeatherInfo(const int64 uid,const std::string& lati
 	std::string artist;
 	std::string title;
 
-	r = RequestCaiYunWeather(latitude,longitude,temp,curret_weather,future_weather);
+	r = RequestCaiYunWeather(latitude,longitude,temp,curret_weather,future_weather,future_time);
 	if(!r)
 		return r;
+	//存储用户及天气
+	CacheManagerOp::GetRobotCacheMgr()->SetUserInfo(10000,uid,curret_weather,future_weather,future_time);
+
+	//缓存中获取地址，如果没有则从百度中获取地址
+	r = CacheManagerOp::GetRobotCacheMgr()->GetUserAddressInfo(10000,uid,city,district,province,street);
 	//获取地址信息
-	r = RequestBaiduAddress(latitude,longitude,city,district,province,street);
+	if(!r){
+		r = RequestBaiduAddress(latitude,longitude,city,district,province,street);
+		CacheManagerOp::GetRobotCacheMgr()->SetUserAddressInfo(10000,uid,city,district,province,street);
+	}
 
-	//获取歌曲
-	GetWeatherMusic(curret_weather,songid,artist,title);
-	//拼装文字
-	const char* current_weather_desc = codotodesc(curret_weather);
-	os<<"一个"<<temp<<"°"<<current_weather_desc<<"的天气,助理小哟为你带来一首"<<artist<<"的"<<title<<".(位于"<<province
+	//判断用户今日是否已经推送过
+	r =CacheManagerOp::GetRobotCacheMgr()->IsPushMessageDay(10000,uid);
+	if(r){
+		//获取歌曲
+		GetWeatherMusic(curret_weather,songid,artist,title);
+		//拼装文字
+		const char* current_weather_desc = codotodesc(curret_weather);
+		os<<"一个"<<temp<<"°"<<current_weather_desc<<"的天气,助理小哟为你带来一首"<<artist<<"的"<<title<<".(位于"<<province
 			<<city<<district<<street<<")";
-	message = os.str();
+		message = os.str();
+		CacheManagerOp::GetRobotCacheMgr()->SetUserPushMessageDay(10000,uid);
+		r = true;
+	}else{// 不再推送
+		r = false;
+	}
 
-	return true;
+	return r;
 
 }
 
 //http://rain.swarma.net/fcgi-bin/v1/api.py?lonlat=116.5754,39.8296&format=json&product=minutes_prec&token=AAEHD3736dKDGEDKUEHD
 bool RobotWeatherMgr::RequestCaiYunWeather(const std::string& latitude,const std::string& longitude,
-		int32& temp,int32& curret_weather,int32& future_weather){
+		int32& temp,int32& curret_weather,int32& future_weather,int32& futrue_time){
 	//http://rain.swarma.net/fcgi-bin/v1/api.py?lonlat=116.5754,39.8296&format=json&product=minutes_prec&token=AAEHD3736dKDGEDKUEHD
 	bool r = false;
 	std::string host_api = "http://rain.swarma.net/fcgi-bin/v1/api.py";
@@ -114,9 +131,12 @@ bool RobotWeatherMgr::RequestCaiYunWeather(const std::string& latitude,const std
 	if(!r)
 		return r;
 	LOG_DEBUG2("skycon: %s",skycon.c_str());
-	//计算未来一小时天气状态
 	curret_weather = caiyuncode(skycon.c_str());
-	future_weather = 1;
+	//计算未来一小时天气状况
+	double d_future_weather = 0;
+	robot_logic::LogicUnit::CalculateOneHourWeather(dataseries_list,d_future_weather,futrue_time);
+	if(d_future_weather>0)//雨天
+		future_weather = 0;
 	return true;
 }
 

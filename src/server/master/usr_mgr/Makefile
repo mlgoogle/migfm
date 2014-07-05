@@ -8,9 +8,9 @@ COMPIlER = g++
 COMPILERC = gcc
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-##CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_  -D_DIC_POOL_ -DPROCESS_WORK -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
 ## for release
-CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_DB_POOL_ -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
+##CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_REENTRANT -D_DB_POOL_ -D_DIC_POOL_ -DPROCESS_WORK -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
 
 ## 链接选项
 ## for debug
@@ -19,13 +19,13 @@ LINK_FLAGS = -g -shared -fPIC
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I./ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I/usr/local/include\
+INCLUDE_PATHS = -I./ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I../../robot/  -I/usr/local/include\
 				 -I/usr/include/mysql -I./../../../third_party/hiredis 
 
 ## 库
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient\
-				../../lib/libbreakpad_client.a ../../lib/libhiredis.a
+				../../lib/libbreakpad_client.a ../../lib/libhiredis.a ../../lib/robot_interface.a
 
 ##3rd
 THIRD_PATH = ../../public

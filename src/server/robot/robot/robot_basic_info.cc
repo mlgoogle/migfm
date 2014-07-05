@@ -101,7 +101,7 @@ UserBasicInfo::UserBasicInfo(const int64 uid){
 	data_ = new Data(uid);
 }
 
-UserBasicInfo::operator =(const UserBasicInfo& user_info){
+UserBasicInfo& UserBasicInfo::operator =(const UserBasicInfo& user_info){
 	if (user_info.data_!=NULL){
 		user_info.data_->AddRef();
 	}

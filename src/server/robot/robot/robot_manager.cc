@@ -12,7 +12,8 @@
 
 
 #define TIME_CHECK_CONNECT    10025//检测连接
-#define TIME_CHECK_WEATCHER   10026//检测天气
+#define TIME_CHECK_WEATCHER   10026//检测天气、
+#define TIME_ROBOT_LIVE       10027//检测用户的活跃度
 namespace robot_logic{
 
 
@@ -167,6 +168,7 @@ bool RobotManager::OnIniTimer(struct server *srv){
 	//检测心跳包 发给机器人和控制器
 	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_CONNECT,20,-1);
 	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_WEATCHER,400,-1);
+	srv->add_time_task(srv,PLUGIN_ID,TIME_ROBOT_LIVE,40,-1);
 	return true;
 }
 
@@ -176,10 +178,13 @@ bool RobotManager::OnTimeout(struct server *srv, char *id,
 	case TIME_CHECK_CONNECT:
 			//LOG_DEBUG2("TIME_CHECK_CONNECT :%d",TIME_CHECK_CONNECT);
 			CacheManagerOp::GetRobotCacheMgr()->CheckRobotConnect(10000);
-			//CacheManagerOp::GetRobotCacheMgr()->Dump();
+			CacheManagerOp::GetRobotCacheMgr()->Dump();
 		break;
 	case TIME_CHECK_WEATCHER:
 		robot_weather_mgr_.get()->OnPullWeatherInfo();
+		break;
+	case TIME_ROBOT_LIVE:
+		CacheManagerOp::GetRobotCacheMgr()->CheckRobotLive(10000);
 		break;
 	default:
 		LOG_ERROR2("unkown code :%d",opcode);

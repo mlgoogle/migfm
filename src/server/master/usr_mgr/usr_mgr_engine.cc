@@ -2,6 +2,7 @@
 #include "db_comm.h"
 #include "dic_comm.h"
 #include "logic_comm.h"
+#include "intertface/robot_interface.h"
 #include "basic/constants.h"
 #include "basic/basic_util.h"
 #include "basic/errno_comm.h"
@@ -56,6 +57,7 @@ bool UsrMgrEngine::OnBroadcastClose(struct server *srv, int socket){
 
 bool UsrMgrEngine::OnBroadcastConnect(struct server *srv, int socket, 
 									  void *data, int len){
+	robot_server_socket_ = socket;
     return true;
 }
 
@@ -457,6 +459,8 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 
 	result = os.str();
 	status = "1";
+	//通知机器人登陆
+	NoticeUserLogin(robot_server_socket_,10000,usrid,0,0);
 
 ret:
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
@@ -518,6 +522,8 @@ bool UsrMgrEngine::UserLogin(const int socket,const packet::HttpPacket& packet){
 			<<new_msg_num;
 		result = os.str();
 		status = "1";
+		//通知机器人登陆
+		NoticeUserLogin(robot_server_socket_,10000,atoll(userid.c_str()),0,0);
 	}else{
 		//错误判断
 		switch (return_code){

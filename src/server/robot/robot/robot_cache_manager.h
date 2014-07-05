@@ -79,8 +79,19 @@ public:
 
 	void CheckRobotConnect(const int64 platform_id);
 
-	void SetUserInfo(const int64 platform_id,const int64 uid,const robot_base::UserBasicInfo& userinfo,
-			std::list<double>* dataseries_list = NULL);
+	void CheckRobotLive(const int64 platform_id);
+
+	void SetUserInfo(const int64 platform_id,const int64 uid,int current_weather,int future_weather,int future_time);
+
+	bool GetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,
+			std::string& district,std::string& province,std::string& street);
+
+	bool SetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,
+			std::string& district,std::string& province,std::string& street);
+
+	bool IsPushMessageDay(const int64 platform_id,const int64 uid);
+
+	bool SetUserPushMessageDay(const int64 platform_id,const int64 uid);
 
 
 	void Dump();

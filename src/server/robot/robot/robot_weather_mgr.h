@@ -20,7 +20,7 @@ private:
 	bool PackageWeatherInfo(const int64 uid,const std::string& latitude,const std::string& longitude,
 			int64& songid,std::string& message);
 	bool RequestCaiYunWeather(const std::string& latitude,const std::string& longitude,int32& temp,
-			int32& curret_weather,int32& future_weather);
+			int32& curret_weather,int32& future_weather,int32& futrue_time);
 	bool RequestBaiduAddress(const std::string& latitude,const std::string& longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street);
 	bool GetWeatherMusic(const int type_id,int64& songid,std::string& singer,std::string& song);

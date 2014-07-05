@@ -72,6 +72,7 @@ bool RobotSongMgr::OnNoticeUserChangerSong(struct server *srv, int socket, struc
 	for(;it!=robot_infos.end()&&itr!=musicinfomap.end();it++,itr++){
 		base::MusicInfo musicinfo = itr->second;
 		robot_base::RobotBasicInfo robot = it->second;
+		robot.set_follower_user_last_time(time(NULL));
 		struct NoticeUserListenSong notice_user_listen;
 		MAKE_HEAD(notice_user_listen, NOTICE_USER_ROBOT_LISTEN_SONG,USER_TYPE,0,0);
 		notice_user_listen.platform_id = current_song->platform_id;

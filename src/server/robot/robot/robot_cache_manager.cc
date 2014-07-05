@@ -101,14 +101,31 @@ bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,con
 	logic::WLockGd lk(lock_);
 	int i = 2;
 	bool r = false;
+	RobotInfosMap  follow_robotinfos;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
-	while(i>0){
-		r = GetRobot(latitude,longitude,pc->idle_robot_infos_,pc->temp_robot_infos_,list,pc->radom_in_.get());
-		i--;
-		if(!r)
-			return r;
+	//检测是否已经有了伴随机器人
+	r = base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(pc->user_follow_infos_,uid,follow_robotinfos);
+	if(r){//存在
+		//重新计算坐标
+		for(RobotInfosMap::iterator itr =  follow_robotinfos.begin();itr!=follow_robotinfos.end();++itr){
+			double robot_latitude = 0;
+			double robot_longitude = 0;
+			GetRobotLbsPos(pc->radom_in_.get(),latitude,longitude,robot_latitude,robot_longitude);
+			robot_base::RobotBasicInfo robot = itr->second;
+			robot.set_latitude(robot_latitude);
+			robot.set_longitude(robot_longitude);
+			robot.set_follower_user_last_time(time(NULL));
+			list.push_back(robot);
+		}
+	}else{//不存在
+		while(i>0){
+			r = GetRobot(latitude,longitude,pc->idle_robot_infos_,pc->temp_robot_infos_,list,pc->radom_in_.get());
+			i--;
+			if(!r)
+				return r;
+		}
 	}
 	return true;
 }
@@ -127,6 +144,7 @@ bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 rob
 	robot_info.set_socket(socket);
 	robot_info.set_follow_uid(uid);
 	robot_info.set_recv_last_time(time(NULL));
+	robot_info.set_follower_user_last_time(time(NULL));
 	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->temp_robot_infos_,robot_uid);
 	base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->used_robot_infos_,robot_uid,robot_info);
 	//更新机器人坐标
@@ -188,7 +206,10 @@ bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::Rob
 		if(robotinfos.size()<=0)
 			continue;
 		//删除跟随机器人
-		base::MapDel<UserFollowMap,UserFollowMap::iterator>(pc->user_follow_infos_,robotinfo.uid());
+		base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(robotinfos,robotinfo.uid());
+		//检测是否是最后一个
+		if(robotinfos.size()==0)
+			base::MapDel<UserFollowMap,UserFollowMap::iterator>(pc->user_follow_infos_,uid);
 	}
 	//从正在使用中放入空闲的底部
 	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->used_robot_infos_,robotinfo.uid());
@@ -196,11 +217,100 @@ bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::Rob
 	return true;
 }
 
-void RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,
-		const robot_base::UserBasicInfo& userinfo){
-
-
+void RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,int current_weather,int future_weather,int future_time){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return ;
+	//获取用户是否存在
+	robot_base::UserBasicInfo userinfo;
+	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	if(!r){//不存在
+		robot_base::UserBasicInfo temp_info(uid);
+		userinfo = temp_info;
+	}else{//存在
+		//获取上个天气状态
+		int last_weather_status = userinfo.last_weather_status();
+		//判断是雨天还是非雨天
+		if(last_weather_status!=future_weather)//雨天转非雨天，通知用户
+			//放入队列
+			return;
+	}
+	//将当前音乐状态写入用户信息中
+	userinfo.set_last_weather_status(current_weather);
+	base::MapAdd<UserInfoMap,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
 }
+
+bool RobotCacheManager::GetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,
+		std::string& district,std::string& province,std::string& street){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	robot_base::UserBasicInfo userinfo;
+	if(pc==NULL)
+		return false;
+	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	if(!r)
+		return false;
+	city = userinfo.city();
+	district = userinfo.distict();
+	province = userinfo.province();
+	street = userinfo.street();
+	if(city.empty()||province.empty())
+		return false;
+	return true;
+}
+
+bool RobotCacheManager::SetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,
+		std::string& district,std::string& province,std::string& street){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	robot_base::UserBasicInfo userinfo;
+	if(pc==NULL)
+		return false;
+	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	if(!r)
+		return false;
+	userinfo.set_city(city);
+	userinfo.set_distict(district);
+	userinfo.set_province(province);
+	userinfo.set_street(street);
+	return true;
+}
+
+bool RobotCacheManager::IsPushMessageDay(const int64 platform_id,const int64 uid){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	robot_base::UserBasicInfo userinfo;
+	if(pc==NULL)
+		return false;
+	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	if(!r)
+		return false;
+	//获取当前时间
+	 time_t current = time(NULL);
+	 struct tm* local = localtime(&current);
+	 if((local->tm_mon+1)!=userinfo.push_month() || local->tm_mday!=userinfo.push_day())
+		 return true;
+	 return false;
+}
+
+bool RobotCacheManager::SetUserPushMessageDay(const int64 platform_id,const int64 uid){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	robot_base::UserBasicInfo userinfo;
+	if(pc==NULL)
+		return false;
+	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	if(!r)
+		return false;
+	//获取当前时间
+	 time_t current = time(NULL);
+	 struct tm* local = localtime(&current);
+	 userinfo.set_push_month(local->tm_mon+1);
+	 userinfo.set_push_day(local->tm_mday);
+	 return base::MapAdd<UserInfoMap,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+}
+
 bool RobotCacheManager::GetIdleAssistant(const int64 platform_id,robot_base::RobotBasicInfo& assistant){
 	logic::RLockGd lk(lock_);
 	bool r = false;
@@ -284,26 +394,6 @@ bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
 }
 
 
-bool RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,const robot_base::UserBasicInfo& userinfo
-		,std::list<double>* dataseries_list/* = NULL*/){
-	logic::WLockGd lk(lock_);
-	PlatformCache* pc = GetPlatformCache(platform_id);
-	if(pc==NULL)
-		return false;
-	robot_base::UserBasicInfo usr;
-	//检测是否存在，如果不存在直接放入，如果存在检测天气变化然后放入队列
-	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,userinfo.uid(),
-			usr);
-	if(!r){
-		r = base::MapAdd<UserInfoMap,robot_base::UserBasicInfo>(pc->user_infos_,userinfo.uid(),userinfo);
-	}else{
-		//检测雨天
-		double weather_result = 0;
-		int result = 0;
-		robot_logic::LogicUnit::CalculateOneHourWeather((*dataseries_list),weather_result);
-	}
-	return r;
-}
 
 bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info){
 	logic::WLockGd lk(lock_);
@@ -341,6 +431,26 @@ bool RobotCacheManager::SchedulerSendMessage(const int64 platform_id,struct Pack
 
 	LOG_DEBUG2("scheduler socket %d",scheduler_info.socket());
 	return sendmessage(scheduler_info.socket(),packet);
+}
+
+void RobotCacheManager::CheckRobotLive(const int64 platform_id){
+	logic::WLockGd lk(lock_);
+	bool r = false;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return;
+	time_t current_time = time(NULL);
+	RobotInfosMap::iterator it = pc->used_robot_infos_.begin();
+	for(;it!=pc->used_robot_infos_.end();++it){
+		robot_base::RobotBasicInfo robot_info = it->second;
+		if(current_time - robot_info.follower_user_last_time()>100){//超出限定时间，主动断掉机器人
+			//断掉连接
+			LOG_DEBUG("close connection");
+			closelockconnect(robot_info.socket());
+			continue;
+			//通过响应事件将无响应模拟客户端移除，这里不移除
+		}
+	}
 }
 
 void RobotCacheManager::CheckRobotConnect(const int64 platform_id){
@@ -457,6 +567,7 @@ bool RobotCacheManager::GetTaskRobot(RobotInfosMap& robot_map,const int32 task,r
 	for(;it!=robot_map.end();++it){
 		robot_base::RobotBasicInfo temp_robot;
 		temp_robot = it->second;
+		temp_robot.set_follower_user_last_time(time(NULL));
 		if(temp_robot.task_count()>robot.task_count()){
 			robot = it->second;
 		}

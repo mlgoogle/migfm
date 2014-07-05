@@ -55,10 +55,10 @@ public:
 private:
 	class Data{
 	public:
-		Data():refcount_(0)
+		Data():refcount_(1)
 			,uid_(0){}
 		Data(const int64 uid,const std::string& latitude,const std::string& longitude)
-			:refcount_(0)
+			:refcount_(1)
 			,uid_(uid)
 			,latitude_(latitude)
 			,longitude_(longitude){}
@@ -94,6 +94,8 @@ public:
 	const std::string& street() const {return data_->street_;}
 	const std::string& distict() const {return data_->district_;}
 	const int last_weather_status() const {return data_->last_weather_status_;}
+	const int32 push_day() const {return data_->push_day_;}
+	const int32 push_month() const {return data_->push_month_;}
 
 	void set_latitude(const double& latitude){data_->latitude_ = latitude;}
 	void set_longitude(const double& longitude){data_->longitude_ = longitude;}
@@ -102,24 +104,34 @@ public:
 	void set_street(const std::string& street){data_->street_ = street;}
 	void set_distict(const std::string& distict){data_->district_ = distict;}
 	void set_last_weather_status(const double last_weather_status){data_->last_weather_status_ = last_weather_status;}
+	void set_push_day(const int32 push_day){data_->push_day_ = push_day;}
+	void set_push_month(const int32 push_month){data_->push_month_ = push_month;}
 
 private:
 	class Data{
 	public:
-		Data():refcount_(0)
-			,uid(0)
+		Data():refcount_(1)
+			,uid_(0)
+			,push_day_(0)
+			,push_month_(0)
 			,latitude_(0)
 			,longitude_(0)
 			,last_weather_status_(-1){}
-		Data(const int last_weather_status):refcount_(0)
-			,uid(0)
+		Data(const int64 uid_):refcount_(1)
+			,uid_(uid_)
 			,latitude_(0)
 			,longitude_(0)
-			,last_weather_status_(last_weather_status){}
+			,push_day_(0)
+			,push_month_(0)
+			,last_weather_status_(0){}
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
 	public:
 		const int64     uid_;
 		double          latitude_;
 		double          longitude_;
+		int32           push_day_;
+		int32           push_month_;
 		std::string     city_;
 		std::string     province_;
 		std::string     street_;
@@ -159,6 +171,7 @@ public:
 	const time_t recv_last_time() const {return data_->recv_last_time_;}
 	const int32 send_error_count() const {return data_->send_error_count_;}
 	const std::map<int64,int64>& follow_uid() const {return data_->follow_map_; }
+	const time_t follower_user_last_time() const {return data_->follower_user_last_time_;}
 
 
 
@@ -174,6 +187,7 @@ public:
 	void set_recv_last_time(const time_t recv_last_time){data_->recv_last_time_ = recv_last_time;}
 	void set_send_error_count(const int32 send_error_count){data_->send_error_count_ = send_error_count;}
 	void set_login_status(const int32 login_status){data_->login_ = login_status;}
+	void set_follower_user_last_time(const time_t follower_user_last_time) {data_->follower_user_last_time_ = follower_user_last_time;}
 
 	void add_task_count(){data_->task_count_++;}
 	void add_song_task_count(){data_->song_task_count_++;add_task_count();}
@@ -195,7 +209,8 @@ private:
 				,login_(0)
 				,send_last_time_(time(NULL))
 				,recv_last_time_(time(NULL))
-				,send_error_count_(0){}
+				,send_error_count_(0)
+				,follower_user_last_time_(0){}
 
 
 			Data(const int64 uid,const int32 sex,const double latitude,const double longitude,
@@ -216,7 +231,8 @@ private:
 			,login_(0)
 			,send_last_time_(time(NULL))
 			,recv_last_time_(time(NULL))
-			,send_error_count_(0){}
+			,send_error_count_(0)
+			,follower_user_last_time_(0){}
 
 			void AddRef(){refcount_ ++;}
 			void Release(){if (!--refcount_)delete this;}
@@ -239,6 +255,7 @@ private:
 			std::map<int64,int64> follow_map_;
 			time_t send_last_time_;
 			time_t recv_last_time_;
+			time_t follower_user_last_time_;
 		private:
 			int refcount_;
 		};
