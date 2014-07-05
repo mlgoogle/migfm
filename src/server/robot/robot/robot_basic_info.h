@@ -78,6 +78,59 @@ private:
 
 };
 
+class UserBasicInfo{
+public:
+	explicit UserBasicInfo(const int64 uid);
+	explicit UserBasicInfo();
+
+	UserBasicInfo(const UserBasicInfo& user_info);
+	UserBasicInfo& operator = (const UserBasicInfo& user_info);
+
+	const int64 uid() const {return data_->uid_;}
+	const double latitude() const {return data_->latitude_;}
+	const double longitude() const {return data_->longitude_;}
+	const std::string& city() const {return data_->city_;}
+	const std::string& province() const {return data_->province_;}
+	const std::string& street() const {return data_->street_;}
+	const std::string& distict() const {return data_->district_;}
+	const int last_weather_status() const {return data_->last_weather_status_;}
+
+	void set_latitude(const double& latitude){data_->latitude_ = latitude;}
+	void set_longitude(const double& longitude){data_->longitude_ = longitude;}
+	void set_city(const std::string& city){data_->city_ = city;}
+	void set_province(const std::string& province){data_->province_ = province;}
+	void set_street(const std::string& street){data_->street_ = street;}
+	void set_distict(const std::string& distict){data_->district_ = distict;}
+	void set_last_weather_status(const double last_weather_status){data_->last_weather_status_ = last_weather_status;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(0)
+			,uid(0)
+			,latitude_(0)
+			,longitude_(0)
+			,last_weather_status_(-1){}
+		Data(const int last_weather_status):refcount_(0)
+			,uid(0)
+			,latitude_(0)
+			,longitude_(0)
+			,last_weather_status_(last_weather_status){}
+	public:
+		const int64     uid_;
+		double          latitude_;
+		double          longitude_;
+		std::string     city_;
+		std::string     province_;
+		std::string     street_;
+		std::string     district_;
+		int             last_weather_status_;
+	private:
+		int refcount_;
+	};
+	Data*               data_;
+};
+
 class RobotBasicInfo{
 public:
 	explicit RobotBasicInfo(const int64 uid,const int32 sex,const double latitude,

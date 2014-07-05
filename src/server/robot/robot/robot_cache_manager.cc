@@ -196,6 +196,11 @@ bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::Rob
 	return true;
 }
 
+void RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,
+		const robot_base::UserBasicInfo& userinfo){
+
+
+}
 bool RobotCacheManager::GetIdleAssistant(const int64 platform_id,robot_base::RobotBasicInfo& assistant){
 	logic::RLockGd lk(lock_);
 	bool r = false;
@@ -276,6 +281,28 @@ bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
 		LOG_DEBUG2("scheduler socket %d",scheduler_info.socket());
 	}
 	return true;
+}
+
+
+bool RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,const robot_base::UserBasicInfo& userinfo
+		,std::list<double>* dataseries_list/* = NULL*/){
+	logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	robot_base::UserBasicInfo usr;
+	//检测是否存在，如果不存在直接放入，如果存在检测天气变化然后放入队列
+	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,userinfo.uid(),
+			usr);
+	if(!r){
+		r = base::MapAdd<UserInfoMap,robot_base::UserBasicInfo>(pc->user_infos_,userinfo.uid(),userinfo);
+	}else{
+		//检测雨天
+		double weather_result = 0;
+		int result = 0;
+		robot_logic::LogicUnit::CalculateOneHourWeather((*dataseries_list),weather_result);
+	}
+	return r;
 }
 
 bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info){

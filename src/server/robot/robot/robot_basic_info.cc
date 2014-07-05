@@ -93,6 +93,33 @@ PlatformInfo& PlatformInfo::operator =(const PlatformInfo& platfrom_info){
 	return *this;
 }
 
+UserBasicInfo::UserBasicInfo(){
+	data_ = new Data();
+}
+
+UserBasicInfo::UserBasicInfo(const int64 uid){
+	data_ = new Data(uid);
+}
+
+UserBasicInfo::operator =(const UserBasicInfo& user_info){
+	if (user_info.data_!=NULL){
+		user_info.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = user_info.data_;
+	return *this;
+}
+
+
+UserBasicInfo::UserBasicInfo(const UserBasicInfo& user_info)
+:data_(user_info.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
 
 UserLbsInfo::UserLbsInfo(){
     data_ = new Data();

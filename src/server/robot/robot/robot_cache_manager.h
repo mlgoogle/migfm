@@ -26,6 +26,8 @@ public:
 	std::map<int,base::MigRadomInV2*>                       mood_random_map_;
 	std::map<int,base::MigRadomInV2*>                       scene_random_map_;
 	RobotInfosMap                                           assistant_;
+	UserInfoMap                                             user_infos_;
+
 };
 
 
@@ -76,6 +78,9 @@ public:
 			int num,std::list<int64>& list);
 
 	void CheckRobotConnect(const int64 platform_id);
+
+	void SetUserInfo(const int64 platform_id,const int64 uid,const robot_base::UserBasicInfo& userinfo,
+			std::list<double>* dataseries_list = NULL);
 
 
 	void Dump();
