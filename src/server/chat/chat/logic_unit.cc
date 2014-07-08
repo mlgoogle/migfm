@@ -23,9 +23,10 @@ bool LogicUnit::CheckToken(const int64 platform_id,int64 user_id,
 
 bool LogicUnit::GetUserInfo(const int64 platform_id,int64 user_id,chat_base::UserInfo& userinfo){
 	bool r = false;
-	r = chat_storage::MemComm::GetUserInfo(platform_id,user_id,userinfo);
+	/*r = chat_storage::MemComm::GetUserInfo(platform_id,user_id,userinfo);
 	if (r)
 		return true;
+		*/
 	r = chat_storage::DBComm::GetUserInfo(platform_id,user_id,userinfo);
 	/*if(type==1)
 		r = chat_storage::DBComm::GetUserInfo(platform_id,user_id,userinfo);

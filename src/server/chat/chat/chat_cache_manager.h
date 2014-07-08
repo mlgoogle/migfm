@@ -60,6 +60,8 @@ public:
 	bool DelLeaveInfos(const int64 platform_id,const int64 tid,const int64 mid);
 
 
+	bool ClearLeaveInfos(const int64 platform_id,const int64 tid);
+
 	bool AddMeetingInfos(const int64 platform_id,const int64 session,
 							const int64 tid,const int64 mid);
 
@@ -118,6 +120,13 @@ public:
 	bool GetSocket(const int socket,chat_base::UserInfo& userinfo);
 
 	bool DelSocket(const int socket);
+public:
+	void SetRobotServerSocket(const int socket);
+
+	bool NoticeRobotChatLogin(const int64 platform_id,const int64 uid,
+			const int64 robotid);
+private:
+	int                robot_server_socket_;
 };
 
 }

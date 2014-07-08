@@ -326,6 +326,10 @@ int core_main(int agrc,char* argv[]){
 		goto rel_net;
 	}
 
+    if(create_connects(srvt)<0){
+    	MIG_ERROR(USER_LEVEL,"initalization of connect");
+    }
+
 
 	if (network_start(srvt)<0){
 		MIG_ERROR(USER_LEVEL,"start network error");

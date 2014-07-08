@@ -1,5 +1,6 @@
 #include "chat_cache_manager.h"
 #include "chat_basic_infos.h"
+#include "intertface/robot_interface.h"
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
@@ -123,7 +124,7 @@ bool PlatformChatCacheManager::DelUserInos(const int64 platform_id,
 }
 
 bool PlatformChatCacheManager::AddMeetingInfos(const int64 platform_id,const int64 session,
-							const int64 uid){//������ʱ������ session ����ʱ���䣬����Ⱥ���죬��session ��Ⱥ��
+							const int64 uid){
 	logic::WLockGd lk(lock_);
 	bool r = false;
 	MeetingSession meeting_session;
@@ -131,10 +132,10 @@ bool PlatformChatCacheManager::AddMeetingInfos(const int64 platform_id,const int
 	if(pl==NULL)
 		return false;
 
-	//���ҴλỰ�Ƿ��Ѿ�����
+
 	r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,session,meeting_session);
 	//
-	if(r){//���� ����
+	if(r){
 		meeting_session[uid] = uid;
 		return base::MapAdd(pl->meeting_infos_map_,session,meeting_session);
 	}else{
@@ -166,14 +167,34 @@ bool PlatformChatCacheManager::DelMeetingInfos(const int64 platform_id,const int
 	if(pl==NULL)
 		return false;
 
+	r = base::MapGet<MeetingMap,MeetingMap::iterator,int64,MeetingSession>(pl->meeting_infos_map_,session,meeting_session);
+	if(meeting_session.size()>2){//群聊
+		base::MapDel<MeetingSession,MeetingSession::iterator>(meeting_session,uid);
+	}else if(meeting_session.size()==2){
+		base::MapDel<MeetingMap,MeetingMap::iterator>(pl->meeting_infos_map_,session);
+		//获取 双方uid
+		int64 tid = 0;
+		for(MeetingSession::iterator it = meeting_session.begin();it!=meeting_session.end();it++){
+			if(it->first!=uid)
+				tid = it->first;
+		}
+		//加入到离线会话
+		SessionInfosMap session_infos;
+		session_infos[tid] = session;
+		r = base::MapAdd<LeaveInfosMap,SessionInfosMap>(pl->leave_infos_map_,uid,session_infos);
+	}else{//
+		r = base::MapDel<LeaveInfosMap,LeaveInfosMap::iterator>(pl->leave_infos_map_,uid);
+	}
 	//DelMeetings
+	/*
 	r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,session,meeting_session);
 	if(!r)
 		base::MapDel<MeetingSession,MeetingSession::iterator>(meeting_session,uid);
-	if(meeting_session.size()>0)
+	if(meeting_session.size()>0){
 		return base::MapAdd(pl->meeting_infos_map_,session,meeting_session);
-	else
+	}else{
 		return base::MapDel<MeetingMap,MeetingMap::iterator>(pl->meeting_infos_map_,session);
+	}*/
 }
 
 bool PlatformChatCacheManager::SendMeetingMessage(const int64 platform_id,const int64 group_id,
@@ -262,6 +283,17 @@ bool PlatformChatCacheManager::IsExitsLeaveInfos(const int64 platform_id,const i
 	return true;
 }
 
+bool PlatformChatCacheManager::ClearLeaveInfos(const int64 platform_id,const int64 tid){
+	logic::WLockGd lk(lock_);
+	bool r = false;
+	SessionInfosMap session_infos;
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if (pl==NULL)
+	   return false;
+	r = base::MapDel<LeaveInfosMap,LeaveInfosMap::iterator>(pl->leave_infos_map_,tid);
+	return r;
+}
+
 bool PlatformChatCacheManager::DelLeaveInfos(const int64 platform_id,const int64 tid,const int64 mid){
 	logic::WLockGd lk(lock_);
 	bool r = false;
@@ -317,7 +349,8 @@ bool PlatformChatCacheManager::GetGroupListUserInfo(const int64 platform_id,cons
 	return true;
 }
 
-CacheManagerOp::CacheManagerOp(){
+CacheManagerOp::CacheManagerOp()
+:robot_server_socket_(0){
 	InitThreadrw(&lock_);
 }
 
@@ -346,6 +379,17 @@ bool CacheManagerOp::DelSocket(const int socket){
 	logic::WLockGd lk(lock_);
 	bool r = base::MapDel<SocketMap,SocketMap::iterator>(socket_infos_map_,socket);
 	return r;
+}
+
+void CacheManagerOp::SetRobotServerSocket(const int socket){
+	logic::RLockGd lk(lock_);
+	robot_server_socket_ = socket;
+}
+
+bool CacheManagerOp::NoticeRobotChatLogin(const int64 platform_id,const int64 uid,
+		const int64 robotid){
+	NoticeRobotLogin(robot_server_socket_,platform_id,uid,robotid);
+	return true;
 }
 
 }

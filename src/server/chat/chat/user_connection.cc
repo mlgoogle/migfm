@@ -125,6 +125,7 @@ bool UserConnectionMgr::OnAberrant(const int socket){
 		return r;
 	cache_op->DelSocket(socket);
 	ClearUserinfo(user_info.platform_id(),user_info.user_id(),user_info.session());
+
 	return r;
 
 }
@@ -221,7 +222,9 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 			senderror(socket,USER_LOGIN_FAILED,0,usr_session,MIG_CHAT_USER_NO_EXIST);
 			return false;
 		}
-
+		//如果是机器人，则通知机器人登陆聊天服务器
+		if(oppinfo_id>10000)
+			CacheManagerOp::GetCacheManagerOp()->NoticeRobotChatLogin(platform_id,user_id,oppinfo_id);
 	}
 
 	//get userinfo
@@ -240,6 +243,8 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
 	}else{//session
 		//oppinfo_user_info.set_session(session);
 		userinfo.set_session(session);
+		pc->ClearLeaveInfos(platform_id,oppinfo_id);
+		pc->AddMeetingInfos(platform_id,session,oppinfo_id,user_id);
 		//LOG_DEBUG2("session %lld oppinfo_user_info %lld",session,oppinfo_user_info.session());
 	}
 

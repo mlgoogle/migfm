@@ -153,6 +153,7 @@ bool ChatManager::OnBroadcastConnect(struct server *srv,
 									 const int socket, 
 									 const void *data, 
 									 const int len){
+	CacheManagerOp::GetCacheManagerOp()->SetRobotServerSocket(socket);
     return true;
 }
 

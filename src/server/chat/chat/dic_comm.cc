@@ -52,7 +52,7 @@ bool MemComm::GetUserInfo(const int64 platform_id,int64 user_id,
 	}
 	if (!r)
 		return r;
-	r = engine_->SetValue(key.c_str(),key.length(),mem_value,mem_value_length)
+	r = engine_->SetValue(key.c_str(),key.length(),mem_value,mem_value_length);
 
 
 }
