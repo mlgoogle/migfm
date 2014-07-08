@@ -942,11 +942,12 @@ struct sock_adapter *create_listen_socket(struct server* srv,const char* path){
         free_sock_adapter(sa,srv);
         return NULL;
     }
-
+#if defined (PROCESS_WORK)
 	int err = chmod(path,0777);
 	if (err<0){
 	    MIG_ERROR(USER_LEVEL,"=====chmod error %s=========",strerror(errno));
 	}
+#endif
     //set socket no-block
     opt = fcntl(sock,F_GETFL,0);
     rc = fcntl(sock,F_SETFL,opt|O_NONBLOCK);
