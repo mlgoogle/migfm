@@ -16,6 +16,17 @@ namespace base{
 		return true;
 	}
 
+
+	template <typename MapType, typename MapTypeIT, typename KeyType,typename ValType>
+	static bool MapGet (MapType &map, KeyType idx, ValType &val)
+	{
+		MapTypeIT it = map.find (idx);
+		if (it == map.end ())
+			return false;
+		val = it->second;
+		return true;
+	}
+
 	template <typename MapType, typename ValType>
 	static bool MapAdd (MapType &map, int64 idx, const ValType &val)
 	{
