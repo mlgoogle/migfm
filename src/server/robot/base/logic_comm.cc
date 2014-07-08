@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <time.h>
 
-namespace logic{
+namespace robot_logic{
 	
 typedef struct {
 	base_storage::DBStorageEngine *conn_;

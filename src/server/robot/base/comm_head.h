@@ -18,6 +18,7 @@ enum operatorcode
 	NOTICE_USER_ROBOT_HANDSEL_SONG = 1001,//通知机器人客户端赠送歌曲
 	NOTICE_USER_ROBOT_HANDSEL_SONG_SUCCESS = 1002,//赠送歌曲成功通知服务端
 	NOTICE_USER_ROBOT_LISTEN_SONG = 1003,//通知机器人客户端试听歌曲
+	NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN = 1004,//通知机器人客户端登陆聊天服务端
 	SCHEDULER_LOGIN = 2000,//机器人调度器登录
 	NOTICE_ASSISTANT_LOGIN = 2100,//通知机器人调度器咪呦助手登陆
 	ASSISTANT_LOGIN_SUCCESS = 2101,//咪呦助手登陆成功
@@ -26,6 +27,7 @@ enum operatorcode
 	NOTICE_USER_LOGIN = 4000,//咪呦通知机器人服务器用户已经登录
 	NOTICE_USER_DEFAULT_SONG = 4001,//咪呦通知机器人服务器用户听的歌
 	NOTICE_USER_CURRENT_SONG = 4002,//咪呦通知机器人服务器用户听歌的变化
+	NOTICE_USER_ROBOT_CHAT_LOGIN = 4003,//聊天服务器通知机器人服务器有用户要和机器人聊天，做登陆准备
 };
 
 enum msgtype
@@ -155,4 +157,23 @@ struct NoticeAssistantHandselSong:public PacketHead{
 	std::list<struct HandleSongInfo*> list;
 };
 
+//NOTICE_USER_ROBOT_CHAT_LOGIN
+//NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN
+#define NOTICEUSERROBOTCHATLOGI_SIZE  (sizeof(int64) * 3)
+struct NoticeUserRobotChatLogin:public PacketHead{
+	int64 platform_id;
+	int64 uid;
+	int64 robot_id;
+};
+
+//NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN
+/*
+#define NOTICEUSERROBOTSCHEDULERCHATLOGIN_SIZE (sizeof(int64) * 3 + sizeof(int8))
+struct NoticeUserRobotSchedulerChatLogin:public PacketHead{
+	int64 platform_id;
+	int64 uid;
+	int64 robot_id;
+	int8  flag;//是否已经使用
+};
+*/
 #endif

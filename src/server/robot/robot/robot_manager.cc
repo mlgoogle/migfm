@@ -41,7 +41,7 @@ bool RobotManager::Init(){
 
 	bool r = false;
 	std::string path = DEFAULT_CONFIG_PATH;
-	logic::ThreadKey::InitThreadKey();
+	robot_logic::ThreadKey::InitThreadKey();
 	config::FileConfig* config = config::FileConfig::GetFileConfig();
 	if(config==NULL){
 		return false;
@@ -131,7 +131,9 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 	case ASSISTANT_LOGIN_SUCCESS:
 		scheduler_mgr_.get()->OnNoticeAssistant(srv,socket,packet);
 		break;
-
+	case NOTICE_USER_ROBOT_CHAT_LOGIN:
+		robot_mgr_.get()->OnRobotChatLogin(srv,socket,packet);
+		break;
 	default:
 		break;
 	}

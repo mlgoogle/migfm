@@ -48,3 +48,15 @@ int NoticeUserCurrentSong(const int socket,const int64 platform_id,const int64 u
 	notice_user_current_song.mode = mode;
 	sendmessage(socket,&notice_user_current_song);
 }
+
+int NoticeRobotLogin(const int socket,const int64 platform_id,const int64 uid,
+					const int64 robotid){
+	if(socket<=0||robotid<10000000)
+		return 0;
+	struct NoticeUserRobotChatLogin robot_user_login;
+	MAKE_HEAD(robot_user_login,NOTICE_USER_ROBOT_CHAT_LOGIN,USER_TYPE,0,0);
+	robot_user_login.platform_id = platform_id;
+	robot_user_login.uid = uid;
+	robot_user_login.robot_id = robotid;
+	sendmessage(socket,&robot_user_login);
+}

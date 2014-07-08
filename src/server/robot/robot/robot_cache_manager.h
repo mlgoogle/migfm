@@ -93,6 +93,9 @@ public:
 
 	bool SetUserPushMessageDay(const int64 platform_id,const int64 uid);
 
+	bool GetUsedRobotInfo(const int64 platform_id,const int64 uid,robot_base::RobotBasicInfo& robotinfo);
+
+	bool GetIdelRobotInfo(const int64 platform_id,const int64 uid,robot_base::RobotBasicInfo& robotinfo);
 
 	void Dump();
 

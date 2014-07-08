@@ -3,6 +3,10 @@
 #include "protocol/data_packet.h"
 #include "base/logic_comm.h"
 
+
+namespace robot_logic{
+
+
 bool ProtocolPack::UnpackStream(const void *packet_stream, int len, 
                                         struct PacketHead**packhead ){
 
@@ -200,6 +204,32 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			vAssistantLoginSuccess->assistant_id = in.Read64();
 		}
 		break;
+		/*case NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN:
+		{
+			struct NoticeUserRobotSchedulerChatLogin* vNoticeUserRobotSchedulerChatLogin =
+					new struct NoticeUserRobotSchedulerChatLogin;
+			*packhead = (struct NoticeUserRobotSchedulerChatLogin*)vNoticeUserRobotSchedulerChatLogin;
+			BUILDPACKHEAD();
+			vNoticeUserRobotSchedulerChatLogin->platform_id = in.Read64();
+			vNoticeUserRobotSchedulerChatLogin->uid = in.Read64();
+			vNoticeUserRobotSchedulerChatLogin->robot_id = in.Read64();
+			vNoticeUserRobotSchedulerChatLogin->flag = in.Read8();
+		}
+		break;
+		*/
+		case NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN:
+		case NOTICE_USER_ROBOT_CHAT_LOGIN:
+		{
+			struct NoticeUserRobotChatLogin* vNoticeUserRobotChatLogin =
+					new struct NoticeUserRobotChatLogin;
+			*packhead= (struct NoticeUserRobotChatLogin*)vNoticeUserRobotChatLogin;
+			BUILDPACKHEAD();
+			vNoticeUserRobotChatLogin->platform_id = in.Read64();
+			vNoticeUserRobotChatLogin->uid = in.Read64();
+			vNoticeUserRobotChatLogin->robot_id = in.Read64();
+
+		}
+		break;
 		case NOTICE_ASSISTANT_HANDSEL_SONG:
 		{
 			struct NoticeAssistantHandselSong* vNoticeAssistanHandselSong =
@@ -245,6 +275,7 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 							  int32* packet_stream_length){
 	bool r = true;
 
+	LOG_DEBUG("===start====\nopcode[]:\n\n====end====\n");
 	int32 packet_length = packhead->packet_length;
 	int32 operate_code = packhead->operate_code;
 	int32 data_length = packhead->data_length;
@@ -386,6 +417,32 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			packet = (char*)out.GetData();
 		}
 		break;
+		case NOTICE_USER_ROBOT_CHAT_LOGIN:
+		case NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN:
+		{
+			struct NoticeUserRobotChatLogin* vNoticeUserRobotChatLogin =
+					(struct NoticeUserRobotChatLogin*)packhead;
+			BUILDHEAD(NOTICEUSERROBOTCHATLOGI_SIZE);
+			out.Write64(vNoticeUserRobotChatLogin->platform_id);
+			out.Write64(vNoticeUserRobotChatLogin->uid);
+			out.Write64(vNoticeUserRobotChatLogin->robot_id);
+			packet = (char*)out.GetData();
+		}
+		break;
+		/*
+		case NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN:
+		{
+			struct NoticeUserRobotSchedulerChatLogin* vNoticeUserRobotSchedulerChatLogin =
+					(struct NoticeUserRobotSchedulerChatLogin*)packhead;
+			BUILDHEAD(NOTICEUSERROBOTSCHEDULERCHATLOGIN_SIZE);
+			out.Write64(vNoticeUserRobotSchedulerChatLogin->platform_id);
+			out.Write64(vNoticeUserRobotSchedulerChatLogin->uid);
+			out.Write64(vNoticeUserRobotSchedulerChatLogin->robot_id);
+			out.Write8(vNoticeUserRobotSchedulerChatLogin->flag);
+			packet = (char*)out.GetData();
+		}
+		break;
+		*/
 		case NOTICE_ASSISTANT_HANDSEL_SONG:
 		{
 			struct NoticeAssistantHandselSong* vNoticeAssistanHandselSong =
@@ -614,6 +671,34 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_END("struct AssistantLoginSuccess DumpEnd");
 		}
 		break;
+		case NOTICE_USER_ROBOT_CHAT_LOGIN:
+		case NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN:
+		{
+			struct NoticeUserRobotChatLogin* vNoticeUserRobotChatLogin =
+					(struct NoticeUserRobotChatLogin*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeUserRobotChatLogin DumpBegin");
+			PRINT_INT64(vNoticeUserRobotChatLogin->platform_id);
+			PRINT_INT64(vNoticeUserRobotChatLogin->uid);
+			PRINT_INT64(vNoticeUserRobotChatLogin->robot_id);
+			PRINT_END("struct NoticeUserRobotChatLogin DumpEnd");
+		}
+		break;
+		/*
+		case NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN:
+		{
+			struct NoticeUserRobotSchedulerChatLogin* vNoticeUserRobotSchedulerChatLogin =
+					(struct NoticeUserRobotSchedulerChatLogin*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeUserRobotSchedulerChatLogin DumpBegin");
+			PRINT_INT64(vNoticeUserRobotSchedulerChatLogin->platform_id);
+			PRINT_INT64(vNoticeUserRobotSchedulerChatLogin->uid);
+			PRINT_INT64(vNoticeUserRobotSchedulerChatLogin->robot_id);
+			PRINT_INT(vNoticeUserRobotSchedulerChatLogin->flag);
+			PRINT_END("struct NoticeUserRobotSchedulerChatLogin DumpEnd");
+		}
+		break;
+		*/
 		case NOTICE_ASSISTANT_HANDSEL_SONG:
 		{
 			struct NoticeAssistantHandselSong* vNoticeAssistanHandselSong=
@@ -665,3 +750,4 @@ void ProtocolPack::HexEncode(const void *bytes, size_t size){
 			head->operate_code,sret.c_str());
 }
 
+}

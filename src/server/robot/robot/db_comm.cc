@@ -63,14 +63,14 @@ void DBComm::Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num/* 
 #if defined (_DB_POOL_)
 
 void DBComm::DBConnectionPush(base_storage::DBStorageEngine* engine){
-	logic::WLockGd lk(db_pool_lock_);
+	robot_logic::WLockGd lk(db_pool_lock_);
 	db_conn_pool_.push_back(engine);
 }
 
 base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
 	if(db_conn_pool_.size()<=0)
 		return NULL;
-	logic::WLockGd lk(db_pool_lock_);
+	robot_logic::WLockGd lk(db_pool_lock_);
     base_storage::DBStorageEngine* engine = db_conn_pool_.front();
     db_conn_pool_.pop_front();
     return engine;
@@ -81,7 +81,7 @@ base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
 
 void DBComm::Dest(){
 #if defined (_DB_POOL_)
-	logic::WLockGd lk(db_pool_lock_);
+	robot_logic::WLockGd lk(db_pool_lock_);
 	while(db_conn_pool_.size()>0){
 		base_storage::DBStorageEngine* engine = db_conn_pool_.front();
 		db_conn_pool_.pop_front();
@@ -398,7 +398,7 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 
 	try{
 		bool r = false;
-		base_storage::DBStorageEngine* engine = logic::ThreadKey::GetStorageDBConn();
+		base_storage::DBStorageEngine* engine = robot_logic::ThreadKey::GetStorageDBConn();
 		if (engine){
 			if (!engine->CheckConnect()){
 				LOG_ERROR("Database %s connection was broken");
@@ -419,7 +419,7 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 		r = engine->Connections(addrlist_);
 		if (!r)
 			return NULL;
-		logic::ThreadKey::SetStorageDBConn(engine);
+		robot_logic::ThreadKey::SetStorageDBConn(engine);
 		LOG_DEBUG("Created database connection");
 		return engine;
 	}

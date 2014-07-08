@@ -40,7 +40,7 @@
 #define LOG_MSG2(f, ...)
 #endif
 
-namespace logic {
+namespace robot_logic {
 
 class ThreadKey {
 public:
@@ -129,26 +129,26 @@ public:
 }
 
 #define sendbytes(socket,bytes,len)     \
-	logic::SomeUtils::SendBytes(socket,bytes,len,__FILE__,__LINE__)
+	robot_logic::SomeUtils::SendBytes(socket,bytes,len,__FILE__,__LINE__)
 
 #define sendmessage(socket,packet) \
-	logic::SomeUtils::SendMessage(socket,packet,__FILE__,__LINE__)
+	robot_logic::SomeUtils::SendMessage(socket,packet,__FILE__,__LINE__)
 
 #define sendheadmsg(socket,operate_code,msg_type,is_zip,session)  \
-	logic::SomeUtils::SendHeadMessage(socket,operate_code,msg_type,is_zip,session,__FILE__,__LINE__)
+	robot_logic::SomeUtils::SendHeadMessage(socket,operate_code,msg_type,is_zip,session,__FILE__,__LINE__)
 
 #define senderror(socket,operate_code,is_zip,session,error_code)  \
-	logic::SomeUtils::SendErrorCode(socket,operate_code,ERROR_TYPE,is_zip,session,error_code,__FILE__,__LINE__)
+	robot_logic::SomeUtils::SendErrorCode(socket,operate_code,ERROR_TYPE,is_zip,session,error_code,__FILE__,__LINE__)
 
 #define closeconnect(socket) \
-	logic::SomeUtils::CloseSocket(socket)
+	robot_logic::SomeUtils::CloseSocket(socket)
 
 #define closelockconnect(socket) \
 	shutdown(socket, SHUT_RDWR);
 
 #define sendrobotmssage(robot_info,packet) \
 	robot_info.set_send_last_time(time(NULL));\
-	r = logic::SomeUtils::SendMessage(robot_info.socket(),packet,__FILE__,__LINE__)
+	r = robot_logic::SomeUtils::SendMessage(robot_info.socket(),packet,__FILE__,__LINE__)
 
 
 

@@ -54,6 +54,9 @@
 #define MAKE_HEAD(head, _operate_code,_msg_type,_is_zip,_reserverd)    \
 	_MAKE_HEAD (head, 0, _operate_code, 0,_msg_type,_is_zip,_reserverd)
 
+namespace robot_logic{
+
+
 class ProtocolPack
 {
 public:
@@ -66,4 +69,6 @@ public:
 
 	static void DumpPacket (const struct PacketHead *packhead);
 };
+
+}
 #endif

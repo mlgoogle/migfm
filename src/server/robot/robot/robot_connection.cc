@@ -42,7 +42,7 @@ bool RobotConnection::OnUserLogin(struct server *srv, int socket, struct PacketH
 		robot_info->latitude = robot_basic_info.latitude();
 		robot_info->longitude = robot_basic_info.longitude();
 		memset(&robot_info->nickname,'\0',NICKNAME_LEN);
-		logic::SomeUtils::SafeStrncpy(robot_info->nickname,NICKNAME_LEN,
+		robot_logic::SomeUtils::SafeStrncpy(robot_info->nickname,NICKNAME_LEN,
 					robot_basic_info.nickname().c_str(),NICKNAME_LEN);
 		notice_robot_login.robot_list.push_back(robot_info);
 	}
@@ -64,6 +64,37 @@ bool RobotConnection::OnRobotLogin(struct server *srv, int socket, struct Packet
 	return r;
 }
 
+bool RobotConnection::OnRobotChatLogin(struct server *srv, int socket, struct PacketHead *packet,
+        const void *msg, int len){
+	bool r = false;
+	int flag = 0;
+	robot_base::RobotBasicInfo robotinfo;
+	struct NoticeUserRobotChatLogin* vNoticeUserRobotChatLogin = (struct NoticeUserRobotChatLogin*)packet;
+	//需要检测是否已经在和对应用户聊天
+	//检测改机器人是否已经使用
+	r = CacheManagerOp::GetRobotCacheMgr()->GetUsedRobotInfo(vNoticeUserRobotChatLogin->platform_id,
+			vNoticeUserRobotChatLogin->robot_id,robotinfo);
+
+	if(!r){
+		r = CacheManagerOp::GetRobotCacheMgr()->GetIdelRobotInfo(vNoticeUserRobotChatLogin->platform_id,
+				vNoticeUserRobotChatLogin->robot_id,robotinfo);
+		if(!r)
+			return false;
+		flag = 0;
+	}else{
+		flag = 1;
+	}
+
+	//不管是否全部通知调用服务端登陆聊天服务端
+	struct NoticeUserRobotChatLogin notice_robot_chat_login;
+	MAKE_HEAD(notice_robot_chat_login, NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN,USER_TYPE,0,0);
+	notice_robot_chat_login.platform_id = vNoticeUserRobotChatLogin->platform_id;
+	notice_robot_chat_login.uid = vNoticeUserRobotChatLogin->uid;
+	notice_robot_chat_login.robot_id = vNoticeUserRobotChatLogin->robot_id;
+	robot_logic::CacheManagerOp::GetRobotCacheMgr()->SchedulerSendMessage(vNoticeUserRobotChatLogin->platform_id,&notice_robot_chat_login);
+	return true;
+}
+
 bool RobotConnection::OnClearRobotConnection(const int socket){
 	//
 	bool r = false;
@@ -76,5 +107,6 @@ bool RobotConnection::OnClearRobotConnection(const int socket){
 
 	return true;
 }
+
 
 }

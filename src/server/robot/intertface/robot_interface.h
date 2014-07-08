@@ -15,6 +15,10 @@ int NoticeUserDefaultSong(const int socket,const int64 platform_id,const int64 u
 
 int NoticeUserCurrentSong(const int socket,const int64 platform_id,const int64 uid,
 			const int64 songid,const int32 type_id,const char* mode);
+
+int NoticeRobotLogin(const int socket,const int64 platform_id,const int64 uid,
+					const int64 robotid);//通知机器人登陆聊天服务器
+
 #ifdef __cplusplus 
 }
 #endif
