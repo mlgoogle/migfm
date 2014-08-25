@@ -178,6 +178,58 @@ bool DBComm::GetMailUserInfo(const int64 count,const int64 from,
 		return false;
 }
 
+bool DBComm::UpdateMusicUrl(const int64 id,const std::string& mp3_url){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+		std::stringstream os;
+		MYSQL_ROW rows;
+
+		if (engine==NULL){
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+
+
+		os<<"call proc_UpdateMusicUrl(\'"<<id<<"\',\'"<<mp3_url<<"\');";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		bool r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+		return true;
+}
+
+bool DBComm::UpdateLyric(const int64 id,const std::string& lyric){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+		std::stringstream os;
+		MYSQL_ROW rows;
+
+		if (engine==NULL){
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+
+
+		os<<"call proc_UpdateLyric(\'"<<id<<"\',\'"<<lyric<<"\');";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		bool r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR2("exec sql error");
+			return false;
+		}
+		return true;
+}
+
 bool DBComm::AddMusicInfo(const int64 id,const std::string& title,const std::string& album,const std::string& artist,
 		const std::string& pub_time,const std::string& album_pic,const std::string& mp3_url,std::string& songid){
 #if defined (_DB_POOL_)
@@ -248,6 +300,82 @@ bool DBComm::GetSpreadMail(std::string& title,std::string& content){
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
 			title = rows[0];
 			content = rows[1];
+		}
+		return true;
+	}
+	return false;
+}
+
+bool DBComm::GetVailedUrlMusic(std::list<int64>& music_list){
+	bool r = false;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+    //call migfm.proc_GetMusicInfoByVailedUrl();
+	os<<"call proc_GetMusicInfoByVailedUrl();";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+
+	int num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			int64 id = atoll(rows[0]);
+			music_list.push_front(id);
+		}
+		return true;
+	}
+	return false;
+}
+
+
+bool DBComm::GetVailedLyric(std::list<int64>& music_list,const int64 from,
+						const int64 count){
+	bool r = false;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+    //call migfm.proc_GetMusicInfoByVailedUrl();
+	os<<"call proc_GetVailedLyric("<<from<<","<<count<<");";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+
+	int num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			int64 id = atoll(rows[0]);
+			music_list.push_front(id);
 		}
 		return true;
 	}
