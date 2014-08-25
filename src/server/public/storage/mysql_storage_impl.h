@@ -18,7 +18,7 @@ public:
 	bool SQLExec(const char* sql);
 	bool Affected(unsigned long& rows);
 	bool FreeRes();
-	uint32 RecordCount();
+	uint32 RecordCount();//由于之前错误，减少代码修改量，此函数返回记录多条
 	db_row_t* FetchRows(void);//get Recoder
 	bool CheckConnect(void);
 

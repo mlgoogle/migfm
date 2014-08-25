@@ -80,7 +80,8 @@ bool MysqlStorageEngineImpl::SQLExec(const char* sql){
 }
 
 uint32 MysqlStorageEngineImpl::RecordCount(){
-    unsigned long ulCount = (unsigned long)mysql_num_rows((MYSQL_RES *)(result_.get()->proc));
+    //unsigned long ulCount = (unsigned long)mysql_num_rows((MYSQL_RES *)(result_.get()->proc));
+	unsigned long ulCount = (unsigned long)mysql_affected_rows((MYSQL*)conn_.get()->proc);
 	MIG_DEBUG(USER_LEVEL,"ulconut ==%d===\n",ulCount);
 	return ulCount;
 }
