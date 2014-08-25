@@ -48,6 +48,8 @@ bool RobotWeatherMgr::OnPullWeatherInfo(void){
 		}
 
 	}
+	if(list.size()<=0)
+		return false;
 	//发送给咪呦助手
 	CacheManagerOp::GetRobotCacheMgr()->SendAssistantHandlseSong(10000,list);
 	return true;

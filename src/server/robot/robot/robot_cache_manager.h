@@ -81,6 +81,10 @@ public:
 
 	void CheckRobotLive(const int64 platform_id);
 
+	void CheckSchedulerConnect(const int64 platform_id);
+
+	void ChecAssistantConnect(const int64 platform_id);
+
 	void SetUserInfo(const int64 platform_id,const int64 uid,int current_weather,int future_weather,int future_time);
 
 	bool GetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,

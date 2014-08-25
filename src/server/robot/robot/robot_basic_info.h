@@ -284,6 +284,15 @@ public:
 	void set_ip(const std::string& ip){data_->ip_ = ip;}
 	void set_socket(const int socket){data_->socket_ = socket;}
 
+	const int32 send_error_count() const {return data_->send_error_count_;}
+	void add_send_error_count(){data_->send_error_count_++;}
+
+	void set_send_last_time(const time_t send_last_time){data_->send_last_time_ = send_last_time;}
+	void set_recv_last_time(const time_t recv_last_time){data_->recv_last_time_ = recv_last_time;}
+	const time_t send_last_time() const {return data_->send_last_time_;}
+	const time_t recv_last_time() const {return data_->recv_last_time_;}
+
+
 public:
 	class Data{
 	public:
@@ -294,9 +303,13 @@ public:
 		,socket_(socket)
 		,ip_(ip)
 		,client_count_(0)
-		,machine_id_(machine_id){}
+		,send_error_count_(0)
+		,machine_id_(machine_id)
+		,send_last_time_(0)
+		,recv_last_time_(0){}
 
-		Data():refcount_(1),platform_id_(0),client_count_(0){}
+		Data():refcount_(1),platform_id_(0),client_count_(0),send_error_count_(0),send_last_time_(0)
+		,recv_last_time_(0){}
 
 		void AddRef(){refcount_ ++;}
 		void Release(){if (!--refcount_)delete this;}
@@ -305,6 +318,9 @@ public:
 		int64 platform_id_;
 		int socket_;
 		int client_count_;
+		int send_error_count_;
+		time_t send_last_time_;
+		time_t recv_last_time_;
 		std::string ip_;
 		std::string machine_id_;
 	private:

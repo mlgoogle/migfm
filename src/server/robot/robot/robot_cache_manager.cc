@@ -459,7 +459,7 @@ void RobotCacheManager::CheckRobotLive(const int64 platform_id){
 	RobotInfosMap::iterator it = pc->used_robot_infos_.begin();
 	for(;it!=pc->used_robot_infos_.end();++it){
 		robot_base::RobotBasicInfo robot_info = it->second;
-		if(current_time - robot_info.follower_user_last_time()>100){//超出限定时间，主动断掉机器人
+		if(current_time - robot_info.follower_user_last_time()>3600){//超出限定时间，主动断掉机器人
 			//断掉连接
 			LOG_DEBUG("close connection");
 			closelockconnect(robot_info.socket());
@@ -469,20 +469,87 @@ void RobotCacheManager::CheckRobotLive(const int64 platform_id){
 	}
 }
 
+void RobotCacheManager::CheckSchedulerConnect(const int64 platform_id){
+	robot_logic::WLockGd lk(lock_);
+	bool r = false;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return;
+	time_t current_time = time(NULL);
+	SchedulerMap::iterator it = pc->schduler_infos_.begin();
+	for(;it!=pc->schduler_infos_.end();it++){
+		robot_base::SchedulerInfo scheduler = it->second;
+		//先检测是否超过三次
+		LOG_DEBUG2("robot_info.send_error_count %d",scheduler.send_error_count());
+		if(scheduler.send_error_count()>3){
+			//断掉连接
+			LOG_DEBUG("close connection");
+			closelockconnect(scheduler.socket());
+			continue;
+			//通过响应事件将无响应模拟客户端移除，这里不移除
+		}
+		if((current_time - scheduler.recv_last_time()>20)&&(current_time -scheduler.send_last_time()>20)){
+			//发送心跳包
+			struct PacketHead heart_packet;
+			MAKE_HEAD(heart_packet, HEART_PACKET,USER_TYPE,0,0);
+			sendschdulermessage(scheduler,&heart_packet);
+			//r = false;
+			if(!r)
+				scheduler.add_send_error_count();
+		}
+	}
+
+}
+
+void RobotCacheManager::ChecAssistantConnect(const int64 platform_id){
+	robot_logic::WLockGd lk(lock_);
+	bool r = false;
+
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return;
+	time_t current_time = time(NULL);
+	RobotInfosMap::iterator it = pc->assistant_.begin();
+	for(;it!=pc->assistant_.end();it++){
+		robot_base::RobotBasicInfo assistant_info = it->second;
+		//先检测是否超过三次
+		LOG_DEBUG2("robot_info.send_error_count %d",assistant_info.send_error_count());
+		if(assistant_info.send_error_count()>3){
+			//断掉连接
+			LOG_DEBUG("close connection");
+			closelockconnect(assistant_info.socket());
+			continue;
+			//通过响应事件将无响应模拟客户端移除，这里不移除
+		}
+		//检测当前接收时间是否大于20s//检测发送时间是否大于20s 若一个小于20s 皆不需要心跳包发送
+		//LOG_DEBUG2("recv_last_time %lld send_last_time %lld current_time %lld recv_differ_time %lld send_differ_time %lld",robot_info.recv_last_time(),
+		//		robot_info.send_last_time(),current_time,(current_time - robot_info.recv_last_time()),
+		//		(current_time -robot_info.send_last_time()));
+		if((current_time - assistant_info.recv_last_time()>20)&&(current_time -assistant_info.send_last_time()>20)){
+			//发送心跳包
+			struct PacketHead heart_packet;
+			MAKE_HEAD(heart_packet, HEART_PACKET,USER_TYPE,0,0);
+			sendrobotmssage(assistant_info,&heart_packet);
+			//r = false;
+			if(!r)
+				assistant_info.add_send_error_count();
+		}
+	}
+}
 void RobotCacheManager::CheckRobotConnect(const int64 platform_id){
 	robot_logic::WLockGd lk(lock_);
 	bool r = false;
-	robot_base::SchedulerInfo scheduler_info;
+
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return;
 	time_t current_time = time(NULL);
 	RobotInfosMap::iterator it = pc->used_robot_infos_.begin();
-	for(;it!=pc->used_robot_infos_.end();++it){
+	for(;it!=pc->used_robot_infos_.end();it++){
 		robot_base::RobotBasicInfo robot_info = it->second;
 		//先检测是否超过三次
 		LOG_DEBUG2("robot_info.send_error_count %d",robot_info.send_error_count());
-		if(robot_info.send_error_count()>1){
+		if(robot_info.send_error_count()>3){
 			//断掉连接
 			LOG_DEBUG("close connection");
 			closelockconnect(robot_info.socket());

@@ -149,6 +149,8 @@ public:
 #define sendrobotmssage(robot_info,packet) \
 	robot_info.set_send_last_time(time(NULL));\
 	r = robot_logic::SomeUtils::SendMessage(robot_info.socket(),packet,__FILE__,__LINE__)
+#define sendschdulermessage(scheduler_info,packet) \
+	r = robot_logic::SomeUtils::SendMessage(scheduler_info.socket(),packet,__FILE__,__LINE__)
 
 
 
