@@ -24,6 +24,9 @@ public:
 public:
 	static bool GetNewMusicInfo(std::list<robot_base::NewMusicInfo>& music_list);
 
+	static bool GetVailedLyric(std::list<int64>& music_list,const int64 from,
+			const int64 count);
+
 	static bool GetMailUserInfo(const int64 count,const int64 from,
 					std::list<robot_base::MailUserInfo>& user_list);
 
@@ -32,11 +35,17 @@ public:
 
 	static bool GetSpreadMail(std::string& title,std::string& content);
 
+	static bool UpdateMusicUrl(const int64 id,const std::string& url);
+
+	static bool UpdateLyric(const int64 id,const std::string& lyric);
+
 	static bool AddMusicInfo(const int64 id,const std::string& title,const std::string& album,const std::string& artist,
 			const std::string& pub_time,const std::string& album_pic,
 			const std::string& mp3_url,std::string& songid);
 
-	static bool UpdateHeadUrl(const int64 id,const std::string& head_url);
+	static bool UpdateHeadUrl(const int64 id,const std::string& mp3_url);
+
+	static bool GetVailedUrlMusic(std::list<int64>& music_list);
 public:
 #if defined (_DB_POOL_)
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

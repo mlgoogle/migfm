@@ -94,6 +94,14 @@ bool RobotEngine::OnRobotMessage(struct server *srv, int socket,
 		user_mgr_->GetRobotsInfo(socket,packet);
 	else if(type=="updaterobotpic")
 		user_mgr_->UpdateRobotsHeadUrl(socket,packet);
+	else if(type=="getvailedurlmusic")
+		music_mgr_->GetUrlVailedMusic(socket,packet);
+	else if(type=="updatevailedurlmusic")
+		music_mgr_->UpdateVailedMusic(socket,packet);
+	else if(type=="getvailedlyric")
+		music_mgr_->GetVailedLyric(socket,packet);
+	else if(type=="updatelyric")
+		music_mgr_->UpdateVailedLyric(socket,packet);
 
     return true;
 }

@@ -15,12 +15,22 @@ public:
 public:
 	bool GetNewMusic(const int socket,const packet::HttpPacket& packet);
 	bool AddNewMusic(const int socket,const packet::HttpPacket& packet);
+	bool GetUrlVailedMusic(const int socket,const packet::HttpPacket& packet);
+	bool UpdateVailedMusic(const int socket,const packet::HttpPacket& packet);
+	bool UpdateVailedLyric(const int socket,const packet::HttpPacket& packet);
+	bool GetVailedLyric(const int socket,const packet::HttpPacket& packet);
 private:
+	void GetBatchMusicInfo(std::list<int64>& songid_list,Json::Value& value);
 	void ChargeNewMusciJson(std::list<robot_base::NewMusicInfo>& list, Json::Value& value);
 	void AddNewMusicInfo(const std::string& content);
+	void UpdateVailedMusicInfo(const std::string& content);
+	void UpdateVailedLyric(const std::string& content);
 	void AddNewMusic(const int64 id,const std::string& name,const std::string& album,const std::string& artist,
 			const std::string& pubtime,const std::string& pic,const std::string& url);
 	//bool AddNewMusicAllInfo(const int socket,const packet::HttpPacket& packet);
+private:
+	int64              from_;
+	int64              count_;
 };
 }
 #endif

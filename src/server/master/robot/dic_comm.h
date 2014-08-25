@@ -6,6 +6,7 @@
 #include "storage/storage.h"
 #include "basic/basictypes.h"
 #include "basic/basic_info.h"
+#include <hiredis.h>
 #include <list>
 #include <string>
 
@@ -37,6 +38,13 @@ public:
 	static bool AddNewMusicInfo(const std::string& songid,const std::string& album,
 				const std::string& title,const std::string& pubtime,const std::string& artist,
 				const std::string& pic);
+
+	static void GetBachMusicInfos(std::list<int64>& songid_list,std::list<std::string>& songinfolist);
+
+	static bool GetMusicInfos(base_storage::DictionaryStorageEngine*engine,const std::string& command,
+                              std::list<std::string>& songinfolist);
+
+	static base_storage::CommandReply* _CreateReply(redisReply* reply);
 public:
 #if defined (_DIC_POOL_)
 	static base_storage::DictionaryStorageEngine* RedisConnectionPop(void);

@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 namespace manager_logic{
 
-static const std::string URL_PUSH_SERVICE("121.199.32.88/api/push");
+static const std::string URL_PUSH_SERVICE("http://push.miyomate.com/api/push");
 
 typedef struct {
 	base_storage::DBStorageEngine *conn_;
@@ -173,16 +173,17 @@ bool HttpComm::PushMessage(const std::string &device_token,
 	Json::Value value;
 	Json::FastWriter wr;
 	std::string post_str;
+    //std::string t_device_token = "1724bb45a85a4ab0c1f4d69f6045423e68f983a19849e0fb2cc44c2df175e5cc";
 	value["message"] = msg;
 	value["badge"] = badge;
 	value["devicetoken"] = device_token;
-	value["sound"] = sound;
+	//value["sound"] = sound;
 	post_str = wr.write(value);
 
 	LOG_DEBUG2("Push msg post:%s", post_str.c_str());
 	int port = 9090;
 	try {
-		post.Post(post_str.c_str(),port);
+		post.Post(post_str.c_str());
 		std::string result;
 		post.GetContent(result);
 		LOG_DEBUG2("%s",result.c_str());

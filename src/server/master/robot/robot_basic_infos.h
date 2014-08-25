@@ -106,6 +106,11 @@ public:
 		return data_->id_;
 	}
 
+	void set_name(const std::string& name){data_->name_ = name;}
+	void set_singer(const std::string& singer) {data_->singer_ = singer;}
+	void set_id(const int64 id) {data_->id_ = id;}
+	void UnserializedJson(std::string& str);
+
 
 private:
 	class Data{

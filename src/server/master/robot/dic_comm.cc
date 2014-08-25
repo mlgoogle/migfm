@@ -125,6 +125,86 @@ bool RedisComm::AddNewMusicInfo(const std::string& songid,const std::string& alb
 	return true;
 }
 
+void RedisComm::GetBachMusicInfos(std::list<int64>& songid_list,std::list<std::string>& songinfolist){
+
+#if defined (_DIC_POOL_)
+	AutoDicCommEngine auto_engine;
+	base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+#endif
+	std::stringstream os;
+	int64 total;
+	os<<"mget";
+	while(songid_list.size()>0){
+		int64 songid = songid_list.front();
+		songid_list.pop_front();
+		os<<" "<<songid;
+	}
+	GetMusicInfos(redis_engine_,os.str(),songinfolist);
+}
+
+
+bool RedisComm::GetMusicInfos(base_storage::DictionaryStorageEngine*engine,
+                              const std::string& command,
+                              std::list<std::string>& songinfolist){
+
+    redisContext *context = (redisContext *)engine->GetContext();
+	LOG_DEBUG2("%s",command.c_str());
+	if (NULL == context)
+		return false;
+	{
+		redisReply *rpl = (redisReply *) redisCommand(context,command.c_str());
+		base_storage::CommandReply *reply = _CreateReply(rpl);
+		freeReplyObject(rpl);
+		if (NULL == reply)
+			return false;
+
+		//
+		if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
+			base_storage::ArrayReply *arep =
+				static_cast<base_storage::ArrayReply *>(reply);
+			base_storage::ArrayReply::value_type &items = arep->value;
+			for (base_storage::ArrayReply::iterator it = items.begin();
+				it != items.end();++it) {
+					base_storage::CommandReply *item = (*it);
+					if (base_storage::CommandReply::REPLY_STRING == item->type) {
+						base_storage::StringReply *srep = static_cast<base_storage::StringReply *>(item);
+						songinfolist.push_back(srep->value);
+					}
+			}
+		}
+		reply->Release();
+	}
+	return true;
+
+}
+
+base_storage::CommandReply* RedisComm::_CreateReply(redisReply* reply) {
+	using namespace base_storage;
+	switch (reply->type) {
+	case REDIS_REPLY_ERROR:
+		return new ErrorReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_NIL:
+		return new CommandReply(CommandReply::REPLY_NIL);
+	case REDIS_REPLY_STATUS:
+		return new StatusReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_INTEGER:
+		return new IntegerReply(reply->integer);
+	case REDIS_REPLY_STRING:
+		return new StringReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_ARRAY: {
+		ArrayReply *rep = new ArrayReply();
+		for (size_t i = 0; i < reply->elements; ++i) {
+			if (CommandReply *cr = _CreateReply(reply->element[i]))
+				rep->value.push_back(cr);
+		}
+		return rep;
+							}
+	default:
+		break;
+	}
+	return NULL;
+}
+
 base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
 
 	try{

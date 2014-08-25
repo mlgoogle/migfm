@@ -1,4 +1,5 @@
 #include "robot_basic_infos.h"
+#include "basic/base64.h"
 #include "basic/constants.h"
 #include "json/json.h"
 #include "log/mig_log.h"
@@ -85,6 +86,27 @@ NewMusicInfo& NewMusicInfo::operator =(const NewMusicInfo& music_info){
 	}
 	data_ = music_info.data_;
 	return *this;
+}
+
+void NewMusicInfo::UnserializedJson(std::string& str){
+	Json::Reader reader;
+	Json::Value root;
+	bool r = false;
+	r = reader.parse(str.c_str(),root);
+	if (!r){
+		MIG_ERROR(USER_LEVEL,"json parser error");
+		return;
+	}
+	//base64 转码
+	std::string b64title;
+	std::string b64artist;
+	std::string b64album;
+	Base64Decode(root["titile"].asString(),&b64title);
+	Base64Decode(root["artist"].asString(),&b64artist);
+	//Base64Decode(smi.album_title(),&b64album);
+	set_id(atoll(root["id"].asString().c_str()));
+	set_singer(b64artist);
+	set_name(b64title);
 }
 
 }

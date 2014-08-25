@@ -292,6 +292,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 	Json::Value same_music_users;
 	std::map<std::string,std::string> collect_musices;
 	Json::Value usersmusic;
+	Json::Value samemusers;
 
 /* 因为暂时无法判断进入范围的用户，故暂时取消
 	//对比当前距离和存储距离如果未超过500米     暂时不做请求
@@ -415,9 +416,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 			  else
 				  r = GetUserCurrentMusic(find->second,item,is_user_like);
 			  if (r){
-				  if (flag==2||flag==3||(flag==5)){
+				  if (flag==2){
 					  if (is_user_like)
-						  usersmusic.append(item); //周围歌曲是否是用户红心歌曲
+						  samemusers.append(item); //周围歌曲是否是用户红心歌曲
 				  }else{
 					  usersmusic.append(item);
 				  }
@@ -441,9 +442,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 
 
 	//获取相同类型的歌曲
-	if(flag==2||flag==3||(flag==5)){
+	if(flag==2||flag==3){
 		storage::DBComm::GetSameMusic(same_music_users,uid,latitude,longitude);
-		AddSameMusicUsers(same_music_users,usersmusic,uid_str);
+		AddSameMusicUsers(same_music_users,samemusers,uid_str);
 
 	}
 
@@ -458,7 +459,7 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		//friend
 		result["result"]["fri_num"] = friend_num;
 		//same_music
-		result["result"]["music_num"] = usersmusic.size();
+		result["result"]["music_num"] = samemusers.size();
 		//near friend
 		result["result"]["near_num"] = usersmusic.size();
 		//message_num
@@ -472,8 +473,9 @@ bool LBSLogic::OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		int music_num = usersmusic.size();
 		result["result"]["mynum"] = collect_num;
 		result["result"]["nearnum"] = music_num;
-	}
-	else{
+	}else if(flag==2){
+		result["result"]["nearUser"] = samemusers;
+	}else{
 		result["result"]["nearUser"] = usersmusic;
 	}
 

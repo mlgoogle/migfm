@@ -64,7 +64,7 @@ bool ManagerEngine::OnBroadcastMessage(struct server *srv, int socket, void *msg
 
 bool ManagerEngine::OnIniTimer(const struct server *srv){
 	//srv->add_time_task(srv, "user_manager", TIME_TEST, 300, 1);
-	srv->add_time_task((struct server*)srv,"manager",TIME_CALLBACK_USER,20,-1);
+	srv->add_time_task((struct server*)srv,"manager",TIME_CALLBACK_USER,600,-1);
     return true;
 }
 
@@ -148,7 +148,7 @@ bool ManagerEngine::PushAllUserMsg(const int socket,const packet::HttpPacket& pa
     while(userinfo_list.size()>0){
     	int64 uid = userinfo_list.front();
     	userinfo_list.pop_front();
-    	if(uid==10108||uid ==10161||uid==10150||uid==10203)
+    	if(uid==10108||uid ==10149||uid==10150||uid==10203)
     		PushUserMessage(uid,summary,message,atol(is_record.c_str()),atol(is_push.c_str()));
     }
 
@@ -229,13 +229,13 @@ void ManagerEngine::OnCallBackUserInfo(){
 
 	std::list<int64> userinfo_list;
 	bool r = false;
-	r = manager_storage::DBComm::GetUsersInfo(0,1000,userinfo_list);
+	r = manager_storage::DBComm::GetOverTimeNoLogin(0,1000,userinfo_list);
 	std::string summary="快回来吧...";
 	std::string message = "快回来吧...";
 	while(userinfo_list.size()>0){
 		int64 uid = userinfo_list.front();
 	    userinfo_list.pop_front();
-	    if(uid==10108||uid ==10161||uid==10150||uid==10203)
+	    if(uid==10108||uid ==10161||uid==10150||uid==10149)
 	    	PushUserMessage(uid,summary,message,0,1);
 	}
 
