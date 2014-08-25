@@ -65,6 +65,8 @@ public:
 	static bool RecordUserMessageList(const int32 type,const int64 send_uid,
 							const int64 to_uid,std::list<struct RecordMessage>& list);
 
+	static bool GetLyric(const int64 songid,std::string& lyric);
+
 	struct FriendInfo {
 		std::string uid;
 		std::string name;

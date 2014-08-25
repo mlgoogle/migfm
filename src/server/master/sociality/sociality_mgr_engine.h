@@ -37,7 +37,7 @@ public:
 	bool OnBroadcastClose (struct server *srv, int socket);
 
 
-	bool OnIniTimer (const struct server* srv);
+	bool OnIniTimer (struct server* srv);
 
 	bool OnTimeout (struct server *srv, char* id, int opcode, int time);
 
@@ -87,6 +87,9 @@ private:
 	bool OnMsgGetMusicFriend(packet::HttpPacket& packet, Json::Value &result,
 		int &status, int &err_code);
 
+	bool OnMsgGetShareMessage(packet::HttpPacket& packet, Json::Value &result,
+			int &status, int &err_code,const int socket,int& flag);
+
 private:
 	bool CheckAndTransHMTime(const std::string &str, unsigned &time);
 
@@ -132,7 +135,7 @@ private:
 	bool GetUserInfo(Json::Value &value,struct MusicFriendInfo& userinfo);
 
 	bool PushPresentMsg(std::string& msg,std::string& summary,
-		                std::string& uid,std::string& to_uid,
+		                std::string& uid,std::string& to_uid,std::string& isbase,
 						int& err_code,int& status);
 
 	bool GetUserCurrentMusic(Json::Value &value,const std::string& tar_uid);

@@ -54,7 +54,8 @@ proc: robotproc chatmgrproc usrmgrproc spreadproc socialityproc musicproc lbspro
 
 
 #####################robot################################################
-robotproc:getnewmusic.fcgi addnewmusic.fcgi getmailinfo.fcgi getspreadmail.fcgi getrobots.fcgi updaterobotpic.fcgi
+robotproc:getnewmusic.fcgi addnewmusic.fcgi getmailinfo.fcgi getspreadmail.fcgi getrobots.fcgi updaterobotpic.fcgi\
+	 getvailedurlmusic.fcgi updatevailedurlmusic.fcgi getvailedlyric.fcgi updatelyric.fcgi
 
 getspreadmail.fcgi: getspreadmail.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getspreadmail.fcgi
@@ -73,6 +74,18 @@ getrobots.fcgi: getrobots.o $(POBJ)
 
 updaterobotpic.fcgi: updaterobotpic.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./updaterobotpic.fcgi
+	
+getvailedurlmusic.fcgi: getvailedurlmusic.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./getvailedurlmusic.fcgi
+	
+getvailedlyric.fcgi: getvailedlyric.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./getvailedlyric.fcgi
+	
+updatevailedurlmusic.fcgi: updatevailedurlmusic.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./updatevailedurlmusic.fcgi
+
+updatelyric.fcgi: updatelyric.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./updatelyric.fcgi
 
 ### 编译
 getspreadmail.o:
@@ -92,9 +105,21 @@ getrobots.o:
 
 updaterobotpic.o:
 	$(COMPILE) ./updaterobotpic/updaterobotpic.cc
+
+getvailedurlmusic.o:
+	$(COMPILE) ./getvailedurlmusic/getvailedurlmusic.cc
+	
+getvailedlyric.o:
+	$(COMPILE) ./getvailedlyric/getvailedlyric.cc
+	
+updatevailedurlmusic.o:
+	$(COMPILE) ./updatevailedurlmusic/updatevailedurlmusic.cc
+	
+updatelyric.o:
+	$(COMPILE) ./updatelyric/updatelyric.cc
 	
 #####################chat_mgr#############################################
-chatmgrproc:getsc.fcgi hischat.fcgi getsc1.fcgi
+chatmgrproc:getsc.fcgi hischat.fcgi
 
 getsc.fcgi: getsc.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getsc.fcgi
@@ -108,10 +133,10 @@ getsc1.fcgi: getsc1.o $(POBJ)
 ### 编译
 
 getsc.o:
-	$(RCOMPILE) ./getsc/getsc.cc
+	$(COMPILE) ./getsc/getsc.cc
 	
 hischat.o:
-	$(RCOMPILE) ./hischat/hischat.cc
+	$(COMPILE) ./hischat/hischat.cc
 	
 getsc1.o:
 	$(COMPILE) ./getsc1/getsc1.cc
@@ -166,7 +191,7 @@ weixin.o:
 ######################sociality###############################################
 socialityproc:setuserconfigofpush.fcgi presentsong.fcgi getpushmsg.fcgi\
 	getpushmsgsummary.fcgi sayhello.fcgi commentsong.fcgi get_comment.fcgi\
-	getmusicuser.fcgi
+	getmusicuser.fcgi getshareinfo.fcgi
 
 setuserconfigofpush.fcgi: setuserconfigofpush.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./setuserconfigofpush.fcgi
@@ -209,6 +234,9 @@ get_comment.fcgi: get_comment.o $(POBJ)
 	
 getmusicuser.fcgi: getmusicuser.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getmusicuser.fcgi
+
+getshareinfo.fcgi: getshareinfo.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./getshareinfo.fcgi
 	
 	
 ### 编译
@@ -255,10 +283,14 @@ get_comment.o:
 getmusicuser.o:
 	$(COMPILE) ./getmusicuser/getmusicuser.cc
 	
+getshareinfo.o:
+	$(COMPILE) ./getshareinfo/getshareinfo.cc
+	
 ######################music###################################################
 musicproc: collectsong.fcgi getcltsongs.fcgi delcltsong.fcgi hatsong.fcgi\
 	delthsong.fcgi recordcursong.fcgi getdefsongs.fcgi gettypesongs.fcgi\
-	recordlocalsongs.fcgi updateconfigfile.fcgi getuserhis.fcgi
+	recordlocalsongs.fcgi updateconfigfile.fcgi getuserhis.fcgi songid.fcgi\
+	getword.fcgi word_song.fcgi getlyric.fcgi
 
 collectsong.fcgi: collectsong.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./collectsong.fcgi
@@ -292,6 +324,18 @@ updateconfigfile.fcgi: updateconfigfile.o $(POBJ)
 	
 getuserhis.fcgi: getuserhis.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getuserhis.fcgi
+	
+songid.fcgi: songid.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./songid.fcgi
+	
+getword.fcgi: getword.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./getword.fcgi
+	
+word_song.fcgi: word_song.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./word_song.fcgi
+	
+getlyric.fcgi: getlyric.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./getlyric.fcgi
 	
 ### 编译
 
@@ -327,6 +371,18 @@ updateconfigfile.o:
 
 getuserhis.o:
 	$(COMPILE) ./getuserhis/getuserhis.cc
+	
+songid.o:
+	$(COMPILE) ./songid/songid.cc
+	
+word_song.o:
+	$(COMPILE) ./word_song/word_song.cc
+	
+getword.o:
+	$(COMPILE) ./getword/getword.cc
+	
+getlyric.o:
+	$(COMPILE) ./getlyric/getlyric.cc
 ######################manager###################################################
 managerproc: pushusermsg.fcgi pushusersmsg.fcgi
 

@@ -13,7 +13,7 @@
 
 namespace mig_sociality {
 
-static const std::string URL_PUSH_SERVICE("121.199.32.88/api/push");
+static const std::string URL_PUSH_SERVICE("http://push.miyomate.com/api/push");
 
 bool mig_sociality::HttpComm::PushMessage(const std::string &device_token,
 		const std::string &msg, int badge/*=1*/, const std::string &sound/*=""*/) {

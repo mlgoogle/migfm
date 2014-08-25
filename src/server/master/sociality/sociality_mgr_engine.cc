@@ -2,6 +2,8 @@
 #include "db_comm.h"
 #include "dic_comm.h"
 #include "logic_comm.h"
+#include "lbs/lbs_connector.h"
+#include "weather/weather_engine.h"
 #include "basic/constants.h"
 #include "basic/basic_util.h"
 #include "config/config.h"
@@ -38,6 +40,14 @@ SocialityMgrEngine::SocialityMgrEngine(){
 	RedisComm::Init(config->redis_list_);
 	base_storage::MYSQLDB::Init(config->mysql_db_list_);
 	base_storage::MemDic::Init(config->mem_list_);
+	//初始化LBS
+	base_lbs::LbsConnectorEngine::Create(base_lbs::IMPL_BAIDU);
+	base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
+	engine->Init(config->mysql_db_list_);
+	base_weather::WeatherConnectorEngine::Create(base_weather::IMPL_CAIYUN);
+	base_weather::WeatherConnectorEngine::GetWeatherConnectorEngine()->Init();
+
+
 }
 
 SocialityMgrEngine::~SocialityMgrEngine(){
@@ -75,12 +85,29 @@ bool SocialityMgrEngine::OnBroadcastMessage(struct server *srv, int socket,
     return true;
 }
 
-bool SocialityMgrEngine::OnIniTimer(const struct server *srv){
-	//srv->add_time_task(srv, "user_manager", TIME_TEST, 300, 1);
+bool SocialityMgrEngine::OnIniTimer(struct server *srv){
+	//srv->add_time_task(srv, "sociality_manager", TIME_TEST, 1, -1);
     return true;
 }
 
 bool SocialityMgrEngine::OnTimeout(struct server *srv, char *id, int opcode, int time){
+
+	std::string latitude = "120.181000";
+	std::string longitude = "30.267600";
+	std::string city;
+	std::string district;
+	std::string province;
+	std::string street;
+	int i = 0;
+	switch(opcode){
+		case TIME_TEST:
+			while(i<4){
+				base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->GeocoderForAddress(latitude,longitude,city,district,province,street);
+				LOG_DEBUG2("city %s province %s",city.c_str(),province.c_str());
+				i++;
+			}
+			break;
+	}
 
 	return true;
 }
@@ -133,6 +160,8 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 		OnMsgGetComment(packet, root, ret_status, err_code);
 	} else if (type == "getmusicuser"){
 		OnMsgGetMusicFriend(packet,root,ret_status, err_code);
+	} else if(type=="getshareinfo"){
+		OnMsgGetShareMessage(packet, root, ret_status, err_code,socket,flag);
 	}else {
 		return true;
 	}
@@ -206,8 +235,7 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		Json::Value& result, int& status, int &err_code,const int socket,int& flag) {
 	LOGIC_PROLOG();
-
-	std::string user_id, to_user_id, song_id_str, ext_msg;
+	std::string user_id, to_user_id, song_id_str, ext_msg,isbase64;
 	if (!packet.GetAttrib("uid", user_id)) {
 		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
@@ -217,12 +245,12 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-/*
+
 	if (!packet.GetAttrib("songid", song_id_str)) {
 		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
 		return false;
 	}
-*/
+
 	if (!packet.GetAttrib("msg", ext_msg)) {
 	}
 
@@ -237,9 +265,12 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	//
+	//base64编码
+	if (!packet.GetAttrib("isbase64", isbase64)) {
+		isbase64 = "0";
+	}
 	std::string summary;
-	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,err_code,status))
+	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,isbase64,err_code,status))
 		return false;
 
 	//鍔犲叆鍘嗗彶璁板綍
@@ -516,6 +547,75 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 	return true;
 }
 
+bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::Value &result,
+			int &status, int &err_code,const int socket,int& flag){
+	LOGIC_PROLOG();
+	std::string str_uid;
+	std::string str_songid;
+	std::string str_type;
+	std::string str_latitude;
+	std::string str_longitude;
+	std::string lyric;
+	std::string city;
+	std::string district;
+	std::string province;
+	std::string street;
+	std::string temp;
+	std::string current_weather;
+	Json::Value &content = result["result"];
+	bool r = false;
+
+	if (!packet.GetAttrib("uid",str_uid)){
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+
+	if (!packet.GetAttrib("songid",str_songid)){
+		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
+		return false;
+	}
+	if (!packet.GetAttrib("type",str_type)){
+		err_code = MIG_FM_SHARE_TYPE;
+		return false;
+	}
+
+	packet.GetAttrib("latitude",str_latitude);
+	packet.GetAttrib("longitude",str_longitude);
+
+	//获取歌词
+	r = mig_sociality::DBComm::GetLyric(atoll(str_songid.c_str()),lyric);
+	//没有歌词不显示
+	if(!r){
+		err_code = MIG_FM_NO_LYRIC;
+		return false;
+	}
+	content["id"] = str_songid;
+	content["lyric"] = lyric;
+	//判断是否提交坐标信息
+	if(str_latitude.empty()||str_longitude.empty()){
+		status = 1;
+		return true;
+	}
+
+	//获取地理位置
+	r = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->GeocoderForAddress(str_latitude,str_longitude,city,district,province,street);
+	//获取天气
+	r = base_weather::WeatherConnectorEngine::GetWeatherConnectorEngine()->GetWeatherInfo(str_latitude,str_longitude,temp,current_weather);
+	result["status"] = 1;
+	//组装数据
+	content["weather"] = current_weather;
+	content["temp"] = temp;
+	content["adress"] = city;
+	Json::FastWriter wr;
+	std::string res = wr.write(result);
+	SomeUtils::SendFull(socket, res.c_str(), res.length());
+	flag = 1;
+	//存储
+	//抽奖
+	return true;
+
+}
+
 bool SocialityMgrEngine::RecordMessage(const std::string& send_uid,const std::string& to_uid,
 		                             const std::string& msg,std::string& summary,
 		                             int& status, int &err_code){
@@ -783,7 +883,7 @@ bool SocialityMgrEngine::OnMsgGetComment(packet::HttpPacket& packet,
 				uinfo["userid"] = item_uid;
 				uinfo["nickname"] = nickname;
 				uinfo["gender"] = gender;
-				uinfo["pic"] = head;
+				uinfo["head"] = head;
 			}
 		}
 	}else{
@@ -1494,7 +1594,7 @@ void SocialityMgrEngine::MakeJsonUserinfoPacket(struct MessageListInfo* msg,Json
 }
 
 bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
-										std::string& uid,std::string& to_uid,
+										std::string& uid,std::string& to_uid,std::string& isbase,
 										int& err_code,int& status){
    
     //json
@@ -1560,10 +1660,18 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 			continue;
 
 		std::string id = song[i]["songid"].asString();
-		std::string msg = song[i]["msg"].asString();
+		std::string pmsg = song[i]["msg"].asString();
+		std::string content;
+		//base64 编码
+		if(atol(isbase64.c_str())==1){
+			Base64Decode(pmsg,content);
+		}else{
+			content = msg;
+		}
+
 		struct RecordMessage record_msg;
 		record_msg.songid = id;
-		record_msg.message = msg;
+		record_msg.message = content;
 		record_msg.distance = distance;
 		list.push_back(record_msg);
 	/*	std::string detail, summary;
