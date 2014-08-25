@@ -87,6 +87,8 @@ private:
 
 	bool GetUserMusicCltAndHis(const int socket,const packet::HttpPacket& packet);
 
+	bool GetMusicLyric(const int socket,const packet::HttpPacket& packet);
+
 private:
 	bool GetMusicInfos(const int socket,const std::string& songid);
 

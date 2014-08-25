@@ -112,6 +112,7 @@ int main(int agrc,char* argv[]){
     //google_breakpad::ExceptionHandler eh(".",NULL,DumpCallBack,NULL,true);
     std::string path = "./config.xml";
 	std::string ipc_conn = "/var/www/tmp/corefile";
+
     //config::FileConfig file_config;
     std::string content;
     const char* query;

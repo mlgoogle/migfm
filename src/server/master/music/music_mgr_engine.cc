@@ -174,6 +174,8 @@ bool MusicMgrEngine::OnMusicMgrMessage(struct server *srv, int socket,
 		UpdateConfigFile(socket,packet);
 	}else if (type=="getuserhis"){
 		GetUserMusicCltAndHis(socket,packet);
+	}else if (type=="getlyric"){
+		GetMusicLyric(socket,packet);
 	}
     return true;
 }
@@ -981,7 +983,7 @@ bool MusicMgrEngine::GetTypeSongs(const int socket,const packet::HttpPacket& pac
 	r = pack.GetAttrib(NUM,num);
 	//fix me
 	if (!r)//
-		num = "10";
+		num = "5";
 
 
 	if ((atol(mood_index.c_str())!=-1)&&(atol(scens_index.c_str())!=-1)&&(atol(channel_index.c_str())!=-1)){
@@ -1139,6 +1141,40 @@ ret:
 	return true;
 }
 
+bool MusicMgrEngine::GetMusicLyric(const int socket,const packet::HttpPacket& packet){
+	packet::HttpPacket pack = packet;
+	std::string songid;
+	std::string lyric;
+	std::string msg;
+	int status = 0;
+	std::string result;
+	std::string result_out;
+	bool r = false;
+	Json::FastWriter wr;
+	Json::Value value;
+	if (!pack.GetAttrib(SONGID,songid)){
+		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
+		status = 0;
+		goto ret;
+	}
+
+	r = storage::DBComm::GetLyric(atoll(songid.c_str()),lyric);
+	if(!r){
+		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
+		status = 0;
+		goto ret;
+	}
+
+	status = 1;
+	value["result"]["id"] = songid;
+	value["result"]["lyric"] = lyric;
+ret:
+	value["status"] = status;
+	value["msg"] = msg;
+	result_out = wr.write(value);
+	music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
 bool MusicMgrEngine::GetUserMusicCltAndHis(const int socket,
 										   const packet::HttpPacket& packet){
 	packet::HttpPacket pack = packet;
@@ -1328,6 +1364,8 @@ bool MusicMgrEngine::SetMoodRecording(const int socket,
 		goto ret;
 	}
 
+	//更新登陆时间
+	storage::DBComm::UpdateLogin(atoll(uid.c_str()));
 	// 返回最新消息个数
 	storage::RedisComm::GetNewMsgNum(uid,new_msg_num);
 	//通知机器人服务器
