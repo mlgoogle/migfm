@@ -140,6 +140,50 @@ void SomeUtils::GetCurrntTimeFormat(std::string& current_time){
 	current_time = os.str();
 }
 
+void SomeUtils::SummaryLyric(const std::string& slyric,std::string& dlyric){
+	const char* src_lyric = slyric.c_str();
+	int index = 0;
+	int lyric_number = 0;
+	int min = 4;
+	int max = 14;
+	int start_pos = 0;
+	for (int index =0; index<slyric.length();index++){//统计总行数
+		if(slyric[index]=='\r'){
+			lyric_number++;
+		}
+	}
+
+	index = 0;
+	//若小于4行则显示全部歌词
+	if(lyric_number<min){
+		dlyric = slyric;
+	//若大于14行 显示4-14行 在4到14行之间这回退，保证10行
+	}else if((lyric_number>max)||(lyric_number<max&&lyric_number>min)){
+		int temp_min = 0;
+		int temp_max = 0;
+		if(lyric_number<max&&lyric_number>min){
+			temp_min = lyric_number - min;
+			temp_max = max - lyric_number -max;
+		}else{
+			temp_min = min;
+			temp_max = max;
+		}
+		for (int index =0; index<slyric.length();index++){//
+			if(src_lyric[index]=='\r'){
+				start_pos++;
+				if(start_pos<=temp_min)
+					continue;
+			}
+			if(start_pos>=temp_min){
+				dlyric.append(1,src_lyric[index]);
+			}
+			if(start_pos>temp_max)
+				break;
+		}
+	}
+
+}
+
 int SomeUtils::SplitStringChr( const char *str, const char *char_set,
 				   std::vector<std::string> &out )
 {

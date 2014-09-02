@@ -31,15 +31,16 @@ bool CaiyunConnectorImpl::GetWeatherInfo(const std::string& latitude,const std::
 	int32 caiyun_temp_value;
 	int i = 0;
 	caiyun_temp_value = 0;
-	//os<<caiyun_weather_host_<<"?lonlat="<<longitude<<","<<latitude<<"&format=json&product=minutes_prec&token=ZG9uZ3hpYW5nIG11c2ljIGFwaQ==";
-	os<<"http://rain.swarma.net/fcgi-bin/v1/api.py?lonlat="<<longitude<<","<<latitude<<"&format=json&product=minutes_prec&token=AAEHD3736dKDGEDKUEHD";
+	os<<caiyun_weather_host_<<"?lonlat="<<longitude<<","<<latitude<<"&format=json&product=minutes_prec&token=ZG9uZ3hpYW5nIG11c2ljIGFwaQ==";
+	//os<<"http://rain.swarma.net/fcgi-bin/v1/api.py?lonlat=116.5754,39.8296&format=json&product=minutes_prec&token=AAEHD3736dKDGEDKUEHD";
 	std::string url = os.str();
 	do{
 		i++;
 		if(i>3)
 			break;
 		//LOG_DEBUG2("%s",os.str().c_str());
-		http::HttpMethodGet caiyun_http(os.str());
+		std::string url = os.str();
+		http::HttpMethodGet caiyun_http(url);
 		r = caiyun_http.Get();
 		if(!r)
 			continue;

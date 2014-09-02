@@ -135,7 +135,7 @@ private:
 	bool GetUserInfo(Json::Value &value,struct MusicFriendInfo& userinfo);
 
 	bool PushPresentMsg(std::string& msg,std::string& summary,
-		                std::string& uid,std::string& to_uid,std::string& isbase,
+		                std::string& uid,std::string& to_uid,
 						int& err_code,int& status);
 
 	bool GetUserCurrentMusic(Json::Value &value,const std::string& tar_uid);

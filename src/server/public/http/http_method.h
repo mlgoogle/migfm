@@ -22,6 +22,7 @@ public:
     const MIG_URL& GetUrl(void){return url_;}
     bool GetContent(std::string& content);
     void SetHeaders(std::string& value);
+    void SetResolve(std::string& value);
     bool GetHeader(const std::string& key,std::string& value);
 private:
 	const MIG_URL& url_;
@@ -30,6 +31,7 @@ private:
 	std::vector<char> content_;
 	std::map<std::string,std::string> header_;
 	struct curl_slist* headers_;
+	struct curl_slist* resolves_;
 };
 
 class HttpMethodPost{
@@ -46,6 +48,7 @@ private:
 	std::vector<char> content_;
 	std::map<std::string,std::string> header_;
 	struct curl_slist* headers_;
+	struct curl_slist* bodys_;
 };	
 }
 

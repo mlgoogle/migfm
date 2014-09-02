@@ -607,6 +607,7 @@ bool DBComm::GetLyric(const int64 songid,std::string& lyric){
 	}
 }
 
+
 bool DBComm::GetMoodInfos(std::list<int> &list){
 	std::stringstream os;
 	bool r = false;

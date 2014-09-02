@@ -19,5 +19,7 @@ public:
 private:
 	std::string  caiyun_weather_host_;
 };
+
+
 }
 #endif

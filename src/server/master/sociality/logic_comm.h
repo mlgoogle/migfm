@@ -116,6 +116,8 @@ public:
 
 	static int SplitStringChr(const char *str, const char *char_set,
 					   std::vector<std::string> &out);
+
+	static void SummaryLyric(const std::string& slyric,std::string& dlyric);
 };
 
 class RLockGd

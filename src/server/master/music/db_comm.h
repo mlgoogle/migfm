@@ -54,6 +54,7 @@ public:
 
 	static bool GetLyric(const int64 songid,std::string& lyric);
 
+
 public:
 #if defined (_DB_POOL_)	
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

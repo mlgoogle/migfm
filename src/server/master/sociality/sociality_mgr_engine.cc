@@ -235,7 +235,8 @@ bool SocialityMgrEngine::OnMsgSetUserConfigOfPush(packet::HttpPacket& packet,
 bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		Json::Value& result, int& status, int &err_code,const int socket,int& flag) {
 	LOGIC_PROLOG();
-	std::string user_id, to_user_id, song_id_str, ext_msg,isbase64;
+
+	std::string user_id, to_user_id, song_id_str, ext_msg;
 	if (!packet.GetAttrib("uid", user_id)) {
 		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
@@ -245,12 +246,12 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-
+/*
 	if (!packet.GetAttrib("songid", song_id_str)) {
 		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
 		return false;
 	}
-
+*/
 	if (!packet.GetAttrib("msg", ext_msg)) {
 	}
 
@@ -265,12 +266,8 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 		return false;
 	}
 
-	//base64编码
-	if (!packet.GetAttrib("isbase64", isbase64)) {
-		isbase64 = "0";
-	}
 	std::string summary;
-	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,isbase64,err_code,status))
+	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,err_code,status))
 		return false;
 
 	//鍔犲叆鍘嗗彶璁板綍
@@ -555,7 +552,11 @@ bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::
 	std::string str_type;
 	std::string str_latitude;
 	std::string str_longitude;
+	std::string str_mode;
+	std::string str_index;
 	std::string lyric;
+	std::string dlyric;
+	std::string description;
 	std::string city;
 	std::string district;
 	std::string province;
@@ -578,19 +579,30 @@ bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::
 		err_code = MIG_FM_SHARE_TYPE;
 		return false;
 	}
+	if (!packet.GetAttrib("mode",str_mode)||str_mode.empty()){
+		str_mode = "chl";
+	}
+	if (!packet.GetAttrib("index",str_index)||str_index.empty()){
+		str_index = "7";
+	}
 
 	packet.GetAttrib("latitude",str_latitude);
 	packet.GetAttrib("longitude",str_longitude);
 
-	//获取歌词
-	r = mig_sociality::DBComm::GetLyric(atoll(str_songid.c_str()),lyric);
+	//获取歌词 及描述
+	//r = mig_sociality::DBComm::GetLyric(atoll(str_songid.c_str()),lyric);
+	r = mig_sociality::DBComm::GetShareInfo(atoll(str_songid.c_str()),str_mode,str_index,lyric,description);
 	//没有歌词不显示
 	if(!r){
 		err_code = MIG_FM_NO_LYRIC;
 		return false;
 	}
+	//歌词换算
+	mig_sociality::SomeUtils::SummaryLyric(lyric,dlyric);
+
 	content["id"] = str_songid;
-	content["lyric"] = lyric;
+	content["lyric"] = dlyric;
+	content["description"] = description;
 	//判断是否提交坐标信息
 	if(str_latitude.empty()||str_longitude.empty()){
 		status = 1;
@@ -605,7 +617,7 @@ bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::
 	//组装数据
 	content["weather"] = current_weather;
 	content["temp"] = temp;
-	content["adress"] = city;
+	content["address"] = city;
 	Json::FastWriter wr;
 	std::string res = wr.write(result);
 	SomeUtils::SendFull(socket, res.c_str(), res.length());
@@ -1594,7 +1606,7 @@ void SocialityMgrEngine::MakeJsonUserinfoPacket(struct MessageListInfo* msg,Json
 }
 
 bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
-										std::string& uid,std::string& to_uid,std::string& isbase,
+										std::string& uid,std::string& to_uid,
 										int& err_code,int& status){
    
     //json
@@ -1660,18 +1672,10 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 			continue;
 
 		std::string id = song[i]["songid"].asString();
-		std::string pmsg = song[i]["msg"].asString();
-		std::string content;
-		//base64 编码
-		if(atol(isbase64.c_str())==1){
-			Base64Decode(pmsg,content);
-		}else{
-			content = msg;
-		}
-
+		std::string msg = song[i]["msg"].asString();
 		struct RecordMessage record_msg;
 		record_msg.songid = id;
-		record_msg.message = content;
+		record_msg.message = msg;
 		record_msg.distance = distance;
 		list.push_back(record_msg);
 	/*	std::string detail, summary;
@@ -1711,5 +1715,4 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 	summary.assign(ss.str());
 	return true;
 }
-
 }

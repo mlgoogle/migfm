@@ -226,7 +226,8 @@ out:
 
 HttpMethodGet::HttpMethodGet(const MIG_URL& url)
 :url_(url)
-,headers_(NULL){
+,headers_(NULL)
+,resolves_(NULL){
 }
 
 HttpMethodGet::~HttpMethodGet(){
@@ -235,6 +236,10 @@ HttpMethodGet::~HttpMethodGet(){
 
 void HttpMethodGet::SetHeaders(std::string& value){
 	headers_ = curl_slist_append(headers_, value.c_str());
+}
+
+void HttpMethodGet::SetResolve(std::string& value){
+	resolves_ = curl_slist_append(NULL, value.c_str());
 }
 
 bool HttpMethodGet::GetContent(std::string& content){
@@ -323,7 +328,17 @@ bool HttpMethodGet::Get(){
     curl_content.headers_ =  &header_;
     curl_content.subversion_ = 0;
     curl_content.max_num_ = 1024*1024;
-	
+
+    if(resolves_!=NULL){
+    	curl_code =  curl_easy_setopt(curl,CURLOPT_RESOLVE,resolves_);
+        if(curl_code != CURLE_OK) {
+        	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_RESOLVE failed: %s",
+    		     curl_easy_strerror(curl_code));
+        	goto out;
+        }
+    	MIG_DEBUG(USER_LEVEL,"curl_easy_setopt, CURLOPT_RESOLVE");
+    }
+
     curl_code = curl_easy_setopt(curl,CURLOPT_HEADERFUNCTION,HeaderFunction);
     if(curl_code != CURLE_OK) {
 	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERFUNCTION failed: %s",
