@@ -192,6 +192,47 @@ std::string BasicUtil::GetSrcString(std::string str){
      return base64_decode(str);
 }
 
+char BasicUtil::toHex(const char &x){
+     return x > 9 ? x -10 + 'A': x + '0';
+}
+
+bool BasicUtil::UrlEncode(const std::string& content,std::string& out_str){
+	int i;
+	int j = 0; /* for result index */
+	char ch;
+	const char* str = content.c_str();
+	int strSize = content.length();
+	char* result = (char*)malloc(strSize * 3);
+	int resultSize = strSize * 3;
+
+	if ((str == NULL) || (result == NULL) || (strSize <= 0) || (resultSize <= 0)) {
+	return 0;
+	}
+
+	for (i=0; (i<strSize) && (j<resultSize); i++) {
+		ch = str[i];
+		if ((ch >= 'A') && (ch <= 'Z')) {
+			result[j++] = ch;
+		} else if ((ch >= 'a') && (ch <= 'z')) {
+			result[j++] = ch;
+		} else if ((ch >= '0') && (ch <= '9')) {
+			result[j++] = ch;
+		} else if(ch == ' '){
+			result[j++] = '+';
+		} else {
+			if (j + 3 < resultSize) {
+				sprintf(result+j, "%%%02X", (unsigned char)ch);
+				j += 3;
+			} else {
+				return false;
+			}
+		}
+	}
+	result[j] = '/0';
+	out_str.assign(result,j);
+	return true;
+}
+
 bool BasicUtil::UrlDecode(std::string& content,std::string& out_str){
 
     char  const *in_str = content.c_str();

@@ -4,7 +4,7 @@
 #include "basic/basic_util.h"
 namespace base_lbs{
 
-bool ResolveJson::ReolveJsonCaiYunWeather(const std::string& content,std::string& city,
+bool ResolveJson::ReolveJsonBaiduAddress(const std::string& content,std::string& city,
 		std::string& district,std::string& province,std::string& street){
 
 	bool r = false;
