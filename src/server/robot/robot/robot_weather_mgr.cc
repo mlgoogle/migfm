@@ -3,7 +3,8 @@
 #include "robot_basic_info.h"
 #include "db_comm.h"
 #include "dic_comm.h"
-#include "http_method.h"
+//#include "http_method.h"
+#include "http/http_method.h"
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
 #include "basic/base64.h"
@@ -118,7 +119,7 @@ bool RobotWeatherMgr::RequestCaiYunWeather(const std::string& latitude,const std
 	request_url.append(host_api);
 	request_url.append(os.str());
 
-	robot_logic::HttpMethodGet caiyun_http(request_url);
+	http::HttpMethodGet caiyun_http(request_url);
 	r = caiyun_http.Get();
 	if(!r)
 		return r;
@@ -153,7 +154,7 @@ bool RobotWeatherMgr::RequestBaiduAddress(const std::string& latitude,const std:
 	std::string content;
 	request_url.append(host_api);
 	request_url.append(os.str());
-	robot_logic::HttpMethodGet baidu_http(request_url);
+	http::HttpMethodGet baidu_http(request_url);
 	r = baidu_http.Get();
 	if(!r)
 		return r;
