@@ -1,5 +1,6 @@
 #include "http_method.h"
 #include "basic/basic_util.h"
+#include <stdio.h>
 
 namespace http{
 
@@ -10,6 +11,7 @@ struct CurlContent{
 	int                                 subversion_;
 	uint32                              max_num_;
 };
+
 
 static size_t ContentFunction(void *ptr, size_t size, size_t nmemb,
 							  void *content){
@@ -23,6 +25,8 @@ static size_t ContentFunction(void *ptr, size_t size, size_t nmemb,
     }
     return size*nmemb;
 }
+
+
 
 static size_t HeaderFunction(void* ptr,size_t size,
                              size_t nmemb,void* content){
@@ -73,7 +77,6 @@ static size_t HeaderFunction(void* ptr,size_t size,
 	value.assign(start, end+1-start);
 	 
 	(*curl_content->headers_)[name] = value;
-	//MIG_DEBUG(USER_LEVEL,"name %s value %s",name.c_str(),value.c_str());
 	return size* nmemb;
 }
 
@@ -96,7 +99,7 @@ bool HttpMethodPost::GetContent(std::string& content){
     return true;
 }
 
-bool HttpMethodPost::Post(const char* post,const int port){
+bool HttpMethodPost::Post(const char* post,const int port,bool on_error){
     CURL* curl = curl_easy_init();
     CURLcode curl_code;
     char curl_error[CURL_ERROR_SIZE];
@@ -128,11 +131,13 @@ bool HttpMethodPost::Post(const char* post,const int port){
 	goto out;
     }
 
-    curl_code = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
-    if(curl_code != CURLE_OK) {
-        MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_FAILONERROR failed: %s",
-		  curl_easy_strerror(curl_code));
-		goto out;
+    if(on_error){
+    	curl_code = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+    	if(curl_code != CURLE_OK) {
+    		MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_FAILONERROR failed: %s",
+    				curl_easy_strerror(curl_code));
+    		goto out;
+    	}
     }
 
 	//set port
@@ -170,6 +175,7 @@ bool HttpMethodPost::Post(const char* post,const int port){
     curl_content.subversion_ = 0;
     curl_content.max_num_ = 1024*1024;
 
+
     if(headers_!=NULL){
         curl_code = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers_);
         if(curl_code != CURLE_OK) {
@@ -180,22 +186,29 @@ bool HttpMethodPost::Post(const char* post,const int port){
     }
 
 	
-    /*curl_code = curl_easy_setopt(curl,CURLOPT_HEADERFUNCTION,HeaderFunction);
+    curl_code = curl_easy_setopt(curl,CURLOPT_HEADERFUNCTION,HeaderFunction);
     if(curl_code != CURLE_OK) {
 	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERFUNCTION failed: %s",
-		  curl_easy_strerror(curl_code));
+		     curl_easy_strerror(curl_code));
 	goto out;
     }
 
-   curl_code = curl_easy_setopt(curl,CURLOPT_HEADERDATA,&curl_content);
-   if(curl_code != CURLE_OK) {
-	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERDATA failed: %s",
-		  curl_easy_strerror(curl_code));
+    /*curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+    if(curl_code != CURLE_OK) {
+	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERFUNCTION failed: %s",
+		     curl_easy_strerror(curl_code));
 	goto out;
-   }*/
+    }*/
 
-   curl_code = curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,ContentFunction);
-   if(curl_code != CURLE_OK) {
+    curl_code = curl_easy_setopt(curl,CURLOPT_HEADERDATA,&curl_content);
+    if(curl_code != CURLE_OK) {
+	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERDATA failed: %s",
+		     curl_easy_strerror(curl_code));
+	goto out;
+    }
+
+    curl_code = curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,ContentFunction);
+    if(curl_code != CURLE_OK) {
 	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_WRITEFUNCTION failed: %s",
 		     curl_easy_strerror(curl_code));
 	goto out;
@@ -204,18 +217,20 @@ bool HttpMethodPost::Post(const char* post,const int port){
     curl_code = curl_easy_setopt(curl,CURLOPT_WRITEDATA,&curl_content);
 
     if(curl_code != CURLE_OK) {
-	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_WRITEDATA failed: %s",
-		  curl_easy_strerror(curl_code));
+    MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_WRITEDATA failed: %s",
+			 curl_easy_strerror(curl_code));
 	goto out;
     }
 
+
     curl_code = curl_easy_perform(curl);
+    code_ = curl_content.code_;
+
     if(curl_code != CURLE_OK) {
 	MIG_ERROR(USER_LEVEL,"curl_easy_perform failed: %s" ,
 		      curl_easy_strerror(curl_code));
 	goto out;
     }
-    code_ = curl_content.code_;
     result = true;
 out:
     curl_easy_cleanup(curl);
@@ -262,10 +277,11 @@ bool HttpMethodGet::GetHeader(const std::string& key,std::string& value){
 	return false;
 }
 
-bool HttpMethodGet::Get(){
+bool HttpMethodGet::Get(const int port,bool on_error ){
 
     CURL* curl = curl_easy_init();
     CURLcode curl_code;
+    char* ct;
     char curl_error[CURL_ERROR_SIZE];
     bool result = false;
     CurlContent curl_content;
@@ -295,13 +311,6 @@ bool HttpMethodGet::Get(){
 	goto out;
     }
 
-    curl_code = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
-    if(curl_code != CURLE_OK) {
-	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_FAILONERROR failed: %s",
-		 curl_easy_strerror(curl_code));
-	goto out;
-    }
-
     if(headers_!=NULL){
         curl_code = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers_);
         if(curl_code != CURLE_OK) {
@@ -310,6 +319,26 @@ bool HttpMethodGet::Get(){
     	goto out;
         }
     }
+
+    if(on_error){
+    	curl_code = curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+    	if(curl_code != CURLE_OK) {
+    		MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_FAILONERROR failed: %s",
+    				curl_easy_strerror(curl_code));
+    		goto out;
+    	}
+    }
+    //set port
+     if (port!=0) {
+          curl_code = curl_easy_setopt(curl, CURLOPT_PORT, port);
+          if(curl_code != CURLE_OK) {
+              MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_PORT failed: %s",
+                          curl_easy_strerror(curl_code));
+              goto out;
+           }
+      }
+
+
 #if defined(GOOGLE_URL)
     curl_code = curl_easy_setopt(curl,CURLOPT_URL,url_.spec().c_str());
 #else
@@ -329,22 +358,19 @@ bool HttpMethodGet::Get(){
     curl_content.subversion_ = 0;
     curl_content.max_num_ = 1024*1024;
 
-    if(resolves_!=NULL){
-    	curl_code =  curl_easy_setopt(curl,CURLOPT_RESOLVE,resolves_);
-        if(curl_code != CURLE_OK) {
-        	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_RESOLVE failed: %s",
-    		     curl_easy_strerror(curl_code));
-        	goto out;
-        }
-    	MIG_DEBUG(USER_LEVEL,"curl_easy_setopt, CURLOPT_RESOLVE");
-    }
-
     curl_code = curl_easy_setopt(curl,CURLOPT_HEADERFUNCTION,HeaderFunction);
     if(curl_code != CURLE_OK) {
 	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERFUNCTION failed: %s",
 		     curl_easy_strerror(curl_code));
 	goto out;
     }
+
+    /*curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+    if(curl_code != CURLE_OK) {
+	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_HEADERFUNCTION failed: %s",
+		     curl_easy_strerror(curl_code));
+	goto out;
+    }*/
 
     curl_code = curl_easy_setopt(curl,CURLOPT_HEADERDATA,&curl_content);
     if(curl_code != CURLE_OK) {
@@ -363,14 +389,17 @@ bool HttpMethodGet::Get(){
     curl_code = curl_easy_setopt(curl,CURLOPT_WRITEDATA,&curl_content);
 
     if(curl_code != CURLE_OK) {
-	MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_WRITEDATA failed: %s",
+    MIG_ERROR(USER_LEVEL,"curl_easy_setopt, CURLOPT_WRITEDATA failed: %s",
 			 curl_easy_strerror(curl_code));
 	goto out;
     }
 
+
+
     curl_code = curl_easy_perform(curl);
+
     if(curl_code != CURLE_OK) {
-	MIG_ERROR(USER_LEVEL,"curl_easy_perform failed: %s" ,
+	MIG_ERROR(USER_LEVEL,"code %d curl_easy_perform failed: %s" ,code_,
 		  curl_easy_strerror(curl_code));
 	goto out;
     }

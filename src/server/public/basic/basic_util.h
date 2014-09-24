@@ -43,6 +43,10 @@ public:
 
     static bool UrlDecode(std::string& content,std::string& out_str);
 
+    static bool UrlEncode(const std::string& content,std::string& out_str);
+
+    static char toHex(const char &x);
+
     static int32 php_htoi(char *s);
 
     static void ResplaceString(const char* str,int len,const char c,std::string& dest_string);
