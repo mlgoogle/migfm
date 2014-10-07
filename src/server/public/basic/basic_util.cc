@@ -219,7 +219,9 @@ bool BasicUtil::UrlEncode(const std::string& content,std::string& out_str){
 			result[j++] = ch;
 		} else if(ch == ' '){
 			result[j++] = '+';
-		} else {
+		} else if (ch == '.' || ch == '-' || ch == '_' || ch == '*') {
+            result[j++] = ch;
+        } else {
 			if (j + 3 < resultSize) {
 				sprintf(result+j, "%%%02X", (unsigned char)ch);
 				j += 3;
