@@ -46,6 +46,8 @@ public:
 	static bool UpdateHeadUrl(const int64 id,const std::string& mp3_url);
 
 	static bool GetVailedUrlMusic(std::list<int64>& music_list);
+
+	static bool GetSinaWbToken(std::list<robot_base::SINAWBAccessToken*>& list);
 public:
 #if defined (_DB_POOL_)
 	static base_storage::DBStorageEngine* DBConnectionPop(void);

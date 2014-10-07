@@ -55,7 +55,7 @@ proc: robotproc chatmgrproc usrmgrproc spreadproc socialityproc musicproc lbspro
 
 #####################robot################################################
 robotproc:getnewmusic.fcgi addnewmusic.fcgi getmailinfo.fcgi getspreadmail.fcgi getrobots.fcgi updaterobotpic.fcgi\
-	 getvailedurlmusic.fcgi updatevailedurlmusic.fcgi getvailedlyric.fcgi updatelyric.fcgi
+	 getvailedurlmusic.fcgi updatevailedurlmusic.fcgi getvailedlyric.fcgi updatelyric.fcgi getwbtoken.fcgi
 
 getspreadmail.fcgi: getspreadmail.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getspreadmail.fcgi
@@ -86,6 +86,9 @@ updatevailedurlmusic.fcgi: updatevailedurlmusic.o $(POBJ)
 
 updatelyric.fcgi: updatelyric.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./updatelyric.fcgi
+	
+getwbtoken.fcgi: getwbtoken.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./getwbtoken.fcgi
 
 ### 编译
 getspreadmail.o:
@@ -117,6 +120,9 @@ updatevailedurlmusic.o:
 	
 updatelyric.o:
 	$(COMPILE) ./updatelyric/updatelyric.cc
+	
+getwbtoken.o:
+	$(COMPILE) ./getwbtoken/getwbtoken.cc
 	
 #####################chat_mgr#############################################
 chatmgrproc:getsc.fcgi hischat.fcgi

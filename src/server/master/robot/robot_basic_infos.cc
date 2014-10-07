@@ -109,4 +109,55 @@ void NewMusicInfo::UnserializedJson(std::string& str){
 	set_name(b64title);
 }
 
+SINAWBAccessToken::SINAWBAccessToken(){
+    data_ = new Data();
+}
+
+SINAWBAccessToken::SINAWBAccessToken(const std::string& appkey,const std::string& appsecret,
+		const std::string& callback,const int32 type){
+
+	data_ = new Data(appkey,appsecret,callback,type);
+}
+
+SINAWBAccessToken::SINAWBAccessToken(const SINAWBAccessToken& access_token)
+:data_(access_token.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+SINAWBAccessToken& SINAWBAccessToken::operator =(const SINAWBAccessToken& access_token){
+
+	if (access_token.data_!=NULL){
+		access_token.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = access_token.data_;
+	return *this;
+}
+
+bool SINAWBAccessToken::operator < (SINAWBAccessToken& access_token){
+	LOG_DEBUG("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+	return data_->count_ < access_token.count();
+}
+
+bool SINAWBAccessToken::operator > (SINAWBAccessToken& access_token){
+	LOG_DEBUG(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+	return data_->count_ > access_token.count();
+}
+
+bool SINAWBAccessToken::cmp(SINAWBAccessToken* t_access_token,SINAWBAccessToken* r_access_token){
+	LOG_DEBUG("cmp");
+	return t_access_token->count() < r_access_token->count();
+}
+
+void SINAWBAccessToken::Dump(){
+	DUMP_STRING(data_->appkey_);
+	DUMP_STRING(data_->appsecret_);
+	DUMP_STRING(data_->access_token_);
+	DUMP_INT(data_->count_);
+}
+
 }

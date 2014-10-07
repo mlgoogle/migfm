@@ -49,6 +49,7 @@ private:
 	scoped_ptr<robot_logic::MusicMgr>               music_mgr_;
 	scoped_ptr<robot_logic::UserMgr>                user_mgr_;
 	scoped_ptr<robot_logic::UtilMgr>                util_mgr_;
+
 };
 
 }

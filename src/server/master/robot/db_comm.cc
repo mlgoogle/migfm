@@ -448,6 +448,48 @@ bool DBComm::UpdateHeadUrl(const int64 id,const std::string& head_url){
 		return true;
 }
 
+bool DBComm::GetSinaWbToken(std::list<robot_base::SINAWBAccessToken*>& list){
+	bool r = false;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+    //call migfm.proc_GetNewMusicInfo(;
+	os<<"call proc_GetSINAWBAccessToken();";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR2("exec sql error");
+		return false;
+	}
+
+
+	int num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			std::string appkey = rows[0];
+			std::string appsecret = rows[1];
+			std::string callback = rows[2];
+			std::string access_token = rows[3];
+			robot_base::SINAWBAccessToken* wb_access_token = new robot_base::SINAWBAccessToken(appkey,appsecret,callback,0);
+			wb_access_token->set_access_token(access_token);
+			list.push_back(wb_access_token);
+		}
+		return true;
+	}
+	return false;
+}
+
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
 	try{

@@ -1,10 +1,18 @@
-#ifndef _CHAT_BASIC_INFOS_H__
-#define _CHAT_BASIC_INFOS_H__
+#ifndef _ROBOT_BASIC_INFOS_H__
+#define _ROBOT_BASIC_INFOS_H__
 
+#include "logic_comm.h"
 #include <map>
 #include <string>
 
 #include "basic/basictypes.h"
+
+#define DUMP_STRING(v) \
+	LOG_DEBUG2("name %s---value %s",#v,v.c_str());
+
+#define DUMP_INT(v) \
+	LOG_DEBUG2("name %s---value %d",#v,v);
+
 namespace robot_base{
 
 class RobotInfo{
@@ -133,6 +141,70 @@ private:
 		int                  refcount_;	
 	};
 
+	Data*                    data_;
+};
+
+class SINAWBAccessToken{
+public:
+	explicit SINAWBAccessToken();
+
+	explicit SINAWBAccessToken(const std::string& appkey,const std::string& appsecret,
+			const std::string& callback,const int32 type);
+
+	SINAWBAccessToken(const SINAWBAccessToken& access_token);
+	SINAWBAccessToken& operator = (const SINAWBAccessToken& access_token);
+
+	const std::string& appkey() const {return data_->appkey_;}
+	const std::string& appsecret() const {return data_->appsecret_;}
+	const std::string& callback() const {return data_->callback_;}
+	const std::string& access_token() const {return data_->access_token_;}
+	const int32 type() const {return data_->type_;}
+	const int64 count() const {return data_->count_;}
+
+	void add_count(){__sync_fetch_and_add(&data_->count_,1);}
+
+	void set_access_token(const std::string& access_token){data_->access_token_ = access_token;}
+
+	//重载比大于 小于符号
+	bool operator < (SINAWBAccessToken& access_token);
+	bool operator > (SINAWBAccessToken& access_token);
+
+	static bool cmp(SINAWBAccessToken* t_access_token,SINAWBAccessToken* r_access_token);
+
+	void Dump();
+
+
+public:
+	class Data{
+	public:
+		Data():refcount_(1)
+			,type_(0)
+			,count_(0){}
+		Data(const std::string& appkey,const std::string& appsecret,
+				const std::string& callback,const int32 type)
+			:refcount_(1)
+			,appkey_(appkey)
+			,appsecret_(appsecret)
+			,callback_(callback)
+			,type_(type)
+			,count_(0){}
+
+		void AddRef(){__sync_fetch_and_add(&refcount_,1);}
+		void Release(){
+			  if ((__sync_fetch_and_sub(&refcount_,1)-1)==0)
+				  delete this;
+		}
+
+	public:
+		std::string  appkey_;
+		std::string  appsecret_;
+		std::string  callback_;
+		std::string  access_token_;
+		int32        type_;
+		int64        count_;
+	private:
+		int                  refcount_;
+	};
 	Data*                    data_;
 };
 

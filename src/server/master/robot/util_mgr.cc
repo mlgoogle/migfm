@@ -8,11 +8,27 @@
 namespace robot_logic{
 
 UtilMgr::UtilMgr(){
-
+	Init();
 }
 
 UtilMgr::~UtilMgr(){
+	Deinit();
+}
 
+void UtilMgr::Init(){
+	//
+	robot_storage::DBComm::GetSinaWbToken(access_token_list_);
+}
+
+void UtilMgr::Deinit(){
+	while(access_token_list_.size()>0){
+		robot_base::SINAWBAccessToken* token = access_token_list_.front();
+		if(token){
+			delete token;
+			token = NULL;
+		}
+		access_token_list_.pop_front();
+	}
 }
 
 bool UtilMgr::GetSpreadMail(const int socket,const packet::HttpPacket& packet){
@@ -62,5 +78,35 @@ ret:
        		 reponse.length());
 }
 
+bool UtilMgr::GetIdleSINAWBtoken(const int socket,const packet::HttpPacket& packet){
+	bool r = false;
+	std::string reponse;
+    Json::Value result;
+    Json::FastWriter wr;
+    Json::Value& content = result["result"];
+    robot_base::SINAWBAccessToken* access_token = NULL;
+    //
+    if(access_token_list_.size()<=0){
+	    result["status"] = 0;
+	    result["msg"] = "无内容";
+	    goto ret;
+    }
+    //获取
+    access_token = access_token_list_.front();
+    content["appkey"] = access_token->appkey();
+    content["appsecret"] = access_token->appsecret();
+    content["access_token"] = access_token->access_token();
+    content["callback"] = access_token->callback();
+    access_token->add_count();
+    access_token->Dump();
+    access_token_list_.sort(robot_base::SINAWBAccessToken::cmp);
+    result["status"] = 1;
+    result["msg"] = "";
+
+ret:
+	reponse = wr.write(result);
+    r =  robot_logic::SomeUtils::SendFull(socket, reponse.c_str(),
+           		 reponse.length());
+}
 
 }

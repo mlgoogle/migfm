@@ -102,6 +102,8 @@ bool RobotEngine::OnRobotMessage(struct server *srv, int socket,
 		music_mgr_->GetVailedLyric(socket,packet);
 	else if(type=="updatelyric")
 		music_mgr_->UpdateVailedLyric(socket,packet);
+	else if(type=="getwbtoken")
+		util_mgr_->GetIdleSINAWBtoken(socket,packet);
 
     return true;
 }
