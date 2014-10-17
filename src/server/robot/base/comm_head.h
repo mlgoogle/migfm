@@ -19,6 +19,7 @@ enum operatorcode
 	NOTICE_USER_ROBOT_HANDSEL_SONG_SUCCESS = 1002,//赠送歌曲成功通知服务端
 	NOTICE_USER_ROBOT_LISTEN_SONG = 1003,//通知机器人客户端试听歌曲
 	NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN = 1004,//通知机器人客户端登陆聊天服务端
+	NOTICE_USER_ROBOT_GIFT_LUCK = 1005,//通知机器人
 	SCHEDULER_LOGIN = 2000,//机器人调度器登录
 	NOTICE_ASSISTANT_LOGIN = 2100,//通知机器人调度器咪呦助手登陆
 	ASSISTANT_LOGIN_SUCCESS = 2101,//咪呦助手登陆成功
@@ -28,6 +29,7 @@ enum operatorcode
 	NOTICE_USER_DEFAULT_SONG = 4001,//咪呦通知机器人服务器用户听的歌
 	NOTICE_USER_CURRENT_SONG = 4002,//咪呦通知机器人服务器用户听歌的变化
 	NOTICE_USER_ROBOT_CHAT_LOGIN = 4003,//聊天服务器通知机器人服务器有用户要和机器人聊天，做登陆准备
+	NOTICE_USER_READY_GIFT_LUCK = 4004,//咪哟通知机器人服务器用户分享成功开始抽奖
 };
 
 enum msgtype
@@ -166,6 +168,26 @@ struct NoticeUserRobotChatLogin:public PacketHead{
 	int64 robot_id;
 };
 
+
+//NOTICE_USER_ROBOT_GIFT_LUCK
+#define NOTICEUSERROBOTGIFTLUCK_SIZE (sizeof(int64) * 2 + sizeof(int32) * 2 + NAME_LEN + SINGER_LEN)
+struct NoticeUserRobotGiftLuck:public PacketHead{
+	int64 platform_id;
+	int64 uid;
+	int32 share_plat;
+	int32 prize;
+	char name[NAME_LEN];
+	char singer[SINGER_LEN];
+};
+
+//NOTICE_USER_READY_GIFT_LUCK
+#define NOTICEUSERREADYGIFTLUCK_SIZE (sizeof(int64) * 3 + sizeof(int32))
+struct NoticeUserReadyGiftLuck:public PacketHead{
+	int64 platform_id;
+	int64 uid;
+	int64 songid;
+	int32 share_plat;
+};
 //NOTICE_USER_ROBOT_SCHEDULER_CHAT_LOGIN
 /*
 #define NOTICEUSERROBOTSCHEDULERCHATLOGIN_SIZE (sizeof(int64) * 3 + sizeof(int8))

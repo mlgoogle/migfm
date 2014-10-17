@@ -255,6 +255,37 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 			}
 		}
 		break;
+		case NOTICE_USER_ROBOT_GIFT_LUCK:
+		{
+			struct NoticeUserRobotGiftLuck* vNoticeUserRobotGiftLuck =
+					new struct NoticeUserRobotGiftLuck;
+			*packhead= (struct NoticeUserRobotGiftLuck*)vNoticeUserRobotGiftLuck;
+			BUILDPACKHEAD();
+			int temp = 0;
+			vNoticeUserRobotGiftLuck->platform_id = in.Read64();
+			vNoticeUserRobotGiftLuck->uid = in.Read64();
+			vNoticeUserRobotGiftLuck->share_plat = in.Read32();
+			vNoticeUserRobotGiftLuck->prize = in.Read32();
+			memcpy(vNoticeUserRobotGiftLuck->name,in.ReadData(NAME_LEN,temp),
+					NAME_LEN);
+			vNoticeUserRobotGiftLuck->name[NAME_LEN - 1] = '\0';
+			memcpy(vNoticeUserRobotGiftLuck->singer,in.ReadData(SINGER_LEN,temp),
+					SINGER_LEN);
+			vNoticeUserRobotGiftLuck->singer[SINGER_LEN - 1] = '\0';
+		}
+		break;
+		case NOTICE_USER_READY_GIFT_LUCK:
+		{
+			struct NoticeUserReadyGiftLuck* vNoticeUserReadyGiftLuck =
+					new struct NoticeUserReadyGiftLuck;
+			*packhead= (struct NoticeUserReadyGiftLuck*)vNoticeUserReadyGiftLuck;
+			BUILDPACKHEAD();
+			vNoticeUserReadyGiftLuck->platform_id = in.Read64();
+			vNoticeUserReadyGiftLuck->uid = in.Read64();
+			vNoticeUserReadyGiftLuck->songid = in.Read64();
+			vNoticeUserReadyGiftLuck->share_plat = in.Read32();
+		}
+		break;
 		case HEART_PACKET:
 		{
 			r = true;
@@ -275,7 +306,6 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 							  int32* packet_stream_length){
 	bool r = true;
 
-	LOG_DEBUG("===start====\nopcode[]:\n\n====end====\n");
 	int32 packet_length = packhead->packet_length;
 	int32 operate_code = packhead->operate_code;
 	int32 data_length = packhead->data_length;
@@ -426,6 +456,32 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 			out.Write64(vNoticeUserRobotChatLogin->platform_id);
 			out.Write64(vNoticeUserRobotChatLogin->uid);
 			out.Write64(vNoticeUserRobotChatLogin->robot_id);
+			packet = (char*)out.GetData();
+		}
+		break;
+		case NOTICE_USER_ROBOT_GIFT_LUCK:
+		{
+			struct NoticeUserRobotGiftLuck* vNoticeUserRobotGiftLuck =
+					(struct NoticeUserRobotGiftLuck*)packhead;
+			BUILDHEAD(NOTICEUSERROBOTGIFTLUCK_SIZE);
+			out.Write64(vNoticeUserRobotGiftLuck->platform_id);
+			out.Write64(vNoticeUserRobotGiftLuck->uid);
+			out.Write32(vNoticeUserRobotGiftLuck->share_plat);
+			out.Write32(vNoticeUserRobotGiftLuck->prize);
+			out.WriteData(vNoticeUserRobotGiftLuck->name,NAME_LEN);
+			out.WriteData(vNoticeUserRobotGiftLuck->singer,SINGER_LEN);
+			packet = (char*)out.GetData();
+		}
+		break;
+		case NOTICE_USER_READY_GIFT_LUCK:
+		{
+			struct NoticeUserReadyGiftLuck* vNoticeUserReadyGiftLuck =
+					(struct NoticeUserReadyGiftLuck*)packhead;
+			BUILDHEAD(NOTICEUSERREADYGIFTLUCK_SIZE);
+			out.Write64(vNoticeUserReadyGiftLuck->platform_id);
+			out.Write64(vNoticeUserReadyGiftLuck->uid);
+			out.Write64(vNoticeUserReadyGiftLuck->songid);
+			out.Write32(vNoticeUserReadyGiftLuck->share_plat);
 			packet = (char*)out.GetData();
 		}
 		break;
@@ -631,6 +687,34 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 			PRINT_INT64(vSchedulerLogin->platform_id);
 			PRINT_STRING(vSchedulerLogin->machine_id.c_str());
 			PRINT_END("struct SchedulerLogin DumpEnd");
+		}
+		break;
+		case NOTICE_USER_ROBOT_GIFT_LUCK:
+		{
+			struct NoticeUserRobotGiftLuck* vNoticeUserRobotGiftLuck =
+					(struct NoticeUserRobotGiftLuck*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeUserRobotGiftLuck DumpBegin");
+			PRINT_INT64(vNoticeUserRobotGiftLuck->platform_id);
+			PRINT_INT64(vNoticeUserRobotGiftLuck->uid);
+			PRINT_INT(vNoticeUserRobotGiftLuck->share_plat);
+			PRINT_INT(vNoticeUserRobotGiftLuck->prize);
+			PRINT_STRING(vNoticeUserRobotGiftLuck->name);
+			PRINT_STRING(vNoticeUserRobotGiftLuck->singer);
+			PRINT_END("struct NoticeUserRobotGiftLuck DumpEnd");
+		}
+		break;
+		case NOTICE_USER_READY_GIFT_LUCK:
+		{
+			struct NoticeUserReadyGiftLuck* vNoticeUserReadyGiftLuck =
+					(struct NoticeUserReadyGiftLuck*)packhead;
+			DUMPHEAD();
+			PRINT_TITLE("struct NoticeUserReadyGiftLuck DumpBegin");
+			PRINT_INT64(vNoticeUserReadyGiftLuck->platform_id);
+			PRINT_INT64(vNoticeUserReadyGiftLuck->uid);
+			PRINT_INT64(vNoticeUserReadyGiftLuck->songid);
+			PRINT_INT(vNoticeUserReadyGiftLuck->share_plat);
+			PRINT_END("struct NoticeUserReadyGiftLuck DumpEnd");
 		}
 		break;
 		case NOTICE_USER_ROBOT_LISTEN_SONG:

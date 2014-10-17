@@ -5,6 +5,7 @@
 #include "robot_connection.h"
 #include "robot_song_mgr.h"
 #include "robot_weather_mgr.h"
+#include "util_mgr.h"
 #include "basic/scoped_ptr.h"
 #include "plugins.h"
 #include "common.h"
@@ -50,7 +51,7 @@ private:
 	scoped_ptr<robot_logic::RobotConnection>  robot_mgr_;
 	scoped_ptr<robot_logic::RobotSongMgr>   robot_song_mgr_;
 	scoped_ptr<robot_logic::RobotWeatherMgr> robot_weather_mgr_;
-
+	scoped_ptr<robot_logic::UtilMgr>       util_mgr_;
 };
 
 

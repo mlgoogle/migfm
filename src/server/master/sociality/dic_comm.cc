@@ -348,6 +348,7 @@ bool RedisComm::GetMusicInfos(const std::string& songid, std::string &music_info
 	return r;
 }
 
+
 bool RedisComm::GenaratePushMsgID(int64 uid, int64& msg_id) {
 	REDIS_PROC_PROLOG(redis);
 

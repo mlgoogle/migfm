@@ -14,6 +14,8 @@
 #define TIME_CHECK_CONNECT    10025//检测连接
 #define TIME_CHECK_WEATCHER   10026//检测天气
 #define TIME_ROBOT_LIVE       10027//检测用户的活跃度
+#define TIME_HANDSEL_SONG     10028//赠送主体歌曲 -- 一天赠送两次，每次赠送一首歌曲
+#define TIME_LUCK_GIFT        10029//测试幸运礼物
 namespace robot_logic{
 
 
@@ -34,6 +36,9 @@ bool RobotManager::InitDefaultPlatformInfo(){
 	std::string platform_name = "miu";
 	robot_base::PlatformInfo platforminfo(platform_id,platform_name);
 	CacheManagerOp::GetRobotCacheMgr()->SetPlatformInfo(platform_id,platforminfo);
+	CacheManagerOp::GetCacheManagerOp();
+	//获取幸运礼物
+	CacheManagerOp::FetchLuckGiftDB();
 	return true;
 }
 
@@ -54,14 +59,9 @@ bool RobotManager::Init(){
 	robot_mgr_.reset(new robot_logic::RobotConnection());
 	robot_song_mgr_.reset(new robot_logic::RobotSongMgr());
 	robot_weather_mgr_.reset(new robot_logic::RobotWeatherMgr());
+	util_mgr_.reset(new robot_logic::UtilMgr());
 	/*chat_storage::MemComm::Init(config->mem_list_);*/
 
-/*
-	usr_connection_mgr_.reset(new chat_logic::UserConnectionMgr());
-	ims_mgr_.reset(new chat_logic::IMSMgr());
-	file_mgr_.reset(new chat_logic::FileMgr());
-	base::SysRadom::GetInstance()->InitRandom();
-*/
 	return true;
 }
 
@@ -118,12 +118,13 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 		break;
 	case NOTICE_USER_LOGIN:
 		robot_mgr_.get()->OnUserLogin(srv,socket,packet);
+		break;
 	case ROBOT_LOGIN:
 		robot_mgr_.get()->OnRobotLogin(srv,socket,packet);
 		robot_song_mgr_.get()->OnRobotLoginSong(srv,socket,packet);
 		break;
 	case NOTICE_USER_DEFAULT_SONG:
-		robot_song_mgr_.get()->OnUserDefaultSong(srv,socket,packet);
+		//robot_song_mgr_.get()->OnUserDefaultSong(srv,socket,packet);
 		break;
 	case NOTICE_USER_CURRENT_SONG:
 		robot_song_mgr_.get()->OnNoticeUserChangerSong(srv,socket,packet);
@@ -131,8 +132,11 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 	case ASSISTANT_LOGIN_SUCCESS:
 		scheduler_mgr_.get()->OnNoticeAssistant(srv,socket,packet);
 		break;
+	case NOTICE_USER_READY_GIFT_LUCK:
+		util_mgr_.get()->OnUserReadyLuckGift(srv,socket,packet);
+		break;
 	case NOTICE_USER_ROBOT_CHAT_LOGIN:
-		robot_mgr_.get()->OnRobotChatLogin(srv,socket,packet);
+		//robot_mgr_.get()->OnRobotChatLogin(srv,socket,packet);
 		break;
 	default:
 		break;
@@ -171,6 +175,10 @@ bool RobotManager::OnIniTimer(struct server *srv){
 	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_CONNECT,20,-1);
 	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_WEATCHER,40,-1);
 	srv->add_time_task(srv,PLUGIN_ID,TIME_ROBOT_LIVE,40,-1);
+
+	srv->add_time_task(srv,PLUGIN_ID,TIME_HANDSEL_SONG,30,-1);
+
+	srv->add_time_task(srv,PLUGIN_ID,TIME_LUCK_GIFT,30,1);
 	return true;
 }
 
@@ -185,10 +193,16 @@ bool RobotManager::OnTimeout(struct server *srv, char *id,
 			CacheManagerOp::GetRobotCacheMgr()->Dump();
 		break;
 	case TIME_CHECK_WEATCHER:
-		robot_weather_mgr_.get()->OnPullWeatherInfo();
+		//robot_weather_mgr_.get()->OnPullWeatherInfo();
 		break;
 	case TIME_ROBOT_LIVE:
 		CacheManagerOp::GetRobotCacheMgr()->CheckRobotLive(10000);
+		break;
+	case TIME_HANDSEL_SONG: //100s 检测一次，取随机数，如果被除尽则赠送歌曲，一天次数不能超过5首
+		CacheManagerOp::GetRobotCacheMgr()->RobotHandselSong(10000);
+		break;
+	case TIME_LUCK_GIFT:
+		//util_mgr_->LuckGiftCalculation(1,10108);
 		break;
 	default:
 		LOG_ERROR2("unkown code :%d",opcode);

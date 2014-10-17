@@ -9,6 +9,44 @@
 
 namespace robot_base{
 
+class LuckGiftInfo{
+public:
+	explicit LuckGiftInfo();
+	explicit LuckGiftInfo(const int64 plat,const int32 rate,const int prize);
+
+	LuckGiftInfo(const LuckGiftInfo& luck_gift);
+	LuckGiftInfo& operator = (const LuckGiftInfo& luck_gift);
+
+	const int32 plat() const {return data_->plat_;}
+	const int32 rate() const {return data_->rate_;}
+	const int32 prize() const {return data_->prize_;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(1)
+			,plat_(0)
+			,rate_(0)
+			,prize_(0){}
+		Data(const int64 plat,const int32 rate,const int prize)
+			:refcount_(1)
+			,plat_(plat)
+			,rate_(rate)
+			,prize_(prize){}
+
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
+	public:
+		const int32          plat_;
+		const int32    		 rate_;
+		const int32          prize_;
+	private:
+		int                  refcount_;
+	};
+	Data*                    data_;
+};
+
+
 class PlatformInfo{
 public:
 	explicit PlatformInfo();
@@ -39,6 +77,47 @@ private:
 
 	Data*                    data_;
 };
+
+
+class UserInfo{
+public:
+	explicit UserInfo();
+	explicit UserInfo(const int64 uid);
+
+	UserInfo(const UserInfo& userinfo);
+	UserInfo& operator = (const UserInfo& userinfo);
+
+	void set_type_id(const int32 type_id){data_->type_id_ = type_id;}
+	void set_mode(const std::string& mode){data_->mode_ = mode;}
+
+	const int64 uid() const {return data_->uid_;}
+	const int32 type_id() const {return data_->type_id_;}
+	const std::string& mode() const {return data_->mode_;}
+
+private:
+	class Data{
+	public:
+		Data():refcount_(1)
+			,uid_(0){}
+		Data(const int64 uid)
+			:refcount_(1)
+			,uid_(uid){}
+
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
+
+	public:
+		int64            uid_;
+		int32            type_id_;
+		std::string      mode_;
+
+	private:
+		int                  refcount_;
+	};
+
+	Data*                  data_;
+};
+
 
 class UserLbsInfo{
 public:
@@ -170,7 +249,7 @@ public:
 	const time_t send_last_time() const {return data_->send_last_time_;}
 	const time_t recv_last_time() const {return data_->recv_last_time_;}
 	const int32 send_error_count() const {return data_->send_error_count_;}
-	const std::map<int64,int64>& follow_uid() const {return data_->follow_map_; }
+	std::map<int64,int64>& follow_uid() const  {return data_->follow_map_; }
 	const time_t follower_user_last_time() const {return data_->follower_user_last_time_;}
 
 
@@ -194,12 +273,18 @@ public:
 	void add_hello_task_count(){data_->say_hello_count_++;add_task_count();}
 	void add_listen_task_count(){data_->listen_task_count_++;add_task_count();}
 
+	bool check_song_task();
+
 
 	void add_send_error_count(){data_->send_error_count_++;}
 private:
 		class Data{
 		public:
 			Data():refcount_(1)
+				,task_count_(0)
+				,song_task_count_(0)
+				,say_hello_count_(0)
+				,listen_task_count_(0)
 				,uid_(0)
 				,sex_(0)
 				,latitude_(0)

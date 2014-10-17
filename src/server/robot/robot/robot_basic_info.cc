@@ -5,6 +5,34 @@
 
 namespace robot_base{
 
+LuckGiftInfo::LuckGiftInfo(){
+	data_ = new Data();
+}
+
+LuckGiftInfo::LuckGiftInfo(const int64 plat,const int32 rate,const int prize){
+	data_ = new Data(plat,rate,prize);
+}
+
+LuckGiftInfo::LuckGiftInfo(const LuckGiftInfo& luck_gift)
+:data_(luck_gift.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+LuckGiftInfo& LuckGiftInfo::operator =(const LuckGiftInfo& luck_gift){
+
+	if (luck_gift.data_!=NULL){
+		luck_gift.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = luck_gift.data_;
+	return *this;
+}
+
+
 
 SchedulerInfo::SchedulerInfo(){
 	data_ = new Data();
@@ -31,6 +59,34 @@ SchedulerInfo& SchedulerInfo::operator =(const SchedulerInfo& scheduler_info){
 		data_->Release();
 	}
 	data_ = scheduler_info.data_;
+	return *this;
+}
+
+
+UserInfo::UserInfo(){
+	data_ = new Data();
+}
+
+UserInfo::UserInfo(const int64 uid){
+	data_ = new Data(uid);
+}
+
+UserInfo::UserInfo(const UserInfo& userinfo)
+:data_(userinfo.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+UserInfo& UserInfo::operator =(const UserInfo& userinfo){
+
+	if (userinfo.data_!=NULL){
+		userinfo.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = userinfo.data_;
 	return *this;
 }
 
@@ -64,6 +120,11 @@ RobotBasicInfo& RobotBasicInfo::operator =(const RobotBasicInfo& robot_info){
 	return *this;
 }
 
+bool RobotBasicInfo::check_song_task(){
+	if((time(NULL)/(data_->song_task_count_+1)==0)&& data_->song_task_count_<5)
+		return true;
+	return false;
+}
 
 PlatformInfo::PlatformInfo(){
     data_ = new Data();

@@ -19,6 +19,8 @@ int NoticeUserCurrentSong(const int socket,const int64 platform_id,const int64 u
 int NoticeRobotLogin(const int socket,const int64 platform_id,const int64 uid,
 					const int64 robotid);//通知机器人登陆聊天服务器
 
+int NoticeUserGiftLuck(const int socket,const int64 platform_id,const int64 uid,
+			const int64 songid,const int plat);//通知用户完成分享开始抽奖
 #ifdef __cplusplus 
 }
 #endif

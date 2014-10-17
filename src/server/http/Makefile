@@ -197,7 +197,7 @@ weixin.o:
 ######################sociality###############################################
 socialityproc:setuserconfigofpush.fcgi presentsong.fcgi getpushmsg.fcgi\
 	getpushmsgsummary.fcgi sayhello.fcgi commentsong.fcgi get_comment.fcgi\
-	getmusicuser.fcgi getshareinfo.fcgi
+	getmusicuser.fcgi getshareinfo.fcgi shareresult.fcgi
 
 setuserconfigofpush.fcgi: setuserconfigofpush.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./setuserconfigofpush.fcgi
@@ -243,6 +243,9 @@ getmusicuser.fcgi: getmusicuser.o $(POBJ)
 
 getshareinfo.fcgi: getshareinfo.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./getshareinfo.fcgi
+	
+shareresult.fcgi: shareresult.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./shareresult.fcgi
 	
 	
 ### 编译
@@ -291,9 +294,12 @@ getmusicuser.o:
 	
 getshareinfo.o:
 	$(COMPILE) ./getshareinfo/getshareinfo.cc
+
+shareresult.o:
+	$(COMPILE) ./shareresult/shareresult.cc
 	
 ######################music###################################################
-musicproc: collectsong.fcgi getcltsongs.fcgi delcltsong.fcgi hatsong.fcgi\
+musicproc: collectsong.fcgi getcltsongs.fcgi delcltsong.fcgi hatesong.fcgi\
 	delthsong.fcgi recordcursong.fcgi getdefsongs.fcgi gettypesongs.fcgi\
 	recordlocalsongs.fcgi updateconfigfile.fcgi getuserhis.fcgi songid.fcgi\
 	getword.fcgi word_song.fcgi getlyric.fcgi
@@ -307,7 +313,7 @@ getcltsongs.fcgi: getcltsongs.o $(POBJ)
 delcltsong.fcgi: delcltsong.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./delcltsong.fcgi
 	
-hatsong.fcgi: sethtsong.o $(POBJ)
+hatesong.fcgi: hatesong.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./hatsong.fcgi
 	
 delthsong.fcgi: delthsong.o $(POBJ)
@@ -354,8 +360,8 @@ collectsong.o:
 delcltsong.o:
 	$(COMPILE) ./delcltsong/delcltsong.cc
 	
-sethtsong.o:
-	$(COMPILE) ./sethtsong/sethtsong.cc
+hatesong.o:
+	$(COMPILE) ./hatesong/hatesong.cc
 	
 delthsong.o:
 	$(COMPILE) ./delthsong/delthsong.cc

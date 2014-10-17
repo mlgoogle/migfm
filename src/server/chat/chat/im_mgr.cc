@@ -56,12 +56,12 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	bool r = false;
 
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
-
+/*
 	r = pc->GetUserInfos(private_send->platform_id,private_send->send_user_id,userinfo);
 
 	if(!r)
 		return false;
-
+*/
 	r = chat_logic::LogicUnit::CheckChatToken(userinfo,private_send->token);
 	r = true;
 	if (!r){//password error
@@ -70,12 +70,15 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 		return false;
 	}
 
+	if(private_send->send_user_id!=10000){
+		r = pc->GetUserInfos(private_send->platform_id,private_send->send_user_id,send_user_info);
 
-	r = pc->GetUserInfos(private_send->platform_id,private_send->send_user_id,send_user_info);
-
-	if(!r){
-		senderror(socket,USER_LOGIN_FAILED,0,send_user_info.session(),MIG_CHAT_USER_NO_EXIST);
-		return false;
+		if(!r){
+			senderror(socket,USER_LOGIN_FAILED,0,send_user_info.session(),MIG_CHAT_USER_NO_EXIST);
+			return false;
+		}
+	}else{
+		r = chat_logic::LogicUnit::GetUserInfo(private_send->platform_id,private_send->send_user_id,send_user_info);
 	}
 
 	r = pc->GetUserInfos(private_send->platform_id,private_send->recv_user_id,recv_user_info);

@@ -29,6 +29,9 @@ bool RobotConnection::OnUserLogin(struct server *srv, int socket, struct PacketH
 	if(list.size()<=0)
 		return false;
 
+	//存储用户信息
+	CacheManagerOp::GetRobotCacheMgr()->SetUserInfoLogin(vNoticeUserLogin->platform_id,vNoticeUserLogin->uid);
+
 	//通知机器人调度客户端，机器人登录
 	struct NoticeRobotLogin notice_robot_login;
 	MAKE_HEAD(notice_robot_login, NOTICE_USER_ROBOT_LOGIN,USER_TYPE,0,0);

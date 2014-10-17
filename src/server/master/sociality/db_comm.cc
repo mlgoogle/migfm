@@ -776,6 +776,40 @@ bool DBComm::GetFriendList(const std::string& uid, FriendInfoList& friends) {
 	return false;
 }
 
+bool DBComm::RecordShareInfo(const int64 uid,const int64 songid,const int64 plat){
+
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	  std::stringstream os;
+	  bool r = false;
+	  MYSQL_ROW rows;
+	  if (engine==NULL){
+		  LOG_ERROR("GetConnection Error");
+		  return false;
+	  }
+
+	  //proc_RecordShareLog(uid,songid,plat)
+	  os<<"call proc_RecordShareLog("<<uid<<","<<songid<<","<<plat<<")";
+	  const char* sql = os.str().c_str();
+	  LOG_DEBUG2("[%s]",os.str().c_str());
+	  r = engine->SQLExec(os.str().c_str());
+	  if (!r){
+		  LOG_ERROR2("exec sql error");
+		  return false;
+	  }
+	  int32 num = engine->RecordCount();
+	  if(num>0){
+		  while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			  int reuslt = atol(rows[0]);
+			  if(reuslt==1)
+				  return true;
+		  }
+	  }
+	  return false;
+}
+
 bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
 		std::list<struct MessageListInfo>& message_list){
 

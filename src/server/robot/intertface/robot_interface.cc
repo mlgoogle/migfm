@@ -60,3 +60,16 @@ int NoticeRobotLogin(const int socket,const int64 platform_id,const int64 uid,
 	robot_user_login.robot_id = robotid;
 	sendmessage(socket,&robot_user_login);
 }
+
+int NoticeUserGiftLuck(const int socket,const int64 platform_id,const int64 uid,const int64 songid,
+					const int plat){
+	if(socket<=0)
+		return 0;
+	struct NoticeUserReadyGiftLuck  user_ready_gift_luck;
+	MAKE_HEAD(user_ready_gift_luck,NOTICE_USER_READY_GIFT_LUCK,USER_TYPE,0,0);
+	user_ready_gift_luck.platform_id = platform_id;
+	user_ready_gift_luck.uid = uid;
+	user_ready_gift_luck.songid = songid;
+	user_ready_gift_luck.share_plat = plat;
+	sendmessage(socket,&user_ready_gift_luck);
+}

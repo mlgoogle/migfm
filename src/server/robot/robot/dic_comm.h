@@ -43,6 +43,7 @@ public:
 	static bool GetBatchInfos(base_storage::DictionaryStorageEngine*engine,
 	                      const std::string& command,std::list<std::string>& batchinfolist);
 
+
 	static base_storage::CommandReply* _CreateReply(redisReply* reply);
 
 private:

@@ -147,7 +147,7 @@ bool SomeUtils::SendMessage(int socket, struct PacketHead *packet,
 	}
 
 	//LOG_DEBUG2("opcode[%d]\n",packet->operate_code);
-	//ProtocolPack::DumpPacket(packet);
+	ProtocolPack::DumpPacket(packet);
 	ret = SendFull (socket, (char *) packet_stream, packet_stream_length);
 	//ProtocolPack::HexEncode(packet_stream,packet_stream_length);
 	if (ret != packet_stream_length) {

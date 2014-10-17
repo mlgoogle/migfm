@@ -2,6 +2,7 @@
 #include "robot_basic_info.h"
 #include "db_comm.h"
 #include "dic_comm.h"
+#include "basic/base64.h"
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
@@ -216,13 +217,18 @@ bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::Rob
 	//清理对应的机器人信息
 	for(std::map<int64,int64>::iterator it = follow_uid.begin();it!=follow_uid.end();++it){
 		//获取用户信息
-		int64 uid = it->second;
+		int64 uid = it->first;
+
+		//删除用户信息
+		base::MapDel<UserInfoMap,UserInfoMap::iterator>(pc->user_infos_,uid);
+
 		RobotInfosMap robotinfos;
 		base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(pc->user_follow_infos_,uid,robotinfos);
 		if(robotinfos.size()<=0)
 			continue;
 		//删除跟随机器人
 		base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(robotinfos,robotinfo.uid());
+
 		//检测是否是最后一个
 		if(robotinfos.size()==0)
 			base::MapDel<UserFollowMap,UserFollowMap::iterator>(pc->user_follow_infos_,uid);
@@ -230,6 +236,7 @@ bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::Rob
 	//从正在使用中放入空闲的底部
 	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->used_robot_infos_,robotinfo.uid());
 	base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->idle_robot_infos_,robotinfo.uid(),robotinfo);
+
 	return true;
 }
 
@@ -240,7 +247,7 @@ void RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,int 
 		return ;
 	//获取用户是否存在
 	robot_base::UserBasicInfo userinfo;
-	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	bool r = base::MapGet<UserBasicMap,UserBasicMap::iterator,robot_base::UserBasicInfo>(pc->user_basic_infos_,uid,userinfo);
 	if(!r){//不存在
 		robot_base::UserBasicInfo temp_info(uid);
 		userinfo = temp_info;
@@ -252,9 +259,8 @@ void RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,int 
 			//放入队列
 			return;
 	}
-	//将当前音乐状态写入用户信息中
 	userinfo.set_last_weather_status(current_weather);
-	base::MapAdd<UserInfoMap,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	base::MapAdd<UserBasicMap,robot_base::UserBasicInfo>(pc->user_basic_infos_,uid,userinfo);
 }
 
 bool RobotCacheManager::GetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,
@@ -264,7 +270,7 @@ bool RobotCacheManager::GetUserAddressInfo(const int64 platform_id,const int64 u
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
 		return false;
-	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	bool r = base::MapGet<UserBasicMap,UserBasicMap::iterator,robot_base::UserBasicInfo>(pc->user_basic_infos_,uid,userinfo);
 	if(!r)
 		return false;
 	city = userinfo.city();
@@ -283,7 +289,7 @@ bool RobotCacheManager::SetUserAddressInfo(const int64 platform_id,const int64 u
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
 		return false;
-	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	bool r = base::MapGet<UserBasicMap,UserBasicMap::iterator,robot_base::UserBasicInfo>(pc->user_basic_infos_,uid,userinfo);
 	if(!r)
 		return false;
 	userinfo.set_city(city);
@@ -299,7 +305,7 @@ bool RobotCacheManager::IsPushMessageDay(const int64 platform_id,const int64 uid
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
 		return false;
-	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	bool r = base::MapGet<UserBasicMap,UserBasicMap::iterator,robot_base::UserBasicInfo>(pc->user_basic_infos_,uid,userinfo);
 	if(!r)
 		return false;
 	//获取当前时间
@@ -316,7 +322,7 @@ bool RobotCacheManager::SetUserPushMessageDay(const int64 platform_id,const int6
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
 		return false;
-	bool r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	bool r = base::MapGet<UserBasicMap,UserBasicMap::iterator,robot_base::UserBasicInfo>(pc->user_basic_infos_,uid,userinfo);
 	if(!r)
 		return false;
 	//获取当前时间
@@ -324,7 +330,32 @@ bool RobotCacheManager::SetUserPushMessageDay(const int64 platform_id,const int6
 	 struct tm* local = localtime(&current);
 	 userinfo.set_push_month(local->tm_mon+1);
 	 userinfo.set_push_day(local->tm_mday);
-	 return base::MapAdd<UserInfoMap,robot_base::UserBasicInfo>(pc->user_infos_,uid,userinfo);
+	 return base::MapAdd<UserBasicMap,robot_base::UserBasicInfo>(pc->user_basic_infos_,uid,userinfo);
+}
+
+bool RobotCacheManager::SetUserInfoLogin(const int64 platform_id,const int64 uid){
+	robot_logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	robot_base::UserInfo userinfo(uid);
+	if(pc==NULL)
+		return false;
+	 return base::MapAdd<UserInfoMap,robot_base::UserInfo>(pc->user_infos_,uid,userinfo);
+}
+
+bool RobotCacheManager::SetUserListenState(const int64 platform_id,const int64 uid,const int32 type_id,
+		const std::string& mode){
+	bool r = false;
+	robot_logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	robot_base::UserInfo userinfo;
+	if(pc==NULL)
+		return false;
+	r =  base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserInfo>(pc->user_infos_,uid,userinfo);
+	if(!r)
+		return r;
+	userinfo.set_mode(mode);
+	userinfo.set_type_id(type_id);
+	return base::MapAdd<UserInfoMap,robot_base::UserInfo>(pc->user_infos_,uid,userinfo);
 }
 
 bool RobotCacheManager::GetIdleAssistant(const int64 platform_id,robot_base::RobotBasicInfo& assistant){
@@ -378,6 +409,52 @@ bool RobotCacheManager::SendAssistantHandlseSong(const int64 platform_id,std::li
 	notice_assistant_handselsong.list = list;
 	return sendmessage(assistant.socket(),&notice_assistant_handselsong);
 }
+
+bool RobotCacheManager::SendAssistantLuckGift(const int64 platform_id,const int64 uid,
+		const int32 share_plat,const int32 prize,const int64 songid){
+	robot_logic::RLockGd lk(lock_);
+	bool r = false;
+	std::string music_str;
+	std::string b64title;
+	std::string b64artist;
+	base::MusicInfo musicinfo;
+	robot_base::RobotBasicInfo assistant;
+	if(prize==0)
+		return true;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->assistant_,10000,assistant);
+	if(!r)
+		return false;
+	//获取歌曲信息
+	r = robot_storage::RedisComm::GetMusicInfos(songid,music_str);
+	if(r){
+		musicinfo.UnserializedJson(music_str);
+		Base64Decode(musicinfo.title(),&b64title);
+		Base64Decode(musicinfo.artist(),&b64artist);
+	}else{
+		b64title = "未知";
+		b64artist = "佚名";
+	}
+
+	//通过助手小哟聊天形式 通知用户中奖=
+	struct NoticeUserRobotGiftLuck gift_luck;
+	MAKE_HEAD(gift_luck, NOTICE_USER_ROBOT_GIFT_LUCK,USER_TYPE,0,0);
+	gift_luck.platform_id = 10000;
+	gift_luck.uid = uid;
+	gift_luck.share_plat = share_plat;
+	gift_luck.prize = prize;
+	memset(&gift_luck.singer,'\0',SINGER_LEN);
+	snprintf(gift_luck.singer, arraysize(gift_luck.singer),
+						"%s",b64artist.c_str());
+	memset(&gift_luck.name,'\0',NAME_LEN);
+	snprintf(gift_luck.name, arraysize(gift_luck.name),
+						"%s",b64title.c_str());
+	return sendmessage(assistant.socket(),&gift_luck);
+}
+
+
 
 bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
 	robot_logic::RLockGd lk(lock_);
@@ -447,6 +524,53 @@ bool RobotCacheManager::SchedulerSendMessage(const int64 platform_id,struct Pack
 
 	LOG_DEBUG2("scheduler socket %d",scheduler_info.socket());
 	return sendmessage(scheduler_info.socket(),packet);
+}
+
+bool RobotCacheManager::RobotHandselSong(const int64 platform_id){
+	bool r = false;
+	robot_logic::WLockGd lk(lock_);
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	//遍历使用机器人MAP
+	for(RobotInfosMap::iterator it = pc->used_robot_infos_.begin();
+			it!=pc->used_robot_infos_.end();it++){
+		robot_base::RobotBasicInfo robotinfo = it->second;
+		//查找主体机器人
+		for(std::map<int64,int64>::iterator  itr = robotinfo.follow_uid().begin();
+				itr!=robotinfo.follow_uid().end();itr++){
+			//获取用户信息
+			robot_base::UserInfo userinfo;
+			r = base::MapGet<UserInfoMap,UserInfoMap::iterator,robot_base::UserInfo>(pc->user_infos_,
+					itr->first,userinfo);
+			if(!r)
+				continue;
+			//检测是否赠送
+			if(1){
+				std::list<std::string> songinfolist;
+				std::map<std::string,base::MusicInfo>  musicinfomap;
+				std::list<int64> list;
+				std::stringstream os;
+				GetTypeRamdon(pc,userinfo.mode(),userinfo.type_id(),1,list);
+				//获取音乐信息
+				os<<userinfo.mode()<<"_r"<<userinfo.type_id();
+				r = robot_storage::RedisComm::GetBatchMusicInfos(os.str(),list,songinfolist);
+				if(songinfolist.size()<=0)
+					continue;
+				robot_logic::LogicUnit::FormateMusicInfo(songinfolist,musicinfomap);
+				if(musicinfomap.size()<=0)
+					continue;
+				struct NoticeUserRobotHandselSong notice_handsel_song;
+				MAKE_HEAD(notice_handsel_song, NOTICE_USER_ROBOT_HANDSEL_SONG,USER_TYPE,0,0);
+				notice_handsel_song.platform_id = platform_id;
+				notice_handsel_song.uid = itr->first;
+				notice_handsel_song.robot_id = robotinfo.uid();
+				notice_handsel_song.song_id = atoll(musicinfomap.begin()->second.id().c_str());
+				sendrobotmssage(robotinfo,&notice_handsel_song);
+				robotinfo.add_song_task_count();
+			}
+		}
+	}
 }
 
 void RobotCacheManager::CheckRobotLive(const int64 platform_id){
@@ -746,10 +870,26 @@ bool RobotCacheManager::GetTypeRamdon(PlatformCache* pc,const std::string& type,
 /****************CacheManagerOp*****************/
 CacheManagerOp::CacheManagerOp() {
 	InitThreadrw(&lock_);
+	SetPrize();
 }
 
 CacheManagerOp::~CacheManagerOp() {
 	DeinitThreadrw(lock_);
+	if(prize_){
+		delete prize_;
+		prize_ = NULL;
+	}
+}
+
+
+bool CacheManagerOp::SetPrize(){
+	prize_ = new PrizeRate();
+	return true;
+}
+
+int CacheManagerOp::GetPrize(pluck_prize prize_info,int count){
+	robot_logic::RLockGd lk(lock_);
+	return prize_->GetPrize(prize_info,count);
 }
 
 bool CacheManagerOp::SetRobotInfo(const int socket,const robot_base::RobotBasicInfo& robotinfo){
@@ -767,5 +907,29 @@ bool CacheManagerOp::GetRobotInfo(const int socket,robot_base::RobotBasicInfo& r
 	return base::MapGet<SocketRobotInfosMap,SocketRobotInfosMap::iterator,robot_base::RobotBasicInfo>(socket_robot_map_,socket,robotinfo);
 }
 
+bool CacheManagerOp::SetLuckGiftInfo(robot_base::LuckGiftInfo* luck){
+	bool r = false;
+	LuckGiftInfoPlatMap plat_map;
+	robot_logic::WLockGd lk(lock_);
+	//查找该平台是已经存在
+	r = base::MapGet<LuckGiftInfoMap,LuckGiftInfoMap::iterator,LuckGiftInfoPlatMap>(luck_gift_infos_,luck->plat(),plat_map);
+
+	//存在则添加
+	plat_map[luck->prize()] = luck;
+	//放入map
+	return base::MapAdd<LuckGiftInfoMap,int,LuckGiftInfoPlatMap>(luck_gift_infos_,luck->plat(),plat_map);
+}
+
+
+bool CacheManagerOp::GetLuckGiftInfo(const int plat,LuckGiftInfoPlatMap& luck_gift_map_){
+	bool r = false;
+	robot_logic::RLockGd lk(lock_);
+	return base::MapGet<LuckGiftInfoMap,LuckGiftInfoMap::iterator,LuckGiftInfoPlatMap>(luck_gift_infos_,plat,luck_gift_map_);
+
+}
+
+bool CacheManagerOp::FetchLuckGiftDB(){
+	return robot_storage::DBComm::GetLuckGiftInfo(cache_manager_op_);
+}
 
 }

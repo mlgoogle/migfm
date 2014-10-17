@@ -394,6 +394,37 @@ bool DBComm::GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list,co
 	return false;
 }
 
+bool DBComm::GetLuckGiftInfo(robot_logic::CacheManagerOp* global_mgr){
+	std::stringstream os;
+	bool r = false;
+	int num = 0;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	os<<"call migfm.proc_GetLuckGiftInfo()";
+	r = engine->SQLExec(os.str().c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+	num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			int32 plat = atol(rows[0]);
+			int32 rate = atol(rows[1]);
+			int32 prize = atol(rows[2]);
+			robot_base::LuckGiftInfo* luck_gift = new robot_base::LuckGiftInfo(plat,rate,prize);
+			//存储
+			global_mgr->SetLuckGiftInfo(luck_gift);
+		}
+		return true;
+	}
+	return false;
+}
+
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
 	try{

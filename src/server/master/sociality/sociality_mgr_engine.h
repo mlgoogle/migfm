@@ -90,6 +90,9 @@ private:
 	bool OnMsgGetShareMessage(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code,const int socket,int& flag);
 
+	bool OnMsgGitfLuckMessage(packet::HttpPacket& packet, Json::Value &result,
+				int &status, int &err_code);
+
 private:
 	bool CheckAndTransHMTime(const std::string &str, unsigned &time);
 
@@ -142,6 +145,7 @@ private:
 
 	bool GetPushMessage(const int64 uid,const int64 page_index,const int64 page_size,
 			Json::Value &info);
+
 private:
 	void MakeJsonPacket(struct MessageListInfo* msg,Json::Value &info);
 
@@ -150,6 +154,8 @@ private:
 	void MakeJsonUserinfoPacket(struct MessageListInfo* msg,Json::Value &info);
 
 	void MakeJsonMusicPacket(struct MessageListInfo* msg,Json::Value &info);
+private:
+	int                                              robot_server_socket_;
 };
 
 }

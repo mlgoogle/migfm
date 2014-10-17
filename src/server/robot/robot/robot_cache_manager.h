@@ -3,6 +3,7 @@
 
 #include "logic_unit.h"
 #include "robot_basic_info.h"
+#include "prize_rate.h"
 #include "base/comm_head.h"
 #include "base/thread_handler.h"
 #include "base/thread_lock.h"
@@ -26,6 +27,7 @@ public:
 	std::map<int,base::MigRadomInV2*>                       mood_random_map_;
 	std::map<int,base::MigRadomInV2*>                       scene_random_map_;
 	RobotInfosMap                                           assistant_;
+	UserBasicMap                                            user_basic_infos_;
 	UserInfoMap                                             user_infos_;
 
 };
@@ -43,6 +45,10 @@ public:
 	bool GetIdleRobot(const int64 platform_id,const int64 uid,const double latitude,const double longitude,
 			 std::list<robot_base::RobotBasicInfo>& list);
 
+	bool SetUserInfoLogin(const int64 platform_id,const int64 uid);
+
+	bool SetUserListenState(const int64 platform_id,const int64 uid,const int32 type_id,const std::string& mode);
+
 	bool GetIdleAssistant(const int64 platform_id,robot_base::RobotBasicInfo& assistant);
 
 	bool NoticeAssistantLogin(const int64 platform_id);
@@ -52,6 +58,9 @@ public:
 	bool GetAssistantInfo(const int64 platform_id,const int64& uid,robot_base::RobotBasicInfo& assistant);
 
 	bool SendAssistantHandlseSong(const int64 platform_id,std::list<struct HandleSongInfo*>& list);
+
+	bool SendAssistantLuckGift(const int64 platform_id,const int64 uid,const int32 share_plat,
+			const int32 prize,const int64 songid);
 
 	bool GetUserFollower(const int64 platform_id,const int64 uid,RobotInfosMap& robotinfos);
 
@@ -100,6 +109,10 @@ public:
 	bool GetUsedRobotInfo(const int64 platform_id,const int64 uid,robot_base::RobotBasicInfo& robotinfo);
 
 	bool GetIdelRobotInfo(const int64 platform_id,const int64 uid,robot_base::RobotBasicInfo& robotinfo);
+
+	bool RobotHandselSong(const int64 platform_id);
+
+
 
 	void Dump();
 
@@ -162,13 +175,24 @@ public:
 		delete cache_manager_op_;
 	}
 
+	static bool FetchLuckGiftDB();
+
 public:
+	//中奖率操作
+	bool SetLuckGiftInfo(robot_base::LuckGiftInfo* luck);
+	bool GetLuckGiftInfo(const int plat,LuckGiftInfoPlatMap& luck_gift_map_);
+
+	bool SetPrize();
+	int  GetPrize(pluck_prize prize_info,int count);
+
 	bool SetRobotInfo(const int socket,const robot_base::RobotBasicInfo& robotinfo);
 	bool GetRobotInfo(const int socket,robot_base::RobotBasicInfo& robotinfo);
 	bool DelRobotInfo(const int socket);
 private:
+	LuckGiftInfoMap                            luck_gift_infos_;
 	SocketRobotInfosMap                        socket_robot_map_;
 	struct threadrw_t*                         lock_;
+	PrizeRate*                                 prize_;
 
 
 };

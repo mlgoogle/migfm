@@ -2,10 +2,13 @@
 #define __ROBOT_DB_COMM_H__
 
 #include "logic_unit.h"
+#include "robot_cache_manager.h"
 #include "base/logic_comm.h"
 #include "basic/basictypes.h"
 #include "storage/storage.h"
 #include "basic/basic_info.h"
+
+//class robot_logic::CacheManagerOp;
 
 namespace robot_storage{
 
@@ -37,6 +40,8 @@ public:
 
 	static bool GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list,const int from,
 			const int count);
+
+	static bool GetLuckGiftInfo(robot_logic::CacheManagerOp* global_mgr);
 
 
 public:

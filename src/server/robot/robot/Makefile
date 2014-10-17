@@ -38,7 +38,7 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output:	robot_cache_manager.o robot_manager.o robot_basic_info.o  robot_connection.o robot_song_mgr.o scheduler_mgr.o protocol.o \
+output:	robot_cache_manager.o robot_manager.o prize_rate.o robot_basic_info.o  robot_connection.o robot_song_mgr.o util_mgr.o scheduler_mgr.o protocol.o \
 		robot_init.o http_method.o robot_weather_mgr.o db_comm.o dic_comm.o basictypes.o basic_util.o logic_unit.o logic_comm.o thread_handler.o thread_lock.o\
 		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
 		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o  base64.o
@@ -68,6 +68,9 @@ robot_song_mgr.o:
 robot_weather_mgr.o:
 	$(COMPILE) ./robot_weather_mgr.cc
 
+util_mgr.o:
+	$(COMPILE) ./util_mgr.cc
+	
 scheduler_mgr.o:
 	$(COMPILE) ./scheduler_mgr.cc
 
@@ -94,6 +97,9 @@ file_mgr.o:
 
 im_mgr.o:
 	$(COMPILE) ./im_mgr.cc
+
+prize_rate.o:
+	$(COMPILE) ./prize_rate.cc
 	
 logic_comm.o:
 	$(COMPILE) ./../base/logic_comm.cc

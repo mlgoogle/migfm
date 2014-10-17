@@ -22,10 +22,14 @@ static char *PLUGIN_PROVIDER = "kerry";
 typedef std::map<int64,robot_base::RobotBasicInfo> RobotInfosMap;
 typedef std::map<int64,RobotInfosMap> UserFollowMap;
 typedef std::map<int,robot_base::SchedulerInfo> SchedulerMap;
-typedef std::map<int64,robot_base::UserBasicInfo> UserInfoMap;
-
+typedef std::map<int64,robot_base::UserBasicInfo> UserBasicMap;
+typedef std::map<int64,robot_base::UserInfo> UserInfoMap;
 typedef std::map<int,robot_base::RobotBasicInfo>  SocketRobotInfosMap;
 typedef std::map<int,robot_base::SchedulerInfo>  SocketSchedulerMap;
+
+//
+typedef std::map<int,robot_base::LuckGiftInfo* >      LuckGiftInfoPlatMap;
+typedef std::map<int,LuckGiftInfoPlatMap>           LuckGiftInfoMap;
 
 //便于不可之前场景冲突 故+100
 

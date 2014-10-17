@@ -70,6 +70,8 @@ public:
 	static bool GetShareInfo(const int64 songid,const std::string& mode,const std::string& index,
 				std::string& lyric,std::string& description);
 
+	static bool RecordShareInfo(const int64 uid,const int64 songid,const int64 plat);
+
 	struct FriendInfo {
 		std::string uid;
 		std::string name;

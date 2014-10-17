@@ -2,6 +2,7 @@
 #include "db_comm.h"
 #include "dic_comm.h"
 #include "logic_comm.h"
+#include "intertface/robot_interface.h"
 #include "lbs/lbs_connector.h"
 #include "weather/weather_engine.h"
 #include "basic/constants.h"
@@ -77,6 +78,7 @@ bool SocialityMgrEngine::OnBroadcastClose(struct server *srv, int socket){
 
 bool SocialityMgrEngine::OnBroadcastConnect(struct server *srv, int socket, 
 									  void *data, int len){
+	robot_server_socket_ = socket;
     return true;
 }
 
@@ -162,6 +164,8 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 		OnMsgGetMusicFriend(packet,root,ret_status, err_code);
 	} else if(type=="getshareinfo"){
 		OnMsgGetShareMessage(packet, root, ret_status, err_code,socket,flag);
+	}else if(type=="shareresult"){
+		OnMsgGitfLuckMessage(packet,root,ret_status,err_code);
 	}else {
 		return true;
 	}
@@ -544,6 +548,55 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 	return true;
 }
 
+//uid,share_plat,songid
+bool SocialityMgrEngine::OnMsgGitfLuckMessage(packet::HttpPacket& packet, Json::Value &result,
+				int &status, int &err_code){
+	LOGIC_PROLOG();
+	bool r = false;
+	std::string str_uid;
+	std::string str_songid;
+	std::string str_share_plat;
+	std::string token;
+	Json::Value &content = result["result"];
+	if (!packet.GetAttrib("uid",str_uid)){
+		err_code = MIG_FM_HTTP_USER_NO_EXITS;
+		return false;
+	}
+
+	if (!packet.GetAttrib("songid",str_songid)){
+		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
+		return false;
+	}
+	if (!packet.GetAttrib("share_plat",str_share_plat)){
+		err_code = MIG_FM_SHARE_TYPE;
+		return false;
+	}
+	if (!packet.GetAttrib("token",token)){
+		err_code = MIG_FM_NO_TOKEN;
+		return false;
+	}
+
+	//检测token
+	r = base::BasicUtil::CheckUserToken(str_uid,token);
+	if(!r){
+		err_code = MIG_FM_TOKEN_ERRNO;
+		return false;
+	}
+	//检测此用户是否已经此歌词再此平台分享过 分享过变不能参与抽奖
+
+	r = mig_sociality::DBComm::RecordShareInfo(atoll(str_uid.c_str()),
+			atoll(str_songid.c_str()),atoll(str_share_plat.c_str()));
+
+	//通知机器人服务器
+	if(r)
+		NoticeUserGiftLuck(robot_server_socket_,10000,atoll(str_uid.c_str()),
+				atoll(str_songid.c_str()),
+				atoll(str_share_plat.c_str()));
+	status = 1;
+	return true;
+}
+
+
 bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code,const int socket,int& flag){
 	LOGIC_PROLOG();
@@ -622,11 +675,11 @@ bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::
 	std::string res = wr.write(result);
 	SomeUtils::SendFull(socket, res.c_str(), res.length());
 	flag = 1;
-	//存储
-	//抽奖
+
 	return true;
 
 }
+
 
 bool SocialityMgrEngine::RecordMessage(const std::string& send_uid,const std::string& to_uid,
 		                             const std::string& msg,std::string& summary,
