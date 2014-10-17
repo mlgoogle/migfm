@@ -375,13 +375,14 @@ bool BasicUtil::CheckUserToken(const std::string& uid,const std::string& token){
 	key.append("token");
 	r = base_storage::MemDic::GetString(key.c_str(),key.length(),
 		                            &mem_value,&mem_value_length);
-	if (r)
-		r = (strcmp(mem_value,token.c_str())==0)?true:false;
+	if (!r)
+		return false;
+	r = (strcmp(mem_value,token.c_str())==0)?true:false;
 	if (mem_value){
 		delete [] mem_value;
 		mem_value = NULL;
 	}
-	return false;
+	return true;
 }
 
 bool BasicUtil::ConverNum(const int num,std::string& conver_num){

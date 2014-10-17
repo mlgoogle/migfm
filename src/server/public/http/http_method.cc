@@ -162,12 +162,19 @@ bool HttpMethodPost::Post(const char* post,const int port,bool on_error){
 	goto out;
     }
 
+    curl_code = curl_easy_setopt(curl, CURLOPT_POST, 1);
+    if(curl_code != CURLE_OK){
+        MIG_ERROR(USER_LEVEL,"curl_easy_setopt CURLOPT_POST failed %s",
+            curl_easy_strerror(curl_code));
+    }
+
     curl_code = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post);
     if(curl_code != CURLE_OK){
         MIG_ERROR(USER_LEVEL,"curl_easy_setopt CURLOPT_POSTFILELDS failed %s",
             curl_easy_strerror(curl_code));
         goto out;
     }
+    MIG_DEBUG(USER_LEVEL,"post %s",post);
 	
     curl_content.code_ = 0;
     curl_content.content_ = &content_;

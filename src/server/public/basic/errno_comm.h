@@ -49,6 +49,8 @@
 #define  MIG_FM_SHARE_TYPE                       -46 //分享类别不存在
 #define  MIG_FM_NO_LYRIC                         -47// 没有歌词
 #define  MIG_FM_NO_LOCATION                      -48// 没有提供坐标
+#define  MIG_FM_NO_TOKEN                         -49// 不含token
+#define  MIG_FM_TOKEN_ERRNO                      -50 //token验证失败或者失效
 const char*
 migfm_strerror(int error_code);
 #endif

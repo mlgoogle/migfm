@@ -97,6 +97,10 @@ migfm_strerror(int error_code){
 		return "没有歌词";
 	case MIG_FM_NO_LOCATION:
 		return "没有提供坐标";
+	case MIG_FM_NO_TOKEN:
+		return "未包含TOKEN";
+	case MIG_FM_TOKEN_ERRNO:
+		return "token验证失败或者失效";
 	default:
 		return "未知错误码";
 	}

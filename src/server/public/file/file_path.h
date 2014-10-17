@@ -10,7 +10,7 @@
 namespace file{
 class FilePath{
 public:
-  typedef std::string StringType;
+    typedef std::string StringType;
 	typedef StringType::value_type CharType;
 	static const CharType kSeparators[];
 	static const CharType kCurrentDirectory[];
