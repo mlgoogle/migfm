@@ -148,6 +148,8 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 bool RobotManager::OnRobotManagerClose(struct server *srv,
 									 const int socket){
 	robot_mgr_.get()->OnClearRobotConnection(socket);
+	scheduler_mgr_.get()->OnDisQuiteScheduler(socket);
+	scheduler_mgr_.get()->OnDisQuiteAssistant(socket);
     return true;
 }
 

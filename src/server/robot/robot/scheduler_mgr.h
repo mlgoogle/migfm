@@ -21,6 +21,8 @@ public:
 
 	bool OnDisQuiteScheduler(const int socket);
 
+	bool OnDisQuiteAssistant(const int socket);
+
 	bool NoticeAssistant();
 };
 }

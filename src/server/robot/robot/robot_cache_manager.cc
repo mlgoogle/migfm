@@ -185,6 +185,8 @@ bool RobotCacheManager::GetUserFollowAllRobot(const int64 platform_id,const int6
 	bool r = base::MapGet<UserFollowMap,UserFollowMap::iterator,RobotInfosMap>(pc->user_follow_infos_,uid,map);
 	if(!r)
 		return false;
+	//机器人客户端可能出现异常问题，客户端会被自动清理，故检测是否在使用里面，若没有，则添加到使用中。并通知其登陆
+	//服务端可能出现异常挂掉，需要重新分配机器人给用户
 	return true;
 }
 
@@ -376,6 +378,16 @@ bool RobotCacheManager::GetAssistantInfo(const int64 platform_id,const int64& ui
 	return base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->assistant_,uid,assistant);
 }
 
+bool RobotCacheManager::DeleteAssistant(const int64 platform_id,const int socket){
+	robot_logic::WLockGd lk(lock_);
+	bool r = false;
+	robot_base::RobotBasicInfo assistant;
+	PlatformCache* pc = GetPlatformCache(platform_id);
+	if(pc==NULL)
+		return false;
+	return base::MapDel<RobotInfosMap,RobotInfosMap::iterator,int64>(pc->robot_socket_,assistant.socket());
+}
+
 bool RobotCacheManager::SetAssistantLogin(const int64 platform_id,const int64 assistant_id,const int32 socket){
 	bool r = false;
 	robot_base::RobotBasicInfo assistant;
@@ -388,7 +400,8 @@ bool RobotCacheManager::SetAssistantLogin(const int64 platform_id,const int64 as
 		return r;
 	assistant.set_login_status(1);
 	assistant.set_socket(socket);
-	return base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->assistant_,assistant_id,assistant);
+	//base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->assistant_,assistant_id,assistant);
+	return base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->robot_socket_,socket,assistant);
 
 }
 
@@ -600,11 +613,13 @@ void RobotCacheManager::CheckSchedulerConnect(const int64 platform_id){
 	if(pc==NULL)
 		return;
 	time_t current_time = time(NULL);
+	LOG_DEBUG2("schduler_infos size %d",pc->schduler_infos_.size());
 	SchedulerMap::iterator it = pc->schduler_infos_.begin();
 	for(;it!=pc->schduler_infos_.end();it++){
 		robot_base::SchedulerInfo scheduler = it->second;
 		//先检测是否超过三次
-		LOG_DEBUG2("robot_info.send_error_count %d",scheduler.send_error_count());
+		LOG_DEBUG2("scheduler.send_error_count %d socket %d",scheduler.send_error_count(),
+				scheduler.socket());
 		if(scheduler.send_error_count()>3){
 			//断掉连接
 			LOG_DEBUG("close connection");
@@ -628,16 +643,24 @@ void RobotCacheManager::CheckSchedulerConnect(const int64 platform_id){
 void RobotCacheManager::ChecAssistantConnect(const int64 platform_id){
 	robot_logic::WLockGd lk(lock_);
 	bool r = false;
+	robot_base::RobotBasicInfo assistant;
 
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return;
 	time_t current_time = time(NULL);
+	LOG_DEBUG2("assistant size %d",pc->assistant_.size());
 	RobotInfosMap::iterator it = pc->assistant_.begin();
 	for(;it!=pc->assistant_.end();it++){
 		robot_base::RobotBasicInfo assistant_info = it->second;
+		//检测是否在调用
+		r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->robot_socket_,
+				assistant_info.socket(),assistant);
+		if(!r)
+			continue;
 		//先检测是否超过三次
-		LOG_DEBUG2("robot_info.send_error_count %d",assistant_info.send_error_count());
+		LOG_DEBUG2("assistant_info.send_error_count %d socket %d",assistant_info.send_error_count(),
+				assistant_info.socket());
 		if(assistant_info.send_error_count()>3){
 			//断掉连接
 			LOG_DEBUG("close connection");

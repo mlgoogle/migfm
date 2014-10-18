@@ -44,4 +44,7 @@ bool SchedulerMgr::OnNoticeAssistant(struct server *srv, int socket, struct Pack
 	return true;
 }
 
+bool SchedulerMgr::OnDisQuiteAssistant(const int socket){
+	return robot_logic::CacheManagerOp::GetRobotCacheMgr()->DeleteAssistant(10000,socket);
+}
 }

@@ -27,6 +27,7 @@ public:
 	std::map<int,base::MigRadomInV2*>                       mood_random_map_;
 	std::map<int,base::MigRadomInV2*>                       scene_random_map_;
 	RobotInfosMap                                           assistant_;
+	RobotInfosMap                                           robot_socket_;
 	UserBasicMap                                            user_basic_infos_;
 	UserInfoMap                                             user_infos_;
 
@@ -57,6 +58,8 @@ public:
 
 	bool GetAssistantInfo(const int64 platform_id,const int64& uid,robot_base::RobotBasicInfo& assistant);
 
+	bool DeleteAssistant(const int64 platform_id,const int socket);
+
 	bool SendAssistantHandlseSong(const int64 platform_id,std::list<struct HandleSongInfo*>& list);
 
 	bool SendAssistantLuckGift(const int64 platform_id,const int64 uid,const int32 share_plat,
@@ -78,6 +81,7 @@ public:
 	bool GetUserFollowTaskRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo);
 
 	bool GetUserFollowAllRobot(const int64 platform_id,const int64 uid,RobotInfosMap& map);
+
 
 	bool ClearRobot(const int64 platform_id,const robot_base::RobotBasicInfo& robotinfo);
 
@@ -133,7 +137,6 @@ private://内置函数，自身不能加锁
 	bool AddUserFollowRobot(UserFollowMap& usr_follow,const int64 uid,const robot_base::RobotBasicInfo& robotinfo);
 
 	bool GetTaskRobot(RobotInfosMap& robot_map,const int32 task,robot_base::RobotBasicInfo& robotinfo);
-
 
 
 private:
