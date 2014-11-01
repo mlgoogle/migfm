@@ -14,6 +14,8 @@
 #define LOCATION_NOT_EXIST                  -8
 #define HEAD_NOT_EXIST                      -9
 #define UID_NOT_EXIST                       -10
+#define TID_NOT_EXIST                       -11
+#define MSGID_NOT_EXIST                     -12
 #define DB_ABNORMAL                         -101
 
 
@@ -29,6 +31,8 @@
 #define LOCATION_NOT_EXIST_STR              "地区不存在"
 #define HEAD_NOT_EXIST_STR                  "头像信息不存在"
 #define UID_NOT_EXIST_STR                   "用户ID不存在"
+#define TID_NOT_EXIST_STR                   "对方ID不存在"
+#define MSGID_NOT_EXIST_STR                 "消息ID不存在"
 #define UNKONW_ERROR                        "未知错误"
 
 const char*

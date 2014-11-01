@@ -1,6 +1,6 @@
 #ifndef _RESTFUL_HTTP_API_H__
 #define _RESTFUL_HTTP_API_H__
-#include "http/http_packet.h"
+#include "protocol/http_packet.h"
 
 namespace base_net{
 
@@ -25,6 +25,13 @@ public:
 
 		//static bool OnBindPush(packet::HttpPacket& packet,std::string& uid,std::string& channel,
 			//	std::string& userid,int& err);
+	};
+
+	class ChatManager{
+		static bool OnGetBestIdle(packet::HttpPacket& packet,std::string& platformid,int& err);
+
+		static bool OnGetHisChat(packet::HttpPacket& packet,std::string& platformid,std::string& uid,
+					std::string& tid,std::string& msgid,std::string& from,std::string& count,int& err);
 	};
 
 };

@@ -96,7 +96,32 @@ bool MYHttpApi::UserManager::OnBindPush(packet::HttpPacket& packet,std::string& 
 }
 */
 
+bool MYHttpApi::ChatManager::OnGetBestIdle(packet::HttpPacket& packet,std::string& platformid,int& err){
+	bool r = false;
+	std::string default_platformid = "10000";
+	PARAM_IS_EXIST_DEFAULTPARAM("platformid",platformid,default_platformid);
+	return true;
 }
+
+bool MYHttpApi::ChatManager::OnGetHisChat(packet::HttpPacket& packet,std::string& platformid,std::string& uid,
+		std::string& tid,std::string& msgid,std::string& from,std::string& count,int& err){
+	bool r = false;
+	std::string default_platformid = "10000";
+	std::string default_from = "0";
+	std::string default_count = "5";
+	PARAM_IS_EXIST_RETURN("uid",uid,UID_NOT_EXIST);
+	PARAM_IS_EXIST_RETURN("tid",tid,TID_NOT_EXIST);
+	PARAM_IS_EXIST_RETURN("msgid",tid,MSGID_NOT_EXIST);
+	PARAM_IS_EXIST_DEFAULTPARAM("platformid",platformid,default_platformid);
+	PARAM_IS_EXIST_DEFAULTPARAM("from",from,default_from);
+	PARAM_IS_EXIST_DEFAULTPARAM("count",count,default_count);
+	return true;
+}
+
+}
+
+
+
 
 #undef PARAM_IS_EXIST_RETURN
 #undef PARAM_IS_EXIST_DEFAULTPARAM

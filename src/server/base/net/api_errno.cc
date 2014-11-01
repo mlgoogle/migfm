@@ -23,6 +23,10 @@ http_strerror(int error_code){
 		return HEAD_NOT_EXIST_STR;
 	case UID_NOT_EXIST:
 		return UID_NOT_EXIST_STR;
+	case TID_NOT_EXIST:
+		return TID_NOT_EXIST_STR;
+	case MSGID_NOT_EXIST:
+		return MSGID_NOT_EXIST_STR;
 	default:
 		return UNKONW_ERROR;
 	}

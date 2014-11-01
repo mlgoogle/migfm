@@ -44,7 +44,7 @@ output:	base_db_mysql_auto.o basic_lbs_info.o lbs_baidu_connector.o lbs_connecto
 	http_api.o base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
 	weather_engine.o weather_logic_unit.o\
 	storage.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
-	redis_warrper.o http_method.o\
+	redis_warrper.o http_method.o http_method.o\
 	json_reader.o json_writer.o json_value.o\
 	constants.o basic_info.o basictypes.o basic_util.o
 	$(LINK)
@@ -114,9 +114,13 @@ basic_util.o:
 constants.o:
 	$(COMPILE) $(THIRD_PATH)/basic/constants.cc
 	
-##协议层
+##操作
 http_method.o:
 	$(COMPILE) $(THIRD_PATH)/http/http_method.cc
+	
+##协议层
+http_packet.o:
+	$(COMPILE) $(THIRD_PATH)/protocol/http_method.cc
 	
 ##数据库存储
 mem_storage_impl.o:
