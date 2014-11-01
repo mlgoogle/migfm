@@ -138,6 +138,8 @@ private://内置函数，自身不能加锁
 
 	bool GetTaskRobot(RobotInfosMap& robot_map,const int32 task,robot_base::RobotBasicInfo& robotinfo);
 
+	bool CheckUserFollowAllRobot(PlatformCache* pc,const int64 uid,robot_base::RobotBasicInfo& robot);
+
 
 private:
 	std::map<int64,PlatformCache*>             platform_cache_;

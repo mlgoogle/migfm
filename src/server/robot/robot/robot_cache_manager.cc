@@ -186,7 +186,46 @@ bool RobotCacheManager::GetUserFollowAllRobot(const int64 platform_id,const int6
 	if(!r)
 		return false;
 	//机器人客户端可能出现异常问题，客户端会被自动清理，故检测是否在使用里面，若没有，则添加到使用中。并通知其登陆
+	for(RobotInfosMap::iterator it = map.begin();it!=map.end();it++){
+		robot_base::RobotBasicInfo robot = it->second;
+		CheckUserFollowAllRobot(pc,uid,robot);
+	}
+
 	//服务端可能出现异常挂掉，需要重新分配机器人给用户
+	return true;
+}
+
+bool RobotCacheManager::CheckUserFollowAllRobot(PlatformCache* pc,const int64 uid,robot_base::RobotBasicInfo& robot){
+	//检测是否存在
+	robot_base::RobotBasicInfo robot_basic_info;
+	robot_base::SchedulerInfo scheduler_info;
+	robot_base::UserInfo userinfo;
+	bool r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->used_robot_infos_,
+			robot.uid(),robot_basic_info);
+	if(r)//存在
+		return true;
+
+	//用户放入存储
+	base::MapAdd<UserInfoMap,robot_base::UserInfo>(pc->user_infos_,uid,userinfo);
+	//从空闲表删除放入临时表
+	base::MapDel<RobotInfosMap,RobotInfosMap::iterator>(pc->idle_robot_infos_,robot.uid());
+	//通知调度器改机器人登陆
+	base::MapAdd<RobotInfosMap,robot_base::RobotBasicInfo>(pc->temp_robot_infos_,robot.uid(),robot);
+	//获取调度器
+	scheduler_info = pc->schduler_infos_.begin()->second;
+	struct NoticeRobotLogin notice_robot_login;
+	MAKE_HEAD(notice_robot_login, NOTICE_USER_ROBOT_LOGIN,USER_TYPE,0,0);
+	notice_robot_login.uid = uid;
+	struct RobotInfo* robot_info = new struct RobotInfo;
+	robot_info->uid = robot.uid();
+	robot_info->songid = 0;
+	robot_info->latitude = robot.latitude();
+	robot_info->longitude = robot.longitude();
+	memset(&robot_info->nickname,'\0',NICKNAME_LEN);
+	robot_logic::SomeUtils::SafeStrncpy(robot_info->nickname,NICKNAME_LEN,
+			robot.nickname().c_str(),NICKNAME_LEN);
+	notice_robot_login.robot_list.push_back(robot_info);
+	sendmessage(scheduler_info.socket(),&notice_robot_login);
 	return true;
 }
 
@@ -751,7 +790,7 @@ bool RobotCacheManager::GetRobot(const double latitude,const double longitude,Ro
 		it->second.set_latitude(robot_latitude);
 		it->second.set_longitude(robot_longitude);
 		list.push_back(it->second);
-		//存入临时表中，待机器人登录成功后，放入运行表中
+		//从空闲表引出，存入临时表中，待机器人登录成功后，放入运行表中
 		temp_robot[it->first] = it->second;
 		LOG_DEBUG2("id %lld",it->first);
 		idle_robot.erase(it);
