@@ -40,7 +40,7 @@ bool LBSDBComm::GetBaiduAcessKey(const int64 platform_id,std::list<base_lbs::Bai
 	r = engine->SQLExec(sql.c_str());
 
 	if (!r) {
-		LOG_ERROR("exec sql error");
+		LOG_ERROR2("exec sql error");
 		return false;
 	}
 

@@ -18,12 +18,17 @@ public:
 	virtual void Release();
 	virtual bool GeocoderForAddress(const std::string& latitude,const std::string& longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street);//通过坐标获取地址
+	virtual bool IPtoAddress(const std::string& host,std::string& latitude,std::string& longitude,
+				std::string& city,std::string& district,std::string& province,std::string& street);//通过IP换算坐标
+
+	virtual bool AddressForGeocoder(const std::string& address,double& latitude,double& longitude);//通过位置换算坐标
 private:
 	bool GetIdleAccessToken(base_lbs::BaiDuAccessKey& baidu_access_key);
 	bool RequestBaiduUrl(const std::string& url,std::string& content);
 private:
 	std::list<base_lbs::BaiDuAccessKey>    access_key_list_;
-	std::string                       baidu_map_host_;
+	std::string                            baidu_map_host_;
+	std::string                            baidu_local_host_;
 };
 }
 #endif

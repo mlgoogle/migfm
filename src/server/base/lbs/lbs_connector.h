@@ -19,6 +19,12 @@ public:
 	virtual void Release() = 0;//释放
 	virtual bool GeocoderForAddress(const std::string& latitude,const std::string& longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street) = 0;//通过坐标获取地址
+
+	virtual bool IPtoAddress(const std::string& host,std::string& latitude,std::string& longitude,
+			std::string& city,std::string& district,std::string& province,std::string& street) = 0;//通过IP换算坐标
+
+
+	virtual bool AddressForGeocoder(const std::string& address,double& latitude,double& longitude) = 0;//通过位置换算坐标
 };
 
 class LbsConnectorEngine{
