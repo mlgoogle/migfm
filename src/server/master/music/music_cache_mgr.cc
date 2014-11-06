@@ -407,28 +407,42 @@ bool MusicCacheManager::GetMusicChannelInfos(int channel,
 											 std::string &json_content,
 											 const int flag,const int cur_num){
 	music_logic::RLockGd lr(cache_mgr_lock_);
-	std::stringstream os;
+	Json::Value root;
+	Json::FastWriter wr;
 	int32 i = 0;
 	int32 max_num = 0;
 	bool r = false;
 	ChannelCache* cc = GetChannelCache(channel);
 	if (cc==NULL)
 		return false;
-	os<<"\"channel\":[";
+	///os<<"\"channel\":[";
 	if (flag==0)
 		max_num = 1;
 	else
 		max_num = cur_num;
+	Json::Value& result = root["result"];
 	while(i<max_num){
 		std::list<base::MusicInfo>::iterator it =cc->channel_music_infos_.begin();
 
 		if (it!=cc->channel_music_infos_.end()){
 			std::string content_url;
 			base::MusicInfo mi = (*it);
-			if (flag==0){
+			Json::Value info;
+			info["id"] = mi.id();
+			info["title"] = mi.title();
+			info["artist"] = mi.artist();
+			info["pub_time"] = mi.pub_time();
+			info["album"] = mi.album_title();
+			info["hq_url"] = mi.hq_url();
+			info["url"] = mi.hq_url();
+			info["pic"] = mi.pic_url();
+			info["like"] = "0";
+			info["time"] = mi.music_time();
+			result.append(info);
+			/*if (flag==0){
 			    r = get_song_engine_->GetSongInfo(mi.artist(),mi.title(),
 				   mi.album_title(),content_url,0);
-			//���겻֧��html5 �ʴ������ȡ
+
 			}else{
 				content_url = mi.url();
 			}
@@ -443,13 +457,14 @@ bool MusicCacheManager::GetMusicChannelInfos(int channel,
 				<<mi.music_time()<<"\",\"like\":\"0\"}";
 			if (i==0){
 				os<<",";
-			}
+			}*/
 			cc->channel_music_infos_.pop_front();
 		}
 		i++;
 	}
-	os<<"]";
-	json_content = os.str();
+	root["status"] = 1;
+	//os<<"]";
+	json_content = wr.write(root);
 	return true;
 }
 

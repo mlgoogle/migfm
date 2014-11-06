@@ -149,7 +149,7 @@ getsc1.o:
 	
 	
 ######################usrmgrproc###############################################
-usrmgrproc:regedit.fcgi updateusr.fcgi guest.fcgi login.fcgi
+usrmgrproc:regedit.fcgi updateusr.fcgi guest.fcgi login.fcgi bdbindpush.fcgi
 
 regedit.fcgi: regedit.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./regedit.fcgi
@@ -165,6 +165,9 @@ guest.fcgi: guest.o $(POBJ)
 	
 login.fcgi: login.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)./login.fcgi
+	
+bdbindpush.fcgi: bdbindpush.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)./bdbindpush.fcgi
 	
 ### 编译
 
@@ -183,6 +186,8 @@ guest.o:
 login.o:
 	$(COMPILE) ./login/login.cc
 	
+bdbindpush.o:
+	$(COMPILE) ./bdbindpush/bdbindpush.cc
 ######################spread###############################################
 spreadproc:weixin.fcgi
 

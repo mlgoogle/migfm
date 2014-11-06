@@ -549,9 +549,9 @@ bool MusicMgrEngine::GetMusicChannelSong(const int socket,
 		 mcm->GetMusicChannelInfos(atol(channel.c_str()),result);
 	 }
 
-	 music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
-	 LOG_DEBUG2("[%s]",result_out.c_str());
-	 music_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	 /*music_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+	 LOG_DEBUG2("[%s]",result_out.c_str());*/
+	 music_logic::SomeUtils::SendFull(socket,result.c_str(),result.length());
 }
 
 bool MusicMgrEngine::DelCollectAndHateSong(const int socket,const packet::HttpPacket& packet, 

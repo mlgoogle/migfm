@@ -59,15 +59,15 @@ public:
 
 public:
 
-	//fix me �궨�� ����ģ���Ż�
+	//fix me 定位公共处理函数
 	 bool OnMsgPublicLbs(packet::HttpPacket& packet, Json::Value &result,
 		int &status, std::string &msg,int flag);  
 	/*
-	flag 1 ��ȡ��Χ���û�               OnMsgSearchNearbyV2
-	     2 ��ȡ��Χ��������ĸ�����û� OnMsgSameMusic
-		 3 ��ȡ��Χ����                 OnMsgMusicFri
-		 4 ��ȡ��Χ����                 OnMsgNearMusic
-		 5 ��ȡ��Χ���ָ�����˸��� OnMsgNearCollect
+	flag 1 歌友栏个数显示                     OnMsgSearchNearbyV2
+	     2 和我听歌相似的                     OnMsgSameMusic
+		 3 附近的歌友                        OnMsgMusicFri
+		 4 附近的好音乐                       OnMsgNearMusic
+		 5 歌单栏个数显示                     OnMsgNearCollect
 	*/ 
 
 	bool UpdateUserInfoPoi(int64 user_id,double longitude, 

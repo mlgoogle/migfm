@@ -25,7 +25,7 @@ public:
 	bool InitMusicChannel();
 	bool AddMusicChannelInfos(int channel,std::list<base::MusicInfo>& list);
 	bool GetMusicChannelInfos(int channel,std::string& json_content,
-		                      const int flag =0,const int cur_num = 3);//0:html5 1:ios
+		                      const int flag =1,const int cur_num = 3);
 
 	bool GetMusicCahnelTypeInfos(int channel,const std::string& uid,const int nun,
 		                         std::stringstream& os);

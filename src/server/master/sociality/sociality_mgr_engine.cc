@@ -628,7 +628,7 @@ bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::
 		err_code = MIG_FM_HTTP_SONG_ID_NO_VALID;
 		return false;
 	}
-	if (!packet.GetAttrib("type",str_type)){
+	if (!packet.GetAttrib("stype",str_type)){
 		err_code = MIG_FM_SHARE_TYPE;
 		return false;
 	}

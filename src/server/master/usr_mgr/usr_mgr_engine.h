@@ -54,6 +54,8 @@ private:
 
 	bool UserLogin(const int socket,const packet::HttpPacket& packet);
 
+	bool UserPushBind(const int socket,const packet::HttpPacket& packet);
+
 	void GetResultMsg(std::string &status, std::string &msg,
 		              std::string &result,std::string &out_str);
 private:

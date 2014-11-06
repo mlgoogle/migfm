@@ -43,6 +43,7 @@ output:	base_db_mysql_auto.o basic_lbs_info.o lbs_baidu_connector.o lbs_connecto
 	lbs_db_comm.o lbs_logic_unit.o logic_comm.o api_errno.o\
 	http_api.o base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
 	weather_engine.o weather_logic_unit.o\
+	basic_push_info.o push_baidu_connector.o push_connector.o push_db_comm.o push_logic_unit.o\
 	storage.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o http_method.o http_method.o\
 	json_reader.o json_writer.o json_value.o\
@@ -100,6 +101,22 @@ weather_engine.o:
 
 weather_logic_unit.o:
 	$(COMPILE) ./weather/weather_logic_unit.cc
+	
+	
+basic_push_info.o:
+	$(COMPILE) ./pushmsg/basic_push_info.cc
+
+push_baidu_connector.o:
+	$(COMPILE) ./pushmsg/push_baidu_connector.cc
+
+push_connector.o:
+	$(COMPILE) ./pushmsg/push_connector.cc
+
+push_db_comm.o:
+	$(COMPILE) ./pushmsg/push_db_comm.cc
+	
+push_logic_unit.o:
+	$(COMPILE) ./pushmsg/push_logic_unit.cc
 	
 ##基础
 basic_info.o:

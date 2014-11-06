@@ -8,7 +8,9 @@
 #include "basic/errno_comm.h"
 #include "config/config.h"
 #include "basic/radom_in.h"
+#include "json/json.h"
 #include "storage/dic_storage.h"
+#include "pushmsg/push_connector.h"
 #include <sstream>
 
 #define		TIME_TEST		1025
@@ -16,7 +18,8 @@
 namespace usr_logic{
 
 
-UsrMgrEngine::UsrMgrEngine(){
+UsrMgrEngine::UsrMgrEngine()
+:robot_server_socket_(0){
 
 	bool r = false;
 	std::string path = DEFAULT_CONFIG_PATH;
@@ -31,6 +34,9 @@ UsrMgrEngine::UsrMgrEngine(){
 	storage::RedisComm::Init(config->redis_list_);
 	base_storage::MemDic::Init(config->mem_list_);
 	base::SysRadom::GetInstance();
+
+	base_push::PushConnectorEngine::Create(base_push::IMPL_BAIDU);
+	base_push::PushConnectorEngine::GetPushConnectorEngine()->Init(config->mysql_db_list_);
 
 }
 
@@ -102,6 +108,8 @@ bool UsrMgrEngine::OnUsrMgrMessage(struct server *srv, int socket,
 		CreateGuest(socket,packet);
 	}else if (type=="login"){
 		UserLogin(socket,packet); 
+	}else if (type=="bdbindpush"){
+		UserPushBind(socket,packet);
 	}
     return true;
 }
@@ -466,6 +474,25 @@ ret:
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+	return true;
+}
+
+bool UsrMgrEngine::UserPushBind(const int socket,const packet::HttpPacket& packet){
+	Json::Value root;
+	int32 err;
+	std::string err_str;
+	Json::FastWriter wr;
+	packet::HttpPacket pack = packet;
+
+	bool r = base_push::PushConnectorEngine::GetPushConnectorEngine()->BindPushUserinfo(pack,err,err_str);
+	if(!r){
+		root["msg"] = err_str;
+		root["status"] = 0;
+	}else{
+		root["status"] = 1;
+	}
+	std::string res = wr.write(root);
+	usr_logic::SomeUtils::SendFull(socket,res.c_str(),res.length());
 	return true;
 }
 
