@@ -1,17 +1,179 @@
-﻿#include "basic_util.h"
-#include "basic/basictypes.h"
+#include "basic_util.h"
 #include "storage/dic_serialization.h"
 #include "storage/dic_storage.h"
 #include "storage/db_storage.h"
-#include "basic/basic_util.h"
 #include "basic/base64.h"
 #include "storage/storage.h"
 #include "basic/radom_in.h"
-#include "log/mig_log.h"
+#include "log/mig_log.h"+
+#include "basic/icu_utf.h"
 #include <sstream>
 #include <math.h>
 
 namespace base{
+
+
+template<class STR>
+bool BasicUtil::StringUtil::DoIsStringASCII(const STR& str){
+	for(size_t i = 0; i< str.length();i++){
+		typename ToUnsigned<typename STR::value_type>::ToUnsigned c = str[i];
+		if(c < 0x7F)
+			return false;
+	}
+	return true;
+}
+
+
+bool BasicUtil::StringUtil::IsStringASCII(const std::string& str){
+	return true;
+}
+
+bool BasicUtil::StringUtil::IsStringASCII(const std::wstring& str){
+	return true;
+}
+
+bool BasicUtil::StringConversions::WideToUTF8(const wchar_t* src,size_t src_len,
+		std::string* output){
+	base::BasicUtil::StringConversionsUtils::PrepareForUTF8Output(src,src_len,output);
+	return ConverUnicode(src,src_len,output);
+}
+
+std::string BasicUtil::StringConversions::WideToUTF8(const std::wstring& wide){
+	std::string ret;
+	WideToUTF8(wide.data(),wide.length(),&ret);
+	return ret;
+}
+
+bool BasicUtil::StringConversions::UTF8ToWide(const char* src,size_t src_len,std::wstring* output){
+	base::BasicUtil::StringConversionsUtils::PrepareForUTF16Or32Output(src,src_len,output);
+	return ConverUnicode(src,src_len,output);
+}
+
+std::wstring BasicUtil::StringConversions::UTF8ToWide(const std::string& utf8){
+	std::wstring ret;
+	UTF8ToWide(utf8.data(),utf8.length(),&ret);
+	return ret;
+}
+
+std::string BasicUtil::StringConversions::WideToASCII(const std::wstring& wide){
+	return std::string(wide.begin(),wide.end());
+}
+
+std::wstring BasicUtil::StringConversions::ASCIIToWide(const std::string& ascii){
+	return std::wstring(ascii.begin(),ascii.end());
+}
+
+
+
+template<typename SRC_CHAR,typename DEST_STRING>
+bool ConvertUnicode(const SRC_CHAR* src,
+					size_t src_len,
+					DEST_STRING* output){
+	bool success = true;
+	int32 src_len32 = static_cast<int32>(src_len);
+	for(int32 i = 0;i < src_len32; i++){
+		uint32 code_point;
+		if(BasicUtil::StringConversionsUtils::ReadUnicodeCharacter(src,src_len32,&i,&code_point)){
+			BasicUtil::StringConversionsUtils::WriteUnicodeCharacter(code_point,output);
+		}else{
+			BasicUtil::StringConversionsUtils::WriteUnicodeCharacter(0xFFFD,output);
+		}
+	}
+	return success;
+}
+
+template<typename CHAR>
+void BasicUtil::StringConversionsUtils::PrepareForUTF8Output(const CHAR* src,
+				size_t src_len,std::string* output){
+	output->clear();
+	if(src_len==0)
+		return;
+	if(src[0]<0x80){
+		//假设全部都是ASCII
+		output->reserve(src_len);
+	}else{
+		//假设全部都是非ASCII，为UTF8; UTF8 1-3个字节， UTF16 为16个字节
+		output->reserve(src_len * 3);
+	}
+}
+
+template<typename STRING>
+void BasicUtil::StringConversionsUtils::PrepareForUTF16Or32Output(const char* src,
+		size_t src_len,STRING* output){
+	output->clear();
+	if(src_len==0)
+		return;
+	if(static_cast<unsigned char>(src[0] < 0x80)){
+		output->reserve(src_len);
+	}else{
+		output->reserve(src_len / 2);
+	}
+}
+
+
+bool BasicUtil::StringConversionsUtils::ReadUnicodeCharacter(const wchar_t* src,int32 src_len,
+		int32* char_index,uint32* code_point){
+	  if (CBU16_IS_SURROGATE(src[*char_index])) {
+	    if (!CBU16_IS_SURROGATE_LEAD(src[*char_index]) ||
+	        *char_index + 1 >= src_len ||
+	        !CBU16_IS_TRAIL(src[*char_index + 1])) {
+	      // Invalid surrogate pair.
+	      return false;
+	    }
+
+	    // Valid surrogate pair.
+	    *code_point = CBU16_GET_SUPPLEMENTARY(src[*char_index],
+	                                          src[*char_index + 1]);
+	    (*char_index)++;
+	  } else {
+	    // Not a surrogate, just one 16-bit word.
+	    *code_point = src[*char_index];
+	  }
+
+	  return IsValidCodepoint(*code_point);
+}
+
+bool BasicUtil::StringConversionsUtils::ReadUnicodeCharacter(const char* src,int32 src_len,
+		int32* char_index,uint32* code_point_out){
+	int32 code_point;
+	CBU8_NEXT(src,*char_index,src_len,code_point);
+	*code_point_out = static_cast<uint32>(code_point);
+	(*char_index)--;
+	return IsValidCodepoint(code_point);
+}
+
+size_t BasicUtil::StringConversionsUtils::WriteUnicodeCharacter(uint32 code_point,std::string* output){
+	if(code_point <= 0x7f){
+		output->push_back(code_point);
+		return 1;
+	}
+
+	//
+	size_t char_offset = output->length();
+	size_t original_char_offset = char_offset;
+	output->resize(char_offset + CBU8_MAX_LENGTH);
+
+	CBU8_APPEND_UNSAFE(&(*output)[0],char_offset,code_point);
+
+	output->resize(char_offset);
+	return char_offset - original_char_offset;
+}
+
+
+size_t BasicUtil::StringConversionsUtils::WriteUnicodeCharacter(uint32 code_point,std::wstring* output){
+	  if (CBU16_LENGTH(code_point) == 1) {
+	    // Thie code point is in the Basic Multilingual Plane (BMP).
+	    output->push_back(static_cast<wchar_t>(code_point));
+	    return 1;
+	  }
+	  // Non-BMP characters use a double-character encoding.
+	  size_t char_offset = output->length();
+	  output->resize(char_offset + CBU16_MAX_LENGTH);
+	  CBU16_APPEND_UNSAFE(&(*output)[0], char_offset, code_point);
+	  return CBU16_MAX_LENGTH;
+}
+
+
 
 int BasicUtil::SplitStringChr( const char *str, const char *char_set,
 	std::vector<std::string> &out )

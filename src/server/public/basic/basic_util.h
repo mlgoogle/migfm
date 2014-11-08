@@ -13,7 +13,81 @@
 #include "basic/basic_info.h"
 namespace base{
 
+
 class BasicUtil{
+
+
+// 字符串处理
+
+
+template<typename T>
+struct ToUnsigned{
+	typedef T Unsigned;
+};
+
+public:
+
+	class StringUtil{
+	public:
+		static bool IsStringASCII(const std::wstring& str);
+
+		static bool IsStringASCII(const std::string& str);
+	private:
+		template<class STR>
+		static bool DoIsStringASCII(const STR& str);
+	};
+
+	class StringConversions{
+	public:
+		static std::string WideToUTF8(const std::wstring& wide);
+
+		static std::wstring UTF8ToWide(const std::string& utf8);
+
+		static std::string WideToASCII(const std::wstring& wide);
+
+		static std::wstring ASCIIToWide(const std::string& ascii);
+
+
+	private:
+		static bool WideToUTF8(const wchar_t* src,size_t src_len,
+				std::string* output);
+
+		static bool UTF8ToWide(const char* src,size_t src_len,std::wstring* output);
+
+		template<typename SRC_CHAR,typename DEST_STRING>
+		static bool ConverUnicode(const SRC_CHAR* src,size_t src_len,DEST_STRING* output);
+
+
+	};
+
+	class StringConversionsUtils{
+	public:
+		template<typename CHAR>
+		static void PrepareForUTF8Output(const CHAR* src,size_t src_len,std::string* output);
+
+		template<typename STRING>
+		static void PrepareForUTF16Or32Output(const char* src,size_t src_len,STRING* output);
+
+		static bool ReadUnicodeCharacter(const wchar_t* src,int32 src_len,
+					int32* char_index,uint32* code_point_out);
+
+		static bool ReadUnicodeCharacter(const char* src,int32 src_len,
+							int32* char_index,uint32* code_point_out);
+
+		static size_t WriteUnicodeCharacter(uint32 code_point,std::string* output);
+
+		static size_t WriteUnicodeCharacter(uint32 code_point,std::wstring* output);
+
+	private:
+		static inline bool IsValidCodepoint(uint32 code_point){
+			  // Excludes the surrogate code points ([0xD800, 0xDFFF]) and
+			  // codepoints larger than 0x10FFFF (the highest codepoint allowed).
+			  // Non-characters and unassigned codepoints are allowed.
+			  return code_point < 0xD800u ||
+			         (code_point >= 0xE000u && code_point <= 0x10FFFFu);
+		}
+
+	};
 public:
     BasicUtil(){}
     virtual ~BasicUtil(){}

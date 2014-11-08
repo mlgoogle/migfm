@@ -1,5 +1,5 @@
 #include "logic/base_values.h"
-
+#include "basic/basic_util.h"
 namespace base_logic{
 
 Value* CopyWithoutEmptyChildren(Value* node) {
@@ -181,7 +181,7 @@ StringValue::StringValue(const std::string& in_value)
 
 StringValue::StringValue(const std::wstring& in_value)
     : Value(TYPE_STRING),
-      value_(WideToUTF8(in_value)) {
+      value_(base::BasicUtil::StringConversions::WideToUTF8(in_value)) {
 }
 
 
@@ -196,7 +196,7 @@ bool StringValue::GetAsString(std::string* out_value) const {
 
 bool StringValue::GetAsString(std::wstring* out_value) const {
   if (out_value)
-	  *out_value = UTF8ToWide(value_);
+	  *out_value = base::BasicUtil::StringConversions::UTF8ToWide(value_);
   return true;
 }
 
@@ -272,7 +272,7 @@ bool DictionaryValue::HasKey(const std::wstring& key) const {
 }
 
 bool DictionaryValue::HasKeyASCII(const std::string& key) const{
-	return HasKey(ASCIIToWide(key));
+	return HasKey(base::BasicUtil::StringConversions::ASCIIToWide(key));
 }
 
 void DictionaryValue::Clear(){
@@ -382,10 +382,10 @@ bool DictionaryValue::GetStringASCII(const std::string& path,
 			std::string* out_value) const {
 
 	std::string out;
-	if (!GetString(ASCIIToWide(path), &out))
+	if (!GetString(base::BasicUtil::StringConversions::ASCIIToWide(path), &out))
 		return false;
 
-	if (!IsStringASCII(out))
+	if (!base::BasicUtil::StringUtil::IsStringASCII(out))
 		return false;
 
 	out_value->assign(out);

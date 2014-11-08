@@ -39,15 +39,15 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(AR)  $(OUTPUT_FILE) $? 
 
 all: clean output delete-temp-file
-output:	base_db_mysql_auto.o basic_lbs_info.o lbs_baidu_connector.o lbs_connector.o\
-	lbs_db_comm.o lbs_logic_unit.o logic_comm.o api_errno.o\
+output:	basic_util.o icu_utf.o base_db_mysql_auto.o basic_lbs_info.o lbs_baidu_connector.o lbs_connector.o\
+	lbs_db_comm.o lbs_logic_unit.o logic_comm.o base_values.o api_errno.o \
 	http_api.o base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
 	weather_engine.o weather_logic_unit.o\
 	basic_push_info.o push_baidu_connector.o push_connector.o push_db_comm.o push_logic_unit.o\
 	storage.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o http_method.o http_method.o\
 	json_reader.o json_writer.o json_value.o\
-	constants.o basic_info.o basictypes.o basic_util.o
+	constants.o basic_info.o basictypes.o 
 	$(LINK)
 
 clean:
@@ -79,6 +79,9 @@ lbs_logic_unit.o:
 	
 logic_comm.o:
 	$(COMPILE) ./logic/logic_comm.cc
+	
+base_values.o:
+	$(COMPILE) ./logic/base_values.cc
 	
 api_errno.o:
 	$(COMPILE) ./net/api_errno.cc
@@ -130,6 +133,10 @@ basic_util.o:
 	
 constants.o:
 	$(COMPILE) $(THIRD_PATH)/basic/constants.cc
+	
+icu_utf.o:
+	$(COMPILE) $(THIRD_PATH)/basic/icu_utf.cc
+	
 	
 ##操作
 http_method.o:
