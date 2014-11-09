@@ -26,16 +26,17 @@ namespace base_net{
 //注册接口
 bool MYHttpApi::UserManager::OnUserRegister(packet::HttpPacket& packet,std::string& username,
 		std::string& password,std::string& nickname,std::string& source,
-		std::string& session,std::string& sex,std::string& borthday,std::string& location,
-		std::string& head,int& err){
+		std::string& session,std::string& sex,std::string& birthday,std::string& location,
+		std::string& address,std::string& head,int& err){
 	bool r = false;
 	std::string default_session = "1";
 	std::string default_username = "default@miglab.com";
 	std::string default_nickname = "米格用户";
 	std::string default_sex = "1";
 	std::string default_birthday= "1986-10=01";
-	std::string default_location;//通过提交的或者坐标来判断城市
+	std::string default_location;
 	std::string default_head;
+	std::string default_address;//通过提交的或者坐标来判断城市
 	PARAM_IS_EXIST_RETURN("source",source,SOURCE_NOT_EXIST);
 	//不为本平台即source 为0 则判断session
 	if(source!="0"){
@@ -58,6 +59,7 @@ bool MYHttpApi::UserManager::OnUserRegister(packet::HttpPacket& packet,std::stri
 		PARAM_IS_EXIST_DEFAULTPARAM("password",password,default_username);
 	}
 	PARAM_IS_EXIST_DEFAULTPARAM("nickname",nickname,default_nickname);
+	PARAM_IS_EXIST_DEFAULTPARAM("address",address,default_address);
 	return true;
 }
 

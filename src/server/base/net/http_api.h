@@ -13,8 +13,8 @@ public:
 	class UserManager{
 		static bool OnUserRegister(packet::HttpPacket& packet,std::string& username,
 				std::string& password,std::string& nickname,std::string& source,
-				std::string& session,std::string& sex,std::string& borthday,std::string& location,
-				std::string& head,int& err);
+				std::string& session,std::string& sex,std::string& birthday,std::string& location,
+				std::string& address,std::string& head,int& err);
 
 		static bool OnUserUpdate(packet::HttpPacket& packet,std::string& uid,
 				         std::string& nickname,std::string& gender,
@@ -113,7 +113,7 @@ public:
 		static bool OnGiftLuckMessage(packet::HttpPacket& packet,std::string& uid,std::string& songid,
 				std::string& plat,std::string& mode,int& err);
 	};
-
 };
+
 }
 #endif
