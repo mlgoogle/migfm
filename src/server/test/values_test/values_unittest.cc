@@ -6,7 +6,9 @@
 #include "basic/basictypes.h"
 #include "gtest/gtest.h"
 #include "../../base/logic/base_values.h"
+#include "../../base/logic/value_serializer.h"
 #include "../../public/basic/scoped_ptr.h"
+#include "log/mig_log.h"
 class ValuesTest: public testing::Test {
 };
 
@@ -22,7 +24,6 @@ TEST(ValuesTest, Basic){
 	ASSERT_FALSE(settings.Get(L"global", NULL));
 	settings.Set(L"global",base_logic::Value::CreateBooleanValue(true));
 	ASSERT_TRUE(settings.Get(L"global", NULL));
-
 	settings.SetString(L"global.homepage", L"http://scurvy.com");
 	ASSERT_TRUE(settings.Get(L"global", NULL));
 
@@ -62,6 +63,7 @@ TEST(ValuesTest, Basic){
 
 TEST(ValuesTest, List) {
   scoped_ptr<base_logic::ListValue> mixed_list(new base_logic::ListValue());
+
   mixed_list->Set(0, base_logic::Value::CreateBooleanValue(true));
   mixed_list->Set(1, base_logic::Value::CreateIntegerValue(42));
   mixed_list->Set(2, base_logic::Value::CreateBigIntegerValue(44294967295));
@@ -97,6 +99,10 @@ TEST(ValuesTest, List) {
   ASSERT_EQ(88.8, double_value);
   ASSERT_TRUE(mixed_list->GetString(4, &string_value));
   ASSERT_EQ("foo", string_value);
+  std::string json_str;
+  base_logic::JsonValueSerializer jsonobj(&json_str);
+  jsonobj.Serialize((*mixed_list.get()));
+  MIG_INFO(USER_LEVEL,"%s",json_str.c_str());
 }
 
 TEST(ValuesTest, BinaryValue) {

@@ -11,6 +11,13 @@
 #include "basic/basictypes.h"
 #include "basic/md5sum.h"
 #include "basic/basic_info.h"
+
+// (This is undocumented but matches what the system C headers do.)
+#define PRINTF_FORMAT(format_param, dots_param) \
+    __attribute__((format(printf, format_param, dots_param)))
+
+#define GG_VA_COPY(a,b) (va_copy(a,b))
+
 namespace base{
 
 
@@ -32,9 +39,44 @@ public:
 		static bool IsStringASCII(const std::wstring& str);
 
 		static bool IsStringASCII(const std::string& str);
+
+		static void StringAppendF(std::string* dst,const char* format,...);
+
+		static void StringAppendF(std::wstring* dst,const wchar_t* format,...);
+
+		static void StringAppendV(std::string* dst,const char* format,va_list ap);
+
+		static void StringAppendV(std::wstring* dst,const wchar_t* format, va_list ap);
+
+		static std::string DoubleToString(double value);
+
+		static std::wstring DobleToWString(double value);
+
+		static inline int vsnprintfT(char* buffer,size_t buf_size,const char* format,
+				va_list argptr){
+			/*int length = vsnprintf_s(buffer,buf_size,buf_size - 1,format,argptr);
+			if(length < 0)
+				return _vscprintf(format,argptr);
+			return length;*/
+			return vsnprintf(buffer,buf_size,format,argptr);
+		}
+
+		static inline int vsnprintfT(wchar_t* buff,size_t buf_size,const wchar_t* format,
+				va_list argptr){
+			/*int length = vsnwprintf_s(buffer,buf_size,buf_size - 1,format,argptr);
+			if(length < 0)
+				return _vscwprintf(format,argptr);
+			return length;
+			*/
+			return vswprintf(buff,buf_size,format,argptr);
+		}
+
 	private:
 		template<class STR>
 		static bool DoIsStringASCII(const STR& str);
+		template<class StringType>
+		static void StringAppendVT(StringType* dst,
+					const typename StringType::value_type* format,va_list ap);
 	};
 
 	class StringConversions{

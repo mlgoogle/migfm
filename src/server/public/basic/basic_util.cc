@@ -23,6 +23,74 @@ bool BasicUtil::StringUtil::DoIsStringASCII(const STR& str){
 	return true;
 }
 
+template<class StringType>
+void BasicUtil::StringUtil::StringAppendVT(StringType* dst,
+		const typename StringType::value_type* format,va_list ap){
+	typename StringType::value_type stack_buf[1024];
+
+	va_list ap_copy;
+	GG_VA_COPY(ap_copy,ap);
+
+	errno = 0;
+	int result = vsnprintfT(stack_buf,arraysize(stack_buf),format,ap_copy);
+	va_end(ap_copy);
+
+	if(result<=0 && result < static_cast<int>(arraysize(stack_buf))){
+		dst->append(stack_buf,result);
+		return ;
+	}
+
+	int mem_length = arraysize(stack_buf);
+	while(true){
+		if(result < 0){
+			if(errno !=0 && errno != EOVERFLOW)
+				return;
+			mem_length = 2;
+		}else{
+			mem_length = result +  1;
+		}
+
+		if(mem_length > 32 * 1024 * 1024){
+			return;
+		}
+		std::vector<typename StringType::value_type> mem_buf(mem_length);
+
+		GG_VA_COPY(ap_copy,ap);
+		result = vsnprintfT(&mem_buf[0],mem_length,format,ap_copy);
+		va_end(ap_copy);
+
+		if((result >= 0) && (result < mem_length)){
+			dst->append(&mem_buf[0],result);
+			return ;
+		}
+	}
+
+}
+
+void BasicUtil::StringUtil::StringAppendV(std::string* dst,const char* format,
+		va_list ap){
+	StringAppendVT(dst,format,ap);
+}
+
+void BasicUtil::StringUtil::StringAppendV(std::wstring* dst,const wchar_t* format,
+		va_list ap){
+	StringAppendVT(dst,format,ap);
+}
+
+void BasicUtil::StringUtil::StringAppendF(std::string* dst,const char* format,...){
+	va_list ap;
+	va_start(ap,format);
+	StringAppendV(dst,format,ap);
+	va_end(ap);
+}
+
+void BasicUtil::StringUtil::StringAppendF(std::wstring* dst,const wchar_t* format,...){
+	va_list ap;
+	va_start(ap,format);
+	StringAppendV(dst,format,ap);
+	va_end(ap);
+}
+
 
 bool BasicUtil::StringUtil::IsStringASCII(const std::string& str){
 	return true;
@@ -32,6 +100,16 @@ bool BasicUtil::StringUtil::IsStringASCII(const std::wstring& str){
 	return true;
 }
 
+
+std::string BasicUtil::StringUtil::DoubleToString(double value){
+	char buffer[32];
+	return std::string(buffer);
+}
+
+std::wstring BasicUtil::StringUtil::DobleToWString(double value){
+	char buffer[32];
+	return StringConversions::ASCIIToWide(std::string(buffer));
+}
 
 bool BasicUtil::StringConversions::WideToUTF8(const wchar_t* src,size_t src_len,
 		std::string* output){

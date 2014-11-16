@@ -64,6 +64,7 @@ public:
 	virtual Value* DeepCopy() const;
 
 	virtual bool Equals(const Value* other) const;
+
 protected:
 	explicit Value(ValueType type) : type_(type) {}
 

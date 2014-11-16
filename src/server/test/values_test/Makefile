@@ -52,6 +52,7 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(THIRD_PATH)\
 				-I/usr/local/include\
 				-I/usr/include/mysql\
+				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 
 
@@ -93,6 +94,9 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 base_values.o : $(USER_DIR)/logic/base_values.cc $(USER_DIR)/logic/base_values.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/base_values.cc $(INCLUDE_PATHS) 
+
+value_serializer.o : $(USER_DIR)/logic/value_serializer.cc $(USER_DIR)/logic/value_serializer.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/value_serializer.cc $(INCLUDE_PATHS) 
 
 basic_util.o : $(THIRD_PATH)/basic/basic_util.cc $(THIRD_PATH)/basic/basic_util.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/basic_util.cc $(INCLUDE_PATHS)
@@ -171,7 +175,7 @@ mig_log.o:$(THIRD_PATH)/log/mig_log.cc $(THIRD_PATH)/log/mig_log.h $(GTEST_HEADE
 values_unittest.o : ./values_unittest.cc $(USER_DIR)/logic/base_values.h  $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./values_unittest.cc $(INCLUDE_PATHS)
 
-values_unittest : base_values.o mig_log.o http_method.o basic_util.o\
+values_unittest : base_values.o value_serializer.o mig_log.o http_method.o basic_util.o\
 	 http_method.o http_packet.o mem_storage_impl.o dic_storage.o db_storage.o\
 	mysql_storage_impl.o redis_storage_impl.o redis_warrper.o basic_info.o\
 	 json_writer.o md5sum.o radom_in.o constants.o base64.o dic_serialization.o icu_utf.o\
