@@ -1,5 +1,6 @@
 #include "http_method.h"
 #include "basic/basic_util.h"
+#include "log/mig_log.h"
 #include <stdio.h>
 
 namespace http{

@@ -3,73 +3,80 @@
 // found in the LICENSE file.
 
 #include <limits>
-
+#include "basic/basictypes.h"
 #include "gtest/gtest.h"
-
+#include "../../base/logic/base_values.h"
+#include "../../public/basic/scoped_ptr.h"
 class ValuesTest: public testing::Test {
 };
 
-/*
-TEST(ValuesTest, Basic) {
-  // Test basic dictionary getting/setting
-  DictionaryValue settings;
-  std::wstring homepage = L"http://google.com";
-  ASSERT_FALSE(
-    settings.GetString(L"global.homepage", &homepage));
-  ASSERT_EQ(std::wstring(L"http://google.com"), homepage);
 
-  ASSERT_FALSE(settings.Get(L"global", NULL));
-  settings.Set(L"global", Value::CreateBooleanValue(true));
-  ASSERT_TRUE(settings.Get(L"global", NULL));
-  settings.SetString(L"global.homepage", L"http://scurvy.com");
-  ASSERT_TRUE(settings.Get(L"global", NULL));
-  homepage = L"http://google.com";
-  ASSERT_TRUE(settings.GetString(L"global.homepage", &homepage));
-  ASSERT_EQ(std::wstring(L"http://scurvy.com"), homepage);
+TEST(ValuesTest, Basic){
+	// Test basic dictionary getting/setting
+	base_logic::DictionaryValue settings;
+	std::wstring homepage = L"http://google.com";
+	ASSERT_FALSE(
+	    settings.GetString(L"global.homepage", &homepage));
+	ASSERT_EQ(std::wstring(L"http://google.com"), homepage);
 
-  // Test storing a dictionary in a list.
-  ListValue* toolbar_bookmarks;
-  ASSERT_FALSE(
-    settings.GetList(L"global.toolbar.bookmarks", &toolbar_bookmarks));
+	ASSERT_FALSE(settings.Get(L"global", NULL));
+	settings.Set(L"global",base_logic::Value::CreateBooleanValue(true));
+	ASSERT_TRUE(settings.Get(L"global", NULL));
 
-  toolbar_bookmarks = new ListValue;
-  settings.Set(L"global.toolbar.bookmarks", toolbar_bookmarks);
-  ASSERT_TRUE(
-    settings.GetList(L"global.toolbar.bookmarks", &toolbar_bookmarks));
+	settings.SetString(L"global.homepage", L"http://scurvy.com");
+	ASSERT_TRUE(settings.Get(L"global", NULL));
 
-  DictionaryValue* new_bookmark = new DictionaryValue;
-  new_bookmark->SetString(L"name", L"Froogle");
-  new_bookmark->SetString(L"url", L"http://froogle.com");
-  toolbar_bookmarks->Append(new_bookmark);
+	homepage = L"http://google.com";
+	ASSERT_TRUE(settings.GetString(L"global.homepage", &homepage));
+	ASSERT_EQ(std::wstring(L"http://scurvy.com"), homepage);
 
-  ListValue* bookmark_list;
-  ASSERT_TRUE(settings.GetList(L"global.toolbar.bookmarks", &bookmark_list));
-  DictionaryValue* bookmark;
-  ASSERT_EQ(1U, bookmark_list->GetSize());
-  ASSERT_TRUE(bookmark_list->GetDictionary(0, &bookmark));
-  std::wstring bookmark_name = L"Unnamed";
-  ASSERT_TRUE(bookmark->GetString(L"name", &bookmark_name));
-  ASSERT_EQ(std::wstring(L"Froogle"), bookmark_name);
-  std::wstring bookmark_url;
-  ASSERT_TRUE(bookmark->GetString(L"url", &bookmark_url));
-  ASSERT_EQ(std::wstring(L"http://froogle.com"), bookmark_url);
+	// Test storing a dictionary in a list.
+	base_logic::ListValue* toolbar_bookmarks;
+	ASSERT_FALSE(
+			settings.GetList(L"global.toolbar.bookmarks",&toolbar_bookmarks)
+	);
+	toolbar_bookmarks =  new base_logic::ListValue;
+	settings.Set(L"global.toolbar.bookmarks",toolbar_bookmarks);
+	ASSERT_TRUE(
+			settings.GetList(L"global.toolbar.bookmarks",&toolbar_bookmarks)
+	);
+
+	base_logic::DictionaryValue* new_bookmark = new base_logic::DictionaryValue;
+	new_bookmark->SetString(L"name", L"Froogle");
+	new_bookmark->SetString(L"url", L"http://froogle.com");
+	toolbar_bookmarks->Append(new_bookmark);
+
+	base_logic::ListValue* bookmark_list;
+	ASSERT_TRUE(settings.GetList(L"global.toolbar.bookmarks", &bookmark_list));
+	base_logic::DictionaryValue* bookmark;
+	ASSERT_EQ(1U, bookmark_list->GetSize());
+	ASSERT_TRUE(bookmark_list->GetDictionary(0, &bookmark));
+	std::wstring bookmark_name = L"Unnamed";
+	ASSERT_TRUE(bookmark->GetString(L"name", &bookmark_name));
+	ASSERT_EQ(std::wstring(L"Froogle"), bookmark_name);
+	std::wstring bookmark_url;
+	ASSERT_TRUE(bookmark->GetString(L"url", &bookmark_url));
+	ASSERT_EQ(std::wstring(L"http://froogle.com"), bookmark_url);
+
 }
 
 TEST(ValuesTest, List) {
-  scoped_ptr<ListValue> mixed_list(new ListValue());
-  mixed_list->Set(0, Value::CreateBooleanValue(true));
-  mixed_list->Set(1, Value::CreateIntegerValue(42));
-  mixed_list->Set(2, Value::CreateRealValue(88.8));
-  mixed_list->Set(3, Value::CreateStringValue("foo"));
-  ASSERT_EQ(4u, mixed_list->GetSize());
+  scoped_ptr<base_logic::ListValue> mixed_list(new base_logic::ListValue());
+  mixed_list->Set(0, base_logic::Value::CreateBooleanValue(true));
+  mixed_list->Set(1, base_logic::Value::CreateIntegerValue(42));
+  mixed_list->Set(2, base_logic::Value::CreateBigIntegerValue(44294967295));
+  mixed_list->Set(3, base_logic::Value::CreateRealValue(88.8));
+  mixed_list->Set(4, base_logic::Value::CreateStringValue("foo"));
+  ASSERT_EQ(5u, mixed_list->GetSize());
 
-  Value *value = NULL;
+  base_logic::Value *value = NULL;
   bool bool_value = false;
   int int_value = 0;
+  int64 bigint_value = 0;
   double double_value = 0.0;
   std::string string_value;
 
-  ASSERT_FALSE(mixed_list->Get(4, &value));
+  ASSERT_FALSE(mixed_list->Get(5, &value));
 
   ASSERT_FALSE(mixed_list->GetInteger(0, &int_value));
   ASSERT_EQ(0, int_value);
@@ -84,22 +91,24 @@ TEST(ValuesTest, List) {
   ASSERT_EQ(true, bool_value);
   ASSERT_TRUE(mixed_list->GetInteger(1, &int_value));
   ASSERT_EQ(42, int_value);
-  ASSERT_TRUE(mixed_list->GetReal(2, &double_value));
+  ASSERT_TRUE(mixed_list->GetBigInteger(2, &bigint_value));
+  ASSERT_EQ(44294967295, bigint_value);
+  ASSERT_TRUE(mixed_list->GetReal(3, &double_value));
   ASSERT_EQ(88.8, double_value);
-  ASSERT_TRUE(mixed_list->GetString(3, &string_value));
+  ASSERT_TRUE(mixed_list->GetString(4, &string_value));
   ASSERT_EQ("foo", string_value);
 }
 
 TEST(ValuesTest, BinaryValue) {
   char* buffer = NULL;
   // Passing a null buffer pointer doesn't yield a BinaryValue
-  scoped_ptr<BinaryValue> binary(BinaryValue::Create(buffer, 0));
+  scoped_ptr<base_logic::BinaryValue> binary(base_logic::BinaryValue::Create(buffer, 0));
   ASSERT_FALSE(binary.get());
 
   // If you want to represent an empty binary value, use a zero-length buffer.
   buffer = new char[1];
   ASSERT_TRUE(buffer);
-  binary.reset(BinaryValue::Create(buffer, 0));
+  binary.reset(base_logic::BinaryValue::Create(buffer, 0));
   ASSERT_TRUE(binary.get());
   ASSERT_TRUE(binary->GetBuffer());
   ASSERT_EQ(buffer, binary->GetBuffer());
@@ -107,7 +116,7 @@ TEST(ValuesTest, BinaryValue) {
 
   // Test the common case of a non-empty buffer
   buffer = new char[15];
-  binary.reset(BinaryValue::Create(buffer, 15));
+  binary.reset(base_logic::BinaryValue::Create(buffer, 15));
   ASSERT_TRUE(binary.get());
   ASSERT_TRUE(binary->GetBuffer());
   ASSERT_EQ(buffer, binary->GetBuffer());
@@ -115,7 +124,7 @@ TEST(ValuesTest, BinaryValue) {
 
   char stack_buffer[42];
   memset(stack_buffer, '!', 42);
-  binary.reset(BinaryValue::CreateWithCopiedBuffer(stack_buffer, 42));
+  binary.reset(base_logic::BinaryValue::CreateWithCopiedBuffer(stack_buffer, 42));
   ASSERT_TRUE(binary.get());
   ASSERT_TRUE(binary->GetBuffer());
   ASSERT_NE(stack_buffer, binary->GetBuffer());
@@ -125,46 +134,31 @@ TEST(ValuesTest, BinaryValue) {
 
 TEST(ValuesTest, StringValue) {
   // Test overloaded CreateStringValue.
-  scoped_ptr<Value> narrow_value(Value::CreateStringValue("narrow"));
+  scoped_ptr<base_logic::Value> narrow_value(base_logic::Value::CreateStringValue("narrow"));
   ASSERT_TRUE(narrow_value.get());
-  ASSERT_TRUE(narrow_value->IsType(Value::TYPE_STRING));
-  scoped_ptr<Value> wide_value(Value::CreateStringValue(L"wide"));
+  ASSERT_TRUE(narrow_value->IsType(base_logic::Value::TYPE_STRING));
+  scoped_ptr<base_logic::Value> wide_value(base_logic::Value::CreateStringValue(L"wide"));
   ASSERT_TRUE(wide_value.get());
-  ASSERT_TRUE(wide_value->IsType(Value::TYPE_STRING));
-  scoped_ptr<Value> utf16_value(
-      Value::CreateStringValueFromUTF16(ASCIIToUTF16("utf16")));
-  ASSERT_TRUE(utf16_value.get());
-  ASSERT_TRUE(utf16_value->IsType(Value::TYPE_STRING));
+  ASSERT_TRUE(wide_value->IsType(base_logic::Value::TYPE_STRING));
 
   // Test overloaded GetString.
   std::string narrow = "http://google.com";
   std::wstring wide = L"http://google.com";
-  string16 utf16 = ASCIIToUTF16("http://google.com");
   ASSERT_TRUE(narrow_value->GetAsString(&narrow));
   ASSERT_TRUE(narrow_value->GetAsString(&wide));
-  ASSERT_TRUE(narrow_value->GetAsUTF16(&utf16));
+
   ASSERT_EQ(std::string("narrow"), narrow);
   ASSERT_EQ(std::wstring(L"narrow"), wide);
-  ASSERT_EQ(ASCIIToUTF16("narrow"), utf16);
 
   ASSERT_TRUE(wide_value->GetAsString(&narrow));
   ASSERT_TRUE(wide_value->GetAsString(&wide));
-  ASSERT_TRUE(wide_value->GetAsUTF16(&utf16));
   ASSERT_EQ(std::string("wide"), narrow);
   ASSERT_EQ(std::wstring(L"wide"), wide);
-  ASSERT_EQ(ASCIIToUTF16("wide"), utf16);
-
-  ASSERT_TRUE(utf16_value->GetAsString(&narrow));
-  ASSERT_TRUE(utf16_value->GetAsString(&wide));
-  ASSERT_TRUE(utf16_value->GetAsUTF16(&utf16));
-  ASSERT_EQ(std::string("utf16"), narrow);
-  ASSERT_EQ(std::wstring(L"utf16"), wide);
-  ASSERT_EQ(ASCIIToUTF16("utf16"), utf16);
 }
 
 // This is a Value object that allows us to tell if it's been
 // properly deleted by modifying the value of external flag on destruction.
-class DeletionTestValue : public Value {
+/*class DeletionTestValue : public Value {
  public:
   explicit DeletionTestValue(bool* deletion_flag) : Value(TYPE_NULL) {
     Init(deletion_flag);  // Separate function so that we can use ASSERT_*

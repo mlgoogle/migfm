@@ -32,6 +32,7 @@ bool BasicUtil::StringUtil::IsStringASCII(const std::wstring& str){
 	return true;
 }
 
+
 bool BasicUtil::StringConversions::WideToUTF8(const wchar_t* src,size_t src_len,
 		std::string* output){
 	base::BasicUtil::StringConversionsUtils::PrepareForUTF8Output(src,src_len,output);
@@ -66,7 +67,7 @@ std::wstring BasicUtil::StringConversions::ASCIIToWide(const std::string& ascii)
 
 
 template<typename SRC_CHAR,typename DEST_STRING>
-bool ConvertUnicode(const SRC_CHAR* src,
+bool BasicUtil::StringConversions::ConverUnicode(const SRC_CHAR* src,
 					size_t src_len,
 					DEST_STRING* output){
 	bool success = true;

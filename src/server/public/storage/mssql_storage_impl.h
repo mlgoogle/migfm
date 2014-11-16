@@ -1,6 +1,7 @@
 #ifndef _MIG_FM_PUBLIC_STORAGE_MSSQL_STRO8AGE_IMPL_H__
 #define _MIG_FM_PUBLIC_STORAGE_MSSQL_STROAGE_IMPL_H__
 #include <sybdb.h>
+#include <list>
 #include "basic/basic_info.h"
 #include "basic/scoped_ptr.h"
 #include "storage/storage.h"

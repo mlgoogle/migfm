@@ -1,4 +1,4 @@
-#include "logic/base_values.h"
+#include "base_values.h"
 #include "basic/basic_util.h"
 namespace base_logic{
 
@@ -61,10 +61,14 @@ Value* Value::CreateBooleanValue(bool in_value){
 }
 
 //static
-Value* Value::CreateIntegerValue(int in_value){
+Value* Value::CreateIntegerValue(int32 in_value){
 	return new FundamentalValue(in_value);
 }
 
+//static
+Value* Value::CreateBigIntegerValue(int64 in_value){
+	return new FundamentalValue(in_value);
+}
 //static
 Value* Value::CreateRealValue(double in_value){
 	return new FundamentalValue(in_value);
@@ -88,7 +92,11 @@ bool Value::GetAsBoolean(bool* in_value) const {
   return false;
 }
 
-bool Value::GetAsInteger(int* in_value) const {
+bool Value::GetAsInteger(int32* in_value) const {
+  return false;
+}
+
+bool Value::GetAsBigInteger(int64* out_value) const{
   return false;
 }
 
@@ -122,7 +130,7 @@ bool FundamentalValue::GetAsBoolean(bool* out_value) const {
   return (IsType(TYPE_BOOLEAN));
 }
 
-bool FundamentalValue::GetAsInteger(int* out_value) const {
+bool FundamentalValue::GetAsInteger(int32* out_value) const {
   if (out_value && IsType(TYPE_INTEGER))
     *out_value = integer_value_;
   return (IsType(TYPE_INTEGER));
@@ -132,6 +140,12 @@ bool FundamentalValue::GetAsReal(double* out_value) const {
   if (out_value && IsType(TYPE_REAL))
     *out_value = real_value_;
   return (IsType(TYPE_REAL));
+}
+
+bool FundamentalValue::GetAsBigInteger(int64* out_value)const {
+  if (out_value && IsType(TYPE_BIG_INTEGER))
+    *out_value = big_integer_value_;
+  return (IsType(TYPE_BIG_INTEGER));
 }
 
 
@@ -145,6 +159,10 @@ Value* FundamentalValue::DeepCopy() const {
 
       case TYPE_REAL:
          return CreateRealValue(real_value_);
+
+      case TYPE_BIG_INTEGER:
+    	 return CreateBigIntegerValue(big_integer_value_);
+
       default:
     	  return NULL;
 	}
@@ -236,6 +254,9 @@ BinaryValue::BinaryValue(char* buffer,size_t size)
 
 }
 
+BinaryValue::~BinaryValue(){
+
+}
 Value* BinaryValue::DeepCopy()const {
 	return CreateWithCopiedBuffer(buffer_,size_);
 }
@@ -308,12 +329,16 @@ void DictionaryValue::SetBoolean(const std::wstring& path, bool in_value){
 	Set(path,CreateBooleanValue(in_value));
 }
 
-void DictionaryValue::SetInteger(const std::wstring& path, int in_value) {
+void DictionaryValue::SetInteger(const std::wstring& path, int32 in_value) {
 	Set(path, CreateIntegerValue(in_value));
 }
 
 void DictionaryValue::SetReal(const std::wstring& path, double in_value) {
 	Set(path, CreateRealValue(in_value));
+}
+
+void DictionaryValue::SetBigInteger(const std::wstring& path,int64 in_value){
+	Set(path, CreateBigIntegerValue(in_value));
 }
 
 void DictionaryValue::SetString(const std::wstring& path,
@@ -361,12 +386,21 @@ bool DictionaryValue::GetBoolean(const std::wstring& path,
 }
 
 bool DictionaryValue::GetInteger(const std::wstring& path,
-                                 int* out_value) const {
+                                 int32* out_value) const {
   Value* value;
   if (!Get(path, &value))
     return false;
 
   return value->GetAsInteger(out_value);
+}
+
+bool DictionaryValue::GetBigInteger(const std::wstring& path,
+								int64* out_value) const {
+  Value* value;
+  if (!Get(path, &value))
+    return false;
+
+  return value->GetAsBigInteger(out_value);
 }
 
 bool DictionaryValue::GetReal(const std::wstring& path,
@@ -463,13 +497,23 @@ bool DictionaryValue::GetWithoutPathExpansion(const std::wstring& key,
 }
 
 bool DictionaryValue::GetIntegerWithoutPathExpansion(const std::wstring& path,
-                                                     int* out_value) const {
+                                                     int32* out_value) const {
   Value* value;
   if (!GetWithoutPathExpansion(path, &value))
     return false;
 
   return value->GetAsInteger(out_value);
 }
+
+bool DictionaryValue::GetBigIntegerWithoutPathExpansion(const std::wstring& path,
+                                                     int64* out_value) const {
+  Value* value;
+  if (!GetWithoutPathExpansion(path, &value))
+    return false;
+
+  return value->GetAsBigInteger(out_value);
+}
+
 
 bool DictionaryValue::GetStringWithoutPathExpansion(
     const std::wstring& path,
@@ -620,12 +664,20 @@ bool ListValue::GetBoolean(size_t index, bool* bool_value) const {
   return value->GetAsBoolean(bool_value);
 }
 
-bool ListValue::GetInteger(size_t index, int* out_value) const {
+bool ListValue::GetInteger(size_t index, int32* out_value) const {
   Value* value;
   if (!Get(index, &value))
     return false;
 
   return value->GetAsInteger(out_value);
+}
+
+bool ListValue::GetBigInteger(size_t index, int64* out_value) const {
+  Value* value;
+  if (!Get(index, &value))
+    return false;
+
+  return value->GetAsBigInteger(out_value);
 }
 
 bool ListValue::GetReal(size_t index, double* out_value) const {

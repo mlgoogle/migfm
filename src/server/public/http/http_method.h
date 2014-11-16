@@ -6,7 +6,6 @@
 #include <map>
 #include "curl/curl.h"
 #include "basic/basictypes.h"
-#include "log/mig_log.h"
 #if defined (GOOGLE_URL)
 typedef GURL            MIG_URL;
 #else

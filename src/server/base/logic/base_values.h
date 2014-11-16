@@ -30,7 +30,8 @@ public:
 
 	static Value* CreateNullValue();
 	static Value* CreateBooleanValue(bool in_value);
-	static Value* CreateIntegerValue(int in_value);
+	static Value* CreateIntegerValue(int32 in_value);
+	static Value* CreateBigIntegerValue(int64 in_value);
 	static Value* CreateRealValue(double in_value);
 	static Value* CreateStringValue(const std::string& in_value);
 	static Value* CreateStringValue(const std::wstring& in_value);
@@ -41,6 +42,7 @@ public:
 	  TYPE_NULL = 0,
 	  TYPE_BOOLEAN,
 	  TYPE_INTEGER,
+	  TYPE_BIG_INTEGER,
 	  TYPE_REAL,
 	  TYPE_STRING,
 	  TYPE_BINARY,
@@ -53,7 +55,8 @@ public:
 	bool IsType(ValueType type) const { return type == type_; }
 
 	virtual bool GetAsBoolean(bool* out_value) const;
-	virtual bool GetAsInteger(int* out_value) const;
+	virtual bool GetAsInteger(int32* out_value) const;
+	virtual bool GetAsBigInteger(int64* out_value) const;
 	virtual bool GetAsReal(double* out_value) const;
 	virtual bool GetAsString(std::string* out_value) const;
 	virtual bool GetAsString(std::wstring* out_value) const;
@@ -91,16 +94,19 @@ class FundamentalValue: public Value{
 public:
 	explicit FundamentalValue(bool in_value)
 	  : Value(TYPE_BOOLEAN), boolean_value_(in_value) {}
-	explicit FundamentalValue(int in_value)
+	explicit FundamentalValue(int32 in_value)
 	  : Value(TYPE_INTEGER), integer_value_(in_value) {}
+	explicit FundamentalValue(int64 in_value)
+	  : Value(TYPE_BIG_INTEGER), big_integer_value_(in_value) {}
 	explicit FundamentalValue(double in_value)
 	  : Value(TYPE_REAL), real_value_(in_value) {}
 
 	~FundamentalValue();
 
 	virtual bool GetAsBoolean(bool* out_value) const;
-	virtual bool GetAsInteger(int* out_value) const;
+	virtual bool GetAsInteger(int32* out_value) const;
 	virtual bool GetAsReal(double* out_value) const;
+	virtual bool GetAsBigInteger(int64* out_value)const;
 
 	virtual Value* DeepCopy() const;
 	virtual bool Equals(const Value* other) const;
@@ -108,7 +114,8 @@ public:
 private:
  union {
    bool boolean_value_;
-   int integer_value_;
+   int32  integer_value_;
+   int64  big_integer_value_;
    double real_value_;
  };
 
@@ -157,7 +164,8 @@ public:
 
 	void Set(const std::wstring& path, Value* in_value);
 	void SetBoolean(const std::wstring& path, bool in_value);
-	void SetInteger(const std::wstring& path, int in_value);
+	void SetInteger(const std::wstring& path, int32 in_value);
+	void SetBigInteger(const std::wstring& path, int64 in_value);
 	void SetReal(const std::wstring& path, double in_value);
 	void SetString(const std::wstring& path, const std::string& in_value);
 	void SetString(const std::wstring& path, const std::wstring& in_value);
@@ -167,7 +175,8 @@ public:
 	bool Get(const std::wstring& path, Value** out_value) const;
 
 	bool GetBoolean(const std::wstring& path, bool* out_value) const;
-	bool GetInteger(const std::wstring& path, int* out_value) const;
+	bool GetInteger(const std::wstring& path, int32* out_value) const;
+	bool GetBigInteger(const std::wstring& path, int64* out_value) const;
 	bool GetReal(const std::wstring& path, double* out_value) const;
 
 	bool GetStringASCII(const std::string& path, std::string* out_value) const;
@@ -186,7 +195,10 @@ public:
 	                               Value** out_value) const;
 
 	bool GetIntegerWithoutPathExpansion(const std::wstring& path,
-	                                      int* out_value) const;
+	                                      int32* out_value) const;
+
+	bool GetBigIntegerWithoutPathExpansion(const std::wstring& path,
+										  int64* out_value) const;
 
 	bool GetStringWithoutPathExpansion(const std::wstring& path,
 	                                     std::string* out_value) const;
@@ -256,7 +268,8 @@ class ListValue : public Value {
 
 
   bool GetBoolean(size_t index, bool* out_value) const;
-  bool GetInteger(size_t index, int* out_value) const;
+  bool GetInteger(size_t index, int32* out_value) const;
+  bool GetBigInteger(size_t index, int64* out_value) const;
   bool GetReal(size_t index, double* out_value) const;
   bool GetString(size_t index, std::string* out_value) const;
   bool GetString(size_t index, std::wstring* out_value) const;
