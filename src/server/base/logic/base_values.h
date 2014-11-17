@@ -163,6 +163,10 @@ public:
 	void Clear();
 
 
+	/*
+	 * wstring
+	 */
+
 	void Set(const std::wstring& path, Value* in_value);
 	void SetBoolean(const std::wstring& path, bool in_value);
 	void SetInteger(const std::wstring& path, int32 in_value);
@@ -172,6 +176,21 @@ public:
 	void SetString(const std::wstring& path, const std::wstring& in_value);
 
 	void SetWithoutPathExpansion(const std::wstring& key, Value* in_value);
+
+
+	/*
+	 * string
+	 */
+
+	void Set(const std::string& path, Value* in_value);
+	void SetBoolean(const std::string& path, bool in_value);
+	void SetInteger(const std::string& path, int32 in_value);
+	void SetBigInteger(const std::string& path, int64 in_value);
+	void SetReal(const std::string& path, double in_value);
+	void SetString(const std::string& path, const std::string& in_value);
+	void SetString(const std::string& path, const std::wstring& in_value);
+
+	void SetWithoutPathExpansion(const std::string& key, Value* in_value);
 
 	bool Get(const std::wstring& path, Value** out_value) const;
 

@@ -305,6 +305,34 @@ void DictionaryValue::Clear(){
 	dictionary_.clear();
 }
 
+void DictionaryValue::Set(const std::string& path, Value* in_value){
+	std::wstring wpath = base::BasicUtil::StringConversions::UTF8ToWide(path);
+	Set(wpath,in_value);
+}
+
+void DictionaryValue::SetBoolean(const std::string& path, bool in_value){
+	Set(path,CreateBooleanValue(in_value));
+}
+
+void DictionaryValue::SetInteger(const std::string& path, int32 in_value){
+	Set(path, CreateIntegerValue(in_value));
+}
+
+void DictionaryValue::SetBigInteger(const std::string& path, int64 in_value){
+	Set(path, CreateBigIntegerValue(in_value));
+}
+
+void DictionaryValue::SetReal(const std::string& path, double in_value){
+	Set(path, CreateRealValue(in_value));
+}
+
+void DictionaryValue::SetString(const std::string& path, const std::string& in_value){
+	Set(path, CreateStringValue(in_value));
+}
+
+void DictionaryValue::SetString(const std::string& path, const std::wstring& in_value){
+	Set(path, CreateStringValue(in_value));
+}
 
 void DictionaryValue::Set(const std::wstring& path, Value* in_value){
 	std::wstring current_path(path);

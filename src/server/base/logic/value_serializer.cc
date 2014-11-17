@@ -24,7 +24,7 @@ JsonValueSerializer::~JsonValueSerializer(){
 }
 
 bool JsonValueSerializer::Serialize(const Value& root){
-	BuildJSONString(&root,0,true);
+	BuildJSONString(&root,0,false);
 	return true;
 }
 
@@ -240,8 +240,10 @@ void JsonDoubleQuoteT(const STR& str,
         // 1. Escaping <, > to prevent script execution.
         // 2. Technically, we could also pass through c > 126 as UTF8, but this
         //    is also optional.  It would also be a pain to implement here.
-        unsigned int as_uint = static_cast<unsigned int>(c);
-        base::BasicUtil::StringUtil::StringAppendF(dst, "\\u%04X", as_uint);
+        unsigned char as_uint = static_cast<unsigned char>(c);
+        //用于存储进行转，以BIN的方式存储
+        //base::BasicUtil::StringUtil::StringAppendF(dst, "\\u%04X", as_uint);
+        dst->push_back(as_uint);
       } else {
         unsigned char ascii = static_cast<unsigned char>(*it);
         dst->push_back(ascii);

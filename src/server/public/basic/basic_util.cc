@@ -5,8 +5,9 @@
 #include "basic/base64.h"
 #include "storage/storage.h"
 #include "basic/radom_in.h"
-#include "log/mig_log.h"+
+#include "log/mig_log.h"
 #include "basic/icu_utf.h"
+#include "dmg_fp/dmg_fp.h"
 #include <sstream>
 #include <math.h>
 
@@ -93,16 +94,17 @@ void BasicUtil::StringUtil::StringAppendF(std::wstring* dst,const wchar_t* forma
 
 
 bool BasicUtil::StringUtil::IsStringASCII(const std::string& str){
-	return true;
+	return DoIsStringASCII(str);
 }
 
 bool BasicUtil::StringUtil::IsStringASCII(const std::wstring& str){
-	return true;
+	return DoIsStringASCII(str);
 }
 
 
 std::string BasicUtil::StringUtil::DoubleToString(double value){
 	char buffer[32];
+	dmg_fp::g_fmt(buffer,value);
 	return std::string(buffer);
 }
 

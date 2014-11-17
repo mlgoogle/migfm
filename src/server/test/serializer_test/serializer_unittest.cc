@@ -2,136 +2,120 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <limits>
 #include "basic/basictypes.h"
 #include "gtest/gtest.h"
-#include "../../base/logic/base_values.h"
-#include "../../public/basic/scoped_ptr.h"
+#include "logic/base_values.h"
+#include "logic/value_serializer.h"
+#include "basic/scoped_ptr.h"
 #include "log/mig_log.h"
+#include <limits>
+#include <string>
 class ValuesTest: public testing::Test {
 };
 
-
-TEST(ValuesTest, Basic){
-	// Test basic dictionary getting/setting
-	base_logic::DictionaryValue settings;
-	std::wstring homepage = L"http://google.com";
-	ASSERT_FALSE(
-	    settings.GetString(L"global.homepage", &homepage));
-	ASSERT_EQ(std::wstring(L"http://google.com"), homepage);
-
-	ASSERT_FALSE(settings.Get(L"global", NULL));
-	settings.Set(L"global",base_logic::Value::CreateBooleanValue(true));
-	ASSERT_TRUE(settings.Get(L"global", NULL));
-	settings.SetString(L"global.homepage", L"http://scurvy.com");
-	ASSERT_TRUE(settings.Get(L"global", NULL));
-
-	homepage = L"http://google.com";
-	ASSERT_TRUE(settings.GetString(L"global.homepage", &homepage));
-	ASSERT_EQ(std::wstring(L"http://scurvy.com"), homepage);
-
-	// Test storing a dictionary in a list.
-	base_logic::ListValue* toolbar_bookmarks;
-	ASSERT_FALSE(
-			settings.GetList(L"global.toolbar.bookmarks",&toolbar_bookmarks)
-	);
-	toolbar_bookmarks =  new base_logic::ListValue;
-	settings.Set(L"global.toolbar.bookmarks",toolbar_bookmarks);
-	ASSERT_TRUE(
-			settings.GetList(L"global.toolbar.bookmarks",&toolbar_bookmarks)
-	);
-
-	base_logic::DictionaryValue* new_bookmark = new base_logic::DictionaryValue;
-	new_bookmark->SetString(L"name", L"Froogle");
-	new_bookmark->SetString(L"url", L"http://froogle.com");
-	toolbar_bookmarks->Append(new_bookmark);
-
-	base_logic::ListValue* bookmark_list;
-	ASSERT_TRUE(settings.GetList(L"global.toolbar.bookmarks", &bookmark_list));
-	base_logic::DictionaryValue* bookmark;
-	ASSERT_EQ(1U, bookmark_list->GetSize());
-	ASSERT_TRUE(bookmark_list->GetDictionary(0, &bookmark));
-	std::wstring bookmark_name = L"Unnamed";
-	ASSERT_TRUE(bookmark->GetString(L"name", &bookmark_name));
-	ASSERT_EQ(std::wstring(L"Froogle"), bookmark_name);
-	std::wstring bookmark_url;
-	ASSERT_TRUE(bookmark->GetString(L"url", &bookmark_url));
-	ASSERT_EQ(std::wstring(L"http://froogle.com"), bookmark_url);
-
+void ValuesSerializeTest(base_logic::Value* value){
+	 std::string json_str;
+	 base_logic::JsonValueSerializer jsonobj(&json_str);
+	 jsonobj.Serialize(*value);
+	 MIG_INFO(USER_LEVEL,"%s\n\n",json_str.c_str());
 }
 
-TEST(ValuesTest, List) {
-  scoped_ptr<base_logic::ListValue> mixed_list(new base_logic::ListValue());
+TEST(ValuesSerializerTest, Basic){
 
-  mixed_list->Set(0, base_logic::Value::CreateBooleanValue(true));
-  mixed_list->Set(1, base_logic::Value::CreateIntegerValue(42));
-  mixed_list->Set(2, base_logic::Value::CreateBigIntegerValue(44294967295));
-  mixed_list->Set(3, base_logic::Value::CreateRealValue(88.8));
-  mixed_list->Set(4, base_logic::Value::CreateStringValue("foo"));
-  ASSERT_EQ(5u, mixed_list->GetSize());
+	base_logic::Value* boolean_value = base_logic::Value::CreateBooleanValue(true);
+	ValuesSerializeTest(boolean_value);
 
-  base_logic::Value *value = NULL;
-  bool bool_value = false;
-  int int_value = 0;
-  int64 bigint_value = 0;
-  double double_value = 0.0;
-  std::string string_value;
+	base_logic::Value* null_value = base_logic::Value::CreateNullValue();
+	ValuesSerializeTest(null_value);
 
-  ASSERT_FALSE(mixed_list->Get(5, &value));
+	base_logic::Value* integer_value = base_logic::Value::CreateIntegerValue(10);
+	ValuesSerializeTest(integer_value);
 
-  ASSERT_FALSE(mixed_list->GetInteger(0, &int_value));
-  ASSERT_EQ(0, int_value);
-  ASSERT_FALSE(mixed_list->GetReal(1, &double_value));
-  ASSERT_EQ(0.0, double_value);
-  ASSERT_FALSE(mixed_list->GetString(2, &string_value));
-  ASSERT_EQ("", string_value);
-  ASSERT_FALSE(mixed_list->GetBoolean(3, &bool_value));
-  ASSERT_EQ(false, bool_value);
+	base_logic::Value* big_integer_value = base_logic::Value::CreateBigIntegerValue(544294967295);
+	ValuesSerializeTest(big_integer_value);
 
-  ASSERT_TRUE(mixed_list->GetBoolean(0, &bool_value));
-  ASSERT_EQ(true, bool_value);
-  ASSERT_TRUE(mixed_list->GetInteger(1, &int_value));
-  ASSERT_EQ(42, int_value);
-  ASSERT_TRUE(mixed_list->GetBigInteger(2, &bigint_value));
-  ASSERT_EQ(44294967295, bigint_value);
-  ASSERT_TRUE(mixed_list->GetReal(3, &double_value));
-  ASSERT_EQ(88.8, double_value);
-  ASSERT_TRUE(mixed_list->GetString(4, &string_value));
-  ASSERT_EQ("foo", string_value);
+	base_logic::Value* real_value = base_logic::Value::CreateRealValue(1.02);
+	ValuesSerializeTest(real_value);
+
+	base_logic::Value* string_value = base_logic::Value::CreateStringValue("老K");
+	ValuesSerializeTest(string_value);
+
+	base_logic::Value* wstring_value = base_logic::Value::CreateStringValue(L"董翔");
+	ValuesSerializeTest(wstring_value);
 }
 
-TEST(ValuesTest, BinaryValue) {
-  char* buffer = NULL;
-  // Passing a null buffer pointer doesn't yield a BinaryValue
-  scoped_ptr<base_logic::BinaryValue> binary(base_logic::BinaryValue::Create(buffer, 0));
-  ASSERT_FALSE(binary.get());
-
-  // If you want to represent an empty binary value, use a zero-length buffer.
-  buffer = new char[1];
-  ASSERT_TRUE(buffer);
-  binary.reset(base_logic::BinaryValue::Create(buffer, 0));
-  ASSERT_TRUE(binary.get());
-  ASSERT_TRUE(binary->GetBuffer());
-  ASSERT_EQ(buffer, binary->GetBuffer());
-  ASSERT_EQ(0U, binary->GetSize());
-
-  // Test the common case of a non-empty buffer
-  buffer = new char[15];
-  binary.reset(base_logic::BinaryValue::Create(buffer, 15));
-  ASSERT_TRUE(binary.get());
-  ASSERT_TRUE(binary->GetBuffer());
-  ASSERT_EQ(buffer, binary->GetBuffer());
-  ASSERT_EQ(15U, binary->GetSize());
-
-  char stack_buffer[42];
-  memset(stack_buffer, '!', 42);
-  binary.reset(base_logic::BinaryValue::CreateWithCopiedBuffer(stack_buffer, 42));
-  ASSERT_TRUE(binary.get());
-  ASSERT_TRUE(binary->GetBuffer());
-  ASSERT_NE(stack_buffer, binary->GetBuffer());
-  ASSERT_EQ(42U, binary->GetSize());
-  ASSERT_EQ(0, memcmp(stack_buffer, binary->GetBuffer(), binary->GetSize()));
+TEST(ValuesSerializerTest, List){
+	base_logic::ListValue* mixed_list = new base_logic::ListValue();
+	mixed_list->Set(0, base_logic::Value::CreateNullValue());
+	mixed_list->Set(1, base_logic::Value::CreateBooleanValue(true));
+	mixed_list->Set(2, base_logic::Value::CreateIntegerValue(42));
+	mixed_list->Set(3, base_logic::Value::CreateBigIntegerValue(44294967295));
+	mixed_list->Set(4, base_logic::Value::CreateRealValue(88.8));
+	mixed_list->Set(5, base_logic::Value::CreateStringValue("kerry"));
+	mixed_list->Set(6, base_logic::Value::CreateStringValue(L"flaght"));
+	ValuesSerializeTest(mixed_list);
 }
+
+TEST(ValuesSerializerTest, Dictionary){
+	base_logic::DictionaryValue* settings  = new base_logic::DictionaryValue();
+	settings->Set(L"name",base_logic::Value::CreateStringValue("kerry"));
+	settings->Set(L"age",base_logic::Value::CreateIntegerValue(42));
+	settings->Set(L"sex",base_logic::Value::CreateBooleanValue(true));
+	settings->Set(L"billing",base_logic::Value::CreateBigIntegerValue(44294967295));
+	settings->Set(L"eye",base_logic::Value::CreateRealValue(5.01));
+	settings->Set(L"nickname",base_logic::Value::CreateStringValue(L"dong"));
+	settings->Set(L"like",base_logic::Value::CreateNullValue());
+	ValuesSerializeTest(settings);
+}
+
+TEST(ValuesSerializerTest, Mixed){
+	base_logic::DictionaryValue* settings  = new base_logic::DictionaryValue();
+	settings->Set(L"name",base_logic::Value::CreateStringValue("kerry"));
+	settings->Set(L"age",base_logic::Value::CreateIntegerValue(42));
+	settings->Set(L"sex",base_logic::Value::CreateBooleanValue(true));
+	settings->Set(L"billing",base_logic::Value::CreateBigIntegerValue(44294967295));
+	settings->Set(L"eye",base_logic::Value::CreateRealValue(5.01));
+	settings->Set(L"nickname",base_logic::Value::CreateStringValue(L"dong"));
+	settings->Set(L"like",base_logic::Value::CreateNullValue());
+
+
+	base_logic::ListValue* mixed_list = new base_logic::ListValue();
+	mixed_list->Set(0, base_logic::Value::CreateNullValue());
+	mixed_list->Set(1, base_logic::Value::CreateBooleanValue(true));
+	mixed_list->Set(2, base_logic::Value::CreateIntegerValue(42));
+	mixed_list->Set(3, base_logic::Value::CreateBigIntegerValue(44294967295));
+	mixed_list->Set(4, base_logic::Value::CreateRealValue(88.8));
+	mixed_list->Set(5, base_logic::Value::CreateStringValue("kerry"));
+	mixed_list->Set(6, base_logic::Value::CreateStringValue(L"flaght"));
+	mixed_list->Set(7,settings);
+	//mixed_list->Set(8,mixed_list);
+
+	base_logic::DictionaryValue* settings2  = new base_logic::DictionaryValue();
+	settings2->Set("name",base_logic::Value::CreateStringValue("kerry2"));
+	settings2->Set("age",base_logic::Value::CreateIntegerValue(42));
+	settings2->Set("sex",base_logic::Value::CreateBooleanValue(true));
+	settings2->Set("billing",base_logic::Value::CreateBigIntegerValue(44294967295));
+	settings2->Set("eye",base_logic::Value::CreateRealValue(5.01));
+	settings2->Set("nickname",base_logic::Value::CreateStringValue(L"dong2"));
+	settings2->Set("like",base_logic::Value::CreateNullValue());
+
+	base_logic::DictionaryValue* settings3  = new base_logic::DictionaryValue();
+	settings3->Set("name",base_logic::Value::CreateStringValue("kerry3"));
+	settings3->Set("age",base_logic::Value::CreateIntegerValue(42));
+	settings3->Set("sex",base_logic::Value::CreateBooleanValue(true));
+	settings3->Set("billing",base_logic::Value::CreateBigIntegerValue(44294967295));
+	settings3->Set("eye",base_logic::Value::CreateRealValue(5.01));
+	settings3->Set("nickname",base_logic::Value::CreateStringValue(L"董翔"));
+	settings3->Set("like",base_logic::Value::CreateNullValue());
+
+
+	base_logic::DictionaryValue* settings1  = new base_logic::DictionaryValue();
+	settings1->Set("list",mixed_list);
+	settings1->Set("dict2",settings2);
+	settings1->Set("dict3",settings3);
+	ValuesSerializeTest(settings1);
+}
+/*
 
 TEST(ValuesTest, StringValue) {
   // Test overloaded CreateStringValue.
@@ -155,7 +139,7 @@ TEST(ValuesTest, StringValue) {
   ASSERT_TRUE(wide_value->GetAsString(&wide));
   ASSERT_EQ(std::string("wide"), narrow);
   ASSERT_EQ(std::wstring(L"wide"), wide);
-}
+}*/
 
 // This is a Value object that allows us to tell if it's been
 // properly deleted by modifying the value of external flag on destruction.
