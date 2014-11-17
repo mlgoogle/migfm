@@ -19,9 +19,9 @@ public:
 	JsonValueSerializer(std::string* json);
 	virtual ~JsonValueSerializer();
 public:
-	bool Serialize(const Value& root);
+	virtual bool Serialize(const Value& root);
 
-	Value* Deserialize(int* error_code, std::string* error_str);
+	virtual Value* Deserialize(int* error_code, std::string* error_str);
 private:
 	void BuildJSONString(const Value* const node,int depth,bool escape);
 
@@ -38,10 +38,15 @@ class XmlValueSerializer:public ValueSerializer{
 public:
 	XmlValueSerializer();
 	virtual ~XmlValueSerializer();
+	XmlValueSerializer(std::string* xml);
 public:
-	bool Serialize(const Value& root);
+	virtual bool Serialize(const Value& root);
 
-	Value* Deserialize(int* error_code, std::string* error_str);
+	virtual Value* Deserialize(int* error_code, std::string* error_str);
+private:
+	std::string*     xml_string_;
+
+	bool             pretty_print_;
 
 };
 

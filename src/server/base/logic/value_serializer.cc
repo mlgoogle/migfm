@@ -167,28 +167,6 @@ Value* JsonValueSerializer::Deserialize(int* error_code, std::string* error_str)
 	return value;
 }
 
-
-
-
-//xml
-XmlValueSerializer::XmlValueSerializer(){
-
-}
-
-XmlValueSerializer::~XmlValueSerializer(){
-
-}
-
-bool XmlValueSerializer::Serialize(const Value& root){
-	return true;
-}
-
-Value* XmlValueSerializer::Deserialize(int* error_code, std::string* error_str){
-	Value*  value = NULL;
-	return value;
-}
-
-
 //escape
 // Try to escape |c| as a "SingleEscapeCharacter" (\n, etc).  If successful,
 // returns true and appends the escape sequence to |dst|.  This isn't required
@@ -265,4 +243,34 @@ std::string StringEscape::GetDoubleQuoteJson(const std::string& str){
 	JsonDoubleQuote(str,true,&dst);
 	return dst;
 }
+
+
+
+//xml
+XmlValueSerializer::XmlValueSerializer()
+:pretty_print_(false)
+,xml_string_(NULL){
+
+}
+
+XmlValueSerializer::XmlValueSerializer(std::string* xml)
+:pretty_print_(true)
+,xml_string_(xml){
+
+}
+
+XmlValueSerializer::~XmlValueSerializer(){
+
+}
+
+bool XmlValueSerializer::Serialize(const Value& root){
+	return true;
+}
+
+Value* XmlValueSerializer::Deserialize(int* error_code, std::string* error_str){
+	Value*  value = NULL;
+	return value;
+}
+
+
 }

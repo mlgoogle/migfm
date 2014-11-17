@@ -5,7 +5,6 @@
 #include "basic/basictypes.h"
 #include "gtest/gtest.h"
 #include "logic/base_values.h"
-#include "logic/value_serializer.h"
 #include "basic/scoped_ptr.h"
 #include "log/mig_log.h"
 #include <limits>
@@ -15,8 +14,8 @@ class ValuesTest: public testing::Test {
 
 void ValuesSerializeTest(base_logic::Value* value){
 	 std::string json_str;
-	 base_logic::JsonValueSerializer jsonobj(&json_str);
-	 jsonobj.Serialize(*value);
+	 base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(0,&json_str);
+	 engine->Serialize(*value);
 	 MIG_INFO(USER_LEVEL,"%s\n\n",json_str.c_str());
 }
 

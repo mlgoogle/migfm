@@ -1,4 +1,5 @@
 #include "base_values.h"
+#include "logic/value_serializer.h"
 #include "basic/basic_util.h"
 namespace base_logic{
 
@@ -848,5 +849,24 @@ bool ListValue::Equals(const Value* other) const {
 
   return true;
 }
+
+
+
+
+ValueSerializer* ValueSerializer::Create(int32 type,std::string* str){
+	ValueSerializer* engine = NULL;
+	switch(type){
+	case IMPL_JSON:
+		engine = new base_logic::JsonValueSerializer(str);
+		break;
+	case IMPL_XML:
+		engine = new base_logic::XmlValueSerializer(str);
+		break;
+	default:
+		break;
+	}
+	return engine;
+}
+
 
 }

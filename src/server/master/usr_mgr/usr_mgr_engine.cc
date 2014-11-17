@@ -38,6 +38,8 @@ UsrMgrEngine::UsrMgrEngine()
 	base_push::PushConnectorEngine::Create(base_push::IMPL_BAIDU);
 	base_push::PushConnectorEngine::GetPushConnectorEngine()->Init(config->mysql_db_list_);
 
+	base_lbs::LbsConnectorEngine::Create(IMPL_BAIDU);
+	base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->Init(config->mysql_db_list_);
 }
 
 UsrMgrEngine::~UsrMgrEngine(){
@@ -333,6 +335,11 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	std::string result_out;
 	std::string status;
 	std::string msg;
+
+
+	Json::Reader reader;
+	Json::Value  root;
+	Json::Value& result = root["result"];
 	std::string username;
 	std::string password;
 	std::string nickname;
@@ -343,7 +350,17 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	std::string birthday;
 	std::string head;
 	std::string token;
+	std::string latitude;
+	std::string longitude;
+	std::string address;
+	std::string city;
+	std::string district;
+	std::string province;
+	std::string street;
 	std::stringstream ssuid;
+
+	int err;
+
 	int64 usrid;
 	int sex;
 	int64 type;
@@ -351,7 +368,20 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	int32 utf8_flag = 0;
 	std::stringstream os;
 	int32 return_code = 0;
-
+#if PACKAGE_HTTP_API
+	r = base_net::MYHttpApi::OnUserRegister(pack,username,password,nickname,source,
+			session,s_sex,birthday,location,address,head,int& err);
+	if(!r){
+		status = "0";
+		msg = http_strerror(err);
+		goto ret;
+	}
+	//通过IP转换城市
+	if(location.empty()){
+	base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->IPtoAddress(address,latitude,longitude,
+			location,district,province,street);
+	}
+#else
 	r = pack.GetAttrib(SOURCE,source);
 	if (!r){
 		status = "0";
@@ -437,6 +467,8 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 			head = "http://fm.miglab.com/default.jpg";
 		}
 	}
+#endif
+
 	r = storage::DBComm::RegistUser(source.c_str(),session.c_str(),
 		           password.c_str(),sex,username,nickname,usrid,
 				   type,location,birthday,head,return_code);
@@ -458,6 +490,7 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	//获取最新消息
 	storage::RedisComm::GetNewMsgNum(usrid,new_msg_num);
 
+
 	os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
 		<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<sex
 		<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
@@ -465,12 +498,15 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 		<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\",\"new_msg_num\":"
 		<<new_msg_num;
 
+
+
 	result = os.str();
 	status = "1";
 	//通知机器人登陆
 	NoticeUserLogin(robot_server_socket_,10000,usrid,0,0);
 
 ret:
+
 	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
 	LOG_DEBUG2("[%s]",result_out.c_str());
 	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());

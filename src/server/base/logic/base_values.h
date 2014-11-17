@@ -324,8 +324,16 @@ class ListValue : public Value {
 
 };
 
+enum SerializerImplType{
+	IMPL_JSON = 0,
+	IMPL_XML = 1
+};
+
+
 class ValueSerializer {
- public:
+public:
+	static ValueSerializer* Create(int32 type,std::string* str);
+public:
   virtual ~ValueSerializer() {}
 
   virtual bool Serialize(const Value& root) = 0;
