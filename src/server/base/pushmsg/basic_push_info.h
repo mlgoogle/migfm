@@ -18,6 +18,12 @@ enum notification_type{
 	OPEN_APP = 2
 };
 
+enum machine_type{
+	ALL_TYPE = 0,
+	IOS_TYPE = 1,
+	ANDROID_TYPE = 2
+};
+
 namespace base_push{
 
 
@@ -139,7 +145,7 @@ private:
 		Data():refcount_(0)
 			,platform_(0)
 			,uid_(0)
-			,machine_(1)
+			,machine_(ANDROID_TYPE)
 			,notification_builder_id_(0)
 			,notification_basic_style_(VIBRATE_STYLE|RING_STYLE)
 			,open_type_(OPEN_APP)
@@ -155,7 +161,7 @@ private:
 		Data(const int64 platform,const int64 uid):refcount_(0)
 			,platform_(platform)
 			,uid_(uid)
-			,machine_(0)
+			,machine_(ANDROID_TYPE)
 			,notification_builder_id_(0)
 			,notification_basic_style_(VIBRATE_STYLE|RING_STYLE)
 			,open_type_(OPEN_APP)
@@ -171,7 +177,7 @@ private:
 		Data(const int64 platform,const int64 uid,const int32 level,const int64 msg_id):refcount_(0)
 			,platform_(platform)
 			,uid_(uid)
-			,machine_(0)
+			,machine_(ALL_TYPE)
 			,notification_builder_id_(0)
 			,open_type_(OPEN_APP)
 			,net_support_(1)
@@ -196,7 +202,7 @@ private:
 		const int64              msg_id_;
 		std::string              baidu_user_id_;
 		std::string              tag_;
-		int                      machine_;//机器类型 0,两者兼容 1,android 2, IOS 默认1
+		int                      machine_;//机器类型 0,两者兼容 1,IOS 2, android 默认1
 		std::string              title_;
 		std::string              description_;
 		int                      notification_builder_id_;//android 消息格式 默认为0

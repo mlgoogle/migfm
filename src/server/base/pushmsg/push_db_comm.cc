@@ -165,9 +165,10 @@ bool PushDBComm::BindBDPushUserinfo(const int64 platform,const int64 uid,const i
 	}
 
     //call proc_BindPushBaiduInfo(platform,uid,channel,'baidu_userid','pkg_name','tag','13123123','12312',1);
-	os<<"call proc_BindPushBaiduInfo(\'"
-			<<platform<<","<<uid<<","
-			<<channel<<",\'"<<baidu_userid.c_str()
+	os<<"call proc_BindPushBaiduInfo("
+			<<platform<<","
+			<<uid<<",\'"
+			<<channel<<"\',\'"<<baidu_userid.c_str()
 			<<"\',\'"<<pkg_name.c_str()
 			<<"\',\'"<<tag.c_str()<<"\',\'"<<appid<<"\',\'"<<requestid<<
 			"\',"<<machine<<");";

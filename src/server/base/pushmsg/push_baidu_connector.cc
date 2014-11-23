@@ -71,10 +71,10 @@ void PushBaiduConnectorImpl::TimeDBPushMessage(){
 		base_push::BaiduPushMessage* push_message = list.front();
 		list.pop_front();
 		//android
-		push_message->set_machine(1);
+		push_message->set_machine(ANDROID_TYPE);
 		r = PushUserMessage(url,3,(*push_message));
 		//IOS
-		push_message->set_machine(2);
+		push_message->set_machine(IOS_TYPE);
 		r = PushUserMessage(url,3,(*push_message));
 		if(r)
 			base_push::PushDBComm::UpdateAllPushMessage(push_message->msg_id());
@@ -141,12 +141,12 @@ bool PushBaiduConnectorImpl::PushUserMessage(const std::string& url,const int32 
 	//if(push_message.machine()==1)
 	push_msg.set_value("msg_keys",time(NULL)+11);
 	push_msg.set_value("push_type",push_type);
-	if(push_message.machine()==1)
+	if(push_message.machine()==ANDROID_TYPE)
 		push_msg.set_value("device_type",base_push::ANDRIOD);
-	else if(push_message.machine()==2)
+	else if(push_message.machine()==IOS_TYPE)
 		push_msg.set_value("device_type",base_push::IOS);
 
-	if(push_message.machine()==2)
+	if(push_message.machine()==IOS_TYPE)
 		push_msg.set_value("deploy_status",DEPLOY_STATUS);
 
 	push_msg.set_value("timestamp",time(NULL));
@@ -287,7 +287,7 @@ void PushBaiduConnectorImpl::TestSign(){
 	std::string url_content;
 	std::string hexdigest;
 	base::BasicUtil::UrlEncode(content,url_content);
-	MD5Sum md5sum(url_content);
+	base::MD5Sum md5sum(url_content);
 	hexdigest = md5sum.GetHash();
 	LOG_DEBUG2("%s",content.c_str());
 	LOG_DEBUG2("%s",url_content.c_str());

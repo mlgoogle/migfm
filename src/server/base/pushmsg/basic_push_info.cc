@@ -53,7 +53,10 @@ void BaiduPushCustomContent::GetJsonObject(Json::Value& result){
 	Json::Value& value = result[data_->name_];
 	for(std::map<std::string,std::string>::iterator itr = data_->param_map_.begin();
 			itr!=data_->param_map_.end();itr++){
-		value[itr->first] = itr->second;
+		if(itr->first=="badge")
+			value[itr->first] = atoll(itr->second.c_str());
+		else
+			value[itr->first] = itr->second;
 	}
 }
 
@@ -133,7 +136,7 @@ bool BaiduPushMessage::SerializedJson(std::string& content){
 #define JSON_VALUE_INT(key,value) \
 		result[key] = value;\
 //判断安卓
-	if(data_->machine_==1){
+	if(data_->machine_==ANDROID_TYPE){
 		JSON_VALUE_STR("title",data_->title_)
 		JSON_VALUE_STR("description",data_->description_)
 		JSON_VALUE_INT("notification_builder_id",data_->notification_builder_id_)
@@ -149,7 +152,7 @@ bool BaiduPushMessage::SerializedJson(std::string& content){
 #undef JSON_VALUE_INT
 
 	//data_->android_cunstom_content_.GetJsonObject(result);
-	if(data_->machine_==2)
+	if(data_->machine_==IOS_TYPE)
 		data_->ios_cunstom_content_.GetJsonObject(result);
 	GetJsonObject(result);
 
@@ -239,10 +242,10 @@ void BaiDuPushMsgInfo::Calculate(){
 	os<<data_->secret_;
 	content = os.str();
 	base::BasicUtil::UrlEncode(content,url_content);
-	MD5Sum md5sum(url_content);
+
+	base::MD5Sum md5sum(url_content);
 	hexdigest_ = md5sum.GetHash();
 	sign_change_ = false;
-
 	/*os<<"POSThttp://channel.api.duapp.com/rest/2.0/channel/channelapikey=Yw3DNoCNaW3PtOzKXsOolp4cchannel_id="
 			<<4209320236570070120<<"message_type=1messages="<<message<<"method=push_msgmsg_keys="
 			<<msg_keys<<"push_type=1timestamp="
