@@ -20,12 +20,14 @@ LINK_FLAGS = -g -shared -fPIC
 
 ## 头文件
 INCLUDE_PATHS = -I./ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I/usr/local/include\
-				 -I/usr/include/mysql -I./../../../third_party/hiredis -I./../../base/  -I../../robot/
+				 -I/usr/include/mysql -I./../../../third_party/hiredis -I./../../base/  -I../../robot/\
+				 -I./../../../third_party/
 
 ## 库
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl\
-				../../lib/libbreakpad_client.a ../../lib/libhiredis.a ../../lib/robot_interface.a 
+				../../lib/libbreakpad_client.a ../../lib/libhiredis.a ../../lib/robot_interface.a\
+				./../../../third_party/dmg_fp/lib/dmg_fp.a ../../lib/mybase.a\
 
 ##3rd
 THIRD_PATH = ../../public
@@ -36,10 +38,7 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output:	caiyun_weather_engine.o weather_engine.o weather_logic_unit.o \
-	lbs_connector.o basic_lbs_info.o lbs_db_comm.o\
-	lbs_logic_unit.o base_db_mysql_auto.o http_method.o lbs_baidu_connector.o \
-	dic_comm.o logic_comm.o thread_handler.o sociality_mgr_engine.o \
+output:	 http_method.o dic_comm.o logic_comm.o thread_handler.o sociality_mgr_engine.o \
 	sociality_mgr_init.o http_response.o thread_lock.o db_comm.o http_comm.o \
 	basic_info.o http_packet.o basictypes.o config.o base64.o radom_in.o\
 	mig_log.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
@@ -77,39 +76,6 @@ sociality_mgr_init.o:
 	$(COMPILE) ./sociality_mgr_init.cc
 
 
-#############base#########################################
-caiyun_weather_engine.o:
-	$(COMPILE) ./../../base/weather/caiyun_weather_engine.cc
-
-weather_engine.o:
-	$(COMPILE) ./../../base/weather/weather_engine.cc
-
-weather_logic_unit.o:
-	$(COMPILE) ./../../base/weather/weather_logic_unit.cc
-	
-lbs_connector.o:
-	$(COMPILE) ./../../base/lbs/lbs_connector.cc
-
-lbs_baidu_connector.o:
-	$(COMPILE) ./../../base/lbs/lbs_baidu_connector.cc
-	
-basic_lbs_info.o:
-	$(COMPILE) ./../../base/lbs/basic_lbs_info.cc
-
-lbs_db_comm.o:
-	$(COMPILE) ./../../base/lbs/lbs_db_comm.cc
-
-lbs_logic_unit.o:
-	$(COMPILE) ./../../base/lbs/lbs_logic_unit.cc
-
-base_db_mysql_auto.o:
-	$(COMPILE) ./../../base/db/base_db_mysql_auto.cc
-
-base_thread_handler.o:
-	$(COMPILE) ./../../base/thread/base_thread_handler.cc
-	
-base_thread_lock.o:
-	$(COMPILE) ./../../base/thread/base_thread_lock.cc
 	
 #############public#######################################
 http_response.o:

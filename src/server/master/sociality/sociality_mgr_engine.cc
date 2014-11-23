@@ -5,11 +5,13 @@
 #include "intertface/robot_interface.h"
 #include "lbs/lbs_connector.h"
 #include "weather/weather_engine.h"
+#include "pushmsg/push_connector.h"
 #include "basic/constants.h"
 #include "basic/basic_util.h"
 #include "config/config.h"
 #include "basic/base64.h"
 #include "basic/errno_comm.h"
+#include "basic/md5sum.h"
 #include "json/json.h"
 #include "storage/db_storage.h"
 #include "storage/dic_storage.h"
@@ -47,8 +49,8 @@ SocialityMgrEngine::SocialityMgrEngine(){
 	engine->Init(config->mysql_db_list_);
 	base_weather::WeatherConnectorEngine::Create(base_weather::IMPL_CAIYUN);
 	base_weather::WeatherConnectorEngine::GetWeatherConnectorEngine()->Init();
-
-
+	base_push::PushConnectorEngine::Create(base_push::IMPL_BAIDU);
+	base_push::PushConnectorEngine::GetPushConnectorEngine()->Init(config->mysql_db_list_);
 }
 
 SocialityMgrEngine::~SocialityMgrEngine(){
@@ -241,6 +243,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	LOGIC_PROLOG();
 
 	std::string user_id, to_user_id, song_id_str, ext_msg;
+	int64 new_msg = 0;
 	if (!packet.GetAttrib("uid", user_id)) {
 		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
@@ -274,8 +277,10 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	if(!PushPresentMsg(ext_msg,summary,user_id,to_user_id,err_code,status))
 		return false;
 
-	//鍔犲叆鍘嗗彶璁板綍
+	//
 	DBComm::AddMusciFriend(user_id,to_user_id);
+	//新增消息
+	RedisComm::AddNewMessage(atoll(to_user_id.c_str()),new_msg);
 
 
 	//回复客户端，避免客户端因推送长时间等待
@@ -286,14 +291,18 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 	else
 		result["msg"] = "";
 
+	if(new_msg==0)
+		new_msg=1;
 	Json::FastWriter wr;
 	std::string res = wr.write(result);
 	SomeUtils::SendFull(socket, res.c_str(), res.length());
 	flag = 1;
 	///
 
-	//鎺ㄩ�娑堟伅閰嶇疆
-	std::string device_token;
+	base_push::PushConnectorEngine::GetPushConnectorEngine()->PushUserMessage(1000,atoll(to_user_id.c_str()),
+			summary,summary,SOUND_TYPE|VIBRATE_TYPE|CLEAR_TYPE,new_msg);
+	//
+	/*std::string device_token;
 	bool is_recv = false;
 	unsigned btime=0, etime=0;
 	if (!RedisComm::GetUserPushConfig(to_uid, device_token,
@@ -337,7 +346,7 @@ bool SocialityMgrEngine::OnMsgPresentSong(packet::HttpPacket& packet,
 // 		return false;
 		status = 1;
 		return true;
-	}
+	}*/
 
 
 	status = 1;
@@ -457,6 +466,7 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 	std::string uid;
 	std::string touid;
 	std::string msg;
+	int64 new_msg = 0;
 	if (!packet.GetAttrib("uid",uid)){
 		err_code = MIG_FM_HTTP_USER_NO_EXITS;
 		return false;
@@ -483,7 +493,7 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 
 
 	//新增消息
-	RedisComm::AddNewMessage(atoll(touid.c_str()));
+	RedisComm::AddNewMessage(atoll(touid.c_str()),new_msg);
 
 	DBComm::AddMusciFriend(uid,touid);
 
@@ -501,7 +511,13 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 	std::string res = wr.write(result);
 	SomeUtils::SendFull(socket, res.c_str(), res.length());
 	flag = 1;
+	if(new_msg==0)
+		new_msg = 1;
 
+	base_push::PushConnectorEngine::GetPushConnectorEngine()->PushUserMessage(1000,atoll(touid.c_str()),
+			summary,summary,SOUND_TYPE|VIBRATE_TYPE|CLEAR_TYPE,new_msg);
+
+/*
 	std::string device_token;
 	bool is_recv = false;
 	unsigned btime = 0,etime = 0;
@@ -543,7 +559,7 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 		status = 1;
 		return true;
 	}
-
+*/
 	status = 1;
 	return true;
 }
@@ -1755,10 +1771,7 @@ bool SocialityMgrEngine::PushPresentMsg(std::string &msg, std::string& summary,
 	}
 
 	DBComm::RecordUserMessageList(PARENT_TYPE,atoll(uid.c_str()),atoll(to_uid.c_str()),list);
-	//新增消息
-	RedisComm::AddNewMessage(atoll(to_uid.c_str()));
 
-	//鍐呭
 	std::stringstream ss;
 	std::string conver_num;
 	r = base::BasicUtil::ConverNum(infos_size,conver_num);

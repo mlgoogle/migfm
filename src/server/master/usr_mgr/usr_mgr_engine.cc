@@ -11,6 +11,7 @@
 #include "json/json.h"
 #include "storage/dic_storage.h"
 #include "pushmsg/push_connector.h"
+#include "logic/"
 #include <sstream>
 
 #define		TIME_TEST		1025
@@ -491,7 +492,7 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 	storage::RedisComm::GetNewMsgNum(usrid,new_msg_num);
 
 
-	os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
+	/*os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
 		<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<sex
 		<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
 		<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
@@ -501,7 +502,8 @@ bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet)
 
 
 	result = os.str();
-	status = "1";
+	status = "1";*/
+
 	//通知机器人登陆
 	NoticeUserLogin(robot_server_socket_,10000,usrid,0,0);
 

@@ -621,12 +621,12 @@ bool RedisComm::GetMusicAboutUser(const std::string &songid,std::string& content
 }
 
 
-bool RedisComm::AddNewMessage(const int64 uid){
+bool RedisComm::AddNewMessage(const int64 uid,int64& new_msg){
 	REDIS_PROC_PROLOG(redis);
-	int64 msg_id;
+	//int64 msg_id;
 	char key[256] = {0};
 	snprintf(key, arraysize(key), KEY_PUSH_NEW_MSG_NUM, uid);
-	return redis->IncDecValue(key, strlen(key), 1, msg_id);
+	return redis->IncDecValue(key, strlen(key), 1, new_msg);
 	//return true;
 }
 

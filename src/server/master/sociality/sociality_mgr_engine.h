@@ -94,6 +94,7 @@ private:
 				int &status, int &err_code);
 
 private:
+
 	bool CheckAndTransHMTime(const std::string &str, unsigned &time);
 
 	bool MakePresentSongContent(const std::string& send_uid,

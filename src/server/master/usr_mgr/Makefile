@@ -20,12 +20,13 @@ LINK_FLAGS = -g -shared -fPIC
 
 ## 头文件
 INCLUDE_PATHS = -I./ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I../../robot/  -I/usr/local/include\
-				 -I/usr/include/mysql -I./../../../third_party/hiredis  -I../../base/
+				 -I/usr/include/mysql -I./../../../third_party/hiredis  -I../../base/ -I./../../../third_party/
 
 ## 库
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient\
-				../../lib/libbreakpad_client.a ../../lib/libhiredis.a ../../lib/robot_interface.a\
+				../../lib/libbreakpad_client.a ../../lib/libhiredis.a ./../../../third_party/dmg_fp/lib/dmg_fp.a\
+				 ../../lib/robot_interface.a\
 				../../lib/mybase.a
 
 ##3rd

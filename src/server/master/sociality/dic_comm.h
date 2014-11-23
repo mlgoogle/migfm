@@ -61,7 +61,7 @@ public:
 	static bool GetCollectSongs(const std::string& uid,
 		std::map<std::string,std::string>& song_map);
 
-	static bool AddNewMessage(const int64 uid);
+	static bool AddNewMessage(const int64 uid,int64& new_msg);
 
 
 	static bool ClearNewMessage(const int64 uid);

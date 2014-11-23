@@ -114,32 +114,130 @@ TEST(ValuesSerializerTest, Mixed){
 	settings1->Set("dict3",settings3);
 	ValuesSerializeTest(settings1);
 }
-/*
 
-TEST(ValuesTest, StringValue) {
-  // Test overloaded CreateStringValue.
-  scoped_ptr<base_logic::Value> narrow_value(base_logic::Value::CreateStringValue("narrow"));
-  ASSERT_TRUE(narrow_value.get());
-  ASSERT_TRUE(narrow_value->IsType(base_logic::Value::TYPE_STRING));
-  scoped_ptr<base_logic::Value> wide_value(base_logic::Value::CreateStringValue(L"wide"));
-  ASSERT_TRUE(wide_value.get());
-  ASSERT_TRUE(wide_value->IsType(base_logic::Value::TYPE_STRING));
+class RootTestValue :public base_logic::DictionaryValue{
+public:
+	RootTestValue(const std::string& status,const std::string& msg)
+		:status_(base_logic::Value::CreateStringValue(status))
+		,msg_(base_logic::Value::CreateStringValue(msg))
+		,result_(new base_logic::DictionaryValue()){
+		this->Set("status",status_);
+		this->Set("msg",msg_);
+		this->Set("result",result_);
+	}
 
-  // Test overloaded GetString.
-  std::string narrow = "http://google.com";
-  std::wstring wide = L"http://google.com";
-  ASSERT_TRUE(narrow_value->GetAsString(&narrow));
-  ASSERT_TRUE(narrow_value->GetAsString(&wide));
+	virtual ~RootTestValue(){}
+private:
+	base_logic::Value*  status_;
+	base_logic::Value*  msg_;
+public:
+	base_logic::DictionaryValue*  result_;
+};
 
-  ASSERT_EQ(std::string("narrow"), narrow);
-  ASSERT_EQ(std::wstring(L"narrow"), wide);
+class ExpandTestValue : public RootTestValue{
+public:
+	ExpandTestValue(const std::string& uid,const std::string& username,
+			const std::string& nickname,const std::string& gender,
+			const int32 type,const std::string& birthday,const std::string& location,
+			const std::string age,const std::string& head,const std::string& token,
+			const std::string& new_msg_num,const std::string& status,const std::string& msg)
+		:uid_(base_logic::Value::CreateStringValue(uid))
+		,username_(base_logic::Value::CreateStringValue(username))
+		,nickname_(base_logic::Value::CreateStringValue(nickname))
+		,gender_(base_logic::Value::CreateStringValue(gender))
+		,type_(base_logic::Value::CreateIntegerValue(type))
+		,birthday_(base_logic::Value::CreateStringValue(birthday))
+		,location_(base_logic::Value::CreateStringValue(location))
+		,age_(base_logic::Value::CreateStringValue(age))
+		,head_(base_logic::Value::CreateStringValue(head))
+		,token_(base_logic::Value::CreateStringValue(token))
+		,new_msg_num_(base_logic::Value::CreateStringValue(new_msg_num))
+		,chat_list_(new base_logic::ListValue())
+		,engine_(NULL)
+		,RootTestValue(status,msg){
 
-  ASSERT_TRUE(wide_value->GetAsString(&narrow));
-  ASSERT_TRUE(wide_value->GetAsString(&wide));
-  ASSERT_EQ(std::string("wide"), narrow);
-  ASSERT_EQ(std::wstring(L"wide"), wide);
-}*/
+	}
+	virtual ~ExpandTestValue(){}
+public:
+	//序列化
+	bool Serializer(std::string* str){
+		result_->Set("uid",uid_);
+		result_->Set("username",username_);
+		result_->Set("nickname",nickname_);
+		result_->Set("gender",gender_);
+		result_->Set("type",type_);
+		result_->Set("birthday",birthday_);
+		result_->Set("location",location_);
+		result_->Set("age",age_);
+		result_->Set("head",head_);
+		result_->Set("token",token_);
+		result_->Set("new_msg_num",new_msg_num_);
+		result_->Set("hischat",chat_list_);
 
+		engine_ = base_logic::ValueSerializer::Create(0,str);
+		engine_->Serialize(*this);
+	}
+
+	void SetChatHisMessage(const int64 fid,const int64 tid,const int64 mid,const std::string& msg,
+			const std::string& time){
+		base_logic::DictionaryValue * hischat = new base_logic::DictionaryValue();
+		hischat->Set("fid",base_logic::Value::CreateBigIntegerValue(fid));
+		hischat->Set("tid",base_logic::Value::CreateBigIntegerValue(tid));
+		hischat->Set("msg",base_logic::Value::CreateStringValue(msg));
+		hischat->Set("mid",base_logic::Value::CreateBigIntegerValue(mid));
+		hischat->Set("time",base_logic::Value::CreateStringValue(time));
+		chat_list_->Append(hischat);
+	}
+
+private:
+	base_logic::Value* uid_;
+	base_logic::Value* username_;
+	base_logic::Value* nickname_;
+	base_logic::Value* gender_;
+	base_logic::Value* type_;
+	base_logic::Value* birthday_;
+	base_logic::Value* location_;
+	base_logic::Value* age_;
+	base_logic::Value* head_;
+	base_logic::Value* token_;
+	base_logic::Value* new_msg_num_;
+	//聊天记录
+	base_logic::ListValue* chat_list_;
+private:
+	base_logic::ValueSerializer* engine_;
+};
+
+TEST(ValuesSerializerTest, ExpandTestValue){
+	std::string uid = "10108";
+	std::string username = "flaght";
+	std::string nickname = "老K";
+	std::string gender = "1";
+	int32 type = 0;
+	std::string birthday = "1986-09-03";
+	std::string location = "浙江杭州";
+	std::string age = "24";
+	std::string head = "http://pic.aadad.com/1.jpg";
+	std::string token = "DSASDASDASDAS21312312";
+	std::string new_msg_num = "1";
+	std::string str;
+	std::string status = "0";
+	std::string msg = "错误未知";
+	ExpandTestValue * value = new ExpandTestValue(uid,username,nickname,gender,type,birthday,
+			location,age,head,token,new_msg_num,status,msg);
+
+	int64 fid = 10008;
+	int64 tid = 11411;
+	int64 mgsid = 123123;
+	std::string time = "2014-09-03";
+	std::string chatmsg = "大家好";
+	value->SetChatHisMessage(fid,tid,mgsid,chatmsg,time);
+	value->SetChatHisMessage(fid,tid,mgsid,chatmsg,time);
+	value->SetChatHisMessage(fid,tid,mgsid,chatmsg,time);
+	value->SetChatHisMessage(fid,tid,mgsid,chatmsg,time);
+	value->SetChatHisMessage(fid,tid,mgsid,chatmsg,time);
+	bool r = value->Serializer(&str);
+	MIG_INFO(USER_LEVEL,"%s\n\n",str.c_str());
+}
 // This is a Value object that allows us to tell if it's been
 // properly deleted by modifying the value of external flag on destruction.
 /*class DeletionTestValue : public Value {
