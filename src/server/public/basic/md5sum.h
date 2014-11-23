@@ -83,6 +83,8 @@ documentation and/or software.
 
 #endif
 
+namespace base{
+
 class MD5Sum
 {
 public:
@@ -101,4 +103,5 @@ private:
 	unsigned char	m_rawHash[16];
 };
 
+}
 #endif
