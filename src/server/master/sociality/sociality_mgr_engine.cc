@@ -168,6 +168,8 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 		OnMsgGetShareMessage(packet, root, ret_status, err_code,socket,flag);
 	}else if(type=="shareresult"){
 		OnMsgGitfLuckMessage(packet,root,ret_status,err_code);
+	}else if(){
+		OnMsgGetLocation(packet, root, ret_status, err_code,socket,flag);
 	}else {
 		return true;
 	}
@@ -564,6 +566,7 @@ bool SocialityMgrEngine::OnMsgSayHello(packet::HttpPacket& packet,
 	return true;
 }
 
+
 //uid,share_plat,songid
 bool SocialityMgrEngine::OnMsgGitfLuckMessage(packet::HttpPacket& packet, Json::Value &result,
 				int &status, int &err_code){
@@ -612,6 +615,40 @@ bool SocialityMgrEngine::OnMsgGitfLuckMessage(packet::HttpPacket& packet, Json::
 	return true;
 }
 
+
+//latitude longitude
+bool SocialityMgrEngine::OnMsgGetLocation(packet::HttpPacket& packet, Json::Value &result,
+		int &status, int &err_code,const int socket,int& flag){
+	bool r = false;
+	std::string str_latitude;
+	std::string str_longitude;
+	std::string city;
+	std::string district;
+	std::string province;
+	std::string street;
+	std::string temp;
+	std::string current_weather;
+
+	packet.GetAttrib("latitude",str_latitude);
+	packet.GetAttrib("longitude",str_longitude);
+
+	if(str_latitude.empty()||str_longitude.empty()){
+
+	}
+	//获取地理位置
+	r = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->GeocoderForAddress(str_latitude,str_longitude,city,district,province,street);
+	//获取天气
+	r = base_weather::WeatherConnectorEngine::GetWeatherConnectorEngine()->GetWeatherInfo(str_latitude,str_longitude,temp,current_weather);
+	result["status"] = 1;
+	//组装数据
+	content["weather"] = current_weather;
+	content["address"] = city;
+	Json::FastWriter wr;
+	std::string res = wr.write(result);
+	SomeUtils::SendFull(socket, res.c_str(), res.length());
+	flag = 1;
+	return true;
+}
 
 bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::Value &result,
 			int &status, int &err_code,const int socket,int& flag){

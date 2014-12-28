@@ -252,7 +252,6 @@ PLUGIN_TO_SLOT(PLUGIN_FUNC_CONNECTION_CLOSE_SRV,connection_close_srv);
 		}\
 			return HANDLER_GO_ON;\
 		}
-		
 PLUGIN_TO_SLOT(PLUGIN_FUNC_TIME_MSG,time_msg);
 #undef PLUGIN_TO_SLOT
 

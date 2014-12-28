@@ -93,6 +93,9 @@ private:
 	bool OnMsgGitfLuckMessage(packet::HttpPacket& packet, Json::Value &result,
 				int &status, int &err_code);
 
+	bool OnMsgGetLocation(packet::HttpPacket& packet, Json::Value &result,
+			int &status, int &err_code,const int socket,int& flag);
+
 private:
 
 	bool CheckAndTransHMTime(const std::string &str, unsigned &time);
