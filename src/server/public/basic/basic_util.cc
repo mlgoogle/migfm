@@ -7,18 +7,46 @@
 #include "basic/radom_in.h"
 #include "log/mig_log.h"
 #include "basic/icu_utf.h"
-#include "dmg_fp/dmg_fp.h"
 #include <sstream>
 #include <math.h>
 
 namespace base{
 
+template<typename StringToNumberTraits>
+bool StringToNumber(const typename StringToNumberTraits::string_type& input,
+                    typename StringToNumberTraits::value_type* output) {
+  typedef StringToNumberTraits traits;
+
+  errno = 0;  // Thread-safe?  It is on at least Mac, Linux, and Windows.
+  typename traits::string_type::value_type* endptr = NULL;
+  typename traits::value_type value = traits::convert_func(input.c_str(),
+                                                           &endptr);
+  *output = value;
+
+  // Cases to return false:
+  //  - If errno is ERANGE, there was an overflow or underflow.
+  //  - If the input string is empty, there was nothing to parse.
+  //  - If endptr does not point to the end of the string, there are either
+  //    characters remaining in the string after a parsed number, or the string
+  //    does not begin with a parseable number.  endptr is compared to the
+  //    expected end given the string's stated length to correctly catch cases
+  //    where the string contains embedded NUL characters.
+  //  - valid_func determines that the input is not in preferred form.
+
+  //
+
+  return errno == 0 &&
+         !input.empty() &&
+         input.c_str() + input.length() == endptr &&
+         traits::valid_func(input);
+}
+
 
 template<class STR>
 bool BasicUtil::StringUtil::DoIsStringASCII(const STR& str){
 	for(size_t i = 0; i< str.length();i++){
-		typename ToUnsigned<typename STR::value_type>::ToUnsigned c = str[i];
-		if(c < 0x7F)
+		typename ToUnsigned<typename STR::value_type>::Unsigned c = str[i];
+		if(c > 0x7F)
 			return false;
 	}
 	return true;
@@ -68,6 +96,29 @@ void BasicUtil::StringUtil::StringAppendVT(StringType* dst,
 
 }
 
+template<typename IntegerType>
+bool BasicUtil::StringUtil::StringToInteger(const std::string& input,IntegerType* output){
+	//
+	if(sizeof(*output)==sizeof(int64))
+		return StringToInt64(input,output);
+	else if(sizeof(*output)==sizeof(int32))
+		return StringToInt(input,output);
+	else
+		return false;
+}
+
+bool BasicUtil::StringUtil::StringToInt(const std::string& input,int32* output){
+	return StringToNumber<StringToIntTraits>(input,output);
+}
+
+bool BasicUtil::StringUtil::StringToInt64(const std::string& input,int64* output){
+	return StringToNumber<StringToInt64Traits>(input,output);
+}
+
+bool BasicUtil::StringUtil::StringToDouble(const std::string& input,double* output){
+	return StringToNumber<StringToDoubleTraits>(input,output);
+}
+
 void BasicUtil::StringUtil::StringAppendV(std::string* dst,const char* format,
 		va_list ap){
 	StringAppendVT(dst,format,ap);
@@ -101,6 +152,20 @@ bool BasicUtil::StringUtil::IsStringASCII(const std::wstring& str){
 	return DoIsStringASCII(str);
 }
 
+
+bool BasicUtil::StringUtil::IsStringUTF8(const std::string& str){
+	const char* src = str.data();
+	int32 src_len = static_cast<int32>(str.length());
+	int32 char_index = 0;
+
+	while(char_index < src_len){
+		int32 code_point;
+		CBU8_NEXT(src,char_index,src_len,code_point);
+		if(StringConversions::IsValidCharacter(code_point))
+			return false;
+	}
+	return true;
+}
 
 std::string BasicUtil::StringUtil::DoubleToString(double value){
 	char buffer[32];
@@ -144,7 +209,13 @@ std::wstring BasicUtil::StringConversions::ASCIIToWide(const std::string& ascii)
 	return std::wstring(ascii.begin(),ascii.end());
 }
 
-
+bool BasicUtil::StringConversions::IsValidCharacter(uint32 code_point){
+	// Excludes non-characters (U+FDD0..U+FDEF, and all codepoints ending in
+	  // 0xFFFE or 0xFFFF) from the set of valid code points.
+	return code_point < 0xD800u || (code_point >= 0xE000u &&
+	      code_point < 0xFDD0u) || (code_point > 0xFDEFu &&
+	      code_point <= 0x10FFFFu && (code_point & 0xFFFEu) != 0xFFFEu);
+}
 
 template<typename SRC_CHAR,typename DEST_STRING>
 bool BasicUtil::StringConversions::ConverUnicode(const SRC_CHAR* src,
@@ -571,19 +642,40 @@ bool BasicUtil::UTF8ToGB2312 (const char *input, size_t inlen, char **output, si
 	return rc == -1 ? false : true;
 }
 
+bool BasicUtil::UTF8ToGBK (const char *input, size_t inlen, char **output, size_t *outlen)
+{
+	char *ib;
+	char *ob;
+	size_t rc;
+
+	iconv_t cd = iconv_open ("gbk", "UTF-8");
+	if (cd == 0) {
+		*output = strdup (input);
+		return true;
+	} else if (cd == (iconv_t)-1)
+		return false;
+	*outlen = inlen * 8 + 1;
+	ob = *output = (char *) malloc (*outlen);
+	ib = (char *) input;
+	rc = iconv (cd, &ib, &inlen, &ob, outlen);
+	*ob = 0;
+	iconv_close (cd);
+	return rc == -1 ? false : true;
+}
+
 double BasicUtil::CalcGEODistance(double latitude1, double longitude1,
 		double latitude2, double longitude2) {
 
 	if ((latitude1==latitude2)&&(longitude1==longitude2))
 		return 0;
     double dd = M_PI/180;
-    double x1 = latitude1 * dd;
-    double y1 = longitude1 * dd;
+    double x1 = longitude1 * dd;
+    double y1 = latitude1 * dd;
 
-    double x2 = latitude2 * dd;
-    double y2 = longitude1 * dd;
+    double x2 = longitude2 * dd;
+    double y2 = latitude2 * dd;
 
-    double R = 6371004;
+    double R = 6378137;
 
     double runDistance = (2*R*asin(sqrt(2-2*cos(x1)*cos(x2)*cos(y1-y2) - 2*sin(x1)*sin(x2))/2));
     runDistance = (runDistance < 0) ? (-runDistance) : runDistance;

@@ -48,11 +48,18 @@ void _set_sock(int sock) {
 
 	int so_ka = 1;
 	setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &so_ka, sizeof(so_ka));
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &so_ka, sizeof(so_ka));
+	int nNetTimeout=1000;//1秒
+	//发送时限
+	setsockopt(sock,SOL_SOCKET,SO_SNDTIMEO,(char *)&nNetTimeout,sizeof(int));
+	//接收时限
+	setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,(char *)&nNetTimeout,sizeof(int));
 
 	linger so_linger = {0};
 	so_linger.l_onoff = 1;
 	so_linger.l_linger = 3;
 	setsockopt(sock, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
+
 }
 
 bool _try_connect() {

@@ -39,8 +39,8 @@ public:
 
 	void swap(C* p2){
 		C* temp_ptr = ptr_;
-		ptr_ = p2.ptr_;
-		p2.ptr_ = ptr_;
+		ptr_ = p2;
+		p2 = temp_ptr;
 	}
 
 	C*  release(void){

@@ -11,12 +11,14 @@
 #include "basic/basictypes.h"
 #include "basic/md5sum.h"
 #include "basic/basic_info.h"
+#include "dmg_fp/dmg_fp.h"
 
 // (This is undocumented but matches what the system C headers do.)
 #define PRINTF_FORMAT(format_param, dots_param) \
     __attribute__((format(printf, format_param, dots_param)))
 
 #define GG_VA_COPY(a,b) (va_copy(a,b))
+
 
 namespace base{
 
@@ -36,6 +38,65 @@ public:
 
 	class StringUtil{
 	public:
+		class StringToIntTraits{
+		public:
+			typedef std::string string_type;
+			typedef int32 value_type;
+			static const int kBase = 10;
+			static inline value_type convert_func(const string_type::value_type* str,
+						string_type::value_type** endptr){
+				return strtol(str,endptr,kBase);
+			}
+			static inline bool valid_func(const string_type& str){
+				return !str.empty() && !isspace(str[0]);
+			}
+		};
+
+		class StringToInt64Traits{
+		public:
+			typedef std::string string_type;
+			typedef int64 value_type;
+			static const int kBase = 10;
+			static inline value_type convert_func(const string_type::value_type* str,
+						string_type::value_type** endptr){
+				return strtoll(str,endptr,kBase);
+			}
+			static inline bool valid_func(const string_type& str){
+				return !str.empty() && !isspace(str[0]);
+			}
+		};
+
+
+		class StringToDoubleTraits{
+		public:
+			typedef std::string string_type;
+			typedef double value_type;
+			static inline value_type convert_func(const string_type::value_type* str,
+						string_type::value_type** endptr){
+				return dmg_fp::strtod(str,endptr);
+			}
+			static inline bool valid_func(const string_type& str){
+				return !str.empty() && !isspace(str[0]);
+			}
+		};
+	public:
+		template<typename IntegerType>
+		static bool StringToInteger(const std::string& input,IntegerType* output);
+
+		static bool StringToInt(const std::string& input,int32* output);
+
+		static bool StringToInt64(const std::string& input,int64* output);
+
+		static bool StringToDouble(const std::string& input,double* output);
+
+		static std::string Int64ToString(int64 value);
+
+		static std::string DoubleToString(double value);
+
+		static std::wstring DobleToWString(double value);
+
+		static bool IsStringUTF8(const std::string& str);
+
 		static bool IsStringASCII(const std::wstring& str);
 
 		static bool IsStringASCII(const std::string& str);
@@ -48,9 +109,6 @@ public:
 
 		static void StringAppendV(std::wstring* dst,const wchar_t* format, va_list ap);
 
-		static std::string DoubleToString(double value);
-
-		static std::wstring DobleToWString(double value);
 
 		static inline int vsnprintfT(char* buffer,size_t buf_size,const char* format,
 				va_list argptr){
@@ -74,9 +132,14 @@ public:
 	private:
 		template<class STR>
 		static bool DoIsStringASCII(const STR& str);
+
 		template<class StringType>
 		static void StringAppendVT(StringType* dst,
 					const typename StringType::value_type* format,va_list ap);
+
+		//template<typename StringToNumberTraits>
+		//bool StringToNumber(const typename StringToNumberTraits::string_type& input,
+		  //                  typename StringToNumberTraits::value_type* output);
 	};
 
 	class StringConversions{
@@ -89,6 +152,7 @@ public:
 
 		static std::wstring ASCIIToWide(const std::string& ascii);
 
+		static bool IsValidCharacter(uint32 code_point);
 
 	private:
 		static bool WideToUTF8(const wchar_t* src,size_t src_len,
@@ -170,6 +234,8 @@ public:
 	static bool GB2312ToUTF8 (const char *input, size_t inlen, char **output /* free */, size_t *outlen);
 
 	static bool UTF8ToGB2312 (const char *input, size_t inlen, char **output /* free */, size_t *outlen);
+
+	static bool UTF8ToGBK(const char *input, size_t inlen, char **output /* free */, size_t *outlen);
 
 	static double CalcGEODistance(double latitude1, double longitude1, double latitude2, double longitude2);
 

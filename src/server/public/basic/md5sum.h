@@ -1,6 +1,7 @@
 #ifndef MIG_FM_PUBLIC_BASIC_MD5_H__
 #define MIG_FM_PUBLIC_BASIC_MD5_H__
 #include <string>
+#include <cstring>
 
 /* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 
