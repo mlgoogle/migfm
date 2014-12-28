@@ -18,7 +18,6 @@
 
 #include "log/mig_log.h"
 #include "config/config.h"
-#include "basic/basic_util.h"
 #include "comm/core_interface.h"
 
 static bool DumpCallBack(const char* dump_path,const char* minidump_id,

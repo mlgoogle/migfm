@@ -17,10 +17,12 @@ LINK_FLAGS = -g  -fPIC
 ## for release
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
+LIB_DIR = ./../../library
+BASE_DIR = ./../pub
 ## 头文件
-INCLUDE_PATHS = -I./../public/ -I /usr/local/libmemcached-1.0.7/include\
-		-I/usr/local/lib -I./../../../third_party/hiredis\
-	        -I../../../third_party/breakpad/src -I/usr/include/mysql 
+INCLUDE_PATHS = -I$(LIB_DIR)/public/ -I /usr/local/libmemcached-1.0.7/include\
+		-I/usr/local/lib -I$(LIB_DIR)/third_party/hiredis -I$(BASE_DIR)/\
+		-I$(LIB_DIR)/third_party/breakpad/src
 
 ## 库
 LINK_PATHS =  -L/usr/local/libmemcached-1.0.7/lib/ -L/usr/lib64/mysql
@@ -46,7 +48,7 @@ LINKALL = $(COMPILER) $(LINK_FLAGS) $(LINK_PATHS) $?  $(LINK_LIBRARYS)
 
 
 POBJ =  mig_log.o core_interface.o
-OUTPUT_FILE = /var/www/cgi-bin/
+OUTPUT_FILE = /var/www/cgi-bin/miyo
 #############################################################################################################################
 all: clean proc delete-temp-file
 
@@ -54,41 +56,43 @@ proc: robotproc chatmgrproc usrmgrproc spreadproc socialityproc musicproc lbspro
 
 
 #####################robot################################################
+ROBOTPROC_PATH = /robot
+OTJERPROC_VERSION = /v1/
 robotproc:getnewmusic.fcgi addnewmusic.fcgi getmailinfo.fcgi getspreadmail.fcgi getrobots.fcgi updaterobotpic.fcgi\
 	 getvailedurlmusic.fcgi updatevailedurlmusic.fcgi getvailedlyric.fcgi updatelyric.fcgi getwbtoken.fcgi
 
 getspreadmail.fcgi: getspreadmail.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getspreadmail.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./getspreadmail.fcgi
 	
 getmailinfo.fcgi: getmailinfo.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getmailinfo.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./getmailinfo.fcgi
 	
 getnewmusic.fcgi: getnewmusic.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getnewmusic.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./getnewmusic.fcgi
 
 addnewmusic.fcgi: addnewmusic.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./addnewmusic.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./addnewmusic.fcgi
 	
 getrobots.fcgi: getrobots.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getrobots.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./getrobots.fcgi
 
 updaterobotpic.fcgi: updaterobotpic.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./updaterobotpic.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./updaterobotpic.fcgi
 	
 getvailedurlmusic.fcgi: getvailedurlmusic.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getvailedurlmusic.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./getvailedurlmusic.fcgi
 	
 getvailedlyric.fcgi: getvailedlyric.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getvailedlyric.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./getvailedlyric.fcgi
 	
 updatevailedurlmusic.fcgi: updatevailedurlmusic.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./updatevailedurlmusic.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./updatevailedurlmusic.fcgi
 
 updatelyric.fcgi: updatelyric.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./updatelyric.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./updatelyric.fcgi
 	
 getwbtoken.fcgi: getwbtoken.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getwbtoken.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(ROBOTPROC_PATH)$(OTJERPROC_VERSION)./getwbtoken.fcgi
 
 ### 编译
 getspreadmail.o:
@@ -125,49 +129,41 @@ getwbtoken.o:
 	$(COMPILE) ./getwbtoken/getwbtoken.cc
 	
 #####################chat_mgr#############################################
-chatmgrproc:getsc.fcgi hischat.fcgi
+CHATPROC_PATH = /chat
+OTJERPROC_VERSION = /v1/
+chatmgrproc:getsc.fcgi
 
 getsc.fcgi: getsc.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getsc.fcgi
-	
-hischat.fcgi: hischat.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./hischat.fcgi
-	
-getsc1.fcgi: getsc1.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getsc1.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(CHATPROC_PATH)$(OTJERPROC_VERSION)./getsc.fcgi
 	
 ### 编译
 
 getsc.o:
 	$(COMPILE) ./getsc/getsc.cc
 	
-hischat.o:
-	$(COMPILE) ./hischat/hischat.cc
-	
-getsc1.o:
-	$(COMPILE) ./getsc1/getsc1.cc
-	
 	
 ######################usrmgrproc###############################################
+USERPROC_PATH = /usr
+OTJERPROC_VERSION = /v1
 usrmgrproc:regedit.fcgi updateusr.fcgi guest.fcgi login.fcgi bdbindpush.fcgi
 
 regedit.fcgi: regedit.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./regedit.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)./regedit.fcgi
 	
 updateusr.fcgi: updateusr.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./updateusr.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)./updateusr.fcgi
 	
 get.fcgi: get.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./get.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)./get.fcgi
 	
 guest.fcgi: guest.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./guest.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)./guest.fcgi
 	
 login.fcgi: login.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./login.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)./login.fcgi
 	
 bdbindpush.fcgi: bdbindpush.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./bdbindpush.fcgi
+	$(LINKALL) -o$(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)./bdbindpush.fcgi
 	
 ### 编译
 
@@ -189,10 +185,12 @@ login.o:
 bdbindpush.o:
 	$(COMPILE) ./bdbindpush/bdbindpush.cc
 ######################spread###############################################
+SPREADPROC_PATH = /spread
+OTJERPROC_VERSION = /v1/
 spreadproc:weixin.fcgi
 
 weixin.fcgi: weixin.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./weixin.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SPREADPROC_PATH)$(OTJERPROC_VERSION)./weixin.fcgi
 	
 ### 编译
 
@@ -200,57 +198,59 @@ weixin.o:
 	$(COMPILE) ./weixin/weixin.cc
 	
 ######################sociality###############################################
+SOCPROC_PATH = /soc
+OTJERPROC_VERSION = /v1/
 socialityproc:setuserconfigofpush.fcgi presentsong.fcgi getpushmsg.fcgi\
 	getpushmsgsummary.fcgi sayhello.fcgi commentsong.fcgi get_comment.fcgi\
 	getmusicuser.fcgi getshareinfo.fcgi shareresult.fcgi
 
 setuserconfigofpush.fcgi: setuserconfigofpush.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./setuserconfigofpush.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./setuserconfigofpush.fcgi
 
 presentsong.fcgi: presentsong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./presentsong.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./presentsong.fcgi
 
 getpushmsg.fcgi: getpushmsg.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getpushmsg.fcgi	
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./getpushmsg.fcgi	
 	
 getpushmsgsummary.fcgi: getpushmsgsummary.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getpushmsgsummary.fcgi	
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./getpushmsgsummary.fcgi	
 	
 getfriendlist.fcgi: getfriendlist.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getfriendlist.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./getfriendlist.fcgi
 	
 sendfriendmsg.fcgi: sendfriendmsg.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./sendfriendmsg.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./sendfriendmsg.fcgi
 
 sayhello.fcgi: sayhello.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./sayhello.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./sayhello.fcgi
 
 adduserbacklist.fcgi: adduserbacklist.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./adduserbacklist.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./adduserbacklist.fcgi
 	
 addfriend.fcgi: addfriend.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./addfriend.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./addfriend.fcgi
 
 importsonglist.fcgi: importsonglist.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./importsonglist.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./importsonglist.fcgi
 	
 importfriend.fcgi: importfriend.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./importfriend.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./importfriend.fcgi
 	
 commentsong.fcgi: commentsong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./commentsong.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./commentsong.fcgi
 	
 get_comment.fcgi: get_comment.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./get_comment.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./get_comment.fcgi
 	
 getmusicuser.fcgi: getmusicuser.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getmusicuser.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./getmusicuser.fcgi
 
 getshareinfo.fcgi: getshareinfo.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getshareinfo.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./getshareinfo.fcgi
 	
 shareresult.fcgi: shareresult.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./shareresult.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./shareresult.fcgi
 	
 	
 ### 编译
@@ -304,55 +304,57 @@ shareresult.o:
 	$(COMPILE) ./shareresult/shareresult.cc
 	
 ######################music###################################################
+MUSICPROC_PATH = /music
+OTJERPROC_VERSION = /v1/
 musicproc: collectsong.fcgi getcltsongs.fcgi delcltsong.fcgi hatesong.fcgi\
 	delthsong.fcgi recordcursong.fcgi getdefsongs.fcgi gettypesongs.fcgi\
 	recordlocalsongs.fcgi updateconfigfile.fcgi getuserhis.fcgi songid.fcgi\
 	getword.fcgi word_song.fcgi getlyric.fcgi
 
 collectsong.fcgi: collectsong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./collectsong.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./collectsong.fcgi
 
 getcltsongs.fcgi: getcltsongs.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getcltsongs.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./getcltsongs.fcgi
 
 delcltsong.fcgi: delcltsong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./delcltsong.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./delcltsong.fcgi
 	
 hatesong.fcgi: hatesong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./hatsong.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./hatsong.fcgi
 	
 delthsong.fcgi: delthsong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./delthsong.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./delthsong.fcgi
 	
 recordcursong.fcgi: recordcursong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./recordcursong.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./recordcursong.fcgi
 	
 getdefsongs.fcgi: getdefsongs.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getdefsongs.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./getdefsongs.fcgi
 	
 gettypesongs.fcgi: gettypesongs.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./gettypesongs.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./gettypesongs.fcgi
 	
 recordlocalsongs.fcgi: recordlocalsongs.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./recordlocalsongs.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./recordlocalsongs.fcgi
 	
 updateconfigfile.fcgi: updateconfigfile.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./updateconfigfile.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./updateconfigfile.fcgi
 	
 getuserhis.fcgi: getuserhis.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getuserhis.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./getuserhis.fcgi
 	
 songid.fcgi: songid.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./songid.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./songid.fcgi
 	
 getword.fcgi: getword.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getword.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./getword.fcgi
 	
 word_song.fcgi: word_song.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./word_song.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./word_song.fcgi
 	
 getlyric.fcgi: getlyric.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./getlyric.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)./getlyric.fcgi
 	
 ### 编译
 
@@ -401,13 +403,15 @@ getword.o:
 getlyric.o:
 	$(COMPILE) ./getlyric/getlyric.cc
 ######################manager###################################################
+MANAGERPROC_PATH = /manager
+OTJERPROC_VERSION = /v1/
 managerproc: pushusermsg.fcgi pushusersmsg.fcgi
 
 pushusermsg.fcgi: pushusermsg.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./pushusermsg.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MANAGERPROC_PATH)$(OTJERPROC_VERSION)./pushusermsg.fcgi
 
 pushusersmsg.fcgi: pushusersmsg.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./pushusersmsg.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(MANAGERPROC_PATH)$(OTJERPROC_VERSION)./pushusersmsg.fcgi
 	
 ### 编译
 
@@ -419,29 +423,30 @@ pushusersmsg.o:
 	
 	
 #######################LBS####################################################
+LBSPROC_PATH = /lbs
 lbsproc:setuserpos.fcgi searchnearby.fcgi nearuser.fcgi collectandnearnum.fcgi\
 	nearmusic.fcgi musicfri.fcgi samemusic.fcgi
 
 setuserpos.fcgi: setuserpos.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./setuserpos.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(LBSPROC_PATH)$(OTJERPROC_VERSION)./setuserpos.fcgi
 	
 searchnearby.fcgi: searchnearby.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./searchnearby.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(LBSPROC_PATH)$(OTJERPROC_VERSION)./searchnearby.fcgi
 
 nearuser.fcgi: nearuser.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./nearuser.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(LBSPROC_PATH)$(OTJERPROC_VERSION)./nearuser.fcgi
 	
 collectandnearnum.fcgi: collectandnearnum.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./collectandnearnum.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(LBSPROC_PATH)$(OTJERPROC_VERSION)./collectandnearnum.fcgi
 	
 nearmusic.fcgi: nearmusic.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./nearmusic.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(LBSPROC_PATH)$(OTJERPROC_VERSION)./nearmusic.fcgi
 	
 musicfri.fcgi: musicfri.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./musicfri.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(LBSPROC_PATH)$(OTJERPROC_VERSION)./musicfri.fcgi
 	
 samemusic.fcgi: samemusic.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)./samemusic.fcgi
+	$(LINKALL) -o $(OUTPUT_FILE)$(LBSPROC_PATH)$(OTJERPROC_VERSION)./samemusic.fcgi
 	
 	
 ### 编译
@@ -484,7 +489,7 @@ delete-temp-file:
 
 ############public###############################
 mig_log.o:
-	$(COMPILE) ./../public/log/mig_log.cc
+	$(COMPILE) $(LIB_DIR)/public/log/mig_log.cc
 
 core_interface.o:
-	$(COMPILE) ./../public/comm/core_interface.cc
+	$(COMPILE) $(LIB_DIR)/public/comm/core_interface.cc
