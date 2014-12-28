@@ -1,5 +1,6 @@
 #include "chat_cache_manager.h"
 #include "chat_basic_infos.h"
+#include "db_comm.h"
 #include "intertface/robot_interface.h"
 #include "base/logic_comm.h"
 #include "base/comm_head.h"
@@ -123,6 +124,21 @@ bool PlatformChatCacheManager::DelUserInos(const int64 platform_id,
 	return base::MapDel<UserInfosMap,UserInfosMap::iterator>(pl->user_infos_map_,user_id);
 }
 
+bool PlatformChatCacheManager::CheckMeetingInfos(const int64 platform_id,const int64 session,
+		const int64 uid){
+	logic::RLockGd lk(lock_);
+	bool r = false;
+	int64 temp_uid;
+	MeetingSession meeting_session;
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if(pl==NULL)
+		return false;
+	r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,session,meeting_session);
+	if(r)
+		return base::MapGet<MeetingSession,MeetingSession::iterator,int64>(meeting_session,uid,temp_uid);
+	return false;
+}
+
 bool PlatformChatCacheManager::AddMeetingInfos(const int64 platform_id,const int64 session,
 							const int64 uid){
 	logic::WLockGd lk(lock_);
@@ -197,6 +213,25 @@ bool PlatformChatCacheManager::DelMeetingInfos(const int64 platform_id,const int
 	}*/
 }
 
+bool PlatformChatCacheManager::SendMeetingNotSelf(const int64 platform_id,const int64 group_id,
+							const int64 send_id,const int64 session,struct PacketHead* packet){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	if (pl==NULL)
+		return false;
+	MeetingSession meeting_session;
+	bool r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,session,meeting_session);
+
+	for(MeetingSession::iterator it = meeting_session.begin();it!=meeting_session.end();++it){
+		chat_base::UserInfo userinfo;
+		int id = it->first;
+		r = base::MapGet<UserInfosMap,UserInfosMap::iterator,chat_base::UserInfo>(pl->user_infos_map_,id,userinfo);
+		if(r&&userinfo.user_id()!=send_id){
+			logic::SomeUtils::SendMessage(userinfo.socket(),packet,__FILE__,__LINE__);
+		}
+	}
+	return true;
+}
 bool PlatformChatCacheManager::SendMeetingMessage(const int64 platform_id,const int64 group_id,
 		const int64 session,struct PacketHead *packet){
 	logic::RLockGd lk(lock_);
@@ -217,10 +252,15 @@ bool PlatformChatCacheManager::SendMeetingMessage(const int64 platform_id,const 
 	return true;
 }
 
-bool PlatformChatCacheManager::SendQuitInfoSession(const int64 platform_id,const int64 session,const int32 uid){
-	logic::RLockGd lk(lock_);
+bool PlatformChatCacheManager::SendQuitInfoSession(const int64 platform_id,const int64 session,
+		const int32 uid){
 	bool r = false;
-	MeetingSession meeting_session;
+	struct UserQuit user_quit;
+	MAKE_HEAD(user_quit, USER_NOTIFICATION_QUIT,USER_TYPE,0,0);
+	user_quit.platform_id = platform_id;
+	user_quit.user_id = uid;
+	return SendMeetingNotSelf(platform_id,session,uid,session,&user_quit);
+	/*MeetingSession meeting_session;
 	PlatformCache* pl = GetPlatformCache(platform_id);
 	if(pl==NULL)
 		return false;
@@ -230,15 +270,15 @@ bool PlatformChatCacheManager::SendQuitInfoSession(const int64 platform_id,const
 		chat_base::UserInfo userinfo;
 		int id = it->first;
 		r = base::MapGet<UserInfosMap,UserInfosMap::iterator,chat_base::UserInfo>(pl->user_infos_map_,id,userinfo);
-		if(!r){
+		if(r){
 			struct UserQuit user_quit;
-			MAKE_HEAD(user_quit, USER_QUIT,USER_TYPE,0,0);
+			MAKE_HEAD(user_quit, USER_NOTIFICATION_QUIT,USER_TYPE,0,0);
 			user_quit.platform_id = platform_id;
 			user_quit.user_id = uid;
 			//sendmessage(userinfo.socket(),&user_quit);
 			logic::SomeUtils::SendMessage(userinfo.socket(),&user_quit,__FILE__,__LINE__);
 		}
-	}
+	}*/
 
 }
 
@@ -315,6 +355,40 @@ bool PlatformChatCacheManager::DelLeaveInfos(const int64 platform_id,const int64
 	return r;
 }
 
+bool PlatformChatCacheManager::GetGroupListUserInfoNotSelf(const int64 platform_id,const int64 group_id,const int64 send_id,
+		const int64 session,std::list<struct Oppinfo*>& oppoinfo_list){
+	logic::RLockGd lk(lock_);
+	PlatformCache* pl = GetPlatformCache(platform_id);
+	MeetingSession meeting_session;
+	if (pl==NULL)
+	   return false;
+	bool r = base::MapGet<MeetingMap,MeetingMap::iterator,MeetingSession>(pl->meeting_infos_map_,
+			session,meeting_session);
+	if(!r)
+		return false;
+	for(MeetingSession::iterator it = meeting_session.begin();
+			it!=meeting_session.end();++it){
+		int64 uid = it->second;
+		chat_base::UserInfo userinfo;
+		if(uid==send_id)
+			continue;
+		r = base::MapGet<UserInfosMap,UserInfosMap::iterator,chat_base::UserInfo>(pl->user_infos_map_,uid,
+				userinfo);
+		if(r){
+			struct Oppinfo* oppinfo = new struct Oppinfo;
+		    oppinfo->user_id = userinfo.user_id();
+		    oppinfo->user_nicknumber = userinfo.nicknumber();
+			logic::SomeUtils::SafeStrncpy(oppinfo->nickname,NICKNAME_LEN,
+					userinfo.nickname().c_str(),userinfo.nickname().length());
+
+		    logic::SomeUtils::SafeStrncpy(oppinfo->user_head,HEAD_URL_LEN,
+		    		userinfo.head_url().c_str(),userinfo.head_url().length());
+
+		    oppoinfo_list.push_back(oppinfo);
+		}
+	}
+	return true;
+}
 
 bool PlatformChatCacheManager::GetGroupListUserInfo(const int64 platform_id,const int64 group_id,const int64 session,
 			std::list<struct Oppinfo*>& oppoinfo_list){
@@ -390,6 +464,10 @@ bool CacheManagerOp::NoticeRobotChatLogin(const int64 platform_id,const int64 ui
 		const int64 robotid){
 	NoticeRobotLogin(robot_server_socket_,platform_id,uid,robotid);
 	return true;
+}
+
+bool CacheManagerOp::FetchDBDimension(){
+	chat_storage::DBComm::GetDimensionGroup(platform_opertion_mgr_);
 }
 
 }

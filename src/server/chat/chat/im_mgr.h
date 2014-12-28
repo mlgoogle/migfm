@@ -23,12 +23,21 @@ public:
 					const void *msg = NULL, int len = 0);
 
 	bool OnConfirmMessage(struct server *srv,int socket,struct PacketHead *packet,
-					const void *msg = NULL, int len = 0);
+			 const void *msg = NULL, int len = 0);
+
+	bool OnGroupMessage(struct server *srv, int socket, struct PacketHead *packet,
+	           const void *msg = NULL, int len = 0);
+
 
 private:
 	bool LeaveMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,
 			const chat_base::UserInfo& send_userinfo,
 			const chat_base::UserInfo& recv_userinfo,
+			const std::string& message);
+
+	bool LeaveMessage(const int64 platform_id,const int64 msg_id,const int32 type,
+			const int64 oppid,const time_t current_time,
+			const chat_base::UserInfo& send_userinfo,
 			const std::string& message);
 
 	bool OffLineMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,

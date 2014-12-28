@@ -104,12 +104,12 @@ bool UserConnectionMgr::OnGetOppInfos(struct server *srv, int socket, struct Pac
 		return false;
 	}
 
-	if(vReqOppstionInfo->type==1)//点对点聊天
+	if(vReqOppstionInfo->type==ALONE_CHAT)//点对点聊天
 		return OnGetUserInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
 							 vReqOppstionInfo->oppostion_id,vReqOppstionInfo->type,
 							 vReqOppstionInfo->reserverd);
-	else if(vReqOppstionInfo->type==3)//临时会话组
-		return OnGetTempGroupInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
+	else if(vReqOppstionInfo->type==TEMP_GROUP_CHAT||vReqOppstionInfo->type==DIMENSION_GROUP_CHAT)//群组
+		return OnGetGroupInfo(socket,vReqOppstionInfo->platform_id,vReqOppstionInfo->user_id,
 				 vReqOppstionInfo->oppostion_id,vReqOppstionInfo->type,
 				 vReqOppstionInfo->reserverd);
 }
@@ -140,13 +140,13 @@ bool UserConnectionMgr::OnUserQuit(struct server *srv, int socket, struct Packet
 	chat_logic::CacheManagerOp * cache_op = CacheManagerOp::GetCacheManagerOp();
 	//r = chat_logic::LogicUnit::CheckToken(vUserQuit->platform_id,
 		//	vUserQuit->user_id,vUserQuit->token);
-	pc->GetUserInfos(vUserQuit->platform_id,vUserQuit->user_id,userinfo);
+	r = pc->GetUserInfos(vUserQuit->platform_id,vUserQuit->user_id,userinfo);
 
 	if(!r)
 		return false;
 
 	r = chat_logic::LogicUnit::CheckChatToken(userinfo,vUserQuit->token);
-
+	r = true;
 	if (!r){//password error
 		//senderror(socket,USER_LOGIN_FAILED,0,vUserQuit->reserverd,MIG_CHAT_USER_PASSWORD_ERROR);
 		logic::SomeUtils::SendErrorCode(socket,USER_LOGIN_FAILED,ERROR_TYPE,0,vUserQuit->reserverd,MIG_CHAT_USER_PASSWORD_ERROR,__FILE__,__LINE__);
@@ -159,6 +159,52 @@ bool UserConnectionMgr::OnUserQuit(struct server *srv, int socket, struct Packet
 
 }
 
+bool UserConnectionMgr::OnGetGroupInfo(const int socket,const int64 platform_id,
+			const int64 user_id,const int64 oppinfo_id,const int32 type,
+			const int64 usr_session){
+	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	chat_base::UserInfo userinfo;
+	chat_base::GroupInfo groupinfo;
+	bool r = pc->GetUserInfos(platform_id,user_id,userinfo);
+	if(!r){
+		return false;
+	}
+	//先获取群组消息
+	r = pc->GetGroupInfos(platform_id,oppinfo_id,groupinfo);
+	if(type==DIMENSION_GROUP_CHAT){
+		if(!r)
+			return false;
+
+	}else if(type==TEMP_GROUP_CHAT){
+
+		if(!r){//不存在,创建群组组及创建会话
+			r = OnCreateGroupInfo(groupinfo,platform_id,oppinfo_id,type,oppinfo_id);
+		}
+	}
+	//加入会话
+	pc->AddMeetingInfos(platform_id,oppinfo_id,user_id);
+
+	userinfo.set_session(oppinfo_id);
+	//发送群组消息
+	struct OppositionInfo opposition_info;
+	MAKE_HEAD(opposition_info, GET_OPPOSITION_INFO,USER_TYPE,0,usr_session);
+	opposition_info.platform_id = platform_id;
+	opposition_info.oppo_id = groupinfo.groupid();
+	opposition_info.oppo_nick_number = groupinfo.nicknumber();
+	opposition_info.oppo_type = type;
+	opposition_info.session = oppinfo_id;
+
+	logic::SomeUtils::SafeStrncpy(opposition_info.oppo_nickname,NICKNAME_LEN,
+				groupinfo.name().c_str(),groupinfo.name().length());
+
+    logic::SomeUtils::SafeStrncpy(opposition_info.oppo_user_head,HEAD_URL_LEN,
+	    		groupinfo.head_url().c_str(),groupinfo.head_url().length());
+
+	//pc->GetGroupListUserInfo(platform_id,groupinfo.groupid(),oppinfo_id,opposition_info.opponfo_list);
+    pc->GetGroupListUserInfoNotSelf(platform_id,groupinfo.groupid(),user_id,oppinfo_id,opposition_info.opponfo_list);
+	struct Oppinfo* oppinfo = opposition_info.opponfo_list.front();
+	return logic::SomeUtils::SendMessage(socket,&opposition_info,__FILE__,__LINE__);
+}
 
 bool UserConnectionMgr::OnGetTempGroupInfo(const int socket,const int64 platform_id,
 		const int64 user_id,const int64 oppinfo_id,const int32 type,const int64 usr_session){
@@ -280,6 +326,42 @@ bool UserConnectionMgr::OnGetUserInfo(const int socket,const int64 platform_id,c
     return logic::SomeUtils::SendMessage(socket,&opposition_info,__FILE__,__LINE__);
 }
 
+bool UserConnectionMgr::OnUserGroupOnline(struct server *srv, int socket, struct PacketHead *packet,
+	           const void *msg, int len){
+	struct UserOnLineReq* vUserOnLineReq = (struct UserOnLineReq*)packet;
+	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	chat_base::GroupInfo  groupinfo;
+	//检测是否是此群组
+	bool r = pc->GetGroupInfos(vUserOnLineReq->platform_id,vUserOnLineReq->group_id,groupinfo);
+	if(!r)
+		return false;
+	//获取个人信息
+	chat_base::UserInfo send_user_info;
+	r = pc->GetUserInfos(vUserOnLineReq->platform_id,vUserOnLineReq->user_id,send_user_info);
+	if(!r)
+		return false;
+	//检测此用户是否还群组存在
+	r = pc->CheckMeetingInfos(vUserOnLineReq->platform_id,vUserOnLineReq->group_id,vUserOnLineReq->user_id);
+	if(!r)
+		return false;
+	//获取用户信息
+	//通知所有用户
+	//群发
+	struct UserOnLineRsp user_onLine_rsp;
+	MAKE_HEAD(user_onLine_rsp, USER_ONLINE_RSP,CHAT_TYPE,0,vUserOnLineReq->reserverd);
+	user_onLine_rsp.platform_id = vUserOnLineReq->platform_id;
+	user_onLine_rsp.group_id = vUserOnLineReq->group_id;
+	user_onLine_rsp.user_id = vUserOnLineReq->user_id;
+	logic::SomeUtils::SafeStrncpy(user_onLine_rsp.nickname,NICKNAME_LEN,
+			send_user_info.nickname().c_str(),send_user_info.nickname().length());
+	logic::SomeUtils::SafeStrncpy(user_onLine_rsp.user_head,HEAD_URL_LEN,
+			send_user_info.head_url().c_str(),send_user_info.head_url().length());
+
+	pc->SendMeetingNotSelf(vUserOnLineReq->platform_id,vUserOnLineReq->group_id,
+			vUserOnLineReq->user_id,vUserOnLineReq->group_id,&user_onLine_rsp);
+	return true;
+
+}
 
 bool UserConnectionMgr::ClearUserinfo(const int64 platform_id,const int64 user_id,const int64 session){
 	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();

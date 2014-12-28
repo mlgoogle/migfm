@@ -181,5 +181,77 @@ private:
 	Data*                    data_;
 };
 
+
+class MessageInfos{
+public:
+	explicit MessageInfos();
+	explicit MessageInfos(const int64 platform,const int64 msgid,const int64 fid,const int64 oppid,
+			const int32 type,const std::string& nickname,const std::string& message,
+			const std::string& lasstime,const std::string& head);
+	MessageInfos(const MessageInfos& msginfo);
+	MessageInfos& operator = (const MessageInfos& msginfo);
+	const int64 platform() const {return data_->platform_;}
+	const int64 msgid() const {return data_->msgid_;}
+	const int64 fid() const {return data_->fid_;}
+	const int64 oppid() const {return data_->oppid_;}
+	const int64 type() const {return data_->type_;}
+	const std::string& nickname() const {return data_->nickname_;}
+	const std::string& message() const {return data_->message_;}
+	const std::string& lasttime() const {return data_->lasttime_;}
+	const std::string& head() const {return data_->head_;}
+
+	void set_platform(const int64 platform) {data_->platform_ = platform;}
+	void set_msgid(const int64 msgid) {data_->msgid_ = msgid;}
+	void set_fid(const int64 fid) {data_->fid_ = fid;}
+	void set_tid(const int64 oppid) {data_->oppid_ = oppid;}
+	void set_group_id(const int32 type) {data_->type_ = type;}
+	void set_nickname(const std::string& nickname){data_->nickname_ = nickname;}
+	void set_message(const std::string& message){data_->message_ = message;}
+	void set_lasttime(const std::string& lasttime){data_->lasttime_ = lasttime;}
+	void set_head(const std::string& head){data_->head_ = head;}
+
+public:
+	class Data{
+	public:
+		Data()
+		  :refcount_(1)
+		  ,msgid_(0)
+		  ,fid_(0)
+		  ,oppid_(0)
+		  ,type_(0)
+		  ,platform_(0){}
+
+		Data(const int64 platform,const int64 msgid,const int64 fid,const int64 oppid,
+				const int32 type,const std::string& nickname,const std::string& message,
+				const std::string& lasstime,const std::string& head)
+		 :refcount_(1)
+		  ,platform_(platform)
+		  ,msgid_(msgid)
+		  ,fid_(fid)
+		  ,oppid_(oppid)
+		  ,type_(type)
+		  ,nickname_(nickname)
+		  ,message_(message)
+		  ,lasttime_(lasstime)
+		  ,head_(head){}
+
+	public:
+		int64 platform_;
+		int64 msgid_;
+		int64 fid_;
+		int64 oppid_;
+		int32 type_;
+		std::string nickname_;
+		std::string message_;
+		std::string lasttime_;
+		std::string head_;
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
+	private:
+		int refcount_;
+	};
+	Data*       data_;
+};
+
 }
 #endif

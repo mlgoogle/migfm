@@ -43,6 +43,43 @@ bool IMSMgr::OnConfirmMessage(struct server *srv,int socket,struct PacketHead *p
     return true;
 }
 
+bool IMSMgr::OnGroupMessage(struct server *srv, int socket, struct PacketHead *packet,
+	           const void *msg, int len){
+	struct MultiChatSend* vMultiChatSend = (struct MultiChatSend*)packet;
+	chat_logic::PlatformChatCacheManager* pc = CacheManagerOp::GetPlatformChatMgrCache();
+	chat_base::GroupInfo  groupinfo;
+	int64 msg_id = 0;
+	//获取群组信息
+	bool r = pc->GetGroupInfos(vMultiChatSend->platform_id,vMultiChatSend->multi_id,groupinfo);
+	if(!r)
+		return false;
+	//获取个人信息
+	chat_base::UserInfo send_user_info;
+	r = pc->GetUserInfos(vMultiChatSend->platform_id,vMultiChatSend->send_user_id,send_user_info);
+	if(!r)
+		return false;
+
+	//群发
+	chat_storage::RedisComm::GenaratePushMsgID(msg_id);
+	struct MultiChatRecv multi_chat_recv;
+	MAKE_HEAD(multi_chat_recv, MULTI_CHAT_RECV,CHAT_TYPE,0,vMultiChatSend->reserverd);
+	multi_chat_recv.platform_id = vMultiChatSend->platform_id;
+	multi_chat_recv.multi_id = vMultiChatSend->multi_id;
+	multi_chat_recv.send_user_id = vMultiChatSend->send_user_id;
+	//multi_chat_recv.send_nickname = send_user_info.nickname();
+	logic::SomeUtils::SafeStrncpy(multi_chat_recv.send_nickname,NICKNAME_LEN,
+			send_user_info.nickname().c_str(),send_user_info.nickname().length());
+	multi_chat_recv.content = vMultiChatSend->content;
+	pc->SendMeetingNotSelf(multi_chat_recv.platform_id,multi_chat_recv.multi_id,
+			vMultiChatSend->send_user_id,vMultiChatSend->session,&multi_chat_recv);
+
+	LeaveMessage(multi_chat_recv.platform_id,msg_id,DIMENSION_GROUP_CHAT,
+			vMultiChatSend->multi_id,time(NULL),send_user_info,
+			vMultiChatSend->content);
+	return true;
+
+}
+
 bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet,
         const void *msg/* = NULL*/, int len/* = 0*/){
 
@@ -95,7 +132,6 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	}
 
 	if(is_push){
-		//msg_id = base::SysRadom::GetInstance()->GetRandomID();
 		chat_storage::RedisComm::GenaratePushMsgID(msg_id);
 		std::string summary;
 		current_time = time(NULL);
@@ -129,8 +165,9 @@ bool IMSMgr::OnMessage(struct server *srv, int socket, struct PacketHead *packet
 	}
 
 	// Leave Meassage
-	return LeaveMessage(private_send->platform_id,msg_id,current_time,send_user_info,
-			recv_user_info,private_send->content);
+	return LeaveMessage(private_send->platform_id,msg_id,ALONE_CHAT,
+			private_send->recv_user_id,time(NULL),send_user_info,
+			private_send->content);
 }
 
 bool IMSMgr::OffLineMessage(const int64 platform_id,const int64 msg_id,const time_t current_time,
@@ -151,20 +188,24 @@ bool IMSMgr::OffLineMessage(const int64 platform_id,const int64 msg_id,const tim
 
 	chat_logic::LogicUnit::MakeLeaveContent(send_userinfo,recv_userinfo,
 			message,TYPE_TEXT,summary,distance);
-
-
-	//缓存redis部分
-	/*
-	chat_logic::LogicUnit::MakeLeaveContent(s_send_uid.str(),s_recv_uid.str(),msg_id,
-												message,detail,summary,s_current_time);
-	chat_storage::RedisComm::StagePushMsg(recv_userinfo.user_id(),msg_id,detail);
-	*/
 	/*修改存入数据库*/
 
 	chat_storage::DBComm::RecordUserMessageList(MESSAGE_TYPE,send_userinfo.user_id(),
 			recv_userinfo.user_id(),distance,summary);
 
 
+	return true;
+}
+
+bool IMSMgr::LeaveMessage(const int64 platform_id,const int64 msg_id,const int32 type,
+		const int64 oppid,const time_t current_time,const chat_base::UserInfo& send_userinfo,
+		const std::string& message){
+	std::string s_current_time;
+	chat_logic::LogicUnit::GetCurrentTimeFormat(current_time,s_current_time);
+	chat_base::MessageInfos messageinfos(platform_id,msg_id,send_userinfo.user_id(),oppid,
+			type,send_userinfo.nickname(),message,s_current_time,send_userinfo.head_url());
+
+	chat_storage::DBComm::RecordChatMessage(type,messageinfos);
 	return true;
 }
 

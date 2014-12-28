@@ -130,7 +130,43 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 				vReqOppstionInfo->token[TOKEN_LEN - 1] = '\0';
 			}
 			break;
+		case USER_ONLINE_REQ:
+		  {
+			struct UserOnLineReq* vUserOnLineReq
+			        =  new struct UserOnLineReq;
+			*packhead = (struct PacketHead*)vUserOnLineReq;
+			BUILDPACKHEAD ();
+			vUserOnLineReq->platform_id = in.Read64();
+			vUserOnLineReq->group_id = in.Read64();
+			vUserOnLineReq->user_id = in.Read64();
+			int temp = 0;
+			memcpy(vUserOnLineReq->token,
+				in.ReadData(TOKEN_LEN,temp),TOKEN_LEN);
+			vUserOnLineReq->token[TOKEN_LEN - 1] = '\0';
 
+		  }
+		  break;
+
+		case USER_ONLINE_RSP:
+		 {
+			 struct UserOnLineRsp* vUserOnLineRsp
+			        = new UserOnLineRsp;
+			*packhead = (struct PacketHead*)vUserOnLineRsp;
+			BUILDPACKHEAD ();
+			vUserOnLineRsp->platform_id = in.Read64();
+			vUserOnLineRsp->group_id = in.Read64();
+			vUserOnLineRsp->user_id = in.Read64();
+			vUserOnLineRsp->user_nicknumber = in.Read64();
+			int temp = 0;
+			memcpy(vUserOnLineRsp->nickname,
+					in.ReadData(NICKNAME_LEN,temp),NICKNAME_LEN);
+			vUserOnLineRsp->nickname[NICKNAME_LEN - 1] = '\0';
+			memcpy(vUserOnLineRsp->user_head,
+					in.ReadData(HEAD_URL_LEN,temp),HEAD_URL_LEN);
+			vUserOnLineRsp->user_head[HEAD_URL_LEN - 1] = '\0';
+
+		 }
+		 break;
 		case TEXT_CHAT_PRIVATE_RECV:
 			{
 				struct TextChatPrivateRecv* vTextChatPrivateRecv
@@ -236,6 +272,51 @@ bool ProtocolPack::UnpackStream(const void *packet_stream, int len,
 					vOppositionInfo->opponfo_list.push_back(opp_info);
 				}
 
+			}
+			break;
+		case MULTI_CHAT_SEND:
+		   {
+                struct MultiChatSend* vMultiChatSend = new struct MultiChatSend;
+                *packhead = (struct PacketHead*)vMultiChatSend;
+                BUILDPACKHEAD();
+                vMultiChatSend->platform_id = in.Read64();
+                vMultiChatSend->multi_id = in.Read64();
+                vMultiChatSend->send_user_id = in.Read64();
+                vMultiChatSend->session = in.Read64();
+				int temp = 0;
+				memcpy(vMultiChatSend->token,
+					in.ReadData(TOKEN_LEN,temp),TOKEN_LEN);
+				vMultiChatSend->token[TOKEN_LEN - 1] = '\0';
+				int len = vMultiChatSend->data_length - sizeof(int64) * 4 - TOKEN_LEN;
+				char* str = new char[len];
+				memcpy(str,in.ReadData(len,temp),len);
+				vMultiChatSend->content.assign(str,len);
+				if(str){
+					delete [] str;
+					str = NULL;
+				}
+		   }
+		 break;
+		case MULTI_CHAT_RECV:
+			{
+				struct MultiChatRecv* vMultiChatRecv =new struct MultiChatRecv;
+				*packhead = (struct PacketHead*)vMultiChatRecv;
+				BUILDPACKHEAD();
+				vMultiChatRecv->platform_id = in.Read64();
+				vMultiChatRecv->multi_id = in.Read64();
+				vMultiChatRecv->send_user_id = in.Read64();
+				int temp = 0;
+				memcpy(vMultiChatRecv->send_nickname,in.ReadData(NICKNAME_LEN,temp),
+					NICKNAME_LEN);
+				vMultiChatRecv->send_nickname[NICKNAME_LEN - 1] = '\0';
+				int len = vMultiChatRecv->data_length - sizeof(int64) * 3 - NICKNAME_LEN;
+				char* str = new char[len];
+				memcpy(str,in.ReadData(len,temp),len);
+				vMultiChatRecv->content.assign(str,len);
+				if(str){
+					delete [] str;
+					str = NULL;
+				}
 			}
 			break;
 		case MULTI_SOUND_SEND:
@@ -451,6 +532,63 @@ bool ProtocolPack::PackStream(const struct PacketHead* packhead,void** packet_st
 
 			}
 			break;
+		case USER_ONLINE_REQ:
+		   {
+			   //USER_ONLINE_REQ = 1030
+			   struct UserOnLineReq* vUserOnLineReq =
+					   (struct UserOnLineReq*)packhead;
+			   BUILDHEAD(USERONLINEREQ_SIZE);
+			   out.Write64(vUserOnLineReq->platform_id);
+			   out.Write64(vUserOnLineReq->group_id);
+			   out.Write64(vUserOnLineReq->user_id);
+			   out.WriteData(vUserOnLineReq->token,TOKEN_LEN);
+			   packet = (char*)out.GetData();
+		   }
+		   break;
+
+		case USER_ONLINE_RSP:
+		  {
+			//USER_ONLINE_RSP = 1031
+			   struct UserOnLineRsp* vUserOnLineRsp =
+					   (struct UserOnLineRsp*)packhead;
+			   BUILDHEAD(USERONLINERSP_SIZE);
+			   out.Write64(vUserOnLineRsp->platform_id);
+			   out.Write64(vUserOnLineRsp->group_id);
+			   out.Write64(vUserOnLineRsp->user_id);
+			   out.Write64(vUserOnLineRsp->user_nicknumber);
+			   out.WriteData(vUserOnLineRsp->nickname,NICKNAME_LEN);
+			   out.WriteData(vUserOnLineRsp->user_head,HEAD_URL_LEN);
+			   packet = (char*)out.GetData();
+		   }
+			break;
+
+		case MULTI_CHAT_SEND:
+			{
+				struct MultiChatSend* vMultiChatSend =
+						(struct MultiChatSend*)packhead;
+				BUILDHEAD(MULTICHATSEND_SIZE);
+				out.Write64(vMultiChatSend->platform_id);
+				out.Write64(vMultiChatSend->multi_id);
+				out.Write64(vMultiChatSend->send_user_id);
+				out.Write64(vMultiChatSend->session);
+				out.WriteData(vMultiChatSend->token,TOKEN_LEN);
+				out.WriteData(vMultiChatSend->content.c_str(),vMultiChatSend->content.length());
+				packet = (char*)out.GetData();
+			}
+			break;
+		case MULTI_CHAT_RECV:
+			{
+				struct MultiChatRecv* vMultiChatRecv =
+						(struct MultiChatRecv*)packhead;
+				BUILDHEAD(MULTICHATRECV_SIZE);
+				out.Write64(vMultiChatRecv->platform_id);
+				out.Write64(vMultiChatRecv->multi_id);
+				out.Write64(vMultiChatRecv->send_user_id);
+				out.WriteData(vMultiChatRecv->send_nickname,NICKNAME_LEN);
+				out.WriteData(vMultiChatRecv->content.c_str(),vMultiChatRecv->content.length());
+				packet = (char*)out.GetData();
+			}
+			break;
 		case MULTI_SOUND_SEND:
 			{
 				struct MultiSoundSend* vMultiSoundSend =
@@ -615,6 +753,36 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				PRINT_END("struct UserQuitNotification Dump End");
 			}
 			break;
+		case USER_ONLINE_REQ:
+		   {
+			   struct UserOnLineReq* vUserOnLineReq =
+			   					(struct UserOnLineReq*)packhead;
+				PRINT_TITLE("struct UserOnLineReq Dump Begin");
+				DUMPHEAD ();
+
+				PRINT_INT64(vUserOnLineReq->platform_id);
+				PRINT_INT64(vUserOnLineReq->group_id);
+				PRINT_INT64(vUserOnLineReq->user_id);
+				PRINT_STRING(vUserOnLineReq->token);
+				PRINT_END("struct UserOnLineReq Dump End");
+		   }
+		break;
+		case USER_ONLINE_RSP:
+		   {
+			   struct UserOnLineRsp* vUserOnLineRsp =
+			   					(struct UserOnLineRsp*)packhead;
+				PRINT_TITLE("struct UserOnLineRsp Dump Begin");
+				DUMPHEAD ();
+
+				PRINT_INT64(vUserOnLineRsp->platform_id);
+				PRINT_INT64(vUserOnLineRsp->group_id);
+				PRINT_INT64(vUserOnLineRsp->user_nicknumber);
+				PRINT_INT64(vUserOnLineRsp->user_id);
+				PRINT_STRING(vUserOnLineRsp->nickname);
+				PRINT_STRING(vUserOnLineRsp->user_head);
+				PRINT_END("struct UserOnLineRsp Dump End");
+		   }
+		break;
 		case REQ_OPPOSITION_INFO:
 			{
 				struct ReqOppstionInfo* vReqOppstionInfo =
@@ -697,6 +865,35 @@ void ProtocolPack::DumpPacket(const struct PacketHead *packhead){
 				PRINT_INT64(vPacketConfirm->private_msg_id);
 				PRINT_STRING(vPacketConfirm->token);
 				PRINT_END("struct PacketConfirm End");
+			}
+			break;
+		case MULTI_CHAT_SEND:
+			{
+				struct MultiChatSend* vMultiChatSend =
+						(struct MultiChatSend*)packhead;
+				PRINT_TITLE("struct MultiChatSend Dump Begin");
+				DUMPHEAD();
+				PRINT_INT64(vMultiChatSend->platform_id);
+				PRINT_INT64(vMultiChatSend->multi_id);
+				PRINT_INT64(vMultiChatSend->send_user_id);
+				PRINT_INT64(vMultiChatSend->session);
+				PRINT_STRING(vMultiChatSend->token);
+				PRINT_STRING(vMultiChatSend->content.c_str());
+				PRINT_END("struct MultiChatSend End");
+			}
+			break;
+		case MULTI_CHAT_RECV:
+			{
+				struct MultiChatRecv* vMultiChatRecv =
+						(struct MultiChatRecv*)packhead;
+				PRINT_TITLE("struct MultiChatRecv Dump Begin");
+				DUMPHEAD();
+				PRINT_INT64(vMultiChatRecv->platform_id);
+				PRINT_INT64(vMultiChatRecv->multi_id);
+				PRINT_INT64(vMultiChatRecv->send_user_id);
+				PRINT_STRING(vMultiChatRecv->send_nickname);
+				PRINT_STRING(vMultiChatRecv->content.c_str());
+				PRINT_END("struct MultiChatRecv End");
 			}
 			break;
 		case MULTI_SOUND_SEND:

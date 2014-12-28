@@ -123,4 +123,37 @@ PlatformInfo& PlatformInfo::operator =(const PlatformInfo& platfrom_info){
 	data_ = platfrom_info.data_;
 	return *this;
 }
+
+
+MessageInfos::MessageInfos(){
+	data_ = new Data();
+}
+
+MessageInfos::MessageInfos(const int64 platform,const int64 msgid,const int64 fid,const int64 oppid,
+		const int32 type,const std::string& nickname,const std::string& message,
+		const std::string& lasstime,const std::string& head){
+	data_ = new Data(platform,msgid,fid,oppid,type,nickname,message,
+			lasstime,head);
+}
+
+
+MessageInfos::MessageInfos(const MessageInfos& msginfo)
+:data_(msginfo.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+MessageInfos& MessageInfos::operator = (const MessageInfos& msginfo){
+	if(msginfo.data_!=NULL){
+		msginfo.data_->AddRef();
+	}
+
+	if(data_!=NULL){
+		data_->Release();
+	}
+	data_ = msginfo.data_;
+	return (*this);
+}
+
 }

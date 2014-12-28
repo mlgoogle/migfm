@@ -2,8 +2,7 @@
 #define _CHAT_CHAT_CACHE_MANAGER_H__
 
 #include "logic_unit.h"
-#include "base/thread_handler.h"
-#include "base/thread_lock.h"
+#include "logic/logic_comm.h"
 
 namespace chat_logic{
 
@@ -65,6 +64,9 @@ public:
 	bool AddMeetingInfos(const int64 platform_id,const int64 session,
 							const int64 tid,const int64 mid);
 
+
+	bool CheckMeetingInfos(const int64 platform_id,const int64 session,const int64 uid);
+
 	bool AddMeetingInfos(const int64 platform_id,const int64 session,
 							const int64 tid);
 
@@ -75,12 +77,17 @@ public:
 	bool SendMeetingMessage(const int64 platform_id,const int64 group_id,
 							const int64 session,struct PacketHead *packet);
 
+	bool SendMeetingNotSelf(const int64 platform_id,const int64 group_id,
+							const int64 send_id,const int64 session,struct PacketHead* packet);
 
 	bool SendQuitInfoSession(const int64 platform_id,const int64 session,const int32 uid);
 
 
 	bool GetGroupListUserInfo(const int64 platform_id,const int64 group_id,	const int64 session,
 			std::list<struct Oppinfo*>& oppoinfo_list);
+
+	bool GetGroupListUserInfoNotSelf(const int64 platform_id,const int64 group_id,const int64 send_id,
+			const int64 session,std::list<struct Oppinfo*>& oppoinfo_list);
 
 private:
 	std::map<int64,PlatformCache*>             platform_cache_;
@@ -114,6 +121,7 @@ public:
 		}
 		return cache_manager_op_;
 	}
+	static bool FetchDBDimension();
 public:
 	bool AddSocket(const int socket,const chat_base::UserInfo& userinfo);
 
@@ -125,6 +133,8 @@ public:
 
 	bool NoticeRobotChatLogin(const int64 platform_id,const int64 uid,
 			const int64 robotid);
+
+
 private:
 	int                robot_server_socket_;
 };

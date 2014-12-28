@@ -22,6 +22,9 @@ public:
 
 	bool OnUserQuit(struct server *srv, int socket, struct PacketHead *packet,
 	        const void *msg = NULL, int len = 0);
+
+	bool OnUserGroupOnline(struct server *srv, int socket, struct PacketHead *packet,
+	           const void *msg = NULL, int len = 0);
 public:
 	bool OnAberrant(const int socket);
 private:
@@ -30,6 +33,10 @@ private:
 			           const int64 usr_session);
 
 	bool OnGetTempGroupInfo(const int socket,const int64 platform_id,
+			const int64 user_id,const int64 oppinfo_id,const int32 type,
+			const int64 usr_session);
+
+	bool OnGetGroupInfo(const int socket,const int64 platform_id,
 			const int64 user_id,const int64 oppinfo_id,const int32 type,
 			const int64 usr_session);
 

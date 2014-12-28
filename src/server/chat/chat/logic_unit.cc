@@ -46,7 +46,7 @@ bool LogicUnit::SetChatToken(chat_base::UserInfo& userinfo){
 	std::stringstream os;
 	std::string key;
 	os<<random_num;
-	MD5Sum md5(os.str());
+	base::MD5Sum md5(os.str());
 	token = md5.GetHash();
 	userinfo.set_chat_token(token);
 	return true;
@@ -131,7 +131,7 @@ void LogicUnit::GetCurrntTimeFormat(std::string& current_time){
 bool HttpComm::PushMessage(const std::string &device_token,
 		const std::string &msg, int badge/*=1*/, const std::string &sound/*=""*/) {
 
-	//return true;
+	return true;
 	if (device_token.empty())
 		return false;
 

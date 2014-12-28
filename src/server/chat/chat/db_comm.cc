@@ -1,5 +1,5 @@
 #include "db_comm.h"
-#include "base/thread_handler.h"
+#include "logic/logic_comm.h"
 #include "base/logic_comm.h"
 #include "storage/storage.h"
 #include <mysql.h>
@@ -332,4 +332,82 @@ bool DBComm::GetUserInfo(const int64 platform_id,int64 user_id,
 	return false;
 }
 
+bool DBComm::RecordChatMessage(const int32 type,chat_base::MessageInfos& message){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+		std::stringstream os;
+		bool r =false;
+		MYSQL_ROW rows;
+		if (engine==NULL){
+			LOG_ERROR("GetConnection Error");
+			return false;
+		}
+		if(type == ALONE_CHAT)
+			os<<"call proc_V2RecordAloneMessage("<<message.platform()<<","
+				<<message.msgid()<<","
+				<<message.fid()<<",\'"<<message.nickname()<<"\',"<<message.oppid()<<",\'"
+				<<message.lasttime()<<"\',\'"<<message.message()<<"\',\'"
+				<<message.head()<<"\');";
+		else
+			os<<"call proc_V2RecordGroupMessage("<<message.platform()<<","
+				<<message.oppid()<<","<<message.msgid()<<","
+				<<message.fid()<<",\'"<<message.nickname()<<"\',\'"
+				<<message.lasttime()<<"\',\'"<<message.message()<<"\',\'"
+				<<message.head()<<"\');";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR("exec sql error");
+		}
+		return r;
+}
+
+bool DBComm::GetDimensionGroup(chat_logic::PlatformChatCacheManager* cache){
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+		std::stringstream os;
+		bool r =false;
+		MYSQL_ROW rows;
+		int num;;
+		if (engine==NULL){
+		 LOG_ERROR("GetConnection Error");
+		 return false;
+		}
+
+		os<<"call proc_V2GetDimensionGroup();";
+		std::string sql = os.str();
+		LOG_DEBUG2("[%s]", sql.c_str());
+		r = engine->SQLExec(sql.c_str());
+
+		if (!r) {
+			LOG_ERROR("exec sql error");
+			return false;
+		}
+		num = engine->RecordCount();
+		if(num>0){
+			while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+				int64 groupid = 0;
+				int64 nicknumber = 0;
+				std::string group_name;
+				std::string head;
+				if(rows[0]!=NULL)
+					groupid = atoll(rows[0]);
+				if(rows[1]!=NULL)
+					nicknumber = atoll(rows[1]);
+				if(rows[2]!=NULL)
+					group_name =rows[2];
+				chat_base::GroupInfo groupinfo(10000,groupid,DIMENSION_GROUP_CHAT,
+						nicknumber,nicknumber,group_name,head);
+				cache->AddGroupInfos(10000,groupid,groupinfo);
+			}
+			return true;
+		}
+		return false;
+}
 }

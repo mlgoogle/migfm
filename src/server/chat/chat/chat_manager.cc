@@ -31,6 +31,7 @@ bool ChatManager::InitDefaultPlatformInfo(){
 	std::string platform_name = "miu";
 	chat_base::PlatformInfo platforminfo(platform_id,platform_name);
 	CacheManagerOp::GetPlatformChatMgrCache()->SetPlatformInfo(platform_id,platforminfo);
+	CacheManagerOp::FetchDBDimension();
 	return true;
 }
 
@@ -136,6 +137,16 @@ bool ChatManager::OnChatManagerMessage(struct server *srv,
 				file_mgr_.get()->OnGroupSound(srv,socket,packet);
 			}
 			break;
+		case MULTI_CHAT_SEND:
+			{
+				ims_mgr_->OnGroupMessage(srv,socket,packet);
+			}
+			break;
+		case USER_ONLINE_REQ:
+		   {
+			   usr_connection_mgr_->OnUserGroupOnline(srv,socket,packet);
+		   }
+		   break;
 		default:
 			break;
 	}

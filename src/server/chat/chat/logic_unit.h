@@ -20,6 +20,10 @@ static char *sound_url = "http://sound.miglab.com/";
 
 #define DEFAULT_CONFIG_PATH     "./plugins/chat_manager/chat_manager_config.xml";
 
+#define ALONE_CHAT              1
+#define TEMP_GROUP_CHAT         2
+#define DIMENSION_GROUP_CHAT    3
+
 
 typedef std::map<int64/*group_id*/,chat_base::GroupInfo/*groupinfo*/> GroupInfosMap;
 

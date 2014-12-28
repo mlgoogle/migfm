@@ -2,6 +2,7 @@
 #define __CHAT_DB_COMM_H__
 
 #include "chat_basic_infos.h"
+#include "chat_cache_manager.h"
 #include "base/logic_comm.h"
 #include "basic/basictypes.h"
 #include "storage/storage.h"
@@ -34,6 +35,10 @@ public:
 									 const int64 to_uid,
 									 const double distance,
 									 const std::string& message);
+
+	static bool GetDimensionGroup(chat_logic::PlatformChatCacheManager* cache);
+
+	static bool RecordChatMessage(const int32 type,chat_base::MessageInfos& message);
 
 public:
 #if defined (_DB_POOL_)

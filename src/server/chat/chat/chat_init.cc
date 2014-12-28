@@ -4,6 +4,7 @@
 #include "common.h"
 #include "plugins.h"
 #include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 
 
 struct ChatManagerPlugin{

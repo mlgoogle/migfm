@@ -26,10 +26,14 @@ enum operatorcode
 	USER_NOTIFICATION_QUIT = 1011,
 	REQ_OPPOSITION_INFO = 1020,
 	GET_OPPOSITION_INFO = 1021,
+	USER_ONLINE_REQ = 1030,//新用户进入群组成功
+	USER_ONLINE_RSP = 1031,//通知所有用户新用户进入
 	TEXT_CHAT_PRIVATE_SEND = 1100,
 	TEXT_CHAT_PRIVATE_RECV = 1101,
 	MULTI_SOUND_SEND = 2100,
-	MULTI_SOUND_RECV = 2101
+	MULTI_SOUND_RECV = 2101,
+	MULTI_CHAT_SEND = 2200,
+	MULTI_CHAT_RECV = 2201
 };
 
 enum msgtype
@@ -115,7 +119,7 @@ struct ReqOppstionInfo : public PacketHead{
 	int64 platform_id;
 	int64 user_id;
 	int64 oppostion_id;
-	int16 type;
+	int16 type; //1 单聊 2 群聊 3 临时组
 	char token[TOKEN_LEN];
 };
 
@@ -163,6 +167,26 @@ struct TextChatPrivateRecv:public PacketHead{
 	std::string content;
 };
 
+//USER_ONLINE_REQ = 1030
+#define USERONLINEREQ_SIZE (sizeof(int64) * 3 + TOKEN_LEN)
+struct UserOnLineReq:public PacketHead{
+	int64 platform_id;
+	int64 group_id;
+	int64 user_id;
+	char token[TOKEN_LEN];
+};
+
+//USER_ONLINE_RSP = 1031
+#define USERONLINERSP_SIZE (sizeof(int64) * 4 + NICKNAME_LEN + HEAD_URL_LEN)
+struct UserOnLineRsp:public PacketHead{
+	int64 platform_id;
+	int64 group_id;
+	int64 user_id;
+	int64 user_nicknumber;
+	char nickname[NICKNAME_LEN];
+	char user_head[HEAD_URL_LEN];
+};
+
 //MULTI_SOUND_SEND = 2100
 #define MULTISOUNDSEND_SIZE (sizeof(int64) * 4 + sizeof(int16) + TOKEN_LEN + vMultiSoundSend->sound_path.length())
 struct MultiSoundSend:public PacketHead{
@@ -183,4 +207,26 @@ struct MultiSoundRecv:public PacketHead{
 	int64 send_user_id;
 	std::string sound_path;
 };
+
+//MULTI_CHAT_SEND = 2200,
+#define MULTICHATSEND_SIZE (sizeof(int64) * 4 +TOKEN_LEN + vMultiChatSend->content.length())
+struct MultiChatSend:public PacketHead{
+	int64 platform_id;
+	int64 multi_id;//群组号
+	int64 send_user_id;
+	int64 session;
+	char  token[TOKEN_LEN];
+	std::string content;
+};
+
+//MULTI_CHAT_RECV = 2201,
+#define MULTICHATRECV_SIZE (sizeof(int64) * 3 + NICKNAME_LEN + vMultiChatRecv->content.length())
+struct MultiChatRecv:public PacketHead{
+	int64 platform_id;
+	int64 multi_id;
+	int64 send_user_id;
+	char send_nickname[NICKNAME_LEN];
+	std::string content;
+};
+
 #endif
