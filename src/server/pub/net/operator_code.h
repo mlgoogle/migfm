@@ -1,0 +1,16 @@
+#ifndef _NET_OPERATOR_CODE_H_
+#define _NET_OPERATOR_CODE_H_
+
+enum operatorcode{
+	//SOC 5000
+	SOC_GAIN_CURRENT_TYPE_BARRAGECOMM = 5001,//获取当前音乐列别弹幕及评论
+	SOC_GAIN_CURRENT_LOCATION_INFO = 5002,//获取当前地理信息
+
+	//CHAT 6000
+	CHAT_GAIN_GROUP_MESSAGE = 6001,//获取群组历史聊天记录
+	CHAT_GAIN_ALONE_MESSAGE = 6002, //获取单聊历史聊天记录
+	CHAT_GAIN_IDLE_CHAT_SERVER = 6003 //获取最空闲聊天服务端
+};
+
+
+#endif
