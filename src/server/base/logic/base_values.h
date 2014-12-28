@@ -326,7 +326,8 @@ class ListValue : public Value {
 
 enum SerializerImplType{
 	IMPL_JSON = 0,
-	IMPL_XML = 1
+	IMPL_XML = 1,
+	IMPL_HTTP = 2
 };
 
 

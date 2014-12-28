@@ -26,6 +26,54 @@ enum machine_type{
 
 namespace base_push{
 
+class BaiduBindPushInfo{
+public:
+	explicit BaiduBindPushInfo();
+	explicit BaiduBindPushInfo(const int64 platform,const int64 uid,const int64 channel,const int64 bd_userid,
+			const std::string& pkg_name,const std::string& tag,const int64 appid,
+			const int64 requestid,const int32 machine);
+	explicit BaiduBindPushInfo(const BaiduBindPushInfo& bind);
+	BaiduBindPushInfo& operator = (const BaiduBindPushInfo& bind);
+
+	const int64 platform() const{return data_->platform_;}
+	const int64 uid() const{return data_->uid_;}
+	const int64 channel() const{return data_->channel_;}
+	const int64 bd_userid() const {return data_->bd_userid_;}
+	const std::string& pkg_name() const{return data_->pkg_name_;}
+	const std::string& tag() const {return data_->tag_;}
+	const int64 appid() const {return data_->appid_;}
+	const int64 requestid() const{return data_->requestid_;}
+	const int32 machine() const {return data_->machine_;}
+
+public:
+	class Data{
+	public:
+		Data(const int64 platform,const int64 uid,const int64 channel,const int64 bd_userid,
+				const std::string& pkg_name,const std::string& tag,const int64 appid,
+				const int64 requestid,const int32 machine)
+	:refcount_(1),platform_(platform),uid_(uid),channel_(channel),bd_userid_(bd_userid)
+	,pkg_name_(pkg_name),tag_(tag),appid_(appid),requestid_(requestid),machine_(machine){}
+
+	Data():refcount_(1),platform_(0),uid_(0),channel_(0),bd_userid_(0)
+		,appid_(0),requestid_(0),machine_(0){}
+	public:
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
+	public:
+		int64                        platform_;
+		int64                        uid_;
+		int64                        channel_;
+		int64                        bd_userid_;
+		std::string                  pkg_name_;
+		std::string                  tag_;
+		int64                        appid_;
+		int64                        requestid_;
+		int32                        machine_;
+	private:
+		int refcount_;
+	};
+	Data*                    data_;
+};
 
 class BaiduPushCustomContent{
 public:
@@ -51,7 +99,7 @@ public:
 private:
 	class Data{
 	public:
-		Data():refcount_(0){}
+		Data():refcount_(1){}
 	public:
 		void AddRef(){refcount_ ++;}
 		void Release(){if (!--refcount_)delete this;}
@@ -142,7 +190,7 @@ public:
 private:
 	class Data{
 	public:
-		Data():refcount_(0)
+		Data():refcount_(1)
 			,platform_(0)
 			,uid_(0)
 			,machine_(ANDROID_TYPE)
@@ -158,7 +206,7 @@ private:
 			ios_cunstom_content_.set_name("aps");
 		}
 
-		Data(const int64 platform,const int64 uid):refcount_(0)
+		Data(const int64 platform,const int64 uid):refcount_(1)
 			,platform_(platform)
 			,uid_(uid)
 			,machine_(ANDROID_TYPE)

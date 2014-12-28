@@ -2,6 +2,7 @@
 #include "json/json.h"
 #include "storage/storage.h"
 #include "basic/basic_util.h"
+#include <math.h>
 namespace base_lbs{
 
 bool ResolveJson::ReolveJsonBaiduIPToAddress(const std::string& content,std::string& city,
@@ -33,8 +34,10 @@ bool ResolveJson::ReolveJsonBaiduIPToAddress(const std::string& content,std::str
 
 	address_detail = addressComponent["address_detail"];
 
-	if (address_detail.isMember("city"))
+	if (address_detail.isMember("city")){
 		city = address_detail["city"].asString();
+		city = city.substr(0,city.find("市"));
+	}
 
 	if (address_detail.isMember("district"))
 		district = address_detail["district"].asString();
@@ -131,6 +134,25 @@ bool ResolveJson::ReolveJsonBaiduAddressForGeocoder(const std::string& content,d
 	if (location.isMember("lat"))
 		latitude = location["lat"].asDouble();
 	return true;
+}
+
+
+double CalcGEO::CalcGEODistance(double latitude1, double longitude1, double latitude2, double longitude2){
+
+	if ((latitude1==latitude2)&&(longitude1==longitude2))
+		return 0;
+    double dd = M_PI/180;
+    double x1 = longitude1 * dd;
+    double y1 = latitude1 * dd;
+
+    double x2 = longitude2 * dd;
+    double y2 = latitude2 * dd;
+
+    double R = 6378137;
+
+    double runDistance = (2*R*asin(sqrt(2-2*cos(x1)*cos(x2)*cos(y1-y2) - 2*sin(x1)*sin(x2))/2));
+    runDistance = (runDistance < 0) ? (-runDistance) : runDistance;
+	return runDistance;
 }
 
 }

@@ -15,5 +15,11 @@ public:
 			double& longitude);
 };
 
+class CalcGEO{//用于自行计算和地理相关的
+public:
+	static double  CalcGEODistance(double latitude1, double longitude1,
+			double latitude2, double longitude2);
+};
+
 }
 #endif

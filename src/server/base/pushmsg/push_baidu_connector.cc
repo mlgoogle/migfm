@@ -85,6 +85,18 @@ void PushBaiduConnectorImpl::TimeDBPushMessage(){
 	}
 }
 
+bool PushBaiduConnectorImpl::BindPushUserinfo(base_push::BaiduBindPushInfo& push_info){
+	//写入数据库
+	/**
+	 * const int64 platform,const int64 uid,const int64 channel,
+			const std::string& baidu_userid,const std::string& pkg_name,const std::string& tag,
+			const int64 appid,const int64 requestid,const int32 machine)
+	 */
+	bool r = base_push::PushDBComm::BindBDPushUserinfo(push_info.platform(),push_info.uid(),
+			push_info.channel(),push_info.bd_userid(),push_info.pkg_name(),
+			push_info.tag(),push_info.appid(),push_info.requestid(),push_info.machine());
+	return true;
+}
 
 bool PushBaiduConnectorImpl::BindPushUserinfo(packet::HttpPacket& packet,int& err,
 		std::string& err_str){

@@ -16,6 +16,9 @@ public:
 	virtual void Release();
 	virtual bool GetWeatherInfo(const std::string& latitude,const std::string& longitude,std::string&temp,
 				std::string& current_weather);
+
+	virtual bool GetWeatherInfo(const double latitude,const double longitude,std::string&temp,
+				std::string& current_weather);
 private:
 	std::string  caiyun_weather_host_;
 };

@@ -45,6 +45,8 @@ public:
 
 	bool BindPushUserinfo(packet::HttpPacket& packet,int32& err,std::string& err_str); //绑定推送用户信息
 
+	bool BindPushUserinfo(base_push::BaiduBindPushInfo& push_info);
+
 	void TimeDBPushMessage();
 private:
 

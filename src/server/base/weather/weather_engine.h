@@ -19,6 +19,8 @@ public:
 	virtual void Release() = 0;//释放
 	virtual bool GetWeatherInfo(const std::string& latitude,const std::string& longitude,std::string&temp,
 			std::string& current_weather) = 0;
+	virtual bool GetWeatherInfo(const double latitude,const double longitude,std::string& temp,
+			std::string& current_weather) = 0;
 };
 
 class WeatherConnectorEngine{

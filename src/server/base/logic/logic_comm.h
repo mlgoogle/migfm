@@ -36,6 +36,10 @@
 
 namespace base_logic{
 
+class LogicComm{
+public:
+	static int SendFull(int socket, const char *buffer, size_t nbytes);
+};
 
 class RLockGd
 {

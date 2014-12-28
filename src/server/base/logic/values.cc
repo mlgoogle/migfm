@@ -1,10 +1,20 @@
-#include "base_values.h"
-#include "logic/value_serializer.h"
-#include "basic/basic_util.h"
-namespace base_logic{
+// Copyright (c) 2010 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+#include "base/values.h"
+
+#include "base/logging.h"
+#include "base/string_util.h"
+#include "base/utf_string_conversions.h"
+
+namespace {
+
+// Make a deep copy of |node|, but don't include empty lists or dictionaries
+// in the copy. It's possible for this function to return NULL and it
+// expects |node| to always be non-NULL.
 Value* CopyWithoutEmptyChildren(Value* node) {
-
+  DCHECK(node);
   switch (node->GetType()) {
     case Value::TYPE_LIST: {
       ListValue* list = static_cast<ListValue*>(node);
@@ -29,6 +39,7 @@ Value* CopyWithoutEmptyChildren(Value* node) {
            it != dict->end_keys(); ++it) {
         Value* child = NULL;
         bool rv = dict->GetWithoutPathExpansion(*it, &child);
+        DCHECK(rv);
         Value* child_copy = CopyWithoutEmptyChildren(child);
         if (child_copy)
           copy->SetWithoutPathExpansion(*it, child_copy);
@@ -41,63 +52,63 @@ Value* CopyWithoutEmptyChildren(Value* node) {
     }
 
     default:
+      // For everything else, just make a copy.
       return node->DeepCopy();
   }
 }
 
-///////////////////// BaseValue ////////////////////
+}  // namespace
 
-Value::~Value(){
+///////////////////// Value ////////////////////
 
-}
-
-//static
-Value* Value::CreateNullValue(){
-	return new Value(TYPE_NULL);
-}
-
-//static
-Value* Value::CreateBooleanValue(bool in_value){
-	return new FundamentalValue(in_value);
-}
-
-//static
-Value* Value::CreateIntegerValue(int32 in_value){
-	return new FundamentalValue(in_value);
-}
-
-//static
-Value* Value::CreateBigIntegerValue(int64 in_value){
-	return new FundamentalValue(in_value);
-}
-//static
-Value* Value::CreateRealValue(double in_value){
-	return new FundamentalValue(in_value);
+Value::~Value() {
 }
 
 // static
-Value* Value::CreateStringValue(const std::string& in_value){
-  return new StringValue(in_value);
+Value* Value::CreateNullValue() {
+  return new Value(TYPE_NULL);
 }
 
-Value* Value::CreateStringValue(const std::wstring& in_value){
+// static
+Value* Value::CreateBooleanValue(bool in_value) {
+  return new FundamentalValue(in_value);
+}
+
+// static
+Value* Value::CreateIntegerValue(int in_value) {
+  return new FundamentalValue(in_value);
+}
+
+// static
+Value* Value::CreateRealValue(double in_value) {
+  return new FundamentalValue(in_value);
+}
+
+// static
+Value* Value::CreateStringValue(const std::string& in_value) {
   return new StringValue(in_value);
 }
 
 // static
-BinaryValue* Value::CreateBinaryValue(char* buffer,size_t size){
-	return BinaryValue::Create(buffer,size);
+Value* Value::CreateStringValue(const std::wstring& in_value) {
+  return new StringValue(in_value);
+}
+
+// static
+Value* Value::CreateStringValueFromUTF16(const string16& in_value) {
+  return new StringValue(in_value);
+}
+
+// static
+BinaryValue* Value::CreateBinaryValue(char* buffer, size_t size) {
+  return BinaryValue::Create(buffer, size);
 }
 
 bool Value::GetAsBoolean(bool* in_value) const {
   return false;
 }
 
-bool Value::GetAsInteger(int32* in_value) const {
-  return false;
-}
-
-bool Value::GetAsBigInteger(int64* out_value) const{
+bool Value::GetAsInteger(int* in_value) const {
   return false;
 }
 
@@ -113,16 +124,27 @@ bool Value::GetAsString(std::wstring* in_value) const {
   return false;
 }
 
+bool Value::GetAsUTF16(string16* out_value) const {
+  return false;
+}
+
 Value* Value::DeepCopy() const {
-	return CreateNullValue();
+  // This method should only be getting called for null Values--all subclasses
+  // need to provide their own implementation;.
+  DCHECK(IsType(TYPE_NULL));
+  return CreateNullValue();
 }
 
 bool Value::Equals(const Value* other) const {
-	return other->IsType(TYPE_NULL);
+  // This method should only be getting called for null Values--all subclasses
+  // need to provide their own implementation;.
+  DCHECK(IsType(TYPE_NULL));
+  return other->IsType(TYPE_NULL);
 }
-///////////////////// FundamentalValue ////////////////////
-FundamentalValue::~FundamentalValue(){
 
+///////////////////// FundamentalValue ////////////////////
+
+FundamentalValue::~FundamentalValue() {
 }
 
 bool FundamentalValue::GetAsBoolean(bool* out_value) const {
@@ -131,7 +153,7 @@ bool FundamentalValue::GetAsBoolean(bool* out_value) const {
   return (IsType(TYPE_BOOLEAN));
 }
 
-bool FundamentalValue::GetAsInteger(int32* out_value) const {
+bool FundamentalValue::GetAsInteger(int* out_value) const {
   if (out_value && IsType(TYPE_INTEGER))
     *out_value = integer_value_;
   return (IsType(TYPE_INTEGER));
@@ -143,66 +165,65 @@ bool FundamentalValue::GetAsReal(double* out_value) const {
   return (IsType(TYPE_REAL));
 }
 
-bool FundamentalValue::GetAsBigInteger(int64* out_value)const {
-  if (out_value && IsType(TYPE_BIG_INTEGER))
-    *out_value = big_integer_value_;
-  return (IsType(TYPE_BIG_INTEGER));
-}
-
-
 Value* FundamentalValue::DeepCopy() const {
-	switch (GetType()){
-      case TYPE_BOOLEAN:
-         return CreateBooleanValue(boolean_value_);
+  switch (GetType()) {
+    case TYPE_BOOLEAN:
+      return CreateBooleanValue(boolean_value_);
 
-      case TYPE_INTEGER:
-         return CreateIntegerValue(integer_value_);
+    case TYPE_INTEGER:
+      return CreateIntegerValue(integer_value_);
 
-      case TYPE_REAL:
-         return CreateRealValue(real_value_);
+    case TYPE_REAL:
+      return CreateRealValue(real_value_);
 
-      case TYPE_BIG_INTEGER:
-    	 return CreateBigIntegerValue(big_integer_value_);
-
-      default:
-    	  return NULL;
-	}
+    default:
+      NOTREACHED();
+      return NULL;
+  }
 }
 
 bool FundamentalValue::Equals(const Value* other) const {
-	if (other->GetType() != GetType())
-		return false;
+  if (other->GetType() != GetType())
+    return false;
 
-	switch (GetType()) {
-	 case TYPE_BOOLEAN: {
-		bool lhs, rhs;
-		return GetAsBoolean(&lhs) && other->GetAsBoolean(&rhs) && lhs == rhs;
-	 }
-	 case TYPE_INTEGER: {
-		int lhs, rhs;
-		return GetAsInteger(&lhs) && other->GetAsInteger(&rhs) && lhs == rhs;
-	 }
-	 case TYPE_REAL: {
-		double lhs, rhs;
-		return GetAsReal(&lhs) && other->GetAsReal(&rhs) && lhs == rhs;
-	 }
-	 default:
-		return false;
-	 }
+  switch (GetType()) {
+    case TYPE_BOOLEAN: {
+      bool lhs, rhs;
+      return GetAsBoolean(&lhs) && other->GetAsBoolean(&rhs) && lhs == rhs;
+    }
+    case TYPE_INTEGER: {
+      int lhs, rhs;
+      return GetAsInteger(&lhs) && other->GetAsInteger(&rhs) && lhs == rhs;
+    }
+    case TYPE_REAL: {
+      double lhs, rhs;
+      return GetAsReal(&lhs) && other->GetAsReal(&rhs) && lhs == rhs;
+    }
+    default:
+      NOTREACHED();
+      return false;
+  }
 }
 
+///////////////////// StringValue ////////////////////
 
-/////////////StringValue/////////////////
 StringValue::StringValue(const std::string& in_value)
     : Value(TYPE_STRING),
       value_(in_value) {
+  DCHECK(IsStringUTF8(in_value));
 }
 
 StringValue::StringValue(const std::wstring& in_value)
     : Value(TYPE_STRING),
-      value_(base::BasicUtil::StringConversions::WideToUTF8(in_value)) {
+      value_(WideToUTF8(in_value)) {
 }
 
+#if !defined(WCHAR_T_IS_UTF16)
+StringValue::StringValue(const string16& in_value)
+    : Value(TYPE_STRING),
+      value_(UTF16ToUTF8(in_value)) {
+}
+#endif
 
 StringValue::~StringValue() {
 }
@@ -215,7 +236,13 @@ bool StringValue::GetAsString(std::string* out_value) const {
 
 bool StringValue::GetAsString(std::wstring* out_value) const {
   if (out_value)
-	  *out_value = base::BasicUtil::StringConversions::UTF8ToWide(value_);
+    *out_value = UTF8ToWide(value_);
+  return true;
+}
+
+bool StringValue::GetAsUTF16(string16* out_value) const {
+  if (out_value)
+    *out_value = UTF8ToUTF16(value_);
   return true;
 }
 
@@ -230,179 +257,195 @@ bool StringValue::Equals(const Value* other) const {
   return GetAsString(&lhs) && other->GetAsString(&rhs) && lhs == rhs;
 }
 
+///////////////////// BinaryValue ////////////////////
 
-/////////////BinaryValue/////////////////
-//static
-BinaryValue* BinaryValue::Create(char* buffer,size_t size){
-	if(!buffer)
-		return NULL;
-	return new BinaryValue(buffer,size);
+// static
+BinaryValue* BinaryValue::Create(char* buffer, size_t size) {
+  if (!buffer)
+    return NULL;
+
+  return new BinaryValue(buffer, size);
 }
 
-//static
-BinaryValue* BinaryValue::CreateWithCopiedBuffer(const char* buffer,size_t size){
-	if(!buffer)
-		return NULL;
-	char* buffer_copy = new char[size];
-	memcpy(buffer_copy,buffer,size);
-	return new BinaryValue(buffer_copy,size);
+// static
+BinaryValue* BinaryValue::CreateWithCopiedBuffer(const char* buffer,
+                                                 size_t size) {
+  if (!buffer)
+    return NULL;
+
+  char* buffer_copy = new char[size];
+  memcpy(buffer_copy, buffer, size);
+  return new BinaryValue(buffer_copy, size);
 }
 
-BinaryValue::BinaryValue(char* buffer,size_t size)
-:Value(TYPE_BINARY)
-,buffer_(buffer)
-,size_(size){
 
+BinaryValue::BinaryValue(char* buffer, size_t size)
+  : Value(TYPE_BINARY),
+    buffer_(buffer),
+    size_(size) {
+  DCHECK(buffer_);
 }
 
-BinaryValue::~BinaryValue(){
-
+BinaryValue::~BinaryValue() {
+  DCHECK(buffer_);
+  if (buffer_)
+    delete[] buffer_;
 }
-Value* BinaryValue::DeepCopy()const {
-	return CreateWithCopiedBuffer(buffer_,size_);
+
+Value* BinaryValue::DeepCopy() const {
+  return CreateWithCopiedBuffer(buffer_, size_);
 }
 
 bool BinaryValue::Equals(const Value* other) const {
-	if(other->GetType()!=GetType())
-		return false;
-	const BinaryValue* other_binary = static_cast<const BinaryValue*>(other);
-	if(other_binary->size_ != size_)
-		return false;
-	return !memcmp(buffer_,other_binary->buffer_,size_);
+  if (other->GetType() != GetType())
+    return false;
+  const BinaryValue* other_binary = static_cast<const BinaryValue*>(other);
+  if (other_binary->size_ != size_)
+    return false;
+  return !memcmp(buffer_, other_binary->buffer_, size_);
 }
 
-
 ///////////////////// DictionaryValue ////////////////////
-DictionaryValue::~DictionaryValue(){
-	Clear();
+
+DictionaryValue::~DictionaryValue() {
+  Clear();
 }
 
 Value* DictionaryValue::DeepCopy() const {
-	DictionaryValue* result = new DictionaryValue;
-	return result;
+  DictionaryValue* result = new DictionaryValue;
+
+  for (ValueMap::const_iterator current_entry(dictionary_.begin());
+       current_entry != dictionary_.end(); ++current_entry) {
+    result->SetWithoutPathExpansion(current_entry->first,
+                                    current_entry->second->DeepCopy());
+  }
+
+  return result;
 }
 
 bool DictionaryValue::Equals(const Value* other) const {
-	if (other->GetType() != GetType())
-		return false;
-	return true;
+  if (other->GetType() != GetType())
+    return false;
+
+  const DictionaryValue* other_dict =
+      static_cast<const DictionaryValue*>(other);
+  key_iterator lhs_it(begin_keys());
+  key_iterator rhs_it(other_dict->begin_keys());
+  while (lhs_it != end_keys() && rhs_it != other_dict->end_keys()) {
+    Value* lhs;
+    Value* rhs;
+    if (!GetWithoutPathExpansion(*lhs_it, &lhs) ||
+        !other_dict->GetWithoutPathExpansion(*rhs_it, &rhs) ||
+        !lhs->Equals(rhs)) {
+      return false;
+    }
+    ++lhs_it;
+    ++rhs_it;
+  }
+  if (lhs_it != end_keys() || rhs_it != other_dict->end_keys())
+    return false;
+
+  return true;
 }
 
 bool DictionaryValue::HasKey(const std::wstring& key) const {
-	ValueMap::const_iterator current_entry = dictionary_.find(key);
-	return current_entry != dictionary_.end();
+  ValueMap::const_iterator current_entry = dictionary_.find(key);
+  DCHECK((current_entry == dictionary_.end()) || current_entry->second);
+  return current_entry != dictionary_.end();
 }
 
-bool DictionaryValue::HasKeyASCII(const std::string& key) const{
-	return HasKey(base::BasicUtil::StringConversions::ASCIIToWide(key));
+bool DictionaryValue::HasKeyASCII(const std::string& key) const {
+  return HasKey(ASCIIToWide(key));
 }
 
-void DictionaryValue::Clear(){
-	ValueMap::iterator dict_iterator = dictionary_.begin();
-	while (dict_iterator != dictionary_.end()) {
-		delete dict_iterator->second;
-	    ++dict_iterator;
-	}
-	dictionary_.clear();
+void DictionaryValue::Clear() {
+  ValueMap::iterator dict_iterator = dictionary_.begin();
+  while (dict_iterator != dictionary_.end()) {
+    delete dict_iterator->second;
+    ++dict_iterator;
+  }
+
+  dictionary_.clear();
 }
 
-void DictionaryValue::Set(const std::string& path, Value* in_value){
-	std::wstring wpath = base::BasicUtil::StringConversions::UTF8ToWide(path);
-	Set(wpath,in_value);
+void DictionaryValue::Set(const std::wstring& path, Value* in_value) {
+  DCHECK(in_value);
+
+  std::wstring current_path(path);
+  DictionaryValue* current_dictionary = this;
+  for (size_t delimiter_position = current_path.find('.');
+       delimiter_position != std::wstring::npos;
+       delimiter_position = current_path.find('.')) {
+    // Assume that we're indexing into a dictionary.
+    std::wstring key(current_path, 0, delimiter_position);
+    DictionaryValue* child_dictionary = NULL;
+    if (!current_dictionary->GetDictionary(key, &child_dictionary)) {
+      child_dictionary = new DictionaryValue;
+      current_dictionary->SetWithoutPathExpansion(key, child_dictionary);
+    }
+
+    current_dictionary = child_dictionary;
+    current_path.erase(0, delimiter_position + 1);
+  }
+
+  current_dictionary->SetWithoutPathExpansion(current_path, in_value);
 }
 
-void DictionaryValue::SetBoolean(const std::string& path, bool in_value){
-	Set(path,CreateBooleanValue(in_value));
+void DictionaryValue::SetBoolean(const std::wstring& path, bool in_value) {
+  Set(path, CreateBooleanValue(in_value));
 }
 
-void DictionaryValue::SetInteger(const std::string& path, int32 in_value){
-	Set(path, CreateIntegerValue(in_value));
-}
-
-void DictionaryValue::SetBigInteger(const std::string& path, int64 in_value){
-	Set(path, CreateBigIntegerValue(in_value));
-}
-
-void DictionaryValue::SetReal(const std::string& path, double in_value){
-	Set(path, CreateRealValue(in_value));
-}
-
-void DictionaryValue::SetString(const std::string& path, const std::string& in_value){
-	Set(path, CreateStringValue(in_value));
-}
-
-void DictionaryValue::SetString(const std::string& path, const std::wstring& in_value){
-	Set(path, CreateStringValue(in_value));
-}
-
-void DictionaryValue::Set(const std::wstring& path, Value* in_value){
-	std::wstring current_path(path);
-	DictionaryValue* current_dictionary = this;
-	//查找value 对应的MAP深度
-	for(size_t delimiter_position = current_path.find('.');
-			delimiter_position != std::wstring::npos;
-			delimiter_position = current_path.find('.')){
-		std::wstring key(current_path, 0, delimiter_position);
-		DictionaryValue* child_dictionary = NULL;
-		if(!current_dictionary->GetDictionary(key, &child_dictionary)){
-			child_dictionary = new DictionaryValue;
-			current_dictionary->SetWithoutPathExpansion(key, child_dictionary);
-		}
-	    current_dictionary = child_dictionary;
-	    current_path.erase(0, delimiter_position + 1);
-	}
-	current_dictionary->SetWithoutPathExpansion(current_path, in_value);
-}
-
-void DictionaryValue::SetBoolean(const std::wstring& path, bool in_value){
-	Set(path,CreateBooleanValue(in_value));
-}
-
-void DictionaryValue::SetInteger(const std::wstring& path, int32 in_value) {
-	Set(path, CreateIntegerValue(in_value));
+void DictionaryValue::SetInteger(const std::wstring& path, int in_value) {
+  Set(path, CreateIntegerValue(in_value));
 }
 
 void DictionaryValue::SetReal(const std::wstring& path, double in_value) {
-	Set(path, CreateRealValue(in_value));
-}
-
-void DictionaryValue::SetBigInteger(const std::wstring& path,int64 in_value){
-	Set(path, CreateBigIntegerValue(in_value));
+  Set(path, CreateRealValue(in_value));
 }
 
 void DictionaryValue::SetString(const std::wstring& path,
                                 const std::string& in_value) {
-	Set(path, CreateStringValue(in_value));
+  Set(path, CreateStringValue(in_value));
 }
 
 void DictionaryValue::SetString(const std::wstring& path,
                                 const std::wstring& in_value) {
-	Set(path, CreateStringValue(in_value));
+  Set(path, CreateStringValue(in_value));
+}
+
+void DictionaryValue::SetStringFromUTF16(const std::wstring& path,
+                                         const string16& in_value) {
+  Set(path, CreateStringValueFromUTF16(in_value));
 }
 
 void DictionaryValue::SetWithoutPathExpansion(const std::wstring& key,
-                                              Value* in_value){
-	if(HasKey(key)){
-		delete dictionary_[key];
-	}
+                                              Value* in_value) {
+  // If there's an existing value here, we need to delete it, because
+  // we own all our children.
+  if (HasKey(key)) {
+    DCHECK(dictionary_[key] != in_value);  // This would be bogus
+    delete dictionary_[key];
+  }
 
-	dictionary_[key] = in_value;
+  dictionary_[key] = in_value;
 }
 
-bool DictionaryValue::Get(const std::wstring& path, Value** out_value) const{
-	std::wstring current_path(path);
-	const DictionaryValue* current_dictionary = this;
-	for(size_t delimiter_position = current_path.find('.');
-			delimiter_position != std::string::npos;
-			delimiter_position = current_path.find('.')){
-		DictionaryValue* child_dictionary = NULL;
-		if(!current_dictionary->GetDictionary(
-				current_path.substr(0,delimiter_position),&child_dictionary))
-			return false;
-		current_dictionary = child_dictionary;
-		current_path.erase(0, delimiter_position + 1);
-	}
-	return current_dictionary->GetWithoutPathExpansion(current_path, out_value);
+bool DictionaryValue::Get(const std::wstring& path, Value** out_value) const {
+  std::wstring current_path(path);
+  const DictionaryValue* current_dictionary = this;
+  for (size_t delimiter_position = current_path.find('.');
+       delimiter_position != std::wstring::npos;
+       delimiter_position = current_path.find('.')) {
+    DictionaryValue* child_dictionary = NULL;
+    if (!current_dictionary->GetDictionary(
+            current_path.substr(0, delimiter_position), &child_dictionary))
+      return false;
+
+    current_dictionary = child_dictionary;
+    current_path.erase(0, delimiter_position + 1);
+  }
+
+  return current_dictionary->GetWithoutPathExpansion(current_path, out_value);
 }
 
 bool DictionaryValue::GetBoolean(const std::wstring& path,
@@ -415,21 +458,12 @@ bool DictionaryValue::GetBoolean(const std::wstring& path,
 }
 
 bool DictionaryValue::GetInteger(const std::wstring& path,
-                                 int32* out_value) const {
+                                 int* out_value) const {
   Value* value;
   if (!Get(path, &value))
     return false;
 
   return value->GetAsInteger(out_value);
-}
-
-bool DictionaryValue::GetBigInteger(const std::wstring& path,
-								int64* out_value) const {
-  Value* value;
-  if (!Get(path, &value))
-    return false;
-
-  return value->GetAsBigInteger(out_value);
 }
 
 bool DictionaryValue::GetReal(const std::wstring& path,
@@ -441,18 +475,24 @@ bool DictionaryValue::GetReal(const std::wstring& path,
   return value->GetAsReal(out_value);
 }
 
+bool DictionaryValue::GetString(const std::string& path,
+                                string16* out_value) const {
+  return GetStringAsUTF16(ASCIIToWide(path), out_value);
+}
+
 bool DictionaryValue::GetStringASCII(const std::string& path,
-			std::string* out_value) const {
+                                     std::string* out_value) const {
+  std::string out;
+  if (!GetString(ASCIIToWide(path), &out))
+    return false;
 
-	std::string out;
-	if (!GetString(base::BasicUtil::StringConversions::ASCIIToWide(path), &out))
-		return false;
+  if (!IsStringASCII(out)) {
+    NOTREACHED();
+    return false;
+  }
 
-	if (!base::BasicUtil::StringUtil::IsStringASCII(out))
-		return false;
-
-	out_value->assign(out);
-	return true;
+  out_value->assign(out);
+  return true;
 }
 
 bool DictionaryValue::GetString(const std::wstring& path,
@@ -471,6 +511,15 @@ bool DictionaryValue::GetString(const std::wstring& path,
     return false;
 
   return value->GetAsString(out_value);
+}
+
+bool DictionaryValue::GetStringAsUTF16(const std::wstring& path,
+                                       string16* out_value) const {
+  Value* value;
+  if (!Get(path, &value))
+    return false;
+
+  return value->GetAsUTF16(out_value);
 }
 
 bool DictionaryValue::GetBinary(const std::wstring& path,
@@ -501,48 +550,37 @@ bool DictionaryValue::GetDictionary(const std::wstring& path,
 
 bool DictionaryValue::GetList(const std::wstring& path,
                               ListValue** out_value) const {
-	Value* value;
-	bool result = Get(path, &value);
-	if (!result || !value->IsType(TYPE_LIST))
-		return false;
+  Value* value;
+  bool result = Get(path, &value);
+  if (!result || !value->IsType(TYPE_LIST))
+    return false;
 
-	if (out_value)
-		*out_value = static_cast<ListValue*>(value);
+  if (out_value)
+    *out_value = static_cast<ListValue*>(value);
 
-	return true;
+  return true;
 }
 
 bool DictionaryValue::GetWithoutPathExpansion(const std::wstring& key,
-        Value** out_value) const{
+                                              Value** out_value) const {
+  ValueMap::const_iterator entry_iterator = dictionary_.find(key);
+  if (entry_iterator == dictionary_.end())
+    return false;
 
-	ValueMap::const_iterator entry_iterator = dictionary_.find(key);
-	if (entry_iterator == dictionary_.end())
-		return false;
-
-	Value* entry = entry_iterator->second;
-	if (out_value)
-		*out_value = entry;
-	return true;
+  Value* entry = entry_iterator->second;
+  if (out_value)
+    *out_value = entry;
+  return true;
 }
 
 bool DictionaryValue::GetIntegerWithoutPathExpansion(const std::wstring& path,
-                                                     int32* out_value) const {
+                                                     int* out_value) const {
   Value* value;
   if (!GetWithoutPathExpansion(path, &value))
     return false;
 
   return value->GetAsInteger(out_value);
 }
-
-bool DictionaryValue::GetBigIntegerWithoutPathExpansion(const std::wstring& path,
-                                                     int64* out_value) const {
-  Value* value;
-  if (!GetWithoutPathExpansion(path, &value))
-    return false;
-
-  return value->GetAsBigInteger(out_value);
-}
-
 
 bool DictionaryValue::GetStringWithoutPathExpansion(
     const std::wstring& path,
@@ -564,6 +602,15 @@ bool DictionaryValue::GetStringWithoutPathExpansion(
   return value->GetAsString(out_value);
 }
 
+bool DictionaryValue::GetStringAsUTF16WithoutPathExpansion(
+    const std::wstring& path,
+    string16* out_value) const {
+  Value* value;
+  if (!GetWithoutPathExpansion(path, &value))
+    return false;
+
+  return value->GetAsUTF16(out_value);
+}
 
 bool DictionaryValue::GetDictionaryWithoutPathExpansion(
     const std::wstring& path,
@@ -591,7 +638,6 @@ bool DictionaryValue::GetListWithoutPathExpansion(const std::wstring& path,
 
   return true;
 }
-
 
 bool DictionaryValue::Remove(const std::wstring& path, Value** out_value) {
   std::wstring current_path(path);
@@ -648,8 +694,8 @@ void DictionaryValue::MergeDictionary(const DictionaryValue* dictionary) {
   }
 }
 
-
 ///////////////////// ListValue ////////////////////
+
 ListValue::~ListValue() {
   Clear();
 }
@@ -665,10 +711,12 @@ bool ListValue::Set(size_t index, Value* in_value) {
     return false;
 
   if (index >= list_.size()) {
+    // Pad out any intermediate indexes with null settings
     while (index > list_.size())
       Append(CreateNullValue());
     Append(in_value);
   } else {
+    DCHECK(list_[index] != in_value);
     delete list_[index];
     list_[index] = in_value;
   }
@@ -693,20 +741,12 @@ bool ListValue::GetBoolean(size_t index, bool* bool_value) const {
   return value->GetAsBoolean(bool_value);
 }
 
-bool ListValue::GetInteger(size_t index, int32* out_value) const {
+bool ListValue::GetInteger(size_t index, int* out_value) const {
   Value* value;
   if (!Get(index, &value))
     return false;
 
   return value->GetAsInteger(out_value);
-}
-
-bool ListValue::GetBigInteger(size_t index, int64* out_value) const {
-  Value* value;
-  if (!Get(index, &value))
-    return false;
-
-  return value->GetAsBigInteger(out_value);
 }
 
 bool ListValue::GetReal(size_t index, double* out_value) const {
@@ -733,6 +773,13 @@ bool ListValue::GetString(size_t index, std::wstring* out_value) const {
   return value->GetAsString(out_value);
 }
 
+bool ListValue::GetStringAsUTF16(size_t index, string16* out_value) const {
+  Value* value;
+  if (!Get(index, &value))
+    return false;
+
+  return value->GetAsUTF16(out_value);
+}
 
 bool ListValue::GetBinary(size_t index, BinaryValue** out_value) const {
   Value* value;
@@ -770,7 +817,6 @@ bool ListValue::GetList(size_t index, ListValue** out_value) const {
   return true;
 }
 
-
 bool ListValue::Remove(size_t index, Value** out_value) {
   if (index >= list_.size())
     return false;
@@ -784,7 +830,6 @@ bool ListValue::Remove(size_t index, Value** out_value) {
   return true;
 }
 
-
 int ListValue::Remove(const Value& value) {
   for (ValueVector::iterator i(list_.begin()); i != list_.end(); ++i) {
     if ((*i)->Equals(&value)) {
@@ -792,6 +837,9 @@ int ListValue::Remove(const Value& value) {
       delete *i;
       list_.erase(i);
 
+      // TODO(anyone): Returning a signed int type here is just wrong.
+      // Change this interface to return a size_t.
+      DCHECK(index <= INT_MAX);
       int return_index = static_cast<int>(index);
       return return_index;
     }
@@ -799,12 +847,13 @@ int ListValue::Remove(const Value& value) {
   return -1;
 }
 
-
 void ListValue::Append(Value* in_value) {
+  DCHECK(in_value);
   list_.push_back(in_value);
 }
 
 bool ListValue::AppendIfNotPresent(Value* in_value) {
+  DCHECK(in_value);
   for (ValueVector::iterator i(list_.begin()); i != list_.end(); ++i) {
     if ((*i)->Equals(in_value))
       return false;
@@ -814,7 +863,7 @@ bool ListValue::AppendIfNotPresent(Value* in_value) {
 }
 
 bool ListValue::Insert(size_t index, Value* in_value) {
-
+  DCHECK(in_value);
   if (index > list_.size())
     return false;
 
@@ -848,28 +897,4 @@ bool ListValue::Equals(const Value* other) const {
     return false;
 
   return true;
-}
-
-
-
-
-ValueSerializer* ValueSerializer::Create(int32 type,std::string* str){
-	ValueSerializer* engine = NULL;
-	switch(type){
-	case IMPL_JSON:
-		engine = new base_logic::JsonValueSerializer(str);
-		break;
-	case IMPL_XML:
-		engine = new base_logic::XmlValueSerializer(str);
-		break;
-	case IMPL_HTTP:
-		engine = new base_logic::HttpValueSerializer(str);
-		break;
-	default:
-		break;
-	}
-	return engine;
-}
-
-
 }

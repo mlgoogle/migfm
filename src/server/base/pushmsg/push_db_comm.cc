@@ -149,6 +149,41 @@ bool PushDBComm::GetAllPushMessage(std::list<base_push::BaiduPushMessage*>& list
 }
 
 bool PushDBComm::BindBDPushUserinfo(const int64 platform,const int64 uid,const int64 channel,
+			const int64 baidu_userid,const std::string& pkg_name,const std::string& tag,
+			const int64 appid,const int64 requestid,const int32 machine){
+	bool r = false;
+#if defined (_DB_POOL_)
+	base_db::AutoMysqlCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+    //call proc_BindPushBaiduInfo(platform,uid,channel,'baidu_userid','pkg_name','tag','13123123','12312',1);
+	os<<"call proc_BindPushBaiduInfo("
+			<<platform<<","
+			<<uid<<",\'"
+			<<channel<<"\',\'"<<baidu_userid
+			<<"\',\'"<<pkg_name.c_str()
+			<<"\',\'"<<tag.c_str()<<"\',\'"<<appid<<"\',\'"<<requestid<<
+			"\',"<<machine<<");";
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return false;
+	}
+	return true;
+}
+
+bool PushDBComm::BindBDPushUserinfo(const int64 platform,const int64 uid,const int64 channel,
 			const std::string& baidu_userid,const std::string& pkg_name,const std::string& tag,
 			const std::string& appid,const std::string& requestid,const int32 machine){
 	bool r = false;

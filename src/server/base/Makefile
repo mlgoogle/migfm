@@ -1,7 +1,7 @@
 
 ###############################################################################
 ## 输出文件名
-OUTPUT_FILE = ./../lib/mybase.a
+OUTPUT_FILE = ./lib/mybase.a
 
 ## 编译器
 COMPIlER = g++
@@ -22,12 +22,12 @@ LINK_FLAGS =
 
 ## 头文件
 INCLUDE_PATHS = -I./ -I ../ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../public/ -I/usr/local/include\
-				 -I/usr/include/mysql -I./../../third_party/hiredis  -I../base -I./../../third_party/
+				 -I/usr/include/mysql -I./../third_party/hiredis  -I../base -I./../third_party/ -I./../public/
 
 ## 库
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl\
-				../lib/libbreakpad_client.a ../lib/libhiredis.a ./../../third_party/dmg_fp/lib/dmg_fp.a
+				../lib/libbreakpad_client.a ../lib/libhiredis.a  ../third_party/dmg_fp/lib/dmg_fp.a 
 
 ##3rd
 THIRD_PATH = ../public
@@ -40,9 +40,9 @@ LINK = $(AR)  $(OUTPUT_FILE) $?
 
 all: clean output delete-temp-file
 output:	basic_util.o icu_utf.o base_db_mysql_auto.o basic_lbs_info.o lbs_baidu_connector.o lbs_connector.o\
-	lbs_db_comm.o lbs_logic_unit.o logic_comm.o base_values.o api_errno.o \
-	http_api.o base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
-	weather_engine.o weather_logic_unit.o\
+	lbs_db_comm.o lbs_logic_unit.o logic_comm.o base_values.o \
+	base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
+	weather_engine.o weather_logic_unit.o value_serializer.o\
 	basic_push_info.o push_baidu_connector.o push_connector.o push_db_comm.o push_logic_unit.o\
 	storage.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o http_method.o http_method.o\
@@ -83,11 +83,8 @@ logic_comm.o:
 base_values.o:
 	$(COMPILE) ./logic/base_values.cc
 	
-api_errno.o:
-	$(COMPILE) ./net/api_errno.cc
-	
-http_api.o:
-	$(COMPILE) ./net/http_api.cc
+value_serializer.o:
+	$(COMPILE) ./logic/value_serializer.cc
 
 base_thread_handler.o:
 	$(COMPILE) ./thread/base_thread_handler.cc
