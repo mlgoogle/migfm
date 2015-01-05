@@ -28,6 +28,7 @@ public:
 	static base_storage::DictionaryStorageEngine* RedisConnectionPop(void);
 	static void RedisConnectionPush(base_storage::DictionaryStorageEngine* engine);
 public:
+	static std::list<base::ConnAddr>  addrlist_;
 	static std::list<base_storage::DictionaryStorageEngine*>   dic_conn_pool_;
 	static threadrw_t*                                        dic_pool_lock_;
 
@@ -40,8 +41,9 @@ public:
 	virtual ~AutoDicCommEngine();
 
 	base_storage::DictionaryStorageEngine*  GetDicEngine(){
-		if(engine_){
+		if(!engine_){
 			engine_->Release();//释放
+			engine_ = NULL;
 		}
 		return engine_;
 	}

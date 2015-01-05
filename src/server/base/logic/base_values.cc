@@ -1,5 +1,7 @@
 #include "base_values.h"
 #include "logic/value_serializer.h"
+#include "logic/json_serializer.h"
+#include "logic/http_serializer.h"
 #include "basic/basic_util.h"
 namespace base_logic{
 

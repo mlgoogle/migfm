@@ -14,8 +14,7 @@ std::list<base_storage::DBStorageEngine*>  MysqlDBPool::db_conn_pool_;
 
 std::list<base::ConnAddr> MysqlDBPool::addrlist_;
 
-AutoMysqlCommEngine::AutoMysqlCommEngine()
-:engine_(NULL){
+AutoMysqlCommEngine::AutoMysqlCommEngine(){
 #if defined (_DB_POOL_)
 	engine_ = base_db::MysqlDBPool::DBConnectionPop();
 #endif

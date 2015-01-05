@@ -39,10 +39,11 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(AR)  $(OUTPUT_FILE) $? 
 
 all: clean output delete-temp-file
-output:	basic_util.o icu_utf.o base_db_mysql_auto.o basic_lbs_info.o lbs_baidu_connector.o lbs_connector.o\
+output:	basic_util.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto.o basic_lbs_info.o lbs_baidu_connector.o\
+	block_msg_queue.o  queue_dic_comm.o lbs_connector.o\
 	lbs_db_comm.o lbs_logic_unit.o logic_comm.o base_values.o \
 	base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
-	weather_engine.o weather_logic_unit.o value_serializer.o\
+	weather_engine.o weather_logic_unit.o value_serializer.o http_serializer.o json_serializer.o\
 	basic_push_info.o push_baidu_connector.o push_connector.o push_db_comm.o push_logic_unit.o\
 	storage.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o http_method.o http_method.o\
@@ -59,6 +60,9 @@ delete-temp-file:
 
 ### 编译
 
+base_dic_redis_auto.o:
+	$(COMPILE) ./dic/base_dic_redis_auto.cc
+	
 base_db_mysql_auto.o:
 	$(COMPILE) ./db/base_db_mysql_auto.cc
 
@@ -86,6 +90,12 @@ base_values.o:
 value_serializer.o:
 	$(COMPILE) ./logic/value_serializer.cc
 
+json_serializer.o:
+	$(COMPILE) ./logic/json_serializer.cc
+	
+http_serializer.o:
+	$(COMPILE) ./logic/http_serializer.cc
+	
 base_thread_handler.o:
 	$(COMPILE) ./thread/base_thread_handler.cc
 
@@ -102,6 +112,11 @@ weather_engine.o:
 weather_logic_unit.o:
 	$(COMPILE) ./weather/weather_logic_unit.cc
 	
+block_msg_queue.o:
+	$(COMPILE) ./queue/block_msg_queue.cc
+	
+queue_dic_comm.o:
+	$(COMPILE) ./queue/queue_dic_comm.cc
 	
 basic_push_info.o:
 	$(COMPILE) ./pushmsg/basic_push_info.cc
