@@ -8,13 +8,16 @@
 #ifndef MIGFM_CACHE_MANAGER_H_
 #define MIGFM_CACHE_MANAGER_H_
 #include "logic_infos.h"
+#include "queue/block_msg_queue.h"
+#include "basic/scoped_ptr.h"
+#include "basic/basic_info.h"
 
 namespace base_logic{
 
 class WholeManager{
 private:
 	static WholeManager*   whole_manager_;
-	WholeManager() {Init();}
+	WholeManager() {}
 	virtual ~WholeManager() {}
 public:
 	static WholeManager* GetWholeManager(){
@@ -27,7 +30,9 @@ public:
 		delete whole_manager_;
 	}
 public:
-	void Init();
+	void Init(std::list<base::ConnAddr>& addrlist);
+public:
+	bool AddBlockMsgQueue(base_queue::BlockMsg* value);
 public:
 	int64 dimensions_name(const std::string& alias,
 			const int64 id,std::string& name);
@@ -37,6 +42,7 @@ private:
 			const std::string& type,const std::string& name);
 private:
 	std::map<std::string,base_logic::Dimensions>   dimensions_;
+	scoped_ptr<base_queue::BaseBlockMsgQueue>      block_queue_;
 };
 }
 

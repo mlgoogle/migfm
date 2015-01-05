@@ -18,7 +18,8 @@ enum errorcode{
 	MUSIC_TYPE_ID_LACK = -1004,
 	MESSAGE_ID_LACK = -1005,
 	GROUP_ID_LACK = -1006,
-	TID_LACK = -1007
+	TID_LACK = -1007,
+	MSG_CONTENT_LACK = -1008
 };
 
 
@@ -32,6 +33,7 @@ enum errorcode{
 #define MUSIC_TYPE_ID_LACK_STR            "当前音乐类别ID不存在"
 #define MESSAGE_ID_LACK_STR               "消息ID不存在"
 #define GROUP_ID_LACK_STR                 "群组ID不存在"
+#define MSG_CONTENT_LACK_STR              "消息内容不存在"
 
 const char*
 miyo_strerror(int error_code);

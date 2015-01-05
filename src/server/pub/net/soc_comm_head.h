@@ -65,6 +65,64 @@ public:
 	:LoginHeadPacket(m){}
 };
 
+//打招呼
+class SayHello:public LoginHeadPacket{
+public:
+	SayHello(NetBase* m)
+	:LoginHeadPacket(m){
+		 Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		GETBIGINTTOINT(L"touid",tid_);
+		if(!r) error_code_ = TID_LACK;
+		//
+		int64 content = 0;
+		r = m_->GetString(L"msg",&content_);
+		//数字 //fixe me
+		/*if(!r){
+			GETBIGINTTOINT(L"msg",content);
+			if(r)
+				content_ = base::BasicUtil::Int64ToString(content);
+			else
+				error_code_ = MSG_CONTENT_LACK;
+		}*/
+	}
+
+	const int64 tid() const {return this->tid_;}
+	const std::string& content() const {return this->content_;}
+private:
+	int64          tid_;
+	std::string    content_;
+};
+
+//送歌
+class GivingSong:public LoginHeadPacket{
+public:
+	GivingSong(NetBase* m)
+	:LoginHeadPacket(m){
+		Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		GETBIGINTTOINT(L"touid",tid_);
+		if(!r) error_code_ = TID_LACK;
+		r = m_->GetString(L"msg",&content_);
+		if(!r)error_code_ = MSG_CONTENT_LACK;
+	}
+
+	const std::string& content() const {return this->content_;}
+
+	const int64 tid() const {return this->tid_;}
+private:
+	int64          tid_;
+	std::string    content_;
+
+};
+
+
 }
 
 namespace netcomm_send{
@@ -147,6 +205,30 @@ private:
 
 };
 
+//打招呼
+class SayHello:public HeadPacket{
+public:
+	SayHello(){
+
+	}
+	netcomm_send::NetBase* release(){
+		this->set_status(1);
+		return head_.release();
+	}
+};
+
+//送歌
+class GivingSong:public HeadPacket{
+public:
+	GivingSong(){
+
+	}
+
+	netcomm_send::NetBase* release(){
+		this->set_status(1);
+		return head_.release();
+	}
+};
 }
 
 

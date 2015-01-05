@@ -5,6 +5,8 @@ enum operatorcode{
 	//SOC 5000
 	SOC_GAIN_CURRENT_TYPE_BARRAGECOMM = 5001,//获取当前音乐列别弹幕及评论
 	SOC_GAIN_CURRENT_LOCATION_INFO = 5002,//获取当前地理信息
+	SOC_GAIN_SAY_HELLO = 5003,//打招呼
+	SOC_GAIN_GIVE_SONG = 5004,//赠送歌曲
 
 	//CHAT 6000
 	CHAT_GAIN_GROUP_MESSAGE = 6001,//获取群组历史聊天记录

@@ -58,13 +58,19 @@ proc: socproc chatproc
 ######################socproc###############################################
 SOCPROC_PATH = /soc
 OTJERPROC_VERSION = /v1
-socproc:getbarragecomm.fcgi getlocation.fcgi
+socproc:getbarragecomm.fcgi getlocation.fcgi sayhello.fcgi presentsong.fcgi
 
 getbarragecomm.fcgi: getbarragecomm.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/getbarragecomm.fcgi
 
 getlocation.fcgi: getlocation.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/getlocation.fcgi
+
+sayhello.fcgi: sayhello.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/sayhello.fcgi
+	
+presentsong.fcgi: presentsong.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/presentsong.fcgi
 ### 编译
 
 getbarragecomm.o:
@@ -72,6 +78,12 @@ getbarragecomm.o:
 
 getlocation.o:
 	$(COMPILE) .$(SOCPROC_PATH)$(OTJERPROC_VERSION)/getlocation/getlocation.cc
+	
+sayhello.o:
+	$(COMPILE) .$(SOCPROC_PATH)$(OTJERPROC_VERSION)/sayhello/sayhello.cc
+	
+presentsong.o:
+	$(COMPILE) .$(SOCPROC_PATH)$(OTJERPROC_VERSION)/presentsong/presentsong.cc
 	
 
 clean:

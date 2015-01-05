@@ -1,5 +1,6 @@
 #include "soc_logic.h"
 #include "db_comm.h"
+#include "queue/block_msg_queue.h"
 #include "logic/cache_manager.h"
 #include "logic/pub_db_comm.h"
 #include "logic/logic_unit.h"
@@ -32,7 +33,8 @@ bool Soclogic::Init(){
 	socsvc_logic::DBComm::Init(config->mysql_db_list_);
 	basic_logic::PubDBComm::Init(config->mysql_db_list_);
 	//初始化全局存储
-	base_logic::WholeManager::GetWholeManager();
+	base_logic::WholeManager::GetWholeManager()->Init(config->redis_list_);
+
 	base_lbs::LbsConnectorEngine::Create(base_lbs::IMPL_BAIDU);
 	base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
 	engine->Init(config->mysql_db_list_);
@@ -91,6 +93,12 @@ bool Soclogic::OnSocMessage(struct server *srv, const int socket, const void *ms
 		 break;
 	 case SOC_GAIN_CURRENT_LOCATION_INFO:
 		 OnGainLocation(srv,socket,value);
+		 break;
+	 case SOC_GAIN_SAY_HELLO:
+		 OnSayHello(srv,socket,value);
+		 break;
+	 case SOC_GAIN_GIVE_SONG:
+		 OnGivingSong(srv,socket,value);
 		 break;
 	}
     return true;
@@ -189,6 +197,110 @@ bool Soclogic::OnGainLocation(struct server *srv,const int socket,netcomm_recv::
 	send_message(socket,(netcomm_send::HeadPacket*)send_location.get());
 	return true;
 
+}
+
+bool Soclogic::OnSayHello(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::SayHello> sayhello(new netcomm_recv::SayHello(netbase));
+	int error_code = sayhello->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	//
+	std::string name = PLATFORM_NAME;
+	scoped_ptr<base_queue::BlockMsg>  msglist(new base_queue::BlockMsg());
+	msglist->SetFormate(base_queue::TYPE_JSON);
+	msglist->SetName(name);
+	msglist->SetMsgType(0);
+
+	scoped_ptr<base_queue::BlockMsg>  message(new base_queue::BlockMsg());
+	message->SetBigInteger(L"tid",sayhello->tid());
+	message->SetString(L"message",sayhello->content());
+	message->SetBigInteger(L"uid",sayhello->uid());
+
+	msglist->AddBlockMsg(message.release());
+
+
+	base_logic::WholeManager::GetWholeManager()->AddBlockMsgQueue(msglist->release());
+	scoped_ptr<netcomm_send::SayHello> ssayhello(new netcomm_send::SayHello());
+	send_message(socket,(netcomm_send::HeadPacket*)ssayhello.get());
+	return true;
+}
+
+bool Soclogic::OnGivingSong(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::GivingSong> giving(new netcomm_recv::GivingSong(netbase));
+	int error_code = giving->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	/*std::string error_str;
+	int jerror_code = 0;
+	std::string json_str = giving->content();
+	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&json_str));
+	base_logic::DictionaryValue*  value = (base_logic::DictionaryValue* )serializer->Deserialize(&jerror_code,&error_str);
+
+	base_logic::ListValue* list;
+	bool r = value->GetList(L"song",&list);
+	size_t size  = list->GetSize();
+	size_t i = 0;
+	std::string name = "miyo";
+	scoped_ptr<base_queue::BlockMsg>  msglist(new base_queue::BlockMsg());
+	msglist->SetFormate(base_queue::TYPE_JSON);
+	msglist->SetName(name);
+	while(i<size){
+		base_queue::BlockMsg* message = new base_queue::BlockMsg();
+		base_logic::Value* value = (base_logic::Value*)message;
+		list->Remove(i,&value);
+		msglist->AddBlockMsg(message);
+		i++;
+	}*/
+
+	std::string json_str = giving->content();
+	AddMoreGivingSongBlockMessage(giving->uid(),giving->tid(),json_str);
+	scoped_ptr<netcomm_send::GivingSong> sgiving(new netcomm_send::GivingSong());
+	send_message(socket,(netcomm_send::HeadPacket*)sgiving.get());
+	return true;
+}
+
+void Soclogic::AddMoreGivingSongBlockMessage(int64 uid,int64 tid,std::string& json_str){
+	std::string error_str;
+
+	int jerror_code = 0;
+	std::string name = PLATFORM_NAME;
+	scoped_ptr<base_queue::BlockMsg>  msglist(new base_queue::BlockMsg());
+	msglist->SetFormate(base_queue::TYPE_JSON);
+	msglist->SetName(name);
+	msglist->SetMsgType(1);
+
+	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&json_str));
+	base_logic::DictionaryValue*  value = (base_logic::DictionaryValue* )serializer->Deserialize(&jerror_code,&error_str);
+	base_logic::ListValue* list;
+	bool r = value->GetList(L"song",&list);
+	while(list->GetSize()>0){
+		scoped_ptr<base_queue::BlockMsg> message(new base_queue::BlockMsg());
+		base_logic::Value* value = NULL;
+		if(list->Remove(0,&value)){
+			std::string songid;
+			std::string msg;
+			base_logic::DictionaryValue* dic = (base_logic::DictionaryValue*)value;
+			dic->GetString(L"songid",&songid);
+			dic->GetString(L"msg",&msg);
+			message->SetString(L"songid",songid);
+			message->SetString(L"message",msg);
+			message->SetBigInteger(L"uid",uid);
+			message->SetBigInteger(L"tid",tid);
+			msglist->AddBlockMsg(message.release());
+		}
+	}
+
+	base_logic::WholeManager::GetWholeManager()->AddBlockMsgQueue(msglist->release());
 }
 
 }

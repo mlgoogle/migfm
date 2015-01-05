@@ -28,11 +28,15 @@ int64 WholeManager::dimensions_name(const std::string& alias,
 	}
 }
 
-void WholeManager::Init(){
+void WholeManager::Init(std::list<base::ConnAddr>& addrlist){
 	//创建三个类别的容器
 	CreateDimensions(10000,"ms",MOOD_NAME);
 	CreateDimensions(20000,"mm",SCENE_NAME);
 	CreateDimensions(30000,"chl",CHANNEL_NAME);
+
+	block_queue_.reset(new base_queue::BaseBlockMsgQueue());
+
+	block_queue_->Init(addrlist);
 }
 
 void  WholeManager::CreateDimensions(const int64 id,
@@ -42,6 +46,10 @@ void  WholeManager::CreateDimensions(const int64 id,
 	dimensions_[type] = dimensions;
 }
 
+
+bool WholeManager::AddBlockMsgQueue(base_queue::BlockMsg* value){
+	return block_queue_->AddBlockMsgQueue(value);
+}
 
 }
 

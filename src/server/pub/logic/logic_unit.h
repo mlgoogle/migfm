@@ -14,6 +14,7 @@
 #define MOOD_NAME            "心情"
 #define SCENE_NAME           "场景"
 #define CHANNEL_NAME         "频道"
+#define PLATFORM_NAME        "miyo"
 
 #define UNKONW_DIMENSIONS_ID 100000
 namespace base_logic{
@@ -33,6 +34,7 @@ public:
 
 	static void SendErrorMsg(const int32 error_code,const int socket);
 };
+
 }
 
 #define send_error      base_logic::LogicUnit::SendErrorMsg
