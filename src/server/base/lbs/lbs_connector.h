@@ -17,10 +17,10 @@ public:
 public:
 	virtual void Init(std::list<base::ConnAddr>& addrlist) = 0;//初始化 //因涉及去数据库读取ACCESS_TOKEN
 	virtual void Release() = 0;//释放
-	virtual bool GeocoderForAddress(const std::string& latitude,const std::string& longitude,
+	virtual bool GeocoderForAddress(const double latitude,const double longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street) = 0;//通过坐标获取地址
 
-	virtual bool IPtoAddress(const std::string& host,std::string& latitude,std::string& longitude,
+	virtual bool IPtoAddress(const std::string& host,double& latitude,double& longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street) = 0;//通过IP换算坐标
 
 

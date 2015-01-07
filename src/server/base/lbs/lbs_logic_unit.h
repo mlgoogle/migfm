@@ -8,8 +8,8 @@ public:
 			std::string& district,std::string& province,std::string& street);
 
 	static bool ReolveJsonBaiduIPToAddress(const std::string& content,std::string& city,
-			std::string& district,std::string& province,std::string& street,std::string& latitude,
-			std::string& longitude);
+			std::string& district,std::string& province,std::string& street,double& latitude,
+			double& longitude);
 
 	static bool ReolveJsonBaiduAddressForGeocoder(const std::string& content,double& latitude,
 			double& longitude);

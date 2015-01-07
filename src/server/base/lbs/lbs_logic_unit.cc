@@ -6,8 +6,8 @@
 namespace base_lbs{
 
 bool ResolveJson::ReolveJsonBaiduIPToAddress(const std::string& content,std::string& city,
-			std::string& district,std::string& province,std::string& street,std::string& latitude,
-			std::string& longitude){
+			std::string& district,std::string& province,std::string& street,double& latitude,
+			double& longitude){
 	bool r = false;
 	int status;
 	Json::Reader reader;
@@ -54,10 +54,10 @@ bool ResolveJson::ReolveJsonBaiduIPToAddress(const std::string& content,std::str
 	address_point = addressComponent["point"];
 
 	if (address_point.isMember("x"))
-		longitude = address_point["x"].asString();
+		longitude = atof(address_point["x"].asString().c_str());
 
 	if (address_point.isMember("y"))
-		latitude = address_point["y"].asString();
+		latitude = atof(address_point["y"].asString().c_str());
 
 	return true;
 

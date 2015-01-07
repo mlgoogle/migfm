@@ -32,7 +32,7 @@ void LbsBaiduConnectorImpl::Release(){
 }
 
 //http://api.map.baidu.com/location/ip?ak=esMsm0k6HDMDOFLxRqtRoWs7&ip=124.160.208.127&coor=bd09ll
-bool LbsBaiduConnectorImpl::IPtoAddress(const std::string& host,std::string& latitude,std::string& longitude,
+bool LbsBaiduConnectorImpl::IPtoAddress(const std::string& host,double& latitude,double& longitude,
 				std::string& city,std::string& district,std::string& province,std::string& street){
 	//向百度请求
 	bool r = false;
@@ -60,7 +60,7 @@ bool LbsBaiduConnectorImpl::IPtoAddress(const std::string& host,std::string& lat
 }
 
 //http://api.map.baidu.com/geocoder/v2/?output=json&pois=0&ak=esMsm0k6HDMDOFLxRqtRoWs7&location=30.267600,120.181000
-bool LbsBaiduConnectorImpl::GeocoderForAddress(const std::string& latitude,const std::string& longitude,
+bool LbsBaiduConnectorImpl::GeocoderForAddress(const double latitude,const double longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street){
 	//向百度请求
 	bool r = false;
