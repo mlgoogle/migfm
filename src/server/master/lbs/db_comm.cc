@@ -224,8 +224,8 @@ bool DBComm::GetLBSAboutInfos(const std::string& uid,std::string& sex,std::strin
 			LOG_ERROR("GetConnection Error");
 			return false;
 		}
-		//call migfm.proc_GetLbsAboutInfos(10108);
-		os<<"call migfm.proc_GetLbsAboutInfos("
+		//call proc_GetLbsAboutInfos(10108);
+		os<<"call proc_GetLbsAboutInfos("
 			<<uid<<")";
 
 		const char* sql = os.str().c_str();
@@ -393,7 +393,7 @@ bool DBComm::GetSameMusic(Json::Value& users,const int64 src_uid,const double la
 	}
 
 	//获取用户信息
-	//call migfm.proc_GetSameMusicUser(10108)
+	//call proc_GetSameMusicUser(10108)
 	os<<"call proc_GetSameMusicUser("<<src_uid<<")";
 	r = engine->SQLExec(os.str().c_str());
 	LOG_DEBUG2("%s",os.str().c_str());
@@ -599,7 +599,7 @@ bool DBComm::GetMusicAboutInfo(const std::string& song_id,std::string& hq_url,st
 		LOG_ERROR("engine error");
 		return true;
 	}
-	//call migfm.proc_GetMusicAboutInfo(325636)
+	//call proc_GetMusicAboutInfo(325636)
 	os<<"call proc_GetMusicAboutInfo("<<song_id<<");";
 	//os<<"select clt_num,cmt_num ,hot_num from migfm_music_about where song_id = "<<song_id;
 	LOG_DEBUG2("%s",os.str().c_str());
@@ -697,8 +697,8 @@ bool DBComm::GetUserInfosLBS(Json::Value& users,double latitude,double longitude
 		LOG_ERROR("engine error");
 		return true;
 	}
-	//call migfm.proc_GetMusicAboutInfo(325636)
-	os<<"call migfm.proc_GetLbsUserInfos();";
+	//call proc_GetMusicAboutInfo(325636)
+	os<<"call proc_GetLbsUserInfos();";
 	int32 ticket = 0;
 	LOG_DEBUG2("%s",os.str().c_str());
 	r = engine->SQLExec(os.str().c_str());

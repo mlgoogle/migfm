@@ -6,6 +6,11 @@ OUTPUT_FILE = ./../../bin/hfcrsrv/plugins/user_manager/user_manager.so
 ## 编译器
 COMPIlER = g++
 COMPILERC = gcc
+
+LIB_DIR = ./../../../library
+USER_DIR = ../../pub
+CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
+
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
 CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_  -D_DIC_POOL_ -DPROCESS_WORK -D_REENTRANT -D_GNU_SOURCE -DROOM_LOG_ERROR -DROOM_LOG_MSG
@@ -19,18 +24,29 @@ LINK_FLAGS = -g -shared -fPIC
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I./ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I../../robot/  -I/usr/local/include\
-				 -I/usr/include/mysql -I./../../../third_party/hiredis  -I../../base/ -I./../../../third_party/
+INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
+				-I$(LIB_DIR)/core \
+				-I$(THIRD_PATH)\
+				-I/usr/local/include\
+				-I/usr/include/mysql\
+				-I$(USER_DIR)\
+				-I$(CUSTOM_THIRD_PATH)/hiredis\
+				-I$(CUSTOM_THIRD_PATH)\
+				-I$(LIB_DIR)/base\
+				-I../../robot/\
+				-I./../\
+
 
 ## 库
-LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
-LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient\
-				../../lib/libbreakpad_client.a ../../lib/libhiredis.a ./../../../third_party/dmg_fp/lib/dmg_fp.a\
-				 ../../lib/robot_interface.a\
-				../../lib/mybase.a
+LINK_PATHS = -L./ -L/usr/lib64/mysql -L/usr/local/lib
+LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil \
+	-lexpat -lrt -lpthread -ldl -liconv \
+	../../lib/libbreakpad_client.a ../../lib/libhiredis.a ../../lib/robot_interface.a $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a\
+	$(LIB_DIR)/base/lib/mybase.a
 
 ##3rd
-THIRD_PATH = ../../public
+THIRD_PATH = $(LIB_DIR)/public/
+
 # 编译
 COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 
@@ -74,49 +90,49 @@ usr_mgr_init.o:
 	$(COMPILE) ./usr_mgr_init.cc
 
 basic_info.o:
-	$(COMPILE) ./../../public/basic/basic_info.cc
+	$(COMPILE) $(THIRD_PATH)/basic/basic_info.cc
 
 http_packet.o:
-	$(COMPILE) ./../../public/protocol/http_packet.cc
+	$(COMPILE) $(THIRD_PATH)/protocol/http_packet.cc
 
 basictypes.o:
-	$(COMPILE) ./../../public/basic/basictypes.cc
+	$(COMPILE) $(THIRD_PATH)/basic/basictypes.cc
 
 config.o:
-	$(COMPILE) ./../../public/config/config.cc
+	$(COMPILE) $(THIRD_PATH)/config/config.cc
 
 mig_log.o:
-	$(COMPILE) ./../../public/log/mig_log.cc
+	$(COMPILE) $(THIRD_PATH)/log/mig_log.cc
 
 mem_storage_impl.o:
-	$(COMPILE) ./../../public/storage/mem_storage_impl.cc
+	$(COMPILE) $(THIRD_PATH)/storage/mem_storage_impl.cc
 
 mysql_storage_impl.o:
-	$(COMPILE) ./../../public/storage/mysql_storage_impl.cc
+	$(COMPILE) $(THIRD_PATH)/storage/mysql_storage_impl.cc
 
 redis_storage_impl.o:
-	$(COMPILE) ./../../public/storage/redis_storage_impl.cc
+	$(COMPILE) $(THIRD_PATH)/storage/redis_storage_impl.cc
 
 dic_storage.o:
-	$(COMPILE) ./../../public/storage/dic_storage.cc
+	$(COMPILE) $(THIRD_PATH)/storage/dic_storage.cc
 
 redis_warrper.o:
-	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ./../../public/storage/redis_warrper.c
+	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb $(THIRD_PATH)/storage/redis_warrper.c
 
 storage.o:
-	$(COMPILE) ./../../public/storage/storage.cc
+	$(COMPILE) $(THIRD_PATH)/storage/storage.cc
 
 constants.o:
-	$(COMPILE) ./../../public/basic/constants.cc
+	$(COMPILE) $(THIRD_PATH)/basic/constants.cc
 
 basic_util.o:
-	$(COMPILE) ./../../public/basic/basic_util.cc
+	$(COMPILE) $(THIRD_PATH)/basic/basic_util.cc
 	
 radom_in.o:
-	$(COMPILE) ./../../public/basic/radom_in.cc
+	$(COMPILE) $(THIRD_PATH)/basic/radom_in.cc
 
 errno_comm.o:
-	$(COMPILE) ./../../public/basic/errno_comm.cc
+	$(COMPILE) $(THIRD_PATH)/basic/errno_comm.cc
 
 md5sum.o:
-	$(COMPILE) ./../../public/basic/md5sum.cc
+	$(COMPILE) $(THIRD_PATH)/basic/md5sum.cc

@@ -39,8 +39,8 @@ bool DBComm::OnGetLeaveMessage(const int64 platform,const int64 fid,const int64 
 		return false;
 	}
 
-    //call migfm.proc_V2GetAloneMessage(10000,10149,10150,10,0,0)
-	os<<"call migfm.proc_V2GetAloneMessage("<<platform<<","
+    //call proc_V2GetAloneMessage(10000,10149,10150,10,0,0)
+	os<<"call proc_V2GetAloneMessage("<<platform<<","
 		<<fid<<","<<tid<<","<<count<<","<<from<<","<<msgid<<")";
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());
@@ -94,8 +94,8 @@ bool DBComm::OnGetGroupMessage(const int64 platform,const int64 groupid,const in
 		return false;
 	}
 
-    //call migfm.`proc_V2GetGroupMsg`(10000,20001,10,0,0)
-	os<<"call migfm.proc_V2GetGroupMsg("<<platform<<","
+    //call proc_V2GetGroupMsg`(10000,20001,10,0,0)
+	os<<"call proc_V2GetGroupMsg("<<platform<<","
 			<<groupid<<","<<count<<","<<from<<","<<msgid<<")";
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());

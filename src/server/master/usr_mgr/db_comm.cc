@@ -217,8 +217,8 @@ bool DBComm::RecordDefaultMessage(const int64 uid,const int64 msg_id){
 		 LOG_ERROR("GetConnection Error");
 		 return false;
 	 }
-	 // call migfm.proc_RegeditDefaultMessage(10108,10000);
-	 os<<"call migfm.proc_RegeditDefaultMessage("<<uid<<","<<msg_id<<");";
+	 // call proc_RegeditDefaultMessage(10108,10000);
+	 os<<"call proc_RegeditDefaultMessage("<<uid<<","<<msg_id<<");";
 	 LOG_DEBUG2("[%s]",os.str().c_str());
 	 r = engine->SQLExec(os.str().c_str());
 
@@ -244,7 +244,7 @@ bool DBComm::UpdateUserInfos(const int64 uid,const std::string& nickname,
 		// <<gender.c_str()<<"\',birthday=\'"<<birthday.c_str()<<"\',nickname=\'"<<nickname.c_str()
 	//	 <<"\' where usrid="<<uid<<";";
 	 //call migfm.proc_UpdateUserInfo(10108,1,'老K','1986-09-03');
-	 os<<"call migfm.proc_UpdateUserInfo("<<uid<<","<<gender.c_str()<<",\'"
+	 os<<"call proc_UpdateUserInfo("<<uid<<","<<gender.c_str()<<",\'"
 			 <<nickname<<"\',\'"<<birthday<<"\');";
 	 LOG_DEBUG2("[%s]",os.str().c_str());
 	 r = engine->SQLExec(os.str().c_str());

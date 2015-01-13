@@ -19,16 +19,29 @@ LINK_FLAGS = -g -shared -fPIC
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I./ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I/usr/local/include\
-				 -I/usr/include/mysql -I./../../../third_party/hiredis 
+INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
+				-I$(LIB_DIR)/core \
+				-I$(THIRD_PATH)\
+				-I/usr/local/include\
+				-I/usr/include/mysql\
+				-I$(USER_DIR)\
+				-I$(CUSTOM_THIRD_PATH)/hiredis\
+				-I$(CUSTOM_THIRD_PATH)\
+				-I$(LIB_DIR)/base\
+				-I../../robot/\
+				-I$(LIB_DIR)/public\
+				-I./../\
+
 
 ## 库
-LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
-LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl\
-				../../lib/libbreakpad_client.a ../../lib/libhiredis.a
+LINK_PATHS = -L./ -L/usr/lib64/mysql -L/usr/local/lib
+LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil \
+	-lexpat -lrt -lpthread -ldl -liconv \
+	../../lib/libbreakpad_client.a ../../lib/libhiredis.a $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a
 
 ##3rd
-THIRD_PATH = ../../public
+THIRD_PATH = $(LIB_DIR)/public/
+
 # 编译
 COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 
@@ -87,55 +100,55 @@ thread_lock.o:
 	$(COMPILE) ./thread_lock.cc
 
 basic_info.o:
-	$(COMPILE) ./../../public/basic/basic_info.cc
+	$(COMPILE) $(THIRD_PATH)/basic/basic_info.cc
 
 http_packet.o:
-	$(COMPILE) ./../../public/protocol/http_packet.cc
+	$(COMPILE) $(THIRD_PATH)/protocol/http_packet.cc
 
 
 basictypes.o:
-	$(COMPILE) ./../../public/basic/basictypes.cc
+	$(COMPILE) $(THIRD_PATH)/basic/basictypes.cc
 
 config.o:
-	$(COMPILE) ./../../public/config/config.cc
+	$(COMPILE) $(THIRD_PATH)/config/config.cc
 
 mig_log.o:
-	$(COMPILE) ./../../public/log/mig_log.cc
+	$(COMPILE) $(THIRD_PATH)/log/mig_log.cc
 
 	
 mem_storage_impl.o:
-	$(COMPILE) ./../../public/storage/mem_storage_impl.cc
+	$(COMPILE) $(THIRD_PATH)/storage/mem_storage_impl.cc
 
 mysql_storage_impl.o:
-	$(COMPILE) ./../../public/storage/mysql_storage_impl.cc
+	$(COMPILE) $(THIRD_PATH)/storage/mysql_storage_impl.cc
 
 redis_storage_impl.o:
-	$(COMPILE) ./../../public/storage/redis_storage_impl.cc
+	$(COMPILE) $(THIRD_PATH)/storage/redis_storage_impl.cc
 
 redis_warrper.o:
-	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb ./../../public/storage/redis_warrper.c
+	$(COMPILERC) -std=c99 -pedantic -c $(INCLUDE_PATHS) -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb $(THIRD_PATH)/storage/redis_warrper.c
 
 storage.o:
-	$(COMPILE) ./../../public/storage/storage.cc
+	$(COMPILE) $(THIRD_PATH)/storage/storage.cc
 
 algorithm_base.o:
-	$(COMPILE) ./../../public/algorithm/algorithm_base.cc
+	$(COMPILE) $(THIRD_PATH)/algorithm/algorithm_base.cc
 
 constants.o:
-	$(COMPILE) ./../../public/basic/constants.cc
+	$(COMPILE) $(THIRD_PATH)/basic/constants.cc
 
 basic_util.o:
-	$(COMPILE) ./../../public/basic/basic_util.cc
+	$(COMPILE) $(THIRD_PATH)/basic/basic_util.cc
 
 errno_comm.o:
-	$(COMPILE) ./../../public/basic/errno_comm.cc
+	$(COMPILE) $(THIRD_PATH)/basic/errno_comm.cc
 
 json_reader.o:
-	$(COMPILE) ./../../public/json/json_reader.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_reader.cpp
 
 json_value.o:
-	$(COMPILE) ./../../public/json/json_value.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_value.cpp
 
 json_writer.o:
-	$(COMPILE) ./../../public/json/json_writer.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_writer.cpp
 

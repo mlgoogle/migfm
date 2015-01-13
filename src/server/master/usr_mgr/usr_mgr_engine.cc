@@ -2,6 +2,7 @@
 #include "db_comm.h"
 #include "dic_comm.h"
 #include "logic_comm.h"
+#include "lbs/lbs_connector.h"
 #include "intertface/robot_interface.h"
 #include "basic/constants.h"
 #include "basic/basic_util.h"
@@ -11,7 +12,6 @@
 #include "json/json.h"
 #include "storage/dic_storage.h"
 #include "pushmsg/push_connector.h"
-#include "logic/"
 #include <sstream>
 
 #define		TIME_TEST		1025
@@ -39,7 +39,7 @@ UsrMgrEngine::UsrMgrEngine()
 	base_push::PushConnectorEngine::Create(base_push::IMPL_BAIDU);
 	base_push::PushConnectorEngine::GetPushConnectorEngine()->Init(config->mysql_db_list_);
 
-	base_lbs::LbsConnectorEngine::Create(IMPL_BAIDU);
+	base_lbs::LbsConnectorEngine::Create(base_lbs::IMPL_BAIDU);
 	base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->Init(config->mysql_db_list_);
 }
 
@@ -331,188 +331,153 @@ bool UsrMgrEngine::UpdateUserinfo(const int socket,const packet::HttpPacket& pac
 
 bool UsrMgrEngine::RegistUser(const int socket,const packet::HttpPacket& packet){
 	bool r = false;
-	packet::HttpPacket pack = packet;
-	std::string result;
-	std::string result_out;
-	std::string status;
-	std::string msg;
+		packet::HttpPacket pack = packet;
+		std::string result;
+		std::string result_out;
+		std::string status;
+		std::string msg;
+		std::string username;
+		std::string password;
+		std::string nickname;
+		std::string source;
+		std::string session;
+		std::string s_sex;
+		std::string location;
+		std::string birthday;
+		std::string head;
+		std::string token;
+		std::stringstream ssuid;
+		int64 usrid;
+		int sex;
+		int64 type;
+		int64 new_msg_num = 0;
+		int32 utf8_flag = 0;
+		std::stringstream os;
+		int32 return_code = 0;
 
-
-	Json::Reader reader;
-	Json::Value  root;
-	Json::Value& result = root["result"];
-	std::string username;
-	std::string password;
-	std::string nickname;
-	std::string source;
-	std::string session;
-	std::string s_sex;
-	std::string location;
-	std::string birthday;
-	std::string head;
-	std::string token;
-	std::string latitude;
-	std::string longitude;
-	std::string address;
-	std::string city;
-	std::string district;
-	std::string province;
-	std::string street;
-	std::stringstream ssuid;
-
-	int err;
-
-	int64 usrid;
-	int sex;
-	int64 type;
-	int64 new_msg_num = 0;
-	int32 utf8_flag = 0;
-	std::stringstream os;
-	int32 return_code = 0;
-#if PACKAGE_HTTP_API
-	r = base_net::MYHttpApi::OnUserRegister(pack,username,password,nickname,source,
-			session,s_sex,birthday,location,address,head,int& err);
-	if(!r){
-		status = "0";
-		msg = http_strerror(err);
-		goto ret;
-	}
-	//通过IP转换城市
-	if(location.empty()){
-	base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->IPtoAddress(address,latitude,longitude,
-			location,district,province,street);
-	}
-#else
-	r = pack.GetAttrib(SOURCE,source);
-	if (!r){
-		status = "0";
-		msg = migfm_strerror(MIG_FM_SOURCE_NO_VAILED);
-		utf8_flag = 0;
-		goto ret;
-	}
-
-	r = pack.GetAttrib(SESSION,session);
-	if (!r){
-		if(source!="0"){
+		r = pack.GetAttrib(SOURCE,source);
+		if (!r){
 			status = "0";
-			msg = migfm_strerror(MIG_FM_SOURCE_SESSION_NO_VAILED);
-			utf8_flag = 0;
-			goto ret;
-		}else{
-			session = "1";
-		}
-	}
-
-	//第三方平卿用户名为秿密码为空 设置默认用户县密码 
-	//本平卿昵称为空
-
-	r = pack.GetAttrib(USERNAME,username);
-	if (!r){
-		if(source=="0"){
-			status = "0";
-			msg = migfm_strerror(MIG_FM_USERNAME_NO_VAILED);
+			msg = migfm_strerror(MIG_FM_SOURCE_NO_VAILED);
 			utf8_flag = 0;
 			goto ret;
 		}
-		else{
-			username = "default@miglab.com";
-		}
-	}
 
-	r = pack.GetAttrib(PASSWORD,password);
-	if (!r){
-		if(source=="0"){
+		r = pack.GetAttrib(SESSION,session);
+		if (!r){
+			if(source!="0"){
+				status = "0";
+				msg = migfm_strerror(MIG_FM_SOURCE_SESSION_NO_VAILED);
+				utf8_flag = 0;
+				goto ret;
+			}else{
+				session = "1";
+			}
+		}
+
+		//第三方平卿用户名为秿密码为空 设置默认用户县密码
+		//本平卿昵称为空
+
+		r = pack.GetAttrib(USERNAME,username);
+		if (!r){
+			if(source=="0"){
+				status = "0";
+				msg = migfm_strerror(MIG_FM_USERNAME_NO_VAILED);
+				utf8_flag = 0;
+				goto ret;
+			}
+			else{
+				username = "default@miglab.com";
+			}
+		}
+
+		r = pack.GetAttrib(PASSWORD,password);
+		if (!r){
+			if(source=="0"){
+				status = "0";
+				msg = migfm_strerror(MIG_FM_PASSWORD_NO_VAILED);
+				utf8_flag = 0;
+				goto ret;
+			}
+			else{
+				password = "123456";
+			}
+		}
+
+		r = pack.GetAttrib(NICKNAME,nickname);
+		if (!r){
+			nickname = "米格用户";
+		}
+		//性别
+		r = pack.GetAttrib(SEX,s_sex);
+		if(!r){
+			if(source=="0"){
+				s_sex = "1";
+			}
+		}
+		sex = atoi(s_sex.c_str());
+
+		//生日
+		r = pack.GetAttrib(BIRTHDAY,birthday);
+		if(!r){
+			if(source=="0"){
+				birthday = "1986-10-01";
+			}
+		}
+
+		//地区
+		r = pack.GetAttrib(LOCATION,location);
+		if(!r){
+			if(source=="0"){
+				location = "浙江杭州";
+			}
+		}
+
+		//头像
+		r = pack.GetAttrib(HEAD,head);
+		if(!r){
+			if(source=="0"){
+				head = "http://fm.miglab.com/default.jpg";
+			}
+		}
+		r = storage::DBComm::RegistUser(source.c_str(),session.c_str(),
+			           password.c_str(),sex,username,nickname,usrid,
+					   type,location,birthday,head,return_code);
+
+
+		if (!r){//用户存在
 			status = "0";
-			msg = migfm_strerror(MIG_FM_PASSWORD_NO_VAILED);
+			msg = migfm_strerror(MIG_FM_USER_EXITS);
 			utf8_flag = 0;
 			goto ret;
 		}
-		else{
-			password = "123456";
-		}
-	}
 
-	r = pack.GetAttrib(NICKNAME,nickname);
-	if (!r){
-		nickname = "米格用户";
-	}
-	//性别
-	r = pack.GetAttrib(SEX,s_sex);
-	if(!r){
-		if(source=="0"){
-			s_sex = "1";
-		}
-	}
-	sex = atoi(s_sex.c_str());
+		//写入默认消息
+		if(return_code==0&&atol(source.c_str())>=0)
+			RegeditDefaultMsg(usrid);
+		//获取token
+		ssuid<<usrid;
+		base::BasicUtil::GetUserToken(ssuid.str(),token);
+		//获取最新消息
+		storage::RedisComm::GetNewMsgNum(usrid,new_msg_num);
 
-	//生日
-	r = pack.GetAttrib(BIRTHDAY,birthday);
-	if(!r){
-		if(source=="0"){
-			birthday = "1986-10-01";
-		}
-	}
+		os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
+			<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<sex
+			<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
+			<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
+			<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\",\"new_msg_num\":"
+			<<new_msg_num;
 
-	//地区
-	r = pack.GetAttrib(LOCATION,location);
-	if(!r){
-		if(source=="0"){
-			location = "浙江杭州";
-		}
-	}
+		result = os.str();
+		status = "1";
+		//通知机器人登陆
+		NoticeUserLogin(robot_server_socket_,10000,usrid,0,0);
 
-	//头像
-	r = pack.GetAttrib(HEAD,head);
-	if(!r){
-		if(source=="0"){
-			head = "http://fm.miglab.com/default.jpg";
-		}
-	}
-#endif
-
-	r = storage::DBComm::RegistUser(source.c_str(),session.c_str(),
-		           password.c_str(),sex,username,nickname,usrid,
-				   type,location,birthday,head,return_code);
-
-
-	if (!r){//用户存在
-		status = "0";
-		msg = migfm_strerror(MIG_FM_USER_EXITS);
-		utf8_flag = 0;
-		goto ret;
-	}
-
-	//写入默认消息
-	if(return_code==0&&atol(source.c_str())>=0)
-		RegeditDefaultMsg(usrid);
-	//获取token
-	ssuid<<usrid;
-	base::BasicUtil::GetUserToken(ssuid.str(),token);
-	//获取最新消息
-	storage::RedisComm::GetNewMsgNum(usrid,new_msg_num);
-
-
-	/*os<<"\"userid\":\""<<usrid<<"\",\"username\":\""<<username.c_str()
-		<<"\",\"nickname\":\""<<nickname.c_str()<<"\",\"gender\":\""<<sex
-		<<"\",\"type\":\""<<type<<"\",\"birthday\":\""<<birthday.c_str()
-		<<"\",\"location\":\""<<location.c_str()<<"\",\"age\":27,\"head\":\""
-		<<head.c_str()<<"\","<<"\"token\":\""<<token.c_str()<<"\",\"new_msg_num\":"
-		<<new_msg_num;
-
-
-
-	result = os.str();
-	status = "1";*/
-
-	//通知机器人登陆
-	NoticeUserLogin(robot_server_socket_,10000,usrid,0,0);
-
-ret:
-
-	usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
-	LOG_DEBUG2("[%s]",result_out.c_str());
-	usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
-	return true;
+	ret:
+		usr_logic::SomeUtils::GetResultMsg(status,msg,result,result_out,utf8_flag);
+		LOG_DEBUG2("[%s]",result_out.c_str());
+		usr_logic::SomeUtils::SendFull(socket,result_out.c_str(),result_out.length());
+		return true;
 }
 
 bool UsrMgrEngine::UserPushBind(const int socket,const packet::HttpPacket& packet){

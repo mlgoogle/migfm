@@ -96,7 +96,7 @@ bool SocialityMgrEngine::OnIniTimer(struct server *srv){
 
 bool SocialityMgrEngine::OnTimeout(struct server *srv, char *id, int opcode, int time){
 
-	std::string latitude = "120.181000";
+	/*std::string latitude = "120.181000";
 	std::string longitude = "30.267600";
 	std::string city;
 	std::string district;
@@ -111,7 +111,7 @@ bool SocialityMgrEngine::OnTimeout(struct server *srv, char *id, int opcode, int
 				i++;
 			}
 			break;
-	}
+	}*/
 
 	return true;
 }
@@ -168,8 +168,6 @@ bool SocialityMgrEngine::OnReadMessage(struct server *srv, int socket,
 		OnMsgGetShareMessage(packet, root, ret_status, err_code,socket,flag);
 	}else if(type=="shareresult"){
 		OnMsgGitfLuckMessage(packet,root,ret_status,err_code);
-	}else if(){
-		OnMsgGetLocation(packet, root, ret_status, err_code,socket,flag);
 	}else {
 		return true;
 	}
@@ -619,7 +617,7 @@ bool SocialityMgrEngine::OnMsgGitfLuckMessage(packet::HttpPacket& packet, Json::
 //latitude longitude
 bool SocialityMgrEngine::OnMsgGetLocation(packet::HttpPacket& packet, Json::Value &result,
 		int &status, int &err_code,const int socket,int& flag){
-	bool r = false;
+	/*bool r = false;
 	std::string str_latitude;
 	std::string str_longitude;
 	std::string city;
@@ -646,7 +644,7 @@ bool SocialityMgrEngine::OnMsgGetLocation(packet::HttpPacket& packet, Json::Valu
 	Json::FastWriter wr;
 	std::string res = wr.write(result);
 	SomeUtils::SendFull(socket, res.c_str(), res.length());
-	flag = 1;
+	flag = 1;*/
 	return true;
 }
 
@@ -716,7 +714,8 @@ bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::
 	}
 
 	//获取地理位置
-	r = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->GeocoderForAddress(str_latitude,str_longitude,city,district,province,street);
+	r = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine()->GeocoderForAddress(atof(str_latitude.c_str()),
+			atof(str_longitude.c_str()),city,district,province,street);
 	//获取天气
 	r = base_weather::WeatherConnectorEngine::GetWeatherConnectorEngine()->GetWeatherInfo(str_latitude,str_longitude,temp,current_weather);
 	result["status"] = 1;

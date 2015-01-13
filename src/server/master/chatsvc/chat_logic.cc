@@ -78,6 +78,9 @@ bool Chatlogic::OnChatMessage(struct server *srv, const int socket, const void *
 	 case CHAT_GAIN_ALONE_MESSAGE:
 		 OnGainLeaveMessage(srv,socket,value);
 		 break;
+	 case CHAT_GAIN_IDLE_CHAT_SERVER:
+		 OnGainIdleChatSvc(srv,socket,value);
+		 break;
 	}
     return true;
 }
@@ -181,7 +184,19 @@ bool Chatlogic::OnGainLeaveMessage(struct server *srv,const int socket,netcomm_r
 
 bool Chatlogic::OnGainIdleChatSvc(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
          		const void* msg,const int len){
-
+	scoped_ptr<netcomm_recv::GetIdleChat> idle_chat(new netcomm_recv::GetIdleChat(netbase));
+	int error_code = idle_chat->GetResult();
+	int64 group_id = 0;
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+	scoped_ptr<netcomm_send::GetIdleChat> sidle_chat(new netcomm_send::GetIdleChat());
+	sidle_chat->SetHost("112.124.49.59",17000);
+	//发送
+	send_message(socket,(netcomm_send::HeadPacket*)sidle_chat.get());
+	return true;
 }
 
 }

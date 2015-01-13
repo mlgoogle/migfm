@@ -30,7 +30,7 @@ INCLUDE_PATHS = -I./ -I$(LIB_DIR)/core -I$(LIB_DIR)/public/ -I$(LIB_DIR)/third_p
 LINK_PATHS = -L./ -L/usr/lib64/mysql -L/usr/local/lib
 LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil \
 	-lexpat -lrt -lpthread -ldl -liconv \
-	../../lib/libbreakpad_client.a ../../lib/libhiredis.a $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a
+	../../lib/libbreakpad_client.a ../../lib/libhiredis.a ../../lib/robot_interface.a $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a
 
 ##3rd
 THIRD_PATH = $(LIB_DIR)/public/

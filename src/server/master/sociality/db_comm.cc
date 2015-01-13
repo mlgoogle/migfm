@@ -143,7 +143,7 @@ bool DBComm::GetShareInfo(const int64 songid,const std::string& mode,const std::
 #endif
 	base_storage::db_row_t* db_rows;
 	MYSQL_ROW rows = NULL;
-	os<<"call migfm.proc_GetShareInfo("<<songid<<",\'"
+	os<<"call proc_GetShareInfo("<<songid<<",\'"
 			<<mode.c_str()<<"\',"<<index.c_str()<<");";
 	r = engine->SQLExec(os.str().c_str());
 	if(!r){
@@ -174,7 +174,7 @@ bool DBComm::GetLyric(const int64 songid,std::string& lyric){
 #endif
 	base_storage::db_row_t* db_rows;
 	MYSQL_ROW rows = NULL;
-	os<<"call migfm.proc_GetLyric("<<songid<<");";
+	os<<"call proc_GetLyric("<<songid<<");";
 	r = engine->SQLExec(os.str().c_str());
 	if(!r){
 		MIG_ERROR(USER_LEVEL,"sqlexec error ");
@@ -250,7 +250,7 @@ bool DBComm::RecordUserMessageList(const int32 type,const int64 send_uid,
 			<<type<<",\'"<<msg.message<<"\',"<<send_uid
 			<<","<<to_uid<<",\'"<<msg.songid<<"\',\'"<<s_distance<<"\');";
 	}
-	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'123232.09999')
+	// call proc_RecordMessageList(1,'来一发',10108,10158,'123232.09999')
 
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
@@ -281,7 +281,7 @@ bool DBComm::RecordUserMessageList(const int32 type,int64 send_uid,int64 to_uid,
 	snprintf(s_distance, arraysize(s_distance),
 			"%lf", distance);
 
-	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'0','123232.09999')
+	// call proc_RecordMessageList(1,'来一发',10108,10158,'0','123232.09999')
 	os	<< "call proc_RecordMessageList("
 		<<type<<",\'"<<message<<"\',"<<send_uid
 		<<","<<to_uid<<",\'0\',\'"<<s_distance<<"\')";
@@ -582,8 +582,8 @@ bool DBComm::GetLBSAboutInfos(const std::string& uid,std::string& sex,std::strin
 			LOG_ERROR("GetConnection Error");
 			return false;
 		}
-		//call migfm.proc_GetLbsAboutInfos(10108);
-		os<<"call migfm.proc_GetLbsAboutInfos("
+		//call proc_GetLbsAboutInfos(10108);
+		os<<"call proc_GetLbsAboutInfos("
 			<<uid<<")";
 
 		const char* sql = os.str().c_str();
@@ -826,8 +826,8 @@ bool DBComm::GetMessageList(const int64 uid,const int64 count,const int64 from,
 		  return false;
 	  }
 
-	  //call migfm.proc_GetMessageList(10112,10,0);
-	  os<<"call migfm.proc_GetMessageList("
+	  //call proc_GetMessageList(10112,10,0);
+	  os<<"call proc_GetMessageList("
 			  <<uid<<","<<from<<","<<count<<")";
 	  const char* sql = os.str().c_str();
 	  LOG_DEBUG2("[%s]",os.str().c_str());
