@@ -52,7 +52,7 @@ OUTPUT_FILE = /var/www/cgi-bin/miyo
 #############################################################################################################################
 all: clean proc delete-temp-file
 
-proc: robotproc chatmgrproc usrmgrproc spreadproc socialityproc musicproc lbsproc managerproc
+proc: robotproc usrmgrproc spreadproc socialityproc musicproc lbsproc managerproc
 
 
 #####################robot################################################
@@ -200,15 +200,12 @@ weixin.o:
 ######################sociality###############################################
 SOCPROC_PATH = /soc
 OTJERPROC_VERSION = /v1/
-socialityproc:setuserconfigofpush.fcgi presentsong.fcgi getpushmsg.fcgi\
-	getpushmsgsummary.fcgi sayhello.fcgi commentsong.fcgi get_comment.fcgi\
+socialityproc:setuserconfigofpush.fcgi  getpushmsg.fcgi\
+	getpushmsgsummary.fcgi  commentsong.fcgi get_comment.fcgi\
 	getmusicuser.fcgi getshareinfo.fcgi shareresult.fcgi
 
 setuserconfigofpush.fcgi: setuserconfigofpush.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./setuserconfigofpush.fcgi
-
-presentsong.fcgi: presentsong.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./presentsong.fcgi
 
 getpushmsg.fcgi: getpushmsg.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./getpushmsg.fcgi	
@@ -221,9 +218,6 @@ getfriendlist.fcgi: getfriendlist.o $(POBJ)
 	
 sendfriendmsg.fcgi: sendfriendmsg.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./sendfriendmsg.fcgi
-
-sayhello.fcgi: sayhello.o $(POBJ)
-	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./sayhello.fcgi
 
 adduserbacklist.fcgi: adduserbacklist.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)./adduserbacklist.fcgi
@@ -257,9 +251,6 @@ shareresult.fcgi: shareresult.o $(POBJ)
 
 setuserconfigofpush.o:
 	$(COMPILE) ./setuserconfigofpush/setuserconfigofpush.cc
-
-presentsong.o:
-	$(COMPILE) ./presentsong/presentsong.cc
 	
 getpushmsg.o:
 	$(COMPILE) ./getpushmsg/getpushmsg.cc
@@ -272,9 +263,6 @@ getfriendlist.o:
 	
 sendfriendmsg.o:
 	$(COMPILE) ./sendfriendmsg/sendfriendmsg.cc
-	
-sayhello.o:
-	$(COMPILE) ./sayhello/sayhello.cc
 	
 adduserbacklist.o:
 	$(COMPILE) ./adduserbacklist/adduserbacklist.cc

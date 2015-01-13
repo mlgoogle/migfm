@@ -96,13 +96,16 @@ delete-temp-file:
 ######################chatproc###############################################
 CHATPROC_PATH = /chat
 OTJERPROC_VERSION = /v1
-chatproc:groupmessage.fcgi alonemessage.fcgi
+chatproc:groupmessage.fcgi alonemessage.fcgi getsc.fcgi
 
 groupmessage.fcgi: groupmessage.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(CHATPROC_PATH)$(OTJERPROC_VERSION)/groupmessage.fcgi
 	
 alonemessage.fcgi: alonemessage.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(CHATPROC_PATH)$(OTJERPROC_VERSION)/alonemessage.fcgi
+
+getsc.fcgi: getsc.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(CHATPROC_PATH)$(OTJERPROC_VERSION)/getsc.fcgi
 
 ### 编译
 
@@ -112,6 +115,9 @@ groupmessage.o:
 
 alonemessage.o:
 	$(COMPILE) .$(CHATPROC_PATH)$(OTJERPROC_VERSION)/alonemessage/alonemessage.cc
+
+getsc.o:
+	$(COMPILE) .$(CHATPROC_PATH)$(OTJERPROC_VERSION)/getsc/getsc.cc
 	
 
 clean:
