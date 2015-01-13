@@ -7,9 +7,14 @@ OUTPUT_FILE = ./../../bin/robot/plugins/robot_manager/robot_manager.so
 COMPIlER = g++
 COMPILERC = gcc
 
+
+LIB_DIR = ./../../../library
+USER_DIR = ../../pub
+CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
+
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -DNET_WORK -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -DNET_WORK -D_REENTRANT -D_GNU_SOURCE
 ## for release
 ## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
 
@@ -20,16 +25,30 @@ LINK_FLAGS = -g -shared -fPIC
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I./ -I ../ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I/usr/local/include\
-				 -I/usr/include/mysql -I./../../../third_party/hiredis 
+#INCLUDE_PATHS = -I./ -I./../ -I$(LIB_DIR)/core -I$(LIB_DIR)/public/ -I$(LIB_DIR)/third_party/hiredis/ \
+	-I/usr/include/mysql -I/usr/local/include/libmemcached-1.0 \
+	-I$(USER_DIR) -I$(CUSTOM_THIRD_PATH)/hiredis -I$(CUSTOM_THIRD_PATH)\
 
+INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
+				-I$(LIB_DIR)/core \
+				-I$(THIRD_PATH)\
+				-I/usr/local/include\
+				-I/usr/include/mysql\
+				-I$(USER_DIR)\
+				-I$(CUSTOM_THIRD_PATH)/hiredis\
+				-I$(CUSTOM_THIRD_PATH)\
+				-I$(LIB_DIR)/base\
+				-I./../\
 ## 库
-LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
-LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl\
-				../../lib/libbreakpad_client.a ../../lib/libhiredis.a
+LINK_PATHS = -L./ -L/usr/lib64/mysql -L/usr/local/lib
+LINK_LIBRARYS = -lcurl -lmysqlclient -lmemcached -lmemcachedutil \
+	-lexpat -lrt -lpthread -ldl -liconv \
+	../../lib/libbreakpad_client.a ../../lib/libhiredis.a\
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a\
+	
 
 ##3rd
-THIRD_PATH = ../../public
+THIRD_PATH = $(LIB_DIR)/public/
 
 # 编译
 COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
@@ -39,7 +58,7 @@ LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRA
 
 all: clean output delete-temp-file
 output:	robot_cache_manager.o robot_manager.o prize_rate.o robot_basic_info.o  robot_connection.o robot_song_mgr.o util_mgr.o scheduler_mgr.o protocol.o \
-		robot_init.o http_method.o robot_weather_mgr.o db_comm.o dic_comm.o basictypes.o basic_util.o logic_unit.o logic_comm.o thread_handler.o thread_lock.o\
+		robot_init.o http_method.o robot_weather_mgr.o db_comm.o dic_comm.o basictypes.o basic_util.o logic_unit.o logic_comm.o\
 		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
 		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o  base64.o
 	$(LINK)
@@ -116,12 +135,6 @@ error_code.o:
 protocol.o:
 	$(COMPILE) ./../base/protocol.cc
 
-thread_handler.o:
-	$(COMPILE) ./../base/thread_handler.cc
-
-thread_lock.o:
-	$(COMPILE) ./../base/thread_lock.cc
-
 basictypes.o:
 	$(COMPILE) $(THIRD_PATH)/basic/basictypes.cc
 
@@ -168,11 +181,11 @@ storage.o:
 	$(COMPILE) $(THIRD_PATH)/storage/storage.cc
 	
 json_reader.o:
-	$(COMPILE) ./../../public/json/json_reader.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_reader.cpp
 
 json_value.o:
-	$(COMPILE) ./../../public/json/json_value.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_value.cpp
 
 json_writer.o:
-	$(COMPILE) ./../../public/json/json_writer.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_writer.cpp
 

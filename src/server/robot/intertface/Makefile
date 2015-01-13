@@ -8,6 +8,10 @@ COMPIlER = g++
 COMPILERC = gcc
 AR = ar cr
 
+LIB_DIR = ./../../../library
+USER_DIR = ../../pub
+CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
+
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
 CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
@@ -21,8 +25,16 @@ LINK_FLAGS =
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I./ -I ../ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../../public/ -I/usr/local/include\
-				 -I/usr/include/mysql -I./../../../third_party/hiredis 
+INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
+				-I$(LIB_DIR)/core \
+				-I$(THIRD_PATH)\
+				-I/usr/local/include\
+				-I/usr/include/mysql\
+				-I$(USER_DIR)\
+				-I$(CUSTOM_THIRD_PATH)/hiredis\
+				-I$(CUSTOM_THIRD_PATH)\
+				-I$(LIB_DIR)/base\
+				-I./../\
 
 ## 库
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
@@ -30,7 +42,7 @@ LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv
 				../../lib/libbreakpad_client.a ../../lib/libhiredis.a
 
 ##3rd
-THIRD_PATH = ../../public
+THIRD_PATH = $(LIB_DIR)/public/
 
 # 编译
 COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
@@ -115,11 +127,11 @@ storage.o:
 	$(COMPILE) $(THIRD_PATH)/storage/storage.cc
 	
 json_reader.o:
-	$(COMPILE) ./../../public/json/json_reader.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_reader.cpp
 
 json_value.o:
-	$(COMPILE) ./../../public/json/json_value.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_value.cpp
 
 json_writer.o:
-	$(COMPILE) ./../../public/json/json_writer.cpp
+	$(COMPILE) $(THIRD_PATH)/json/json_writer.cpp
 

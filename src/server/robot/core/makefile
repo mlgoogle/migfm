@@ -6,6 +6,8 @@ OUTPUT_FILE = ./../../bin/chat/plugins/core/core.so
 COMPILER = g++
 COMPILERC = gcc
 
+LIB_DIR = ./../../../library
+
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
 CPP_FLAG = -g -Wall -w -fPIC -c -rdynamic -D_LINUX -DDEBUG -D_DEBUG -D_REENTRANT -D_GNU_SOURCE -DNET_WORK
@@ -19,7 +21,7 @@ LINK_FLAGS = -g  -fPIC -shared -lrt
 ## LINK_FLAGS = -s -O3 -shared -fPIC
 
 ## 头文件
-INCLUDE_PATHS = -I./../../public -I../../../third_party/breakpad/src
+INCLUDE_PATHS = -I$(LIB_DIR)/public/ -I$(LIB_DIR)/third_party/breakpad/src
 
 ## 库
 LINK_PATHS =   -L/usr/local/lib
@@ -82,5 +84,5 @@ clock_task.o:
 	$(COMPILE) ./clock_task.c
 
 mig_log.o:
-	$(COMPILE) ./../../public/log/mig_log.cc 
+	$(COMPILE) $(LIB_DIR)/public/log/mig_log.cc 
 

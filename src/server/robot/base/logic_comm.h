@@ -5,8 +5,8 @@
 #include "log/mig_log.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
-#include "base/thread_handler.h"
-#include "base/thread_lock.h"
+#include "thread/base_thread_handler.h"
+#include "thread/base_thread_lock.h"
 #include "basic/basictypes.h"
 #include "storage/storage.h"
 

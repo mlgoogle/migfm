@@ -5,8 +5,8 @@
 #include "robot_basic_info.h"
 #include "prize_rate.h"
 #include "base/comm_head.h"
-#include "base/thread_handler.h"
-#include "base/thread_lock.h"
+#include "thread/base_thread_handler.h"
+#include "thread/base_thread_lock.h"
 #include "basic/scoped_ptr.h"
 #include "basic/radom_in.h"
 #include <list>

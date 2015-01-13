@@ -1,5 +1,5 @@
 #include "db_comm.h"
-#include "base/thread_handler.h"
+#include "thread/base_thread_handler.h"
 #include "base/logic_comm.h"
 #include "basic/basictypes.h"
 #include "storage/storage.h"
@@ -404,7 +404,7 @@ bool DBComm::GetLuckGiftInfo(robot_logic::CacheManagerOp* global_mgr){
 #endif
 	base_storage::db_row_t* db_rows;
 	MYSQL_ROW rows = NULL;
-	os<<"call migfm.proc_GetLuckGiftInfo()";
+	os<<"call proc_GetLuckGiftInfo()";
 	r = engine->SQLExec(os.str().c_str());
 	if(!r){
 		MIG_ERROR(USER_LEVEL,"sqlexec error ");
