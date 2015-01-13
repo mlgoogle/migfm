@@ -38,8 +38,8 @@ bool DBComm::GetTypeBarrage(const int64 platform,const int64 groupid,
 		return false;
 	}
 
-    //call migfm.proc_V2GetTypeBarrage(10000,20001,10)
-	os<<"call migfm.proc_V2GetTypeBarrage("<<platform<<","<<groupid
+    //call proc_V2GetTypeBarrage(10000,20001,10)
+	os<<"call proc_V2GetTypeBarrage("<<platform<<","<<groupid
 			<<","<<count<<")";
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());

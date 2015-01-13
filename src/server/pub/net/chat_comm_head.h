@@ -20,12 +20,13 @@ namespace netcomm_recv{
 class GetIdleChat:public LoginHeadPacket{
 public:
 	GetIdleChat(NetBase* m)
-	  :LoginHeadPacket(m)
-	  ,platform_(0){}
+	  :LoginHeadPacket(m){
+		Init();
+	}
 
 	inline void Init(){
 		bool r = false;
-		GETBIGINTTOINT(L"platform",platform_);
+		GETBIGINTTOINT(L"platformid",platform_);
 		if(!r) error_code_ = PLATFORM_LACK;
 	}
 	const inline int64 platform() const {return this->platform_;}
@@ -187,6 +188,25 @@ private:
 };
 
 
+class GetIdleChat:public HeadPacket{
+public:
+	GetIdleChat(){
+		base_.reset(new netcomm_send::NetBase());
+	}
+
+	netcomm_send::NetBase* release(){
+		head_->Set(L"result",base_.release());
+		this->set_status(1);
+		return head_.release();
+	}
+
+	void SetHost(const std::string& host,const int32 port){
+		this->base_->SetString(L"host",host);
+		this->base_->SetInteger(L"port",port);
+	}
+private:
+	scoped_ptr<netcomm_send::NetBase>             base_;
+};
 }
 
 

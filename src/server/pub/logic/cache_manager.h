@@ -33,6 +33,10 @@ public:
 	void Init(std::list<base::ConnAddr>& addrlist);
 public:
 	bool AddBlockMsgQueue(base_queue::BlockMsg* value);
+
+	bool GetBlockMsgQueue(const std::string& key,const int32 type,
+			std::list<base_queue::BlockMsg*>& list);
+
 public:
 	int64 dimensions_name(const std::string& alias,
 			const int64 id,std::string& name);

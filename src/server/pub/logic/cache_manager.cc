@@ -51,6 +51,12 @@ bool WholeManager::AddBlockMsgQueue(base_queue::BlockMsg* value){
 	return block_queue_->AddBlockMsgQueue(value);
 }
 
+bool WholeManager::GetBlockMsgQueue(const std::string& key,const int32 type,
+		std::list<base_queue::BlockMsg*>& list){
+	return block_queue_->GetBlockMsgQueue(key,type,list);
+}
+
+
 }
 
 

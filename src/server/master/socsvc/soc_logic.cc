@@ -42,6 +42,14 @@ bool Soclogic::Init(){
 	base_weather::WeatherConnectorEngine::Create(base_weather::IMPL_CAIYUN);
 	base_weather::WeatherConnector* weather_engine = base_weather::WeatherConnectorEngine::GetWeatherConnectorEngine();
 	weather_engine->Init();
+
+	/*std::list<base_queue::BlockMsg*> list;
+	std::string key="miyo:0";
+	base_logic::WholeManager::GetWholeManager()->GetBlockMsgQueue(key,base_queue::TYPE_JSON,list);
+	while(list.size()>0){
+		base_queue::BlockMsg* msg = list.front();
+		list.pop_front();
+	}*/
     return true;
 }
 

@@ -40,7 +40,7 @@ void PubDBComm::GetDimensions(const std::string& type,
 		return ;
 	}
 	//call migfm.proc_V2GetDimensions('chl')
-	os<<"call migfm.proc_V2GetDimensions(\'"<<type<<"\')";
+	os<<"call proc_V2GetDimensions(\'"<<type<<"\')";
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
