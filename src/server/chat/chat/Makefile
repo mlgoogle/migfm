@@ -33,7 +33,7 @@ CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 PLUGIN = $(SO_DIR)/chat_manager/chat_manager.so
                 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
-				-I./../core \
+				-I$(LIB_DIR)/core \
 				-I../ \
 				-I$(ROBOT_DIR) \
 				-I$(THIRD_PATH)\

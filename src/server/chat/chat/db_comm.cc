@@ -148,7 +148,7 @@ bool DBComm::RecordUserMessageList(const int32 type,const int64 send_uid,
 	snprintf(s_distance, arraysize(s_distance),
 			"%lf", distance);
 
-	// call migfm.proc_RecordMessageList(1,'来一发',10108,10158,'0','123232.09999')
+	// call proc_RecordMessageList(1,'来一发',10108,10158,'0','123232.09999')
 	os	<< "call proc_RecordMessageList("
 		<<type<<",\'"<<message<<"\',"<<send_uid
 		<<","<<to_uid<<",\'0\',\'"<<s_distance<<"\')";
@@ -186,7 +186,7 @@ bool DBComm::RecordMessage(const int64 platform_id,const int64 fid,const int64 t
     */
 	LOG_DEBUG2("current_time = %s msg_id = %lld send_id = %lld recv_id = %lld content = %s",
 			current_time.c_str(),msg_id,fid,tid,message.c_str());
-	//call migfm.proc_ChatRecordMessage(10001,12321323,10013,10014,'o','2014-03-10')
+	//call proc_ChatRecordMessage(10001,12321323,10013,10014,'o','2014-03-10')
 	os<<"call proc_ChatRecordMessage("<<platform_id<<","<<msg_id<<","
 			<<fid<<","<<tid<<",'"<<current_time<<"','"<<message<<"');";
 	sql = os. str();
@@ -221,8 +221,8 @@ bool DBComm::GetUserLBSPos(const int64& uid,double& latitude,double& longitude){
 	 return false;
 	}
 
-	//call migfm.proc_GetLbsAboutInfos(10108)
-	os<<"call migfm.proc_GetLbsAboutInfos("<<uid<<");";
+	//call proc_GetLbsAboutInfos(10108)
+	os<<"call proc_GetLbsAboutInfos("<<uid<<");";
 
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
