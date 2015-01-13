@@ -207,6 +207,7 @@ private:
 	base_logic::ValueSerializer* engine_;
 };
 
+
 TEST(ValuesSerializerTest, ExpandTestValue){
 	std::string uid = "10108";
 	std::string username = "flaght";
@@ -237,6 +238,115 @@ TEST(ValuesSerializerTest, ExpandTestValue){
 	value->SetChatHisMessage(fid,tid,mgsid,chatmsg,time);
 	bool r = value->Serializer(&str);
 	MIG_INFO(USER_LEVEL,"%s\n\n",str.c_str());
+}
+
+TEST(ValuesDeseralizeTest,Value){
+	int error_code;
+	std::string error_str;
+	std::string http_str = "address=192.168.1.1&order=44294967295&latitude=120.1614&uid=10042&coid=1000&workid=10001&token=25b4e95be8fa2fb772db9a70c6629600";
+	base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(2,&http_str);
+	base_logic::Value*  value = engine->Deserialize(&error_code,&error_str);
+	base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)  value;
+	std::string address;
+	dict->GetString(L"address", &address);
+	std::string token_value;
+	dict->GetString(L"token", &token_value);
+	int64 coid_value64;
+	dict->GetBigInteger(L"coid", &coid_value64);
+	int32 coid_value32;
+	dict->GetInteger(L"coid", &coid_value32);
+	std::string workid_value;
+	dict->GetString(L"workid", &workid_value);
+	int32 workid_value_int;
+	dict->GetInteger(L"workid", &workid_value_int);
+	double latitude_value;
+	dict->GetReal(L"latitude", &latitude_value);
+	int64 bigint_value;
+	dict->GetBigInteger(L"order", &bigint_value);
+	bool is_value;
+	dict->GetBoolean(L"is", &is_value);
+	MIG_INFO(USER_LEVEL,"\n\n");
+}
+
+
+class NetBase{
+public:
+	//virtual bool Deserialize(const std::string& rest_str);
+	NetBase(base_logic::DictionaryValue* value)
+		:value_(value){
+		type();
+	}
+public:
+	const void type(){
+		int64 value;
+		value_->GetBigInteger(L"type",&value);
+		type_ = value;
+	}
+public:
+	int32     type_;
+public:
+	base_logic::DictionaryValue* value_;
+	int error_;
+	std::string error_str;
+};
+
+//快速登錄
+class QucikLogin{
+public:
+	QucikLogin(base_logic::DictionaryValue* m){
+		m_ = m;
+		imei();
+		machine();
+		latitude();
+		longitude();
+		adddress();
+	}
+public:
+	const std::string& timei() const{return this->imei_;}
+	const std::string& address() const {return this->adddress_;}
+private:
+	void imei(){
+		m_->GetString(L"imei",&imei_);
+	}
+	void machine(){
+		int64 value;
+		m_->GetBigInteger(L"machine",&value);
+		machine_ = value;
+	}
+	void latitude(){
+		m_->GetReal(L"latitude",&latitude_);
+	}
+	void longitude(){
+		m_->GetReal(L"longitude",&longitude_);
+	}
+	void adddress(){
+		m_->GetString(L"adddress",&adddress_);
+	}
+public:
+	std::string  imei_;
+	std::string  adddress_;
+	int32        machine_;
+	double       latitude_;
+	double       longitude_;
+private:
+	base_logic::DictionaryValue*     m_;
+
+};
+
+TEST(ValuesDeseralizeTest,NetBase){
+	std::string error_str;
+	int error_code;
+	std::string http_str = "adddress=192.168.1.1&imei=AO44294967295&latitude=120.1614&longitude=30.2936&machine=1";
+	base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(2,&http_str);
+	base_logic::Value*  value = engine->Deserialize(&error_code,&error_str);
+
+	/*NetBase* dict = (NetBase*)  value;
+*/
+	base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)value;
+	QucikLogin* login = new QucikLogin(dict);
+	std::string imei = login->timei();
+	std::string address = login->address();
+	MIG_INFO(USER_LEVEL,"\n\n");
 }
 // This is a Value object that allows us to tell if it's been
 // properly deleted by modifying the value of external flag on destruction.
