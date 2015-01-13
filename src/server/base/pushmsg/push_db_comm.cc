@@ -33,7 +33,7 @@ bool PushDBComm::GetUserBdInfo(const int64 platform,const int64 uid,base_push::B
 		return false;
 	}
 
-    //call migfm.proc_GetUserBaiduPushInfo(1000,10000);
+    //call proc_GetUserBaiduPushInfo(1000,10000);
 	os<<"call proc_GetUserBaiduPushInfo("<<platform<<","<<uid<<");";
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());
@@ -89,7 +89,7 @@ bool PushDBComm::GetAllPushMessage(std::list<base_push::BaiduPushMessage*>& list
 		return false;
 	}
 
-    //call bc.proc_GetAllPushMessage();
+    //call proc_GetAllPushMessage();
 	os<<"call proc_GetAllPushMessage();";
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());

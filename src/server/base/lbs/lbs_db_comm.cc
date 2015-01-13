@@ -33,7 +33,7 @@ bool LBSDBComm::GetBaiduAcessKey(const int64 platform_id,std::list<base_lbs::Bai
 		return false;
 	}
 
-    //call migfm.proc_GetBaiduAcessKey();
+    //call proc_GetBaiduAcessKey();
 	os<<"call proc_GetBaiduAccessKey()";
 	std::string sql = os.str();
 	LOG_DEBUG2("[%s]", sql.c_str());

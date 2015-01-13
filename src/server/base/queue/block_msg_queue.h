@@ -25,8 +25,16 @@ class BlockMsg:public base_logic::DictionaryValue{
 public:
 	BlockMsg(){
 		formate_type_ = 0;
+		msg_type_ = 0;
 		message_list_.reset(new base_logic::ListValue());
 	}
+
+	BlockMsg(base_logic::DictionaryValue* m)
+	:m_(m){
+		DeserializeInit();
+	}
+
+	void DeserializeInit();
 
 	inline  void AddBlockMsg(base_queue::BlockMsg* value){
 		this->message_list_->Append(value);
@@ -40,22 +48,30 @@ public:
 		this->name_ = name;
 	}
 
-	inline void SetMsgType(const int64 msg_type){
+	inline void SetMsgType(const int32 msg_type){
 		this->msg_type_ = msg_type;
 	}
+
+	const inline std::string& Name() const {
+		return this->name_;
+	}
+
 
 	base_queue::BlockMsg* release(){
 		this->Set(L"list",message_list_.release());
 		this->SetBigInteger(L"formate",formate_type_);
 		this->SetString(L"name",name_);
+		this->SetBigInteger(L"msgtype",this->msg_type_);
 		return this;
 	}
 
 private:
 	int64                                         formate_type_;
+	int32                                         msg_type_;
 	std::string                                   name_;
-	std::string                                   msg_type_;
 	scoped_ptr<base_logic::ListValue>             message_list_;
+private:
+	base_logic::DictionaryValue*                  m_;
 };
 
 
@@ -65,6 +81,8 @@ public:
 	virtual ~MsgSerializer(){};
 public:
 	virtual bool Serialize(const base_queue::BlockMsg* value,std::string* str) = 0;
+
+	virtual base_queue::BlockMsg* Deserialize(std::string& str,int* error_code, std::string* error_str) = 0;
 };
 
 class JsonMsgSerializer:public MsgSerializer{
@@ -73,6 +91,8 @@ public:
 	~JsonMsgSerializer();
 public:
 	virtual bool Serialize(const base_queue::BlockMsg* value,std::string* str);
+
+	virtual base_queue::BlockMsg* Deserialize(std::string& str,int* error_code, std::string* error_str);
 };
 
 
@@ -83,6 +103,8 @@ public:
 public:
 	bool Init(std::list<base::ConnAddr>& addrlist);
 	bool AddBlockMsgQueue(base_queue::BlockMsg* value);
+	bool GetBlockMsgQueue(const std::string& key,const int32 type,
+			std::list<base_queue::BlockMsg*>& list);
 
 private:
 	bool AddBlockMsgQueue(const std::string& key,const int32 type,base_queue::BlockMsg* value);

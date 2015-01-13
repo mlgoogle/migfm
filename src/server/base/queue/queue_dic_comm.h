@@ -22,6 +22,11 @@ public:
 
 public:
 	static bool AddBlockQueueMessage(const std::string& key,const std::string& str);
+
+	static bool GetBlockQueueMessage(const std::string& key,std::list<std::string>& list,
+			const int32 count = 1);
+
+	static bool GetBlockQueueMessage(const std::string& key,std::string& str);
 };
 }
 
