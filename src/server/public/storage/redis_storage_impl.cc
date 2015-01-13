@@ -235,6 +235,13 @@ bool RedisStorageEngineImpl::AddListElement(const char* key,
 	return RedisAddListElement(c_,key,key_len,val,val_len,flag)==1?true:false;
 }
 
+bool RedisStorageEngineImpl::PopListElement(const char* key,const size_t key_len,char** val,
+                		size_t *val_len,const int flag){
+	if(PingRedis()!=1)
+		return false;
+	return RedisPopListElement(c_,key,key_len,val,val_len,flag)==1?true:false;
+}
+
 bool RedisStorageEngineImpl::GetListElement (const char* key,const size_t key_len,
 	                                         const int index,char** val,size_t *val_len){
     if(PingRedis()!=1)

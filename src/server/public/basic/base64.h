@@ -1,3 +1,5 @@
+#ifndef _MIG_FM_PUBLIC_BASIC_BASE64_H__
+#define _MIG_FM_PUBLIC_BASIC_BASE64_H__
 #include <string>
 
 #define modp_b64_encode_len(A) ((A+2)/3 * 4 + 1)
@@ -497,3 +499,5 @@ bool Base64Decode(const std::string& input, std::string* output);
 
 std::string base64_encode(unsigned char const* , unsigned int len);
 std::string base64_decode(std::string const& s);
+
+#endif;

@@ -233,6 +233,30 @@ int RedisGetListElement(warrper_redis_context_t* context,
 	return 1;
 }
 
+int RedisPopListElement(warrper_redis_context_t* context,
+		   const char* key,const size_t key_len,char** val,size_t *val_len,
+		   const int flag){
+	redisReply* reply;
+	if (flag==0)
+		reply =  redisCommand(context->context,"RPOP %s",key);
+	else
+		reply =  redisCommand(context->context,"LPOP %s",key);
+	if(reply->len!=0){
+		if (strlen(reply->str)<=0){
+			printf("########%d#########",strlen(reply->str));
+			return 0;
+		}
+		*val = (char*)malloc(reply->len+1);
+		memcpy(*val,reply->str,reply->len+1);
+		(*val_len) = reply->len+1;
+		freeReplyObject(reply);
+		return 1;
+	}
+	*val_len = 0;
+	freeReplyObject(reply);
+	return 0;
+}
+
 int RedisSetListElement(warrper_redis_context_t* context,int index,
 					const char* key,const size_t key_len,
 					const char* val,const size_t val_len){

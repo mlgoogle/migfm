@@ -79,6 +79,10 @@ int RedisGetListElement(warrper_redis_context_t* context,
 			
 int RedisDelListElement(warrper_redis_context_t* context,int index,
 			   const char* key,const size_t key_len);
+
+int RedisPopListElement(warrper_redis_context_t* context,
+		   const char* key,const size_t key_len,char** val,size_t *val_len,
+		   const int flag);
 			  
 int RedisSetListElement(warrper_redis_context_t* context,int index,
 					const char* key,const size_t key_len,

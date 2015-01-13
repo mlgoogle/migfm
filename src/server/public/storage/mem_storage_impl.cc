@@ -264,6 +264,11 @@ bool MemStorageEngineImpl::SetListElement(const int index,const char* key,const 
 	return true;
 }
 
+bool MemStorageEngineImpl::PopListElement(const char* key,const size_t key_len,char** val,
+        		size_t *val_len,const int flag){
+	return true;
+}
+
 bool MemStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 	                                  std::list<std::string>& list){
 	return true;

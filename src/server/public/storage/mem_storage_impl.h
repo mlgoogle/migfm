@@ -53,6 +53,10 @@ public:
     
     virtual bool DelListElement(const char* key,const size_t key_len,const int index);
     
+    virtual bool PopListElement(const char* key,const size_t key_len,char** val,
+            		size_t *val_len,const int flag);
+
+
     virtual bool SetListElement(const int index,const char* key,const size_t key_len,const char* val,const size_t val_len);
 
 	virtual int GetListSize(const char* list_name){}

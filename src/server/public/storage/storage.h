@@ -199,6 +199,9 @@ public:
     virtual bool SetListElement(const int index,const char* key,const size_t key_len,
     								const char* val,const size_t val_len) =0 ;
     
+    virtual bool PopListElement(const char* key,const size_t key_len,char** val,
+    		size_t *val_len,const int flag) = 0;
+
 	virtual bool AddHashRadomElement(const char* hash_name,const char* val,
 									const size_t val_len) = 0;
 
