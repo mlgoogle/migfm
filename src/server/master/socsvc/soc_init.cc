@@ -20,7 +20,7 @@ static void *OnSocStart(){
 
     soc->name="soc";
 
-    soc->version="1.0";
+    soc->version="1.0.0";
 
     soc->provider="kerry";
 

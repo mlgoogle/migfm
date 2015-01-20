@@ -86,8 +86,8 @@ msg_logic.o : ./msg_logic.cc ./msg_logic.h
 db_comm.o : ./db_comm.cc ./db_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./db_comm.cc $(INCLUDE_PATHS)
 	
-msg_basic_infos.o : ./msg_basic_infos.cc ./msg_basic_infos.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./msg_basic_infos.cc $(INCLUDE_PATHS)
+msg_basic_info.o : ./msg_basic_info.cc ./msg_basic_info.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./msg_basic_info.cc $(INCLUDE_PATHS)
 
 comm_impl.o :  $(USER_DIR)/net/comm_impl.cc $(USER_DIR)/net/comm_head.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/comm_impl.cc $(INCLUDE_PATHS)
@@ -128,7 +128,7 @@ md5sum.o:$(THIRD_PATH)/basic/md5sum.cc
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : soc_init.o soc_logic.o db_comm.o soc_basic_infos.o\
+$(PLUGIN) : msg_init.o msg_logic.o db_comm.o msg_basic_info.o\
 	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o cache_manager.o pub_db_comm.o\
 	logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \

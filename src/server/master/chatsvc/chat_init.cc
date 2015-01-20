@@ -21,7 +21,7 @@ static void *OnChatStart(){
 
     chat->name="chat";
 
-    chat->version="1.0";
+    chat->version="1.0.0";
 
     chat->provider="kerry";
 

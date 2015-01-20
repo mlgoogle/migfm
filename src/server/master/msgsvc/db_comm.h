@@ -4,13 +4,13 @@
  *  Created on: 2014年12月4日
  *      Author: kerry
  */
-#ifndef SOC_DB_HEAD_H_
-#define SOC_DB_HEAD_H_
-#include "soc_basic_infos.h"
+#ifndef MSG_DB_HEAD_H_
+#define MSG_DB_HEAD_H_
+#include "msg_basic_info.h"
 #include "logic/logic_infos.h"
 #include "config/config.h"
 #include <list>
-namespace socsvc_logic{
+namespace msgsvc_logic{
 
 class DBComm{
 public:
@@ -21,10 +21,12 @@ public:
 	static void Dest();
 
 public:
-	static bool GetTypeBarrage(const int64 platform,const int64 groupid,
-			const int64 count,std::list<socsvc_logic::BarrageInfos>& list);
+	//批量写入存储
+	static bool RecordGivingSong(GIVINGSONGLIST& list);
 
-	static double GetDistance(const int64 uid,const int64 tid);
+	//写入好友列表
+	static bool AddUserFriend(const int64 uid,const int64 tid,std::string& nickname);
+
 };
 
 }

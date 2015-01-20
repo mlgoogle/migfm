@@ -286,6 +286,7 @@ void Soclogic::AddMoreGivingSongBlockMessage(int64 uid,int64 tid,std::string& js
 	msglist->SetFormate(base_queue::TYPE_JSON);
 	msglist->SetName(name);
 	msglist->SetMsgType(1);
+	msglist->SetReal(L"distance",socsvc_logic::DBComm::GetDistance(uid,tid));
 
 	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&json_str));
 	base_logic::DictionaryValue*  value = (base_logic::DictionaryValue* )serializer->Deserialize(&jerror_code,&error_str);
@@ -309,6 +310,11 @@ void Soclogic::AddMoreGivingSongBlockMessage(int64 uid,int64 tid,std::string& js
 	}
 
 	base_logic::WholeManager::GetWholeManager()->AddBlockMsgQueue(msglist->release());
+}
+
+
+double Soclogic::GetPushMessageDistance(const int64 uid,const int64 tid){
+
 }
 
 }

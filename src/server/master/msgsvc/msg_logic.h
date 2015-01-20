@@ -1,8 +1,10 @@
 #ifndef __MIGFM__MSGSVC__MSG_LOGIC___
 #define __MIGFM__MSGSVC__MSG_LOGIC___
+#include "queue/block_msg_queue.h"
+#include "logic/cache_manager.h"
 #include "common.h"
 
-
+#define DEFAULT_CONFIG_PATH     "./plugins/msgsvc/msgsvc_config.xml"
 namespace msgsvc_logic{
 
 class Msglogic{
@@ -38,8 +40,9 @@ public:
 
 private:
 
-    bool GetPushMessageQueue();
+    void GetPushMessageQueue();
 
+    void ResolveGiving(base_queue::BlockMsg* block);
 
     bool Init();
 };

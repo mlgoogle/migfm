@@ -23,7 +23,8 @@ enum SerializerType{
 
 class BlockMsg:public base_logic::DictionaryValue{
 public:
-	BlockMsg(){
+	BlockMsg()
+	:m_(NULL){
 		formate_type_ = 0;
 		msg_type_ = 0;
 		message_list_.reset(new base_logic::ListValue());
@@ -40,6 +41,10 @@ public:
 		this->message_list_->Append(value);
 	}
 
+	base_logic::ListValue* message_list(){
+		return this->message_list_.release();
+	}
+
 	inline void SetFormate(const int64 formate_type){
 		this->formate_type_ = formate_type;
 	}
@@ -48,9 +53,12 @@ public:
 		this->name_ = name;
 	}
 
+	const inline int32 MsgType() const {return this->msg_type_;}
+
 	inline void SetMsgType(const int32 msg_type){
 		this->msg_type_ = msg_type;
 	}
+
 
 	const inline std::string& Name() const {
 		return this->name_;
@@ -64,6 +72,8 @@ public:
 		this->SetBigInteger(L"msgtype",this->msg_type_);
 		return this;
 	}
+
+
 
 private:
 	int64                                         formate_type_;

@@ -10,7 +10,7 @@
 #include <sstream>
 #include <mysql.h>
 
-namespace socsvc_logic{
+namespace msgsvc_logic{
 
 void DBComm::Init(std::list<base::ConnAddr>& addrlist){
 #if defined (_DB_POOL_)
@@ -24,8 +24,7 @@ void DBComm::Dest(){
 #endif
 }
 
-bool DBComm::GetTypeBarrage(const int64 platform,const int64 groupid,
-		const int64 count,std::list<socsvc_logic::BarrageInfos>& list){
+bool DBComm::AddUserFriend(const int64 uid,const int64 tid,std::string& nickname){
 	bool r = false;
 #if defined (_DB_POOL_)
 	base_db::AutoMysqlCommEngine auto_engine;
@@ -39,9 +38,8 @@ bool DBComm::GetTypeBarrage(const int64 platform,const int64 groupid,
 		return false;
 	}
 
-    //call proc_V2GetTypeBarrage(10000,20001,10)
-	os<<"call proc_V2GetTypeBarrage("<<platform<<","<<groupid
-			<<","<<count<<")";
+    //call proc_V2AddUserFriend(10151,10251)
+	os<<"call proc_V2AddUserFriend("<<uid<<","<<tid<<")";
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
@@ -55,67 +53,46 @@ bool DBComm::GetTypeBarrage(const int64 platform,const int64 groupid,
 	int num = engine->RecordCount();
 	if(num>0){
 		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
-			socsvc_logic::BarrageInfos barrage;
 			if(rows[0]!=NULL)
-				barrage.set_msg_id(atoll(rows[0]));
-			if(rows[1]!=NULL)
-				barrage.set_fid(atoll(rows[1]));
-			if(rows[2]!=NULL)
-				barrage.set_nickname(rows[2]);
-			if(rows[3]!=NULL)
-				barrage.set_message(rows[3]);
-			list.push_back(barrage);
+				nickname = rows[0];
 		}
 		return true;
 	}
 	return false;
 }
 
-
-double DBComm::GetDistance(const int64 uid,const int64 tid){
+bool DBComm::RecordGivingSong(GIVINGSONGLIST& list){
 	bool r = false;
 #if defined (_DB_POOL_)
 	base_db::AutoMysqlCommEngine auto_engine;
 	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
 #endif
-	double u_latitude = 0;
-	double u_longitude = 0;
-	double t_latitude = 0;
-	double t_longitude = 0;
 	std::stringstream os;
 	MYSQL_ROW rows;
 
 	if (engine==NULL){
 		LOG_ERROR("GetConnection Error");
-		return 0;
+		return false;
 	}
 
-    //call proc_V2GetUserBatchLbsInfo('10151,10251')
-	os<<"call proc_V2GetUserBatchLbsInfo(\'"<<uid<<","<<tid<<"\')";
+	while(list.size()>0){
+		msgsvc_logic::GivingSongInfo info = list.front();
+		list.pop_front();
+		os	<< "call proc_RecordMessageList("
+			<<1<<",\'"<<info.message()<<"\',"<<info.uid()
+			<<","<<info.tid()<<",\'"<<info.songid()<<"\',\'"<<info.distance()<<"\');";
+	}
+
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
 
 	if (!r) {
 		LOG_ERROR("exec sql error");
-		return 0;
+		return false;
 	}
 
-
-	int num = engine->RecordCount();
-	if(num>0){
-		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
-			if(atoll(rows[0])==uid){
-				u_latitude = atof(rows[1]);
-				u_longitude = atof(rows[2]);
-			}else{
-				t_latitude = atof(rows[1]);
-				t_longitude = atof(rows[2]);
-			}
-		}
-		return base::BasicUtil::CalcGEODistance(u_latitude,u_longitude,t_latitude,t_longitude);
-	}
-	return 0;
+	return true;
 }
 
 }

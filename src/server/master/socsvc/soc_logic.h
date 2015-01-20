@@ -49,6 +49,8 @@ private:
     		const void* msg = NULL,const int len = 0);
 public:
     void AddMoreGivingSongBlockMessage(int64 uid,int64 tid,std::string& json_str);
+
+    double GetPushMessageDistance(const int64 uid,const int64 tid);
 private:
 
     bool Init();
