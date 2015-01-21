@@ -313,9 +313,5 @@ void Soclogic::AddMoreGivingSongBlockMessage(int64 uid,int64 tid,std::string& js
 }
 
 
-double Soclogic::GetPushMessageDistance(const int64 uid,const int64 tid){
-
-}
-
 }
 

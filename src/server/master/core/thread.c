@@ -43,8 +43,8 @@ static void *sys_trun(base_thread_t *thd,int flag,void *data)
         case PACKET:
         	{
             packet = (struct packet_buffer*)data;
-			MIG_INFO(USER_LEVEL,"[%d] %s",packet->buf->used-1,
-				      packet->buf->ptr);
+			//MIG_INFO(USER_LEVEL,"[%d] %s",packet->buf->used-1,
+			//	      packet->buf->ptr);
             //SINA_LOG(SYSTEM_LEVEL,"sock[%d] type[%d] len[%d]",packet->sock,packet->type,packet->buf->used-1);
             if(packet->type==ACCEPT)
                 plugins_call_handler_read(packet->srv,packet->sock,

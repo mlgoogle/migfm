@@ -44,6 +44,14 @@ private:
 
     void ResolveGiving(base_queue::BlockMsg* block);
 
+    void ResolveSayHello(base_queue::BlockMsg* block);
+
+    void PushMessage(const int64 uid,const int64 tid,const std::string& message);
+
+    template <typename ELEMENT>
+    void ResolveTemplate(base_queue::BlockMsg* block,int64& uid,int64& tid,
+    		std::list<ELEMENT>& list);
+
     bool Init();
 };
 

@@ -252,8 +252,10 @@ PLUGIN_TO_SLOT(PLUGIN_FUNC_CONNECTION_CLOSE_SRV,connection_close_srv);
 		}\
 			return HANDLER_GO_ON;\
 		}
+		
 PLUGIN_TO_SLOT(PLUGIN_FUNC_TIME_MSG,time_msg);
 #undef PLUGIN_TO_SLOT
+
 
 #define PLUGIN_TO_SLOT(x,y)\
     handler_t plugins_call_##y(struct server* srv,void* pd) {\
