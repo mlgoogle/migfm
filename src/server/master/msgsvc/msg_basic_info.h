@@ -15,13 +15,13 @@
 #include <map>
 namespace msgsvc_logic{
 
-class GivingSongInfo{
+class PushMessageInfo{
 public:
-	explicit GivingSongInfo();
-	GivingSongInfo(const GivingSongInfo& giving_song);
-	GivingSongInfo& operator = (const GivingSongInfo& giving_song);
+	explicit PushMessageInfo();
+	PushMessageInfo(const PushMessageInfo& push_message);
+	PushMessageInfo& operator = (const PushMessageInfo& push_message);
 
-	GivingSongInfo(base_logic::DictionaryValue* value);
+	PushMessageInfo(base_logic::DictionaryValue* value);
 
 	void set_message(const std::string& message){data_->message_ = message;}
 	void set_songid(const std::string& songid){data_->songid_ = songid;}
@@ -44,6 +44,8 @@ private:
 		Data()
 		:refcount_(0)
 		,isadd_(0)
+		,uid_(0)
+		,tid_(0)
 		,msgtype_(0)
 		,distance_(0){}
 	public:
@@ -64,9 +66,9 @@ private:
 
 }
 
-typedef std::list<msgsvc_logic::GivingSongInfo> GIVINGSONGLIST;
-typedef std::map<int64,GIVINGSONGLIST> GIVINGSONGMAP; // uid - LIST
-typedef std::map<int64,GIVINGSONGMAP> GIVINGSONGMAPS; //tid - map
+typedef std::list<msgsvc_logic::PushMessageInfo> PUSHMESSAGELIST;
+typedef std::map<int64,PUSHMESSAGELIST> PUSHMESSAGEMAP; // uid - LIST
+typedef std::map<int64,PUSHMESSAGEMAP> PUSHMESSAGEMAPS; //tid - map
 
 
 

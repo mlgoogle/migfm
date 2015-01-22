@@ -23,7 +23,7 @@ CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -isystem -shared -fPIC -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DNET_WORK
+CPPFLAGS += -isystem -shared -fPIC -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DPROCESS_WORK
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
@@ -43,6 +43,7 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
 				-I$(LIB_DIR)/base\
+				-I/usr/local/freetds/include
 
 
 # House-keeping build targets.
@@ -120,6 +121,18 @@ error_code.o : $(USER_BASE)/error_code.cc $(USER_BASE)/error_code.cc
 protocol.o : $(USER_BASE)/protocol.cc $(USER_BASE)/protocol.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_BASE)/protocol.cc $(INCLUDE_PATHS)
 
+cache_manager.o :  $(USER_DIR)/logic/cache_manager.cc $(USER_DIR)/logic/cache_manager.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/cache_manager.cc $(INCLUDE_PATHS)
+	
+pub_db_comm.o :  $(USER_DIR)/logic/pub_db_comm.cc $(USER_DIR)/logic/pub_db_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/pub_db_comm.cc $(INCLUDE_PATHS)
+	
+logic_infos.o :  $(USER_DIR)/logic/logic_infos.cc $(USER_DIR)/logic/logic_infos.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_infos.cc $(INCLUDE_PATHS)
+
+logic_unit.o :  $(USER_DIR)/logic/logic_unit.cc $(USER_DIR)/logic/logic_unit.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_unit.cc $(INCLUDE_PATHS)
+	
 mig_log.o: $(THIRD_PATH)/log/mig_log.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/log/mig_log.cc $(INCLUDE_PATHS)
 	
@@ -155,7 +168,8 @@ redis_warrper.o:$(THIRD_PATH)/storage/redis_warrper.c
 
 
 $(PLUGIN) : chat_init.o chat_basic_infos.o chat_cache_manager.o chat_manager.o logic_unit.o\
-	db_comm.o dic_comm.o file_mgr.o im_mgr.o user_connection.o logic_comm.o error_code.o\
+	db_comm.o dic_comm.o file_mgr.o im_mgr.o user_connection.o cache_manager.o pub_db_comm.o\
+	logic_infos.o logic_unit.o logic_comm.o error_code.o\
 	protocol.o mig_log.o basictypes.o basic_util.o config.o md5sum.o radom_in.o mem_storage_impl.o\
 	redis_storage_impl.o storage.o redis_warrper.o data_packet.o\
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a $(LIB_DIR)/lib/robot_interface.a

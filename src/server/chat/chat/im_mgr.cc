@@ -3,6 +3,8 @@
 #include "db_comm.h"
 #include "chat_cache_manager.h"
 #include "logic_unit.h"
+#include "queue/block_msg_queue.h"
+#include "logic/cache_manager.h"
 #include "base/logic_comm.h"
 #include "base/error_code.h"
 #include "json/json.h"
@@ -223,8 +225,26 @@ bool IMSMgr::LeaveMessage(const int64 platform_id,const int64 msg_id,const time_
 // push to apple message center
 bool IMSMgr::PushMessage(const int64 platform_id,const chat_base::UserInfo& send_userinfo,
 		const chat_base::UserInfo& recv_userinfo,const std::string& message){
+	//写入推送消息队列
+	std::string name = "miyo";
+	scoped_ptr<base_queue::BlockMsg>  msglist(new base_queue::BlockMsg());
+	msglist->SetFormate(base_queue::TYPE_JSON);
+	msglist->SetName(name);
+	msglist->SetMsgType(2);
 
-	std::stringstream os;
+	scoped_ptr<base_queue::BlockMsg>  msg(new base_queue::BlockMsg());
+	msg->SetBigInteger(L"tid",recv_userinfo.user_id());
+	msg->SetString(L"message",message);
+	msg->SetBigInteger(L"uid",send_userinfo.user_id());
+
+	msglist->AddBlockMsg(msg.release());
+
+
+	base_logic::WholeManager::GetWholeManager()->AddBlockMsgQueue(msglist->release());
+
+	return true;
+
+	/*std::stringstream os;
 	std::string device_token;
 	bool is_receive;
 	unsigned begin_time;
@@ -235,6 +255,7 @@ bool IMSMgr::PushMessage(const int64 platform_id,const chat_base::UserInfo& send
 			device_token,is_receive,begin_time,end_time);
 
 	return chat_logic::HttpComm::PushMessage(device_token,os.str());
+	*/
 }
 
 }

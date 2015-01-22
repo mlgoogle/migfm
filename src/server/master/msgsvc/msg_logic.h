@@ -46,6 +46,8 @@ private:
 
     void ResolveSayHello(base_queue::BlockMsg* block);
 
+    void ResolveLeaveMessage(base_queue::BlockMsg* block);
+
     void PushMessage(const int64 uid,const int64 tid,const std::string& message);
 
     template <typename ELEMENT>

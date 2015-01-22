@@ -21,7 +21,7 @@ CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DNET_WORK
+CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DPROCESS_WORK
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
@@ -86,6 +86,9 @@ msg_logic.o : ./msg_logic.cc ./msg_logic.h
 db_comm.o : ./db_comm.cc ./db_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./db_comm.cc $(INCLUDE_PATHS)
 	
+dic_comm.o : ./dic_comm.cc ./dic_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./dic_comm.cc $(INCLUDE_PATHS)
+	
 msg_basic_info.o : ./msg_basic_info.cc ./msg_basic_info.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./msg_basic_info.cc $(INCLUDE_PATHS)
 
@@ -128,7 +131,7 @@ md5sum.o:$(THIRD_PATH)/basic/md5sum.cc
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : msg_init.o msg_logic.o db_comm.o msg_basic_info.o\
+$(PLUGIN) : msg_init.o msg_logic.o db_comm.o dic_comm.o msg_basic_info.o\
 	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o cache_manager.o pub_db_comm.o\
 	logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \

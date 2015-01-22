@@ -20,6 +20,11 @@ Soclogic::Soclogic(){
 }
 
 Soclogic::~Soclogic(){
+	socsvc_logic::DBComm::Dest();
+	basic_logic::PubDBComm::Dest();
+	base_lbs::LbsConnectorEngine::FreeLbsConnectorEngine();
+	base_weather::WeatherConnectorEngine::FreeWeatherConnectorEngine();
+	base_logic::WholeManager::FreeWholeManager();
 }
 
 bool Soclogic::Init(){

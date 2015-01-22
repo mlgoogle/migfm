@@ -61,7 +61,7 @@ bool DBComm::AddUserFriend(const int64 uid,const int64 tid,std::string& nickname
 	return false;
 }
 
-bool DBComm::RecordGivingSong(GIVINGSONGLIST& list){
+bool DBComm::RecordPushMessage(PUSHMESSAGELIST& list){
 	bool r = false;
 #if defined (_DB_POOL_)
 	base_db::AutoMysqlCommEngine auto_engine;
@@ -76,7 +76,7 @@ bool DBComm::RecordGivingSong(GIVINGSONGLIST& list){
 	}
 
 	while(list.size()>0){
-		msgsvc_logic::GivingSongInfo info = list.front();
+		msgsvc_logic::PushMessageInfo info = list.front();
 		list.pop_front();
 		os	<< "call proc_RecordMessageList("
 			<<1<<",\'"<<info.message()<<"\',"<<info.uid()

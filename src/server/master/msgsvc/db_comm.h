@@ -22,7 +22,7 @@ public:
 
 public:
 	//批量写入存储
-	static bool RecordGivingSong(GIVINGSONGLIST& list);
+	static bool RecordPushMessage(PUSHMESSAGELIST& list);
 
 	//写入好友列表
 	static bool AddUserFriend(const int64 uid,const int64 tid,std::string& nickname);

@@ -1,5 +1,5 @@
-#ifndef __BASE_LOGIC_UNIT_H__
-#define __BASE_LOGIC_UNIT_H__
+#ifndef __BASE_LOGIC_COMM_H__
+#define __BASE_LOGIC_COMM_H__
 #include "log/mig_log.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"

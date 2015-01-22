@@ -15,6 +15,7 @@ Chatlogic::Chatlogic(){
 }
 
 Chatlogic::~Chatlogic(){
+	chatsvc_logic::DBComm::Dest();
 }
 
 bool Chatlogic::Init(){

@@ -7,31 +7,31 @@
 
 #include "msg_basic_info.h"
 namespace msgsvc_logic{
-GivingSongInfo::GivingSongInfo(){
+PushMessageInfo::PushMessageInfo(){
 	data_ = new Data();
 }
 
-GivingSongInfo::GivingSongInfo(const GivingSongInfo& giving_song)
-:data_(giving_song.data_){
+PushMessageInfo::PushMessageInfo(const PushMessageInfo& push_message)
+:data_(push_message.data_){
 	if(data_!=NULL){
 		data_->AddRef();
 	}
 }
 
-GivingSongInfo& GivingSongInfo::operator =(const GivingSongInfo& giving_song){
-	if(giving_song.data_!=NULL){
-		giving_song.data_->AddRef();
+PushMessageInfo& PushMessageInfo::operator =(const PushMessageInfo& push_message){
+	if(push_message.data_!=NULL){
+		push_message.data_->AddRef();
 	}
 
 	if(data_!=NULL){
 		data_->Release();
 	}
 
-	data_ = giving_song.data_;
+	data_ = push_message.data_;
 	return (*this);
 }
 
-GivingSongInfo::GivingSongInfo(base_logic::DictionaryValue* value){
+PushMessageInfo::PushMessageInfo(base_logic::DictionaryValue* value){
 	data_ = new Data();
 	bool  r = false;
 	base_logic::DictionaryValue* dic =  value;

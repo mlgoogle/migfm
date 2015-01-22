@@ -4,6 +4,8 @@
 #include "logic_unit.h"
 #include "db_comm.h"
 #include "dic_comm.h"
+#include "logic/pub_db_comm.h"
+#include "logic/cache_manager.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
 #include "base/logic_comm.h"
@@ -32,6 +34,7 @@ bool ChatManager::InitDefaultPlatformInfo(){
 	chat_base::PlatformInfo platforminfo(platform_id,platform_name);
 	CacheManagerOp::GetPlatformChatMgrCache()->SetPlatformInfo(platform_id,platforminfo);
 	CacheManagerOp::FetchDBDimension();
+
 	return true;
 }
 
@@ -49,6 +52,9 @@ bool ChatManager::Init(){
 	chat_storage::DBComm::Init(config->mysql_db_list_);
 	chat_storage::MemComm::Init(config->mem_list_);
 	chat_storage::RedisComm::Init(config->redis_list_);
+	basic_logic::PubDBComm::Init(config->mysql_db_list_);
+	//初始化全局存储
+	base_logic::WholeManager::GetWholeManager()->Init(config->redis_list_);
 
 	usr_connection_mgr_.reset(new chat_logic::UserConnectionMgr());
 	ims_mgr_.reset(new chat_logic::IMSMgr());
