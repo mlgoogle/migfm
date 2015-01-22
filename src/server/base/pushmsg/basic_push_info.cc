@@ -4,6 +4,36 @@
 #include "log/mig_log.h"
 
 namespace base_push{
+BaiduBindPushInfo::BaiduBindPushInfo(){
+	data_ = new Data();
+}
+
+BaiduBindPushInfo::BaiduBindPushInfo(const int64 platform,const int64 uid,const int64 channel,const int64 bd_userid,
+		const std::string& pkg_name,const std::string& tag,const int64 appid,
+		const int64 requestid,const int32 machine){
+	data_ = new Data(platform,uid,channel,bd_userid,pkg_name,tag,
+			appid,requestid,machine);
+}
+
+
+BaiduBindPushInfo::BaiduBindPushInfo(const BaiduBindPushInfo& bind)
+:data_(bind.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+BaiduBindPushInfo& BaiduBindPushInfo::operator =(const BaiduBindPushInfo& bind){
+	if (bind.data_!=NULL){
+		bind.data_->AddRef();
+	}
+	if (data_!=NULL){
+		data_->Release();
+	}
+	data_ = bind.data_;
+	return *this;
+}
+
 
 BaiduPushCustomContent::BaiduPushCustomContent(){
 	data_ = new Data();
