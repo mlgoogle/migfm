@@ -145,7 +145,9 @@ bool DBComm::GetShareInfo(const int64 songid,const std::string& mode,const std::
 	MYSQL_ROW rows = NULL;
 	os<<"call proc_GetShareInfo("<<songid<<",\'"
 			<<mode.c_str()<<"\',"<<index.c_str()<<");";
-	r = engine->SQLExec(os.str().c_str());
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
 	if(!r){
 		MIG_ERROR(USER_LEVEL,"sqlexec error ");
 		return r;

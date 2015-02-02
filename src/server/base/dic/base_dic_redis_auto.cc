@@ -77,6 +77,79 @@ base_storage::DictionaryStorageEngine* RedisPool::RedisConnectionPop(){
     return engine;
 }
 
+/*
+template <typename Container, typename Element>
+struct ElementStorageContainerT{
+static void ElementStorageList(Container container,Element elment){
+	container.push_back(elment);
+}
+static void ELmenetStorageVector(Container container,Element elment){
+	container.push_back(elment);
+}
+
+};
+
+template <typename Container,typename Value>
+void RedisOperation::GetBatchInfos(base_storage::DictionaryStorageEngine*engine,
+	                              const std::string& command,
+	                              Container& batch){
+    redisContext *context = (redisContext *)engine->GetContext();
+	LOG_DEBUG2("%s",command.c_str());
+	if (NULL == context)
+		return false;
+	{
+		redisReply *rpl = (redisReply *) redisCommand(context,command.c_str());
+		base_storage::CommandReply *reply = _CreateReply(rpl);
+		freeReplyObject(rpl);
+		if (NULL == reply)
+			return false;
+		if (base_storage::CommandReply::REPLY_ARRAY == reply->type) {
+			base_storage::ArrayReply *arep =
+				static_cast<base_storage::ArrayReply *>(reply);
+			base_storage::ArrayReply::value_type &items = arep->value;
+			for (base_storage::ArrayReply::iterator it = items.begin();
+				it != items.end();++it) {
+					base_storage::CommandReply *item = (*it);
+					if (base_storage::CommandReply::REPLY_STRING == item->type) {
+						base_storage::StringReply *srep = static_cast<base_storage::StringReply *>(item);
+						//通过模板转化
+						//ElementStorageContainerT<Container,std::string>::ElementStorageList(batch,srep->value);
+					}
+			}
+		}
+		reply->Release();
+	}
+	return true;
+}*/
+
+base_storage::CommandReply* RedisOperation::_CreateReply(redisReply* reply){
+	switch (reply->type) {
+	case REDIS_REPLY_STATUS:
+		return new base_storage::ErrorReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_NIL:
+		return new base_storage::CommandReply(CommandReply::REPLY_NIL);
+	case REDIS_REPLY_STATUS:
+		return new base_storage::StatusReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_INTEGER:
+		return new base_storage::IntegerReply(reply->integer);
+	case REDIS_REPLY_STRING:
+		return new base_storage::StringReply(std::string(reply->str, reply->len));
+	case REDIS_REPLY_ARRAY: {
+		base_storage::ArrayReply *rep = new base_storage::ArrayReply();
+			for (size_t i = 0; i < reply->elements; ++i) {
+				if (base_storage::CommandReply *cr = _CreateReply(reply->element[i]))
+					rep->value.push_back(cr);
+			}
+			return rep;
+		}
+	default:
+		break;
+	}
+	return NULL;
+}
+
+
+
 }
 
 

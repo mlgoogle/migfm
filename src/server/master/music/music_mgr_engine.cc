@@ -1159,12 +1159,13 @@ bool MusicMgrEngine::GetMusicLyric(const int socket,const packet::HttpPacket& pa
 	}
 
 	r = storage::DBComm::GetLyric(atoll(songid.c_str()),lyric);
-	if(!r){
+	/*if(!r){
 		msg = migfm_strerror(MIG_FM_HTTP_SONG_ID_NO_VALID);
 		status = 0;
 		goto ret;
-	}
+	}*/
 
+	//歌词不存在则显示一张图
 	status = 1;
 	value["result"]["id"] = songid;
 	value["result"]["lyric"] = lyric;

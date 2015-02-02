@@ -17,6 +17,10 @@
 #define PLATFORM_NAME        "miyo"
 
 #define UNKONW_DIMENSIONS_ID 100000
+
+#define MUSICINFO_MAP         std::map<int64,base_logic::MusicInfo>
+#define MUSICINFONLIST_MAP    std::map<int64,std::map<int64,base_logic::MusicInfo> >
+
 namespace base_logic{
 
 class LogicUnit{

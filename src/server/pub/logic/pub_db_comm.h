@@ -10,6 +10,7 @@
 #include "logic_infos.h"
 #include "config/config.h"
 #include <list>
+#include <map>
 
 namespace basic_logic{
 
@@ -23,6 +24,13 @@ public:
 public:
 	static void GetDimensions(const std::string& type,
 			base_logic::Dimensions& dimensions);
+
+	static void GetMusicURL(std::map<int64,base_logic::MusicInfo>& map);
+
+	static void GetMusicAbout(std::map<int64,base_logic::MusicInfo>& map);
+
+	static void GetAvailableMusicInfo(std::map<int64,base_logic::MusicInfo>& map);
+
 };
 
 }

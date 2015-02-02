@@ -21,14 +21,14 @@ CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DNET_WORK
+CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG -D_DIC_POOL_ -D_REENTRANT -D__OLD_VERSION__ -D__BASE64_MUSIC__ -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DPROCESS_WORK
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-PLUGIN = $(SO_DIR)/chatsvc/chat.so
+PLUGIN = $(SO_DIR)/musicsvc/music.so
                 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(LIB_DIR)/core \
@@ -77,17 +77,20 @@ clean :
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-chat_init.o : ./chat_init.cc ./chat_init.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./chat_init.cc $(INCLUDE_PATHS) 
+music_init.o : ./music_init.cc ./music_init.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./music_init.cc $(INCLUDE_PATHS) 
 
-chat_logic.o : ./chat_logic.cc ./chat_logic.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./chat_logic.cc $(INCLUDE_PATHS)
+music_logic.o : ./music_logic.cc ./music_logic.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./music_logic.cc $(INCLUDE_PATHS)
 	
-chat_basic_infos.o : ./chat_basic_infos.cc ./chat_basic_infos.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./chat_basic_infos.cc $(INCLUDE_PATHS)
+whole_manager.o :  ./whole_manager.cc ./whole_manager.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./whole_manager.cc $(INCLUDE_PATHS)
 	
 db_comm.o : ./db_comm.cc ./db_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./db_comm.cc $(INCLUDE_PATHS)
+	
+soc_basic_infos.o : ./soc_basic_infos.cc ./soc_basic_infos.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./soc_basic_infos.cc $(INCLUDE_PATHS)
 
 comm_impl.o :  $(USER_DIR)/net/comm_impl.cc $(USER_DIR)/net/comm_head.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/comm_impl.cc $(INCLUDE_PATHS)
@@ -101,11 +104,14 @@ logic_infos.o :  $(USER_DIR)/logic/logic_infos.cc $(USER_DIR)/logic/logic_infos.
 logic_unit.o :  $(USER_DIR)/logic/logic_unit.cc $(USER_DIR)/logic/logic_unit.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_unit.cc $(INCLUDE_PATHS)
 	
-cache_manager.o :  $(USER_DIR)/logic/cache_manager.cc $(USER_DIR)/logic/cache_manager.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/cache_manager.cc $(INCLUDE_PATHS)
-	
 pub_db_comm.o :  $(USER_DIR)/logic/pub_db_comm.cc $(USER_DIR)/logic/pub_db_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/pub_db_comm.cc $(INCLUDE_PATHS)
+	
+pub_dic_comm.o :  $(USER_DIR)/logic/pub_dic_comm.cc $(USER_DIR)/logic/pub_dic_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/pub_dic_comm.cc $(INCLUDE_PATHS)
+
+base_cache_manager.o :  $(USER_DIR)/logic/base_cache_manager.cc $(USER_DIR)/logic/base_cache_manager.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/base_cache_manager.cc $(INCLUDE_PATHS)
 	
 http_packet.o: $(THIRD_PATH)/protocol/http_packet.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/protocol/http_packet.cc $(INCLUDE_PATHS)
@@ -125,13 +131,17 @@ config.o: $(THIRD_PATH)/config/config.cc
 md5sum.o:$(THIRD_PATH)/basic/md5sum.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/md5sum.cc $(INCLUDE_PATHS)
 
+base64.o:$(THIRD_PATH)/basic/base64.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/base64.cc $(INCLUDE_PATHS)
+	
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : chat_init.o chat_logic.o db_comm.o chat_basic_infos.o\
-	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o cache_manager.o pub_db_comm.o\
+$(PLUGIN) : music_init.o music_logic.o whole_manager.o\
+	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o\
+	base_cache_manager.o pub_db_comm.o pub_dic_comm.o\
 	logic_infos.o logic_unit.o basic_util.o config.o \
-	md5sum.o radom_in.o \
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a
+	md5sum.o radom_in.o base64.o\
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl \
 	$^ -o $@

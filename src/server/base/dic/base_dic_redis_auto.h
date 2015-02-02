@@ -14,6 +14,7 @@
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
 #include "logic/logic_comm.h"
+#include "storage/storage.h"
 
 namespace base_dic{
 
@@ -27,12 +28,29 @@ public:
 
 	static base_storage::DictionaryStorageEngine* RedisConnectionPop(void);
 	static void RedisConnectionPush(base_storage::DictionaryStorageEngine* engine);
+private:
+
+
 public:
 	static std::list<base::ConnAddr>  addrlist_;
 	static std::list<base_storage::DictionaryStorageEngine*>   dic_conn_pool_;
 	static threadrw_t*                                        dic_pool_lock_;
 
 };
+
+class RedisOperation{
+public:
+	RedisOperation(){}
+	virtual ~RedisOperation(){}
+public:
+	base_storage::CommandReply* _CreateReply(redisReply* reply);
+
+	/*template <typename Container>
+	void GetBatchInfos(base_storage::DictionaryStorageEngine*engine,
+	                              const std::string& command,
+	                              Container& batch);*/
+};
+
 
 
 class AutoDicCommEngine{

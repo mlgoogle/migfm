@@ -2,6 +2,9 @@
 #define _NET_OPERATOR_CODE_H_
 
 enum operatorcode{
+
+	//MUSIC 4000
+	MUSIC_GAIN_COLLECT_LIST = 4001,//获取红心歌单
 	//SOC 5000
 	SOC_GAIN_CURRENT_TYPE_BARRAGECOMM = 5001,//获取当前音乐列别弹幕及评论
 	SOC_GAIN_CURRENT_LOCATION_INFO = 5002,//获取当前地理信息
@@ -12,6 +15,7 @@ enum operatorcode{
 	CHAT_GAIN_GROUP_MESSAGE = 6001,//获取群组历史聊天记录
 	CHAT_GAIN_ALONE_MESSAGE = 6002, //获取单聊历史聊天记录
 	CHAT_GAIN_IDLE_CHAT_SERVER = 6003 //获取最空闲聊天服务端
+
 };
 
 

@@ -52,8 +52,29 @@ OUTPUT_FILE = /var/www/cgi-bin/miyo
 #############################################################################################################################
 all: clean proc delete-temp-file
 
-proc: socproc chatproc
+proc: socproc chatproc musicproc
 
+######################musicproc###############################################
+MUSICPROC_PATH = /music
+OTJERPROC_VERSION = /v1
+musicproc:getcltsongs.fcgi
+
+getcltsongs.fcgi: getcltsongs.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs.fcgi
+
+### 编译
+
+getcltsongs.o:
+	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs/getcltsongs.cc
+
+
+clean:
+	-rm -f *.o
+	-rm -f $(OUTPUT_FILE)./*.fcgi
+
+delete-temp-file:
+	-rm -f *.o
+	
 	
 ######################socproc###############################################
 SOCPROC_PATH = /soc

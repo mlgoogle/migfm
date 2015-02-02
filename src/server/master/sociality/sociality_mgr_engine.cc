@@ -697,10 +697,10 @@ bool SocialityMgrEngine::OnMsgGetShareMessage(packet::HttpPacket& packet, Json::
 	//r = mig_sociality::DBComm::GetLyric(atoll(str_songid.c_str()),lyric);
 	r = mig_sociality::DBComm::GetShareInfo(atoll(str_songid.c_str()),str_mode,str_index,lyric,description);
 	//没有歌词不显示
-	if(!r){
+	/*if(!r){
 		err_code = MIG_FM_NO_LYRIC;
 		return false;
-	}
+	}*/
 	//歌词换算
 	mig_sociality::SomeUtils::SummaryLyric(lyric,dlyric);
 
