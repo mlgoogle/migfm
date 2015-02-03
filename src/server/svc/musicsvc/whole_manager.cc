@@ -22,16 +22,26 @@ CacheManagerOp* CacheManagerOp::cache_manager_op_ = NULL;
 WholeManager::WholeManager()
 :base_logic::BaseWholeManager(){
 	music_cache_ = new MusicCache();
-	base_logic::BaseWholeManager::Init();
+	Init();
 }
 
 WholeManager::~WholeManager(){
 }
 
+void WholeManager::Init(){
+	base_logic::BaseWholeManager::Init();
+}
+
+void WholeManager::CreateRadomin(){
+	CreateRadomin(music_cache_->channel_dimension_);
+	CreateRadomin(music_cache_->mood_dimension_);
+	CreateRadomin(music_cache_->scene_dimension_);
+}
+
 void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list){
 	//
 	bool r = false;
-	MULTI_DIMENSION_MAP multi_dimension_map;
+	/*MULTI_DIMENSION_MAP multi_dimension_map;
 	{
 		base_logic::RLockGd lk(lock_);
 		if(name=="chl")
@@ -48,11 +58,54 @@ void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSIC
 		int i = 0;
 		for(DIMENSION_MAP::iterator itr = dimension_map.begin();itr!=dimension_map.end();itr++){
 			//获取是10个
-			base_logic::MusicInfo info = itr->second;
+			base_logic::MusicInfo info;
+			//base_logic::MusicInfo info = itr->second;
+			//music_list[info.id()] = info;
+			info = dimension_map[0];
 			music_list[info.id()] = info;
 			i++;
 			if(i>10)
 				break;
+		}
+
+	}*/
+	MULTI_DIMENSION_VEC  multi_dimension_vec;
+	RADOMIN_MAP   dimension_radomin;
+	std::list<int32>  radom_list;
+	{
+		base_logic::RLockGd lk(lock_);
+		if(name=="chl"){
+			multi_dimension_vec = music_cache_->channel_dimension_.dimension_vec_;
+			dimension_radomin = music_cache_->channel_dimension_.dimension_radomin_;
+		}
+		else if(name=="ms"){
+			multi_dimension_vec = music_cache_->mood_dimension_.dimension_vec_;
+			dimension_radomin = music_cache_->mood_dimension_.dimension_radomin_;
+		}
+		else if(name=="mm"){
+			multi_dimension_vec = music_cache_->scene_dimension_.dimension_vec_;
+			dimension_radomin = music_cache_->scene_dimension_.dimension_radomin_;
+		}
+	}
+	//获取随机数
+	GetRadomin(dimension_radomin,id,10,radom_list);
+
+	{
+
+		base_logic::RLockGd lk(lock_);
+		DIMENSION_VEC dimension_vec;
+		r = base::MapGet<MULTI_DIMENSION_VEC,MULTI_DIMENSION_VEC::iterator,int64,DIMENSION_VEC>
+		(multi_dimension_vec,id,dimension_vec);
+
+		int i = 0;
+		while(radom_list.size()>0){
+			int32 radom = radom_list.front();
+			radom_list.pop_front();
+			base_logic::MusicInfo info;
+			if(radom<=dimension_vec.size()){
+				info = dimension_vec[radom];
+				music_list[info.id()] = info;
+			}
 		}
 
 	}
@@ -105,8 +158,6 @@ void WholeManager::GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
 		base_logic::MusicInfo info;
 		info.JsonSeralize(str);
 		music_list[info.id()] = info;
-		//music_list[atoll(str_songid.c_str())] = atoll(str_songid.c_str());
-		//music_list.push_back(atoll(str_songid.c_str()));
 	}
 	{
 		base_logic::WLockGd lk(lock_);
@@ -116,37 +167,41 @@ void WholeManager::GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
 	}
 }
 
-/*
-void WholeManager::GetCollectList(const int64 uid,
-	std::map<int64,int64>& collect_list){
-	//检测是否存在,不存在则读取redis
-	bool r = false;
-	std::list<std::string> list;
-	bool r =  false;
-	{
-		logic::RLockGd lk(lock_);
-		//加锁
-		r = base::MapGet<std::map<int64,std::map<int64,int64>>,int64,std::map<int64,int64> >
-		(music_cache_->collect_map_,uid,collect_list);
+void WholeManager::GetRadomin(RADOMIN_MAP& dimension_radomin,const int32 id,
+		int32 num,std::list<int32>& list){
+	//
+	base::MigRadomInV2* radomin;
+	int i = 0;
+	int32* rands = new int32[num];
+	bool r = base::MapGet<RADOMIN_MAP,RADOMIN_MAP::iterator,
+				int32,base::MigRadomInV2* >(dimension_radomin,id,radomin);
+	if(!r)
+		return;
+	radomin->GetPrize(rands,num);
+	while(i<=num){
+		list.push_back(rands[i]);
+		i++;
 	}
-	if(!r)//读取
-		basic_logic::PubDicComm::GetColllectList(uid,list);
-	if(!r)//无红心歌单
-		return ;
-	//写入存储
-	while(list.size()>0){//
-		std::string str_songid = list.front();
-		list.pop_front();
-		collect_list.push_back(atoll(str_songid.c_str()));
-	}
-	{
-		logic::WLockGd lk(lock_);
-		//加锁
-		r = base::MapGet<std::map<int64,std::map<int64,int64>>,int64,std::map<int64,int64> >
-			MapAdd(music_cache_->collect_map_,uid,collect_list);
-	}
-}*/
 
+	if (rands){
+		delete[] rands;
+		rands = NULL;
+	}
+}
+
+void WholeManager::CreateRadomin(DimensionCache& dimension_cache){
+
+	//遍历MAP
+	MULTI_DIMENSION_MAP multl_dimension_map = dimension_cache.dimension_map_;
+	for(MULTI_DIMENSION_MAP::iterator it = multl_dimension_map.begin();
+			it!=multl_dimension_map.end();it++){
+		DIMENSION_MAP dimenson_map = it->second;
+		base::MigRadomInV2* radomV2 = new base::MigRadomInV2((dimenson_map.size()));
+		dimension_cache.dimension_radomin_[it->first] = radomV2;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CacheManagerOp::FetchDicMusicBasic(){
 //读取基础信息
 }
@@ -184,6 +239,7 @@ void CacheManagerOp::FectchDimensionMusic(base_logic::Dimension& dimension){
 	std::string key;
 	key = os.str();
 	DIMENSION_MAP  dimension_map;
+	DIMENSION_VEC  dimension_vec;
 	basic_logic::PubDicComm::GetDimensionMusicList(key,list);
 	while(list.size()>0){
 		std::string str = list.front();
@@ -194,15 +250,22 @@ void CacheManagerOp::FectchDimensionMusic(base_logic::Dimension& dimension){
 		info.set_class(dimension.id());
 		//添加歌曲
 		dimension_map[info.id()] = info;
+		dimension_vec.push_back(info);
 	}
 
 	//根据维度添加缓存
-	if(dimension.class_name()=="chl")
-		whole_mgr_->GetFindCache()->channel_dimension_[dimension.id()] = dimension_map;
-	else if(dimension.class_name()=="ms")
-		whole_mgr_->GetFindCache()->mood_dimension_[dimension.id()] = dimension_map;
-	else if(dimension.class_name()=="mm")
-		whole_mgr_->GetFindCache()->scene_dimension_[dimension.id()] = dimension_map;
+	if(dimension.class_name()=="chl"){
+		whole_mgr_->GetFindCache()->channel_dimension_.dimension_map_[dimension.id()] = dimension_map;
+		whole_mgr_->GetFindCache()->channel_dimension_.dimension_vec_[dimension.id()] = dimension_vec;
+	}
+	else if(dimension.class_name()=="mm"){
+		whole_mgr_->GetFindCache()->mood_dimension_.dimension_map_[dimension.id()] = dimension_map;
+		whole_mgr_->GetFindCache()->mood_dimension_.dimension_vec_[dimension.id()] = dimension_vec;
+	}
+	else if(dimension.class_name()=="ms"){
+		whole_mgr_->GetFindCache()->scene_dimension_.dimension_map_[dimension.id()] = dimension_map;
+		whole_mgr_->GetFindCache()->scene_dimension_.dimension_vec_[dimension.id()] = dimension_vec;
+	}
 
 }
 

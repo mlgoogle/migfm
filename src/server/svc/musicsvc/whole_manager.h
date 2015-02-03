@@ -13,12 +13,28 @@
 #include <map>
 namespace musicsvc_logic{
 
+
+class DimensionCache{
+public:
+	MULTI_DIMENSION_MAP    dimension_map_;
+	MULTI_DIMENSION_VEC    dimension_vec_;
+	RADOMIN_MAP            dimension_radomin_;
+};
+
+
 class MusicCache:public base_logic::BaseCache{
 public:
-// 维度歌曲存储
-	MULTI_DIMENSION_MAP          channel_dimension_;
+	DimensionCache                channel_dimension_;
+	DimensionCache                mood_dimension_;
+	DimensionCache                scene_dimension_;
+	/*MULTI_DIMENSION_MAP          channel_dimension_;
 	MULTI_DIMENSION_MAP          mood_dimension_;
 	MULTI_DIMENSION_MAP          scene_dimension_;
+
+	MULTI_DIMENSION_VEC         channel_dimension_vec_;
+	MULTI_DIMENSION_VEC         mood_dimension_vec_;
+	MULTI_DIMENSION_VEC         scene_dimension_vec_;*/
+
 };
 
 class WholeManager: public base_logic::BaseWholeManager{
@@ -26,14 +42,21 @@ public:
 	WholeManager();
 	~WholeManager();
 public:
+	void Init();
+public:
+	void CreateRadomin();
+public:
 	void GetCollectList(const int64 uid,MUSICINFO_MAP& music_list);
 
 	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list);
 private:
-	//void GetCollectList(const int64 uid);
 	void GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
 			MUSICINFO_MAP& music_list,void (*redis_get)(const int64,std::list<std::string>&));
 
+	void CreateRadomin(DimensionCache& dimension_cache);
+
+	void GetRadomin(RADOMIN_MAP& dimension_radomin,const int32 id,
+			int32 num,std::list<int32>& list);
 private:
 	void GetMusicInfo(MUSICINFO_MAP& list);
 public:

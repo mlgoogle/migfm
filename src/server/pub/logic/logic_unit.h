@@ -9,6 +9,7 @@
 
 #include "logic/logic_infos.h"
 #include "net/comm_head.h"
+#include "basic/radom_in.h"
 
 #define UNKONW_DIMENSIONS    "未知维度"
 #define MOOD_NAME            "心情"
@@ -22,8 +23,14 @@
 #define MUSICINFONLIST_MAP    std::map<int64,std::map<int64,base_logic::MusicInfo> >
 
 //维度存储歌曲
+#define DIMENSION_VEC         std::vector<base_logic::MusicInfo>  /*歌曲*/
+#define MULTI_DIMENSION_VEC   std::map<int64,DIMENSION_VEC > /*维度ID -- 歌曲存储*/
+
 #define DIMENSION_MAP         std::map<int64,base_logic::MusicInfo> /* 歌曲ID--歌曲信息*/
 #define MULTI_DIMENSION_MAP   std::map<int64,DIMENSION_MAP > /*维度ID -- 歌曲存储*/
+
+
+#define RADOMIN_MAP           std::map<int,base::MigRadomInV2*>
 
 namespace base_logic{
 

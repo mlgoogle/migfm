@@ -41,6 +41,8 @@ bool Musiclogic::Init(){
 	//
 	musicsvc_logic::CacheManagerOp::FetchDimensionMusic();
 
+	musicsvc_logic::CacheManagerOp::GetWholeManager()->CreateRadomin();
+
     return true;
 }
 
