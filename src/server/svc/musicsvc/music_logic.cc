@@ -1,5 +1,6 @@
 #include "music_logic.h"
 #include "whole_manager.h"
+#include "db_comm.h"
 #include "logic/pub_db_comm.h"
 #include "logic/pub_dic_comm.h"
 #include "logic/logic_unit.h"
@@ -30,10 +31,15 @@ bool Musiclogic::Init(){
 	r = config->LoadConfig(path);
 	basic_logic::PubDBComm::Init(config->mysql_db_list_);
 	basic_logic::PubDicComm::Init(config->redis_list_);
+
+	musicsvc_logic::DBComm::Init(config->mysql_db_list_);
 	musicsvc_logic::CacheManagerOp::GetWholeManager();
 
 	//读取信息
 	musicsvc_logic::CacheManagerOp::FetchAvailableMusicInfo();
+
+	//
+	musicsvc_logic::CacheManagerOp::FetchDimensionMusic();
 
     return true;
 }
@@ -85,6 +91,9 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	case MUSIC_GAIN_COLLECT_LIST:
 		OnCollectList(srv,socket,value);
 		break;
+	case MUSIC_GAIN_DIMENSION_LIST:
+		OnDimensionList(srv,socket,value);
+		break;
 	}
     return true;
 }
@@ -125,6 +134,30 @@ bool Musiclogic::OnTimeout(struct server *srv, char *id, int opcode, int time){
     return true;
 }
 
+bool Musiclogic::OnDimensionList(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+       		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::Dimension> dimension(new netcomm_recv::Dimension(netbase));
+	int error_code = dimension->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	MUSICINFO_MAP music_list;
+
+	musicsvc_logic::CacheManagerOp::GetWholeManager()->GetDimensionList(dimension->dimension_name(),
+			dimension->dimension_sub_id(),music_list);
+	scoped_ptr<netcomm_send::MusicList> smusiclist(new netcomm_send::MusicList());
+	for(MUSICINFO_MAP::iterator it = music_list.begin();it!=music_list.end();){
+		base_logic::MusicInfo info = it->second;
+		smusiclist->set_list(info.Release());
+		music_list.erase(it++);
+	}
+
+	send_message(socket,(netcomm_send::HeadPacket*)smusiclist.get());
+	return true;
+}
 bool Musiclogic::OnCollectList(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
        		const void* msg,const int len){
 	scoped_ptr<netcomm_recv::Collect> collect(new netcomm_recv::Collect(netbase));

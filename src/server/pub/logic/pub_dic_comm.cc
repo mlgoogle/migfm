@@ -26,6 +26,13 @@ void PubDicComm::Dest(){
 	base_dic::RedisPool::Dest();
 }
 
+void PubDicComm::GetDimensionMusicList(const std::string& key,std::list<std::string>& list){
+	bool r = false;
+	base_dic::AutoDicCommEngine auto_engine;
+	base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+	redis_engine_->GetHashValues(key.c_str(),key.length(),list);
+}
+
 void PubDicComm::GetColllectList(const int64 uid,std::list<std::string>& list){
 	bool r = false;
 	base_dic::AutoDicCommEngine auto_engine;

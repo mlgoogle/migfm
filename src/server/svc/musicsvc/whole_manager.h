@@ -14,18 +14,26 @@
 namespace musicsvc_logic{
 
 class MusicCache:public base_logic::BaseCache{
-
+public:
+// 维度歌曲存储
+	MULTI_DIMENSION_MAP          channel_dimension_;
+	MULTI_DIMENSION_MAP          mood_dimension_;
+	MULTI_DIMENSION_MAP          scene_dimension_;
 };
+
 class WholeManager: public base_logic::BaseWholeManager{
 public:
 	WholeManager();
 	~WholeManager();
 public:
 	void GetCollectList(const int64 uid,MUSICINFO_MAP& music_list);
+
+	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list);
 private:
 	//void GetCollectList(const int64 uid);
 	void GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
 			MUSICINFO_MAP& music_list,void (*redis_get)(const int64,std::list<std::string>&));
+
 private:
 	void GetMusicInfo(MUSICINFO_MAP& list);
 public:
@@ -62,7 +70,10 @@ public:
 	static void FetchDBMusicURL();
 	static void FetchDicMusicBasic();
 	static void FetchAvailableMusicInfo();
+	static void FetchDimensionMusic();
 	//static void FetchDBMusicAbout();
+private:
+	static void FectchDimensionMusic(base_logic::Dimension& dimension);
 
 };
 

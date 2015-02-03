@@ -37,6 +37,30 @@ public:
 private:
 	int64  tid_;
 };
+
+
+class Dimension:public LoginHeadPacket{
+public:
+	Dimension(NetBase* m)
+	:LoginHeadPacket(m){
+		Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		GETBIGINTTOINT(L"sid",dimension_sub_id_);
+		if(!r) error_code_ = MUSIC_TYPE_LACK;
+		r = m_->GetString(L"dimension",&dimension_name_);
+		if(!r) error_code_ = MUSIC_TYPE_ID_LACK;
+	}
+
+	const std::string& dimension_name() const {return dimension_name_;}
+	const int64 dimension_sub_id() const {return dimension_sub_id_;}
+private:
+	std::string  dimension_name_;
+	int64  dimension_sub_id_;
+};
+
 }
 
 namespace netcomm_send{

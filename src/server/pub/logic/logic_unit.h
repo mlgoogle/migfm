@@ -21,6 +21,10 @@
 #define MUSICINFO_MAP         std::map<int64,base_logic::MusicInfo>
 #define MUSICINFONLIST_MAP    std::map<int64,std::map<int64,base_logic::MusicInfo> >
 
+//维度存储歌曲
+#define DIMENSION_MAP         std::map<int64,base_logic::MusicInfo> /* 歌曲ID--歌曲信息*/
+#define MULTI_DIMENSION_MAP   std::map<int64,DIMENSION_MAP > /*维度ID -- 歌曲存储*/
+
 namespace base_logic{
 
 class LogicUnit{

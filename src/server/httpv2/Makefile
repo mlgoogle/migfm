@@ -57,15 +57,21 @@ proc: socproc chatproc musicproc
 ######################musicproc###############################################
 MUSICPROC_PATH = /music
 OTJERPROC_VERSION = /v1
-musicproc:getcltsongs.fcgi
+musicproc:getcltsongs.fcgi getdimension.fcgi
 
 getcltsongs.fcgi: getcltsongs.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs.fcgi
+
+getdimension.fcgi: getdimension.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getdimension.fcgi
 
 ### 编译
 
 getcltsongs.o:
 	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs/getcltsongs.cc
+
+getdimension.o:
+	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getdimension/getdimension.cc
 
 
 clean:

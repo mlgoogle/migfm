@@ -167,9 +167,14 @@ public:
 	Dimension& operator = (const Dimension& dimension_info);
 
 	const int64 id() const {return data_->id_;}
+	const std::string class_name() const {return data_->class_name_;}
 	const std::string name() const {return data_->name_;}
 	const std::string description() const {return data_->description_;}
 
+	void set_id(const int64 id){data_->id_ = id;}
+	void set_name(const std::string& name){data_->name_ = name;}
+	void set_class_name(const std::string& class_name){data_->class_name_ = class_name;}
+	void set_description(const std::string& description){data_->description_ = description;}
 	class Data{
 	public:
 		Data()
@@ -186,9 +191,10 @@ public:
 		void AddRef(){refcount_ ++;}
 		void Release(){if (!--refcount_)delete this;}
 	public:
-		const int64         id_;
-		const std::string   name_;
-		const std::string   description_;
+		int64         id_;
+		std::string   class_name_;
+		std::string   name_;
+		std::string   description_;
 	private:
 		int refcount_;
 	};

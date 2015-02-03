@@ -137,7 +137,7 @@ base64.o:$(THIRD_PATH)/basic/base64.cc
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : music_init.o music_logic.o whole_manager.o\
+$(PLUGIN) : music_init.o music_logic.o whole_manager.o db_comm.o\
 	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o\
 	base_cache_manager.o pub_db_comm.o pub_dic_comm.o\
 	logic_infos.o logic_unit.o basic_util.o config.o \
