@@ -119,6 +119,7 @@ base_logic::DictionaryValue* MusicInfo::Release(){
 		dict->SetString(L"artist",data_->artist_);
 	if(!data_->title_.empty()){
 		dict->SetString(L"title",data_->title_);
+		dict->SetString(L"name",data_->title_);
 #if defined(__OLD_VERSION__)
 		dict->SetString(L"titile",data_->title_);
 #endif

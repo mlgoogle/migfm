@@ -99,7 +99,7 @@ bool Msglogic::OnBroadcastClose(struct server *srv, const int socket){
 }
 
 bool Msglogic::OnIniTimer(struct server *srv){
-	srv->add_time_task(srv,"msg",TIME_GET_BLOCK_QUEUE,10,-1);
+	//srv->add_time_task(srv,"msg",TIME_GET_BLOCK_QUEUE,10,-1);
     return true;
 }
 

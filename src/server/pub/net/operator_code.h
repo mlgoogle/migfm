@@ -3,6 +3,12 @@
 
 enum operatorcode{
 
+	//USER 1000
+	QUICK_LOGIN = 1000, //快速登录
+	THIRID_LOGIN = 10001, //第三方登陆
+	LOGIN_RECORD = 10002,//登陆记录
+	BD_BIND_PUSH = 1100, //百度推送绑定
+
 	//MUSIC 4000
 	MUSIC_GAIN_COLLECT_LIST = 4001,//获取红心歌单
 	MUSIC_GAIN_DIMENSION_LIST = 4002,//获取单维度歌曲

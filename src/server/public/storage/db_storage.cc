@@ -45,7 +45,7 @@ bool MYSQLDB::GetUserInfo(const std::string& uid,base::UserInfo& usrinfo){
 	//sql<<"select usrid,username,sex,type,ctry,head,birthday,nickname,source "
 	//	<<"from migfm_user_infos where usrid = '"<<uid.c_str()<<"';";
 	//call migfm.proc_GetUserBasicInfo(10000013)
-	sql<<"call proc_GetUserBasicInfo("<<uid<<")";
+	sql<<"call proc_V2GetUserBasicInfo("<<uid<<")";
 	//check
 	CheckConnection();
 	MIG_DEBUG(USER_LEVEL,"sql[%s]\n",sql.str().c_str());

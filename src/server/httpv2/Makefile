@@ -52,8 +52,40 @@ OUTPUT_FILE = /var/www/cgi-bin/miyo
 #############################################################################################################################
 all: clean proc delete-temp-file
 
-proc: socproc chatproc musicproc
+proc: socproc chatproc musicproc userproc
 
+######################userproc###############################################
+USERPROC_PATH = /user
+OTJERPROC_VERSION = /v1
+userproc:quicklogin.fcgi bdbindpush.fcgi thirdlogin.fcgi loginrecord.fcgi
+
+quicklogin.fcgi: quicklogin.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)/quicklogin.fcgi
+
+thirdlogin.fcgi: thirdlogin.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)/thirdlogin.fcgi
+	
+bdbindpush.fcgi: bindpush.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)/bdbindpush.fcgi
+	
+loginrecord.fcgi: loginrecord.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)/loginrecord.fcgi
+	
+### 编译
+
+quicklogin.o:
+	$(COMPILE) .$(USERPROC_PATH)$(OTJERPROC_VERSION)/quicklogin/quicklogin.cc
+	
+bindpush.o:
+	$(COMPILE) .$(USERPROC_PATH)$(OTJERPROC_VERSION)/bindpush/bindpush.cc
+
+thirdlogin.o:
+	$(COMPILE) .$(USERPROC_PATH)$(OTJERPROC_VERSION)/thirdlogin/thirdlogin.cc
+	
+loginrecord.o:
+	$(COMPILE) .$(USERPROC_PATH)$(OTJERPROC_VERSION)/loginrecord/loginrecord.cc
+	
+	
 ######################musicproc###############################################
 MUSICPROC_PATH = /music
 OTJERPROC_VERSION = /v1

@@ -79,12 +79,12 @@ void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSIC
 			dimension_radomin = music_cache_->channel_dimension_.dimension_radomin_;
 		}
 		else if(name=="ms"){
-			multi_dimension_vec = music_cache_->mood_dimension_.dimension_vec_;
-			dimension_radomin = music_cache_->mood_dimension_.dimension_radomin_;
-		}
-		else if(name=="mm"){
 			multi_dimension_vec = music_cache_->scene_dimension_.dimension_vec_;
 			dimension_radomin = music_cache_->scene_dimension_.dimension_radomin_;
+		}
+		else if(name=="mm"){
+			multi_dimension_vec = music_cache_->mood_dimension_.dimension_vec_;
+			dimension_radomin = music_cache_->mood_dimension_.dimension_radomin_;
 		}
 	}
 	//获取随机数
