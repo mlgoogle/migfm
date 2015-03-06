@@ -3,8 +3,7 @@
 #include "db_comm.h"
 #include "logic/logic_unit.h"
 #include "logic/logic_infos.h"
-#include "lbs/lbs_connector.h"
-#include "lbs/lbs_logic_unit.h"
+#include "lbs/location_server.h"
 #include "pushmsg/basic_push_info.h"
 #include "pushmsg/push_connector.h"
 #include "basic/scoped_ptr.h"
@@ -23,7 +22,8 @@ Userlogic::Userlogic(){
 }
 
 Userlogic::~Userlogic(){
-	base_lbs::LbsConnectorEngine::FreeLbsConnectorEngine();
+	//base_lbs::LbsConnectorEngine::FreeLbsConnectorEngine();
+	base_lbs::LocationServer::Dest();
 	base_push::PushConnectorEngine::FreePushConnectorEngine();
 	usersvc_logic::DBComm::Dest();
 }
@@ -37,10 +37,8 @@ bool Userlogic::Init(){
 	}
 	r = config->LoadConfig(path);
 
+	base_lbs::LocationServer::Init(config->mysql_db_list_,config->mem_list_);
 	usersvc_logic::DBComm::Init(config->mysql_db_list_);
-	base_lbs::LbsConnectorEngine::Create(base_lbs::IMPL_BAIDU);
-	base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
-	engine->Init(config->mysql_db_list_);
 	base_push::PushConnectorEngine::Create(base_push::IMPL_BAIDU);
 	base_push::PushConnectorEngine::GetPushConnectorEngine()->Init(config->mysql_db_list_);
     return true;

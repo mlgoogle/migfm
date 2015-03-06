@@ -25,6 +25,7 @@ void LbsBaiduConnectorImpl::Init(std::list<base::ConnAddr>& addrlist){
 		assert(0);
 		return ;
 	}
+
 }
 
 void LbsBaiduConnectorImpl::Release(){

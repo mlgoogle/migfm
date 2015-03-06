@@ -127,5 +127,5 @@ $(PLUGIN) : user_init.o user_logic.o user_basic_info.o db_comm.o \
 	logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl \
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lmemcached -lmemcachedutil -lcurl \
 	$^ -o $@

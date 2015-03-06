@@ -7,7 +7,7 @@
 #include "logic/logic_unit.h"
 #include "net/comm_head.h"
 #include "net/error_comm.h"
-#include "lbs/lbs_connector.h"
+#include "lbs/location_server.h"
 #include "weather/weather_engine.h"
 #include "logic/logic_comm.h"
 #include "basic/scoped_ptr.h"
@@ -31,27 +31,21 @@ base_logic::LBSInfos* LogicUnit::GetGeocderAndAddress(netcomm_recv::HeadPacket* 
 	double longitude_double = 0;
 	bool r = false;
 	std::string host = packet->remote_addr();
-	base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
+	//base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
 	if(packet->latitude()==0||packet->longitude()==0){//ip获取地址
-		bool r = engine->IPtoAddress(host,latitude_double,
-					longitude_double,city,district,province,street);
+		//bool r = engine->IPtoAddress(host,latitude_double,
+			//		longitude_double,city,district,province,street);
+		bool r = base_lbs::LocationServer::IPtoAddress(host,latitude_double,
+						longitude_double,city,district,province,street);
 		if(!r)
 			return false;
-			/*const std::wstring num_wstring_latitude(latitude.begin(),latitude.end());
-			const std::string  num_string_latitude =  base::BasicUtil::StringConversions::WideToASCII(num_wstring_latitude);
-			if(base::BasicUtil::StringUtil::StringToDouble(num_string_latitude,&latitude_double)&&finite(latitude_double))
-				packet->set_latitude(latitude_double);
-
-
-			const std::wstring num_wstring_longitude(longitude.begin(),longitude.end());
-			const std::string  num_string_longitude =  base::BasicUtil::StringConversions::WideToASCII(num_wstring_longitude);
-			if(base::BasicUtil::StringUtil::StringToDouble(num_string_longitude,&longitude_double)&&finite(longitude_double))
-				packet->set_latitude(latitude_double);*/
 	}else{
 
 		latitude_double = packet->latitude();
 		longitude_double = packet->longitude();
-		r = engine->GeocoderForAddress(latitude_double,longitude_double,city,district,province,street);
+		//r = engine->GeocoderForAddress(latitude_double,longitude_double,city,district,province,street);
+		r = base_lbs::LocationServer::GeocoderForAddress(latitude_double,longitude_double,
+				city,district,province,street);
 		if(!r)
 			return false;
 	}
@@ -73,8 +67,10 @@ bool LogicUnit::IPToGeocoderAndAddress(netcomm_recv::HeadPacket* packet,
 	double latitude_double;
 	double longitude_double;
 	std::string host = packet->remote_addr();
-	base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
-	bool r = engine->IPtoAddress(host,latitude_double,
+//	base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
+	//bool r = engine->IPtoAddress(host,latitude_double,
+		//	longitude_double,city,district,province,street);
+	bool r = base_lbs::LocationServer::IPtoAddress(host,latitude_double,
 			longitude_double,city,district,province,street);
 	if(!r)
 		return false;

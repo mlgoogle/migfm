@@ -22,7 +22,7 @@ LINK_FLAGS =
 
 ## 头文件
 INCLUDE_PATHS = -I./ -I ../ -I/usr/local/libmemcached-1.0.7/include/ -I../core -I../public/ -I/usr/local/include\
-				 -I/usr/include/mysql -I./../third_party/hiredis  -I../base -I./../third_party/ -I./../public/
+				 -I/usr/include/mysql -I./../third_party/hiredis  -I../base -I./../third_party/ -I./../public/ -I/usr/local/freetds/include/
 
 ## 库
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
@@ -33,13 +33,14 @@ LINK_LIBRARYS = -lmemcached -lmemcachedutil  -lexpat -lrt -lpthread -ldl -liconv
 THIRD_PATH = ../public
 
 # 编译
-COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
+COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@ 
 
 # 链接
-LINK = $(AR)  $(OUTPUT_FILE) $? 
+LINK = $(AR)  $(OUTPUT_FILE) $?
 
 all: clean output delete-temp-file
-output:	basic_util.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto.o basic_lbs_info.o lbs_baidu_connector.o\
+output:	basic_util.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto.o\
+	basic_lbs_info.o lbs_baidu_connector.o lbs_dic_comm.o location_server.o\
 	block_msg_queue.o  queue_dic_comm.o lbs_connector.o\
 	lbs_db_comm.o lbs_logic_unit.o logic_comm.o base_values.o \
 	base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
@@ -77,9 +78,15 @@ lbs_connector.o:
 	
 lbs_db_comm.o:
 	$(COMPILE) ./lbs/lbs_db_comm.cc
+
+lbs_dic_comm.o:
+	$(COMPILE) ./lbs/lbs_dic_comm.cc
 	
 lbs_logic_unit.o:
 	$(COMPILE) ./lbs/lbs_logic_unit.cc
+	
+location_server.o:
+	$(COMPILE) ./lbs/location_server.cc
 	
 logic_comm.o:
 	$(COMPILE) ./logic/logic_comm.cc

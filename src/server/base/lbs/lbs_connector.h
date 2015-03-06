@@ -15,7 +15,7 @@ public:
 	static LbsConnector* Create(int32 type);
 	virtual ~LbsConnector(){}
 public:
-	virtual void Init(std::list<base::ConnAddr>& addrlist) = 0;//初始化 //因涉及去数据库读取ACCESS_TOKEN
+	virtual void Init(std::list<base::ConnAddr>& addrlist) = 0;//初始化 //因涉及去数据库读取ACCESS_TOKEN //自行存储坐标信息
 	virtual void Release() = 0;//释放
 	virtual bool GeocoderForAddress(const double latitude,const double longitude,
 			std::string& city,std::string& district,std::string& province,std::string& street) = 0;//通过坐标获取地址
