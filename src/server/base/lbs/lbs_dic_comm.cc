@@ -53,6 +53,12 @@ bool MemComm::GetLocation(const double latitude,const double longitude,char** da
 	LocationToKey(latitude,longitude,key);
 	return engine_->GetValue(key.c_str(),key.length(),data,len);
 }
+
+bool MemComm::DelLocation(const double latitude,const double longitude){
+	std::string key;
+	LocationToKey(latitude,longitude,key);
+	return engine_->DelValue(key.c_str(),key.length());
+}
 /*
 bool MemComm::SetString(const char* key,const size_t key_len,
         const char* data, size_t len){

@@ -50,6 +50,7 @@ bool LocationServer::GeocoderForAddress(const double latitude,const double longi
 		location.set_district(district);
 		location.set_province(province);
 		location.set_street(street);
+		location.set_current_time(time(NULL));
 		location.JsonSerializer(&json);
 		base_lbs::MemComm::SetLocation(latitude,longitude,json.c_str(),json.length());
 	}else{
@@ -61,6 +62,8 @@ bool LocationServer::GeocoderForAddress(const double latitude,const double longi
 		province = location.province();
 		street = location.street();
 		//检测 如果大于指定时间则删除
+		if((time(NULL) - location.current_time())>(60 * 60 * 24 * 4))
+			base_lbs::MemComm::DelLocation(latitude,longitude);
 	}
 	return true;
 }

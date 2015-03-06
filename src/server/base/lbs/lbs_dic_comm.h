@@ -32,6 +32,8 @@ public:
 
 	static bool GetLocation(const double latitude,const double longitude,char** data,
 			size_t* len);
+
+	static bool DelLocation(const double latitude,const double longitude);
 private:
 	static base_storage::DictionaryStorageEngine* engine_;
 };
