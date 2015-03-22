@@ -89,8 +89,8 @@ whole_manager.o :  ./whole_manager.cc ./whole_manager.h
 db_comm.o : ./db_comm.cc ./db_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./db_comm.cc $(INCLUDE_PATHS)
 	
-soc_basic_infos.o : ./soc_basic_infos.cc ./soc_basic_infos.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./soc_basic_infos.cc $(INCLUDE_PATHS)
+music_dic_comm.o : ./music_dic_comm.cc ./music_dic_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./music_dic_comm.cc $(INCLUDE_PATHS)
 
 comm_impl.o :  $(USER_DIR)/net/comm_impl.cc $(USER_DIR)/net/comm_head.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/comm_impl.cc $(INCLUDE_PATHS)
@@ -137,7 +137,7 @@ base64.o:$(THIRD_PATH)/basic/base64.cc
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : music_init.o music_logic.o whole_manager.o db_comm.o\
+$(PLUGIN) : music_init.o music_logic.o whole_manager.o db_comm.o music_dic_comm.o\
 	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o\
 	base_cache_manager.o pub_db_comm.o pub_dic_comm.o\
 	logic_infos.o logic_unit.o basic_util.o config.o \

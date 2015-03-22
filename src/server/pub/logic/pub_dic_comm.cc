@@ -7,6 +7,7 @@
 
 #include "pub_dic_comm.h"
 #include "dic/base_dic_redis_auto.h"
+#include "basic/basic_util.h"
 
 namespace basic_logic{
 
@@ -38,10 +39,12 @@ void PubDicComm::GetColllectList(const int64 uid,std::list<std::string>& list){
 	base_dic::AutoDicCommEngine auto_engine;
 	base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
 	std::string key;
-	key = "h10108clt";
+	key = "h10113clt";
 	//key.append();
 	redis_engine_->GetHashValues(key.c_str(),key.length(),list);
 }
+
+
 /*
 void PubDicComm::GetBatchMusicInfo(std::list<base_logic::MusicInfo>& map){
 	bool r = false;

@@ -48,7 +48,11 @@ public:
 public:
 	void GetCollectList(const int64 uid,MUSICINFO_MAP& music_list);
 
-	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list);
+	void SetCollectSong(const int64 uid,base_logic::MusicInfo& music);
+
+	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,const int64 num = 10);
+
+
 private:
 	void GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
 			MUSICINFO_MAP& music_list,void (*redis_get)(const int64,std::list<std::string>&));

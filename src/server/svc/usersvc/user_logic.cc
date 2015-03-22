@@ -1,6 +1,7 @@
 #include "user_logic.h"
 #include "user_basic_info.h"
 #include "db_comm.h"
+#include "dic_comm.h"
 #include "logic/logic_unit.h"
 #include "logic/logic_infos.h"
 #include "lbs/location_server.h"
@@ -39,6 +40,7 @@ bool Userlogic::Init(){
 
 	base_lbs::LocationServer::Init(config->mysql_db_list_,config->mem_list_);
 	usersvc_logic::DBComm::Init(config->mysql_db_list_);
+	usersvc_logic::UserDicComm::Init(config->redis_list_);
 	base_push::PushConnectorEngine::Create(base_push::IMPL_BAIDU);
 	base_push::PushConnectorEngine::GetPushConnectorEngine()->Init(config->mysql_db_list_);
     return true;
@@ -101,6 +103,10 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket, const void *
 		case LOGIN_RECORD:
 			OnLoginRecord(srv,socket,value);
 			break;
+		case UPDATE_USERINFO:
+			OnUpdateUserInfo(srv,socket,value);
+			break;
+
 	}
 
 	return true;
@@ -239,10 +245,44 @@ bool Userlogic::OnLoginRecord(struct server *srv,const int socket,netcomm_recv::
 
 	//记录用户登陆时间和登陆位置及坐标
 	usersvc_logic::DBComm::OnLoginRecord(login->uid(),lbs_info.get());
-	scoped_ptr<netcomm_send::HeadPacket> qlogin(new netcomm_send::HeadPacket());
+
+	int32 new_num = 0;
+	//返回用户新增消息
+	usersvc_logic::UserDicComm::GetNewMsgNum(login->uid(),new_num);
+
+	scoped_ptr<netcomm_send::LoginRecord> qlogin(new netcomm_send::LoginRecord());
+	qlogin->set_new_msg(2);
 	send_message(socket,(netcomm_send::HeadPacket*)qlogin.get());
 	return true;
 }
+
+
+
+bool Userlogic::OnUpdateUserInfo(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+		const void* msg,const int len){
+
+	scoped_ptr<netcomm_recv::UpdateUserInfo> update(new netcomm_recv::UpdateUserInfo(netbase));
+	int32 error_code = update->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	usersvc_logic::UserInfo userinfo;
+	userinfo.set_uid(update->uid());
+	userinfo.set_birthday(update->birthday());
+	userinfo.set_nickname(update->nickname());
+	userinfo.set_sex(update->sex());
+	//更新信息
+	usersvc_logic::DBComm::OnUpdateUserInfo(userinfo);
+
+	scoped_ptr<netcomm_send::HeadPacket> qupdate(new netcomm_send::HeadPacket);
+	qupdate->set_status(1);
+	send_message(socket,(netcomm_send::HeadPacket*)qupdate.get());
+	return true;
+}
+
 
 
 bool Userlogic::OnBDBindPush(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
@@ -260,6 +300,7 @@ bool Userlogic::OnBDBindPush(struct server *srv,const int socket,netcomm_recv::N
 
 	return true;
 }
+
 
 }
 

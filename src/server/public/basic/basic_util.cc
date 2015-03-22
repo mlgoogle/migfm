@@ -260,6 +260,14 @@ std::wstring BasicUtil::StringUtil::DobleToWString(double value){
 	return StringConversions::ASCIIToWide(std::string(buffer));
 }
 
+
+size_t BasicUtil::StringUtil::Copy(char* buf,size_t n,
+		size_t pos,const char* ptr,size_t length){//从prtPOS开始buf 上
+	size_t ret = std::min(length-pos,n);
+	memcpy(buf,ptr + pos,ret);
+	return ret;
+}
+
 bool BasicUtil::StringConversions::WideToUTF8(const wchar_t* src,size_t src_len,
 		std::string* output){
 	base::BasicUtil::StringConversionsUtils::PrepareForUTF8Output(src,src_len,output);

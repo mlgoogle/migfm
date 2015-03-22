@@ -97,6 +97,60 @@ void MusicInfo::JsonSeralize(std::string& str){
 	this->set_class(atoll(str_class.c_str()));
 }
 
+void MusicInfo::JsonDeserialize(std::string& str,int32 dimenon){
+	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&str));
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(data_->id_!=0){
+		dict->SetBigInteger(L"id",data_->id_);
+		dict->SetBigInteger(L"songid",data_->id_);
+	}
+	if(data_->clt_!=-1)
+		dict->SetBigInteger(L"clt",data_->clt_);
+	if(data_->cmt_!=-1)
+		dict->SetBigInteger(L"cmt",data_->cmt_);
+	if(data_->hot_!=-1)
+		dict->SetBigInteger(L"hot",data_->hot_);
+	if(data_->like_!=-1)
+		dict->SetInteger(L"like",data_->like_);
+	if(data_->class_!=-1)
+		dict->SetInteger(L"tid",data_->class_);
+	if(!data_->class_name_.empty())
+		dict->SetString(L"type",data_->class_name_);
+	if(!data_->ablum_.empty())
+		dict->SetString(L"ablum",data_->ablum_);
+	if(!data_->artist_.empty())
+		dict->SetString(L"artist",data_->artist_);
+	if(!data_->title_.empty()){
+		dict->SetString(L"title",data_->title_);
+		dict->SetString(L"name",data_->title_);
+#if defined(__OLD_VERSION__)
+		dict->SetString(L"titile",data_->title_);
+#endif
+	}
+	if(!data_->hq_url_.empty())
+		dict->SetString(L"hq_url",data_->hq_url_);
+	if(!data_->pic_.empty())
+		dict->SetString(L"pic",data_->pic_);
+	if(!data_->pubtime_.empty())
+		dict->SetString(L"pubtime",data_->pubtime_);
+	if(!data_->url_.empty())
+		dict->SetString(L"url",data_->url_);
+	if(dimenon==1){//允许设置类别
+#if defined(__OLD_VERSION__)
+	if(data_->class_!=-1)
+		dict->SetBigInteger(L"typeid",data_->class_);
+	if(!data_->class_name_.empty())
+		dict->SetString(L"type",data_->class_name_);
+#endif
+	}
+
+	base_logic::Value* value = (base_logic::Value*)dict.get();
+	serializer->Serialize(*value);
+
+}
+
+
+
 base_logic::DictionaryValue* MusicInfo::Release(){
 	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
 	if(data_->id_!=0)

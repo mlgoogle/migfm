@@ -304,9 +304,11 @@ bool RedisStorageEngineImpl::GetHashValues(const char* hash_name,
 	if (PingRedis()!=1)
 		return false;
 	char** pptr = NULL;
-	int n;
+	int n = 0;
 	warrper_redis_reply_t*  rp = NULL;
 	rp = RedisGetHashValueAll(c_, hash_name,hash_name_len,&pptr,&n);
+	if(n == 0 || pptr == NULL)
+		return false;
 	for(r =0;r<n;r++){
 		std::string str;
 		str.assign(pptr[r]);
@@ -326,9 +328,11 @@ bool RedisStorageEngineImpl::GetListAll(const char* key,const size_t key_len,
 	if(PingRedis()!=1)
     	return false;
     char** pptr = NULL;
-    int n;
+    int n = 0;
 	warrper_redis_reply_t*  rp = NULL;
 	rp = RedisGetListAll(c_, key,key_len,&pptr,&n);
+	if(n == 0 || pptr == NULL)
+		return false;
 	for(r =0;r<n;r++){
 		std::string str;
 		str.assign(pptr[r]);

@@ -62,6 +62,8 @@ public:
 
 	//解析JSON
 	void JsonSeralize(std::string& str);
+	//组装json
+	void JsonDeserialize(std::string& str,int32 dimenon = 0);
 
 private:
 	class Data{

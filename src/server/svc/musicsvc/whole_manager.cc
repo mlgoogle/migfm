@@ -7,6 +7,7 @@
 
 #include "whole_manager.h"
 #include "db_comm.h"
+#include "music_dic_comm.h"
 #include "basic/template.h"
 #include "logic/pub_dic_comm.h"
 #include "logic/pub_db_comm.h"
@@ -38,7 +39,8 @@ void WholeManager::CreateRadomin(){
 	CreateRadomin(music_cache_->scene_dimension_);
 }
 
-void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list){
+void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,const int64 num
+		){
 	//
 	bool r = false;
 	/*MULTI_DIMENSION_MAP multi_dimension_map;
@@ -88,7 +90,7 @@ void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSIC
 		}
 	}
 	//获取随机数
-	GetRadomin(dimension_radomin,id,10,radom_list);
+	GetRadomin(dimension_radomin,id,num,radom_list);
 
 	{
 
@@ -112,7 +114,33 @@ void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSIC
 	GetMusicInfo(music_list);
 }
 
+void WholeManager::SetCollectSong(const int64 uid,base_logic::MusicInfo& music){
+	bool r = false;
+	std::string str_json;
+	//写入redis
+	music.JsonDeserialize(str_json,1);
+	MUSICINFO_MAP music_list;
+	musicsvc_logic::MusicDicComm::SetCollect(uid,music.id(),str_json);
+	{
+		base_logic::RLockGd lk(lock_);
+		//读取完整信息存入缓存
+		r = base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,
+				int64,base_logic::MusicInfo >(music_cache_->music_info_map_,music.id(),music);
 
+		//写入个人红心歌单
+		r = base::MapGet<MUSICINFONLIST_MAP,MUSICINFONLIST_MAP::iterator,
+					int64,MUSICINFO_MAP >(music_cache_->collect_map_,uid,music_list);
+		if(!r)
+			return;
+		r =base::MapAdd<MUSICINFO_MAP,int64,base_logic::MusicInfo>
+		(music_list,music.id(),music);
+		if(!r)
+			return;
+		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP>
+		(music_cache_->collect_map_,uid,music_list);
+	}
+
+}
 void WholeManager::GetCollectList(const int64 uid,MUSICINFO_MAP& music_list){
 	GetMusicListT(uid,music_cache_->collect_map_,music_list,basic_logic::PubDicComm::GetColllectList);
 	GetMusicInfo(music_list);
@@ -147,7 +175,7 @@ void WholeManager::GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
 		(container,uid,music_list);
 	}
 
-	if(!r)//读取
+	if(!r||music_list.size()==0)//读取
 		redis_get(uid,list);
 	if(list.size()<=0)//
 			return ;

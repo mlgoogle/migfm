@@ -86,8 +86,9 @@ public:
 			if(!r) error_code_ = NICKNAME_LACK;
 			//URLCODE 解码
 			base::BasicUtil::UrlDecode(nickname,nickname_);
-			GETBIGINTTOINT(L"sex",sex_);
 		}
+
+		GETBIGINTTOINT(L"sex",sex_);
 
 
 
@@ -180,11 +181,49 @@ private:
 	*/
 };
 
+
+//更新个人信息
+class UpdateUserInfo:public LoginHeadPacket{
+public:
+	UpdateUserInfo(NetBase* m)
+	:LoginHeadPacket(m){
+		Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		r = m_->GetBigInteger(L"gender",&gender_);
+		if(!r) gender_ = 0;
+		//昵称既可能是数字也可能是字符和数字拼接
+		int64 inickname = 0;
+		std::string nickname;
+		r = m_->GetBigInteger(L"nickname",&inickname);
+		if(r){ //昵称为纯数字
+			nickname_ = base::BasicUtil::StringUtil::Int64ToString(inickname);
+		}else{//昵称不为纯数字
+			r = m_->GetString(L"nickname",&nickname);
+			if(!r) error_code_ = NICKNAME_LACK;
+			//URLCODE 解码
+			base::BasicUtil::UrlDecode(nickname,nickname_);
+		}
+		//获取生日
+		r = m_->GetString(L"birthday",&birthday_);
+		if(!r) error_code_ = BIRTHDAT_LACK;
+	}
+
+	const std::string& birthday() const {return this->birthday_;}
+	const std::string& nickname() const {return this->nickname_;}
+	const int64 sex() const {return this->gender_;}
+private:
+	int64           gender_;
+	std::string     nickname_;
+	std::string     birthday_;
+};
 //百度推送綁定
-class BDBindPush:public HeadPacket{
+class BDBindPush:public LoginHeadPacket{
 public:
 	BDBindPush(NetBase* m)
-	:HeadPacket(m)
+	:LoginHeadPacket(m)
 	,platform_(0)
 	,uid_(0)
 	,channel_(0)
@@ -250,6 +289,28 @@ private:
 namespace netcomm_send{
 
 
+class LoginRecord:public HeadPacket{
+public:
+public:
+	LoginRecord(){
+		base_.reset(new netcomm_send::NetBase());
+	}
+
+	netcomm_send::NetBase* release(){
+		head_->Set(L"result",base_.release());
+		this->set_flag(0);
+		this->set_msg("");
+		this->set_status(1);
+		return head_.release();
+	}
+
+	void set_new_msg(const int32 num){
+		base_->SetInteger(L"new_msg_num",num);
+	}
+private:
+	scoped_ptr<netcomm_send::NetBase> base_;
+
+};
 
 class Login:public HeadPacket{
 public:

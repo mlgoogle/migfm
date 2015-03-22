@@ -239,8 +239,10 @@ int buffer_append_string_len(struct buffer *b,const char *s,size_t s_len)
     if(b->used == 0)
         b->used++;
   
-    memcpy(b->ptr+b->used-1,s,s_len);
-    b->used+=s_len;
+    //判断s_len
+    size_t c_len = s_len>(b->size - b->used)?(b->size - b->used):s_len;
+    memcpy(b->ptr+b->used-1,s,c_len);
+    b->used+=c_len;
     b->ptr[b->used -1] = '\0';
     
     return 0;

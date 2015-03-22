@@ -89,6 +89,9 @@ public:
 
 		static bool StringToDouble(const std::string& input,double* output);
 
+
+		static size_t Copy(char* buf,size_t n,size_t pos,const char* ptr,size_t length);
+
 		static std::string Int64ToString(int64 value);
 
 		static std::string DoubleToString(double value);

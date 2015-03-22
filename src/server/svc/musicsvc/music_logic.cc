@@ -1,6 +1,7 @@
 #include "music_logic.h"
 #include "whole_manager.h"
 #include "db_comm.h"
+#include "music_dic_comm.h"
 #include "logic/pub_db_comm.h"
 #include "logic/pub_dic_comm.h"
 #include "logic/logic_unit.h"
@@ -31,6 +32,9 @@ bool Musiclogic::Init(){
 	r = config->LoadConfig(path);
 	basic_logic::PubDBComm::Init(config->mysql_db_list_);
 	basic_logic::PubDicComm::Init(config->redis_list_);
+
+	musicsvc_logic::MusicDicComm::Init(config->redis_list_);
+
 
 	musicsvc_logic::DBComm::Init(config->mysql_db_list_);
 	musicsvc_logic::CacheManagerOp::GetWholeManager();
@@ -96,6 +100,12 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	case MUSIC_GAIN_DIMENSION_LIST:
 		OnDimensionList(srv,socket,value);
 		break;
+	case MUSIC_GAIN_DIMENSIONS_LIST:
+		OnDimensionsList(srv,socket,value);
+		break;
+	case MUSIC_GAIN_SET_COLLECT:
+		OnSetCollection(srv,socket,value);
+		break;
 	}
     return true;
 }
@@ -160,6 +170,40 @@ bool Musiclogic::OnDimensionList(struct server *srv,const int socket,netcomm_rec
 	send_message(socket,(netcomm_send::HeadPacket*)smusiclist.get());
 	return true;
 }
+
+bool Musiclogic:: OnDimensionsList(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::Dimensions> dimension(new netcomm_recv::Dimensions(netbase));
+	int error_code = dimension->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	MUSICINFO_MAP music_list;
+	int index = dimension->ChannelDimension().dimension_index();
+	if(dimension->ChannelDimension().dimension_index()!=-1)
+		musicsvc_logic::CacheManagerOp::GetWholeManager()->GetDimensionList(dimension->ChannelDimension().dimension_alias_name(),
+				dimension->ChannelDimension().dimension_id(),music_list,dimension->Num());
+	if(dimension->MoodDimension().dimension_index()!=-1)
+		musicsvc_logic::CacheManagerOp::GetWholeManager()->GetDimensionList(dimension->MoodDimension().dimension_alias_name(),
+				dimension->MoodDimension().dimension_id(),music_list,dimension->Num());
+	if(dimension->ScensDimension().dimension_index()!=-1)
+		musicsvc_logic::CacheManagerOp::GetWholeManager()->GetDimensionList(dimension->ScensDimension().dimension_alias_name(),
+				dimension->ScensDimension().dimension_id(),music_list,dimension->Num());
+
+	scoped_ptr<netcomm_send::MusicList> smusiclist(new netcomm_send::MusicList());
+	for(MUSICINFO_MAP::iterator it = music_list.begin();it!=music_list.end();){
+		base_logic::MusicInfo info = it->second;
+		smusiclist->set_list(info.Release());
+		music_list.erase(it++);
+	}
+
+	send_message(socket,(netcomm_send::HeadPacket*)smusiclist.get());
+	return true;
+}
+
 bool Musiclogic::OnCollectList(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
        		const void* msg,const int len){
 	scoped_ptr<netcomm_recv::Collect> collect(new netcomm_recv::Collect(netbase));
@@ -183,6 +227,30 @@ bool Musiclogic::OnCollectList(struct server *srv,const int socket,netcomm_recv:
 	}
 
 	send_message(socket,(netcomm_send::HeadPacket*)smusiclist.get());
+	return true;
+}
+
+bool Musiclogic::OnSetCollection(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+       		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::SetCollect> collect(new netcomm_recv::SetCollect(netbase));
+	int error_code = collect->GetResult();
+	int64 group_id = 0;
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	//设置
+	base_logic::MusicInfo musicinfo;
+	musicinfo.set_id(collect->songid());
+	musicinfo.set_class(collect->dimemsion_id());
+	musicinfo.set_class_name(collect->dimension_alais());
+	musicsvc_logic::CacheManagerOp::GetWholeManager()->SetCollectSong(collect->uid(),musicinfo);
+
+	scoped_ptr<netcomm_send::HeadPacket> head(new netcomm_send::HeadPacket());
+	head->set_status(1);
+	send_message(socket,(netcomm_send::HeadPacket*)head.get());
 	return true;
 }
 

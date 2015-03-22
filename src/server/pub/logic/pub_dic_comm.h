@@ -23,9 +23,12 @@ public:
 	static void Init(std::list<base::ConnAddr>& addrlist);
 	static void Dest();
 public:
+
+
 	static void GetColllectList(const int64 uid,std::list<std::string>& list);
 	//static void GetBatchMusicInfo(std::list<base_logic::MusicInfo>& list);
 	static void GetDimensionMusicList(const std::string& key,std::list<std::string>& list);
+
 };
 }
 

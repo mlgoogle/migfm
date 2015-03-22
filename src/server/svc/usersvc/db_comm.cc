@@ -162,4 +162,35 @@ bool DBComm::OnLoginRecord(const int64 uid,base_logic::LBSInfos* lbsinfo){
 
 }
 
+bool DBComm::OnUpdateUserInfo(usersvc_logic::UserInfo& userinfo){
+	bool r = false;
+#if defined (_DB_POOL_)
+	base_db::AutoMysqlCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return false;
+	}
+
+
+	 os<<"call proc_V2UpdateUserInfo("<<userinfo.uid()<<","<<userinfo.sex()<<",\'"
+			 <<userinfo.nickname()<<"\',\'"<<userinfo.birthday()<<"\');";
+	 LOG_DEBUG2("[%s]",os.str().c_str());
+	 r = engine->SQLExec(os.str().c_str());
+
+	std::string sql = os.str();
+	LOG_MSG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return false;
+	}
+	return true;
+}
+
 }

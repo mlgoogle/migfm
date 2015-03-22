@@ -57,7 +57,7 @@ proc: socproc chatproc musicproc userproc
 ######################userproc###############################################
 USERPROC_PATH = /user
 OTJERPROC_VERSION = /v1
-userproc:quicklogin.fcgi bdbindpush.fcgi thirdlogin.fcgi loginrecord.fcgi
+userproc:quicklogin.fcgi bdbindpush.fcgi thirdlogin.fcgi loginrecord.fcgi update.fcgi
 
 quicklogin.fcgi: quicklogin.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)/quicklogin.fcgi
@@ -71,6 +71,8 @@ bdbindpush.fcgi: bindpush.o $(POBJ)
 loginrecord.fcgi: loginrecord.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)/loginrecord.fcgi
 	
+update.fcgi: update.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(USERPROC_PATH)$(OTJERPROC_VERSION)/update.fcgi
 ### 编译
 
 quicklogin.o:
@@ -84,18 +86,26 @@ thirdlogin.o:
 	
 loginrecord.o:
 	$(COMPILE) .$(USERPROC_PATH)$(OTJERPROC_VERSION)/loginrecord/loginrecord.cc
-	
+
+update.o:
+	$(COMPILE) .$(USERPROC_PATH)$(OTJERPROC_VERSION)/update/update.cc
 	
 ######################musicproc###############################################
 MUSICPROC_PATH = /music
 OTJERPROC_VERSION = /v1
-musicproc:getcltsongs.fcgi getdimension.fcgi
+musicproc:getcltsongs.fcgi getdimension.fcgi getdimensions.fcgi collectsong.fcgi
 
 getcltsongs.fcgi: getcltsongs.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs.fcgi
 
 getdimension.fcgi: getdimension.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getdimension.fcgi
+	
+getdimensions.fcgi: getdimensions.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getdimensions.fcgi
+
+collectsong.fcgi: collectsong.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/collectsong.fcgi
 
 ### 编译
 
@@ -104,8 +114,12 @@ getcltsongs.o:
 
 getdimension.o:
 	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getdimension/getdimension.cc
+	
+getdimensions.o:
+	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getdimensions/getdimensions.cc
 
-
+collectsong.o:
+	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/collectsong/collectsong.cc
 clean:
 	-rm -f *.o
 	-rm -f $(OUTPUT_FILE)./*.fcgi
