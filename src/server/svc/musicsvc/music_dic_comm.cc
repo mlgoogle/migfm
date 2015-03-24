@@ -44,6 +44,19 @@ void MusicDicComm::SetCollect(const int64 uid,const int64 songid,const std::stri
 			key.length(),json.c_str(),json.length());
 }
 
+void MusicDicComm::DelCollect(const int64 uid,const int64 songid){
+	/*char key[256] = {0};
+	char* value;
+	size_t value_len = 0;
+	snprintf(key,arraysize(key),"soc%lld:new.msg",uid);*/
+	std::string hash_name;
+	hash_name = "h10113clt";
+	std::string key  = base::BasicUtil::StringUtil::Int64ToString(songid);
+	base_dic::AutoDicCommEngine auto_engine;
+	base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
+	redis_engine_->DelHashElement(hash_name.c_str(),key.c_str(),key.length());
+}
+
 }
 
 

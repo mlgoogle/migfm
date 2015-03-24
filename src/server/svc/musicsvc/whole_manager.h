@@ -50,7 +50,10 @@ public:
 
 	void SetCollectSong(const int64 uid,base_logic::MusicInfo& music);
 
-	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,const int64 num = 10);
+	void DelCollectSong(const int64 uid,const int64 songid);
+
+	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,
+			const int64 num = 10);
 
 
 private:

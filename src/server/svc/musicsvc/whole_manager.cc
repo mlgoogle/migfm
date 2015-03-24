@@ -114,6 +114,26 @@ void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSIC
 	GetMusicInfo(music_list);
 }
 
+void WholeManager::DelCollectSong(const int64 uid,const int64 songid){
+	musicsvc_logic::MusicDicComm::DelCollect(uid,songid);
+	bool r = false;
+	MUSICINFO_MAP music_list;
+	//删除缓存
+	{
+		base_logic::WLockGd lk(lock_);
+			//写入个人红心歌单
+		r = base::MapGet<MUSICINFONLIST_MAP,MUSICINFONLIST_MAP::iterator,
+						int64,MUSICINFO_MAP >(music_cache_->collect_map_,uid,music_list);
+		if(!r)
+			return;
+		r = base::MapDel<MUSICINFO_MAP,MUSICINFO_MAP::iterator,int64>(music_list,songid);
+		if(!r)
+			return;
+		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP>
+		(music_cache_->collect_map_,uid,music_list);
+	}
+}
+
 void WholeManager::SetCollectSong(const int64 uid,base_logic::MusicInfo& music){
 	bool r = false;
 	std::string str_json;
@@ -122,7 +142,7 @@ void WholeManager::SetCollectSong(const int64 uid,base_logic::MusicInfo& music){
 	MUSICINFO_MAP music_list;
 	musicsvc_logic::MusicDicComm::SetCollect(uid,music.id(),str_json);
 	{
-		base_logic::RLockGd lk(lock_);
+		base_logic::WLockGd lk(lock_);
 		//读取完整信息存入缓存
 		r = base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,
 				int64,base_logic::MusicInfo >(music_cache_->music_info_map_,music.id(),music);

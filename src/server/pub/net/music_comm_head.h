@@ -38,6 +38,24 @@ private:
 	int64  tid_;
 };
 
+class DelCollect:public LoginHeadPacket{
+public:
+	DelCollect(NetBase* m)
+	:LoginHeadPacket(m){
+		Init();
+	}
+
+	void Init(){
+		bool r = false;
+		GETBIGINTTOINT(L"songid",songid_);
+		if(!r) error_code_ = MUSIC_SONG_ID_LACK;
+	}
+
+	const int64 songid() const {return this->songid_;}
+
+private:
+	int64 songid_;
+};
 class SetCollect:public LoginHeadPacket{
 public:
 	SetCollect(NetBase* m)

@@ -89,10 +89,16 @@ void MusicInfo::JsonSeralize(std::string& str){
 	std::string str_class;
 	std::string str_class_name;
 	std::string str_songid;
+	int64 songid;
+	//老版本中songid用的十字符串估计需要兼容新版和老版本
 	r = dic->GetString(L"songid",&str_songid);
+	if(!r)
+		r = dic->GetBigInteger(L"songid",&songid);
+	else
+		songid = atoll(str_songid.c_str());
 	r = dic->GetString(L"type",&str_class_name);
 	r = dic->GetString(L"typeid",&str_class);
-	this->set_id(atoll(str_songid.c_str()));
+	this->set_id(songid);
 	this->set_class_name(str_class_name);
 	this->set_class(atoll(str_class.c_str()));
 }
@@ -151,8 +157,13 @@ void MusicInfo::JsonDeserialize(std::string& str,int32 dimenon){
 
 
 
-base_logic::DictionaryValue* MusicInfo::Release(){
+base_logic::DictionaryValue* MusicInfo::Release(bool all){
 	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+
+	//若是全获即all为true 取则URL 若为空则不添加
+	if(all&&(data_->hq_url_.empty()||data_->url_.empty()))
+		return NULL;
+
 	if(data_->id_!=0)
 		dict->SetBigInteger(L"id",data_->id_);
 	if(data_->clt_!=-1)
@@ -178,10 +189,12 @@ base_logic::DictionaryValue* MusicInfo::Release(){
 		dict->SetString(L"titile",data_->title_);
 #endif
 	}
+
 	if(!data_->hq_url_.empty())
 		dict->SetString(L"hq_url",data_->hq_url_);
 	if(!data_->pic_.empty())
 		dict->SetString(L"pic",data_->pic_);
+
 	if(!data_->pubtime_.empty())
 		dict->SetString(L"pubtime",data_->pubtime_);
 	if(!data_->url_.empty())

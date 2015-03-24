@@ -93,7 +93,7 @@ update.o:
 ######################musicproc###############################################
 MUSICPROC_PATH = /music
 OTJERPROC_VERSION = /v1
-musicproc:getcltsongs.fcgi getdimension.fcgi getdimensions.fcgi collectsong.fcgi
+musicproc:getcltsongs.fcgi getdimension.fcgi getdimensions.fcgi collectsong.fcgi delcltsong.fcgi
 
 getcltsongs.fcgi: getcltsongs.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs.fcgi
@@ -106,6 +106,9 @@ getdimensions.fcgi: getdimensions.o $(POBJ)
 
 collectsong.fcgi: collectsong.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/collectsong.fcgi
+	
+delcltsong.fcgi: delcltsong.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/delcltsong.fcgi
 
 ### 编译
 
@@ -120,6 +123,9 @@ getdimensions.o:
 
 collectsong.o:
 	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/collectsong/collectsong.cc
+	
+delcltsong.o:
+	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/delcltsong/delcltsong.cc
 clean:
 	-rm -f *.o
 	-rm -f $(OUTPUT_FILE)./*.fcgi

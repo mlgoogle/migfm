@@ -23,7 +23,7 @@ public:
 
 	MusicInfo& BaseCopy(const MusicInfo& music_info);
 
-	base_logic::DictionaryValue* Release();
+	base_logic::DictionaryValue* Release(bool all =true);
 
 
 	const int64 id() const {return data_->id_;}

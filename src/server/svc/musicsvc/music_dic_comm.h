@@ -21,6 +21,8 @@ public:
 	static void Dest();
 public:
 	static void SetCollect(const int64 uid,const int64 songid,const std::string& json);
+
+	static void DelCollect(const int64 uid,const int64 songid);
 };
 
 }
