@@ -34,6 +34,7 @@ bool Musiclogic::Init(){
 	basic_logic::PubDicComm::Init(config->redis_list_);
 
 	musicsvc_logic::MusicDicComm::Init(config->redis_list_);
+	musicsvc_logic::MemComm::Init(config->mem_list_);
 
 
 	musicsvc_logic::DBComm::Init(config->mysql_db_list_);
@@ -108,6 +109,12 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 		break;
 	case MUSIC_GAIN_DEL_COOLECT:
 		OnDelCollection(srv,socket,value);
+		break;
+	case MUSIC_GAIN_NEAR_MUSIC:
+		OnNearMusic(srv,socket,value);
+		break;
+	case MUSIC_GAIN_NEAR_USER:
+		OnNearUser(srv,socket,value);
 		break;
 	}
     return true;
@@ -281,6 +288,66 @@ bool Musiclogic::OnDelCollection(struct server *srv,const int socket,netcomm_rec
 bool Musiclogic::OnHateList(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
        		const void* msg,const int len){
 	return true;
+}
+
+bool Musiclogic::OnNearMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg,const int len ){
+	scoped_ptr<netcomm_recv::NearMusic> near_music(new netcomm_recv::NearMusic(netbase));
+	int error_code = near_music->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	std::map<int64,base_logic::UserAndMusic>infomap;
+	GetNearUserAndMusic(near_music->latitude(),near_music->longitude(),infomap);
+
+	scoped_ptr<netcomm_send::NearMusic> snear_music(new netcomm_send::NearMusic());
+	for(std::map<int64,base_logic::UserAndMusic>::iterator it = infomap.begin();
+			it!=infomap.end();it++){
+		base_logic::UserAndMusic info = it->second;
+		//判断如果没有听歌不发送
+		if(info.musicinfo_.id()!=0)
+			snear_music->set_info(info.Release(true,near_music->latitude(),near_music->longitude()));
+	}
+	send_message(socket,(netcomm_send::HeadPacket*)snear_music.get());
+
+	return true;
+}
+
+bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::NearUser> near_user(new netcomm_recv::NearUser(netbase));
+	int error_code = near_user->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	std::map<int64,base_logic::UserAndMusic>infomap;
+	GetNearUserAndMusic(near_user->latitude(),near_user->longitude(),infomap);
+
+	scoped_ptr<netcomm_send::NearUser> snear_user(new netcomm_send::NearUser());
+	for(std::map<int64,base_logic::UserAndMusic>::iterator it = infomap.begin();
+			it!=infomap.end();it++){
+		base_logic::UserAndMusic info = it->second;
+		snear_user->set_info(info.Release(true,near_user->latitude(),near_user->longitude()));
+	}
+	send_message(socket,(netcomm_send::HeadPacket*)snear_user.get());
+}
+
+
+void Musiclogic::GetNearUserAndMusic(const double latitude,const double longitude,
+		std::map<int64,base_logic::UserAndMusic>& infomap){
+	//判断如果有坐标则获取周边的人 如果为0 根据登陆获取
+	if(latitude==0 || longitude==0)
+		basic_logic::PubDBComm::GetUserInfoByLoginTime(infomap);
+	else
+		basic_logic::PubDBComm::GetUserInfoByLocation(infomap);
+	//获取对应用户的音乐
+	musicsvc_logic::MemComm::BatchGetCurrentSong(infomap);
 }
 
 }

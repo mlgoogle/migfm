@@ -31,6 +31,10 @@ public:
 
 	static void GetAvailableMusicInfo(std::map<int64,base_logic::MusicInfo>& map);
 
+	static void GetUserInfoByLoginTime(std::map<int64,base_logic::UserAndMusic>& map);
+
+	static void GetUserInfoByLocation(std::map<int64,base_logic::UserAndMusic>& map);
+
 };
 
 }

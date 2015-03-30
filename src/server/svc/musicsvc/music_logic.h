@@ -1,6 +1,7 @@
 #ifndef __MIGFM__MUSICSVC__MUSIC_LOGIC___
 #define __MIGFM__MUSICSVC__MUSIC_LOGIC___
 #include "net/music_comm_head.h"
+#include "logic/logic_infos.h"
 #include "common.h"
 
 #define DEFAULT_CONFIG_PATH     "./plugins/musicsvc/musicsvc_config.xml"
@@ -56,7 +57,16 @@ private:
     bool OnDimensionsList(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
+    bool OnNearMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg = NULL,const int len = 0);
+
+    bool OnNearUser(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg = NULL,const int len = 0);
+
 private:
+
+    void GetNearUserAndMusic(const double latitude,const double longitude,
+    		std::map<int64,base_logic::UserAndMusic>& infomap);
 
     bool Init();
 };

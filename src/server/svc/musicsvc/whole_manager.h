@@ -64,7 +64,7 @@ private:
 
 	void GetRadomin(RADOMIN_MAP& dimension_radomin,const int32 id,
 			int32 num,std::list<int32>& list);
-private:
+public:
 	void GetMusicInfo(MUSICINFO_MAP& list);
 public:
 	MusicCache* GetFindCache(){return this->music_cache_;}

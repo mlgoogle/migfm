@@ -202,4 +202,103 @@ void PubDBComm::GetMusicAbout(std::map<int64,base_logic::MusicInfo>& map){
 }
 
 
+void PubDBComm::GetUserInfoByLoginTime(std::map<int64,base_logic::UserAndMusic>& map){
+	bool r = false;
+#if defined (_DB_POOL_)
+	base_db::AutoMysqlCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return ;
+	}
+	//call proc_V2GetUserInfoByLoginTime()
+	os<<"call proc_V2GetUserInfoByLoginTime()";
+	std::string sql = os.str();
+	LOG_MSG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return ;
+	}
+
+	int num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			base_logic::UserAndMusic info;
+			if(rows[0]!=NULL)
+				info.userinfo_.set_uid(atoll(rows[0]));
+			if(rows[1]!=NULL)
+				info.userinfo_.set_sex(atol(rows[1]));
+			if(rows[2]!=NULL)
+				info.userinfo_.set_nickname(rows[2]);
+			if(rows[3]!=NULL)
+				info.userinfo_.set_source(atol(rows[3]));
+			if(rows[4]!=NULL)
+				info.userinfo_.set_city(rows[4]);
+			if(rows[5]!=NULL)
+				info.userinfo_.set_birthday(rows[5]);
+			if(rows[6]!=NULL)
+				info.userinfo_.set_head(rows[6]);
+			map[info.userinfo_.uid()] = info;
+		}
+	}
+}
+
+
+void PubDBComm::GetUserInfoByLocation(std::map<int64,base_logic::UserAndMusic>& map){
+	bool r = false;
+#if defined (_DB_POOL_)
+	base_db::AutoMysqlCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return ;
+	}
+	//call proc_V2GetUserInfoByLoginLocation()
+	os<<"call proc_V2GetUserInfoByLoginLocation()";
+	std::string sql = os.str();
+	LOG_MSG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return ;
+	}
+
+	int num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			base_logic::UserAndMusic info;
+			if(rows[0]!=NULL)
+				info.userinfo_.set_uid(atoll(rows[0]));
+			if(rows[1]!=NULL)
+				info.userinfo_.set_sex(atol(rows[1]));
+			if(rows[2]!=NULL)
+				info.userinfo_.set_nickname(rows[2]);
+			if(rows[3]!=NULL)
+				info.userinfo_.set_source(atol(rows[3]));
+			if(rows[4]!=NULL)
+				info.userinfo_.set_city(rows[4]);
+			if(rows[5]!=NULL)
+				info.lbsinfo_.set_latitude(atof(rows[5]));
+			if(rows[6]!=NULL)
+				info.lbsinfo_.set_longitude(atof(rows[6]));
+			if(rows[7]!=NULL)
+				info.userinfo_.set_birthday(rows[7]);
+			if(rows[8]!=NULL)
+				info.userinfo_.set_head(rows[8]);
+			map[info.userinfo_.uid()] = info;
+		}
+	}
+}
+
 }

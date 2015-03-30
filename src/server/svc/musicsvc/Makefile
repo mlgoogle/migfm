@@ -143,5 +143,5 @@ $(PLUGIN) : music_init.o music_logic.o whole_manager.o db_comm.o music_dic_comm.
 	logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o base64.o\
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl \
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl -lmemcached -lmemcachedutil \
 	$^ -o $@

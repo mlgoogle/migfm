@@ -6,9 +6,84 @@
  */
 #include "logic_infos.h"
 #include "logic_unit.h"
+#include "lbs/lbs_logic_unit.h"
 #include "basic/base64.h"
 
 namespace base_logic{
+
+UserInfo::UserInfo(){
+	data_ = new Data();
+}
+
+
+UserInfo::UserInfo(const UserInfo& userinfo)
+:data_(userinfo.data_){
+	if(data_!=NULL){
+		data_->AddRef();
+	}
+}
+
+UserInfo& UserInfo::operator =(const UserInfo& userinfo){
+	if(userinfo.data_!=NULL){
+		userinfo.data_->AddRef();
+	}
+
+	if(data_!=NULL){
+		data_->Release();
+	}
+	data_ = userinfo.data_;
+	return (*this);
+}
+
+base_logic::DictionaryValue* UserInfo::Release(){
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(data_->uid_!=0)
+		dict->SetBigInteger(L"uid",data_->uid_);
+#if defined(__OLD_VERSION__)
+		dict->SetString(L"userid",base::BasicUtil::StringUtil::Int64ToString(data_->uid_));
+#endif
+	if(data_->sex_!=0){
+#if defined(__OLD_VERSION__)
+		int64 i64sex = data_->sex_;
+		dict->SetString(L"sex",base::BasicUtil::StringUtil::Int64ToString(i64sex));
+#else
+		dict->SetBigInteger(L"sex",data_->sex_);
+#endif
+		dict->SetInteger(L"gender",data_->sex_);
+	}
+	if(data_->source_!=0){
+#if defined(__OLD_VERSION__)
+		int64 i64souce = data_->source_;
+		dict->SetString(L"source",base::BasicUtil::StringUtil::Int64ToString(i64souce));
+#else
+		dict->SetInteger(L"source",data_->source_);
+#endif
+		dict->SetInteger(L"plat",data_->source_);
+	}
+	if(data_->machine_!=0)
+		dict->SetInteger(L"machine",data_->machine_);
+	if(data_->type_!=0)
+		dict->SetInteger(L"type",data_->type_);
+	if(!data_->session_.empty())
+		dict->SetString(L"session",data_->session_);
+	if(!data_->imei_.empty())
+		dict->SetString(L"imei",data_->imei_);
+	if(!data_->nickname_.empty())
+		dict->SetString(L"nickname",data_->nickname_);
+	if(!data_->city_.empty()){
+		dict->SetString(L"city",data_->city_);
+		dict->SetString(L"location",data_->city_);
+	}
+	if(!data_->head_.empty())
+		dict->SetString(L"head",data_->head_);
+	if(!data_->birthday_.empty())
+		dict->SetString(L"birthday",data_->birthday_);
+	if(!data_->location_.empty())
+		dict->SetString(L"loaction",data_->location_);
+	if(!data_->token_.empty())
+		dict->SetString(L"token",data_->token_);
+	return dict.release();
+}
 
 //音乐
 MusicInfo::MusicInfo(){
@@ -235,6 +310,28 @@ LBSInfos& LBSInfos::operator =(const LBSInfos& lbs_basic_info){
 	return (*this);
 }
 
+base_logic::DictionaryValue* LBSInfos::Release(const double latitude,
+			const double longitude){
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(data_->latitude_!=0.0)
+		dict->SetReal(L"latitude",data_->latitude_);
+	if(data_->longitude_!=0.0)
+		dict->SetReal(L"longitude",data_->longitude_);
+	if(data_->longitude_!=0.0&&data_->latitude_!=0.0&&
+			latitude!=0.0&&longitude!=0.0)
+		dict->SetReal(L"distance",base_lbs::CalcGEO::CalcGEODistance(data_->latitude_,data_->longitude_,
+				latitude,longitude));
+	if(!data_->city_.empty())
+		dict->SetString(L"city",data_->city_);
+	if(!data_->district_.empty())
+		dict->SetString(L"district",data_->district_);
+	if(!data_->province_.empty())
+		dict->SetString(L"province",data_->province_);
+	if(!data_->street_.empty())
+		dict->SetString(L"street",data_->street_);
+
+	return dict.release();
+}
 
 Dimension::Dimension(){
 	data_ = new Data();
@@ -298,6 +395,40 @@ void Dimensions::dimension_name(const int64 id,std::string& name){
 	else
 		name = UNKONW_DIMENSIONS;
 }
+
+
+////组合////
+UserAndMusic::UserAndMusic(){
+
+}
+
+UserAndMusic::UserAndMusic(const UserAndMusic& user_music){
+	this->userinfo_ = user_music.userinfo_;
+	this->musicinfo_ = user_music.musicinfo_;
+	this->lbsinfo_ = user_music.lbsinfo_;
+}
+
+UserAndMusic& UserAndMusic::operator =(const UserAndMusic& user_music){
+	this->userinfo_ = user_music.userinfo_;
+	this->musicinfo_ = user_music.musicinfo_;
+	this->lbsinfo_ = user_music.lbsinfo_;
+	return (*this);
+}
+
+base_logic::DictionaryValue* UserAndMusic::Release(bool all,double latitude,
+		double longitude){
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(musicinfo_.id()!=0)
+		dict->Set(L"music",musicinfo_.Release(all));
+	if(userinfo_.uid()!=0)
+		dict->Set(L"userinfo",userinfo_.Release());
+	if(lbsinfo_.latitude()!=0.0&lbsinfo_.longitude()!=0.0)
+		dict->Set(L"poi",lbsinfo_.Release(latitude,longitude));
+	dict->SetString(L"songstat","0");
+	return dict.release();
+}
+
+
 
 }
 

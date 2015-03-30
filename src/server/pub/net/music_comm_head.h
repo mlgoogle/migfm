@@ -213,6 +213,44 @@ private:
 	int64           num_;
 };
 
+class NearMusic:public LoginHeadPacket{
+public:
+	NearMusic(NetBase* m)
+	:LoginHeadPacket(m){
+		Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		r = m_->GetReal(L"longitude",&longitude_);
+		if(!r) longitude_ = 0.0;
+		r = m_->GetReal(L"latitude",&latitude_);
+		if(!r) latitude_ = 0.0;
+		r = m_->GetBigInteger(L"radius",&radius_);
+		if(!r) radius_ = 1000;
+		r = m_->GetBigInteger(L"page_index",&page_index_);
+		if(!r) page_index_ = 0;
+		r = m_->GetBigInteger(L"page_size",&page_size_);
+		if(!r) page_size_ = 10;
+	}
+
+	const double longitude() const {return this->longitude_;}
+	const double latitude()  const {return this->latitude_;}
+	const int64 radius() const {return this->radius_;}
+	const int64 page_index() const {return this->page_index_;}
+	const int64 page_size() const {return this->page_size_;}
+
+
+private:
+	double longitude_;
+	double latitude_;
+	int64  radius_;
+	int64  page_index_;
+	int64  page_size_;
+};
+
+typedef NearMusic NearUser;
+
 }
 
 namespace netcomm_send{
@@ -241,6 +279,30 @@ private:
 
 };
 
+class NearMusic:public HeadPacket{
+public:
+	NearMusic(){
+		base_.reset(new netcomm_send::NetBase());
+		list_.reset(new base_logic::ListValue());
+	}
+
+	netcomm_send::NetBase* release(){
+		if(!list_->empty())
+			this->base_->Set(L"nearUser",list_.release());
+		head_->Set("result",base_.release());
+		this->set_status(1);
+		return head_.release();
+	}
+
+	void set_info(base_logic::DictionaryValue* info){
+		list_->Append(info);
+	}
+private:
+	scoped_ptr<netcomm_send::NetBase>             base_;
+	scoped_ptr<base_logic::ListValue>             list_;
+};
+
+typedef NearMusic NearUser;
 
 }
 

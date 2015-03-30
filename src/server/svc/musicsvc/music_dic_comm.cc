@@ -6,9 +6,11 @@
  */
 
 #include "music_dic_comm.h"
+#include "whole_manager.h"
 #include "dic/base_dic_redis_auto.h"
 #include "basic/basic_util.h"
 #include <string>
+#include <sstream>
 
 namespace musicsvc_logic{
 
@@ -57,6 +59,52 @@ void MusicDicComm::DelCollect(const int64 uid,const int64 songid){
 	redis_engine_->DelHashElement(hash_name.c_str(),key.c_str(),key.length());
 }
 
+
+
+/////
+
+base_storage::DictionaryStorageEngine* MemComm::engine_ = NULL;
+
+void MemComm::Init(std::list<base::ConnAddr>& addrlist){
+	engine_ = base_storage::DictionaryStorageEngine::Create(base_storage::IMPL_MEM);
+	engine_->Connections(addrlist);
+}
+
+void MemComm::Dest(){
+	if (engine_){
+		delete engine_;
+		engine_ = NULL;
+	}
+}
+
+void MemComm::BatchGetCurrentSong(std::map<int64,base_logic::UserAndMusic>& map){
+	//可批处理提取
+	std::stringstream ss;
+	bool r = false;
+	MUSICINFO_MAP infomap;
+	for (std::map<int64,base_logic::UserAndMusic>::const_iterator it=map.begin();
+			it!=map.end(); ++it) {
+		ss.str("");
+		ss << "cur" << it->first;
+		const std::string key =ss.str();
+		char* data = NULL;
+		size_t len = 0;
+		r = engine_->GetValue(key.c_str(),key.length(),&data,&len);
+		if(r){
+			std::string value;
+			value.assign(data,len);
+			MIG_DEBUG(USER_LEVEL,"key[%s] value[%s]",key.c_str(),data);
+			base_logic::UserAndMusic info = it->second;
+			info.musicinfo_.JsonSeralize(value);
+			//获取完整信息
+			infomap[info.musicinfo_.id()] = info.musicinfo_;
+		}
+		if(data){delete [] data; data = NULL;}
+	}
+	musicsvc_logic::CacheManagerOp::GetWholeManager()->GetMusicInfo(infomap);
+
+
+}
 }
 
 

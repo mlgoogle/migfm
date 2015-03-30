@@ -93,7 +93,7 @@ update.o:
 ######################musicproc###############################################
 MUSICPROC_PATH = /music
 OTJERPROC_VERSION = /v1
-musicproc:getcltsongs.fcgi getdimension.fcgi getdimensions.fcgi collectsong.fcgi delcltsong.fcgi
+musicproc:getcltsongs.fcgi getdimension.fcgi getdimensions.fcgi collectsong.fcgi delcltsong.fcgi nearmusic.fcgi
 
 getcltsongs.fcgi: getcltsongs.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs.fcgi
@@ -109,6 +109,9 @@ collectsong.fcgi: collectsong.o $(POBJ)
 	
 delcltsong.fcgi: delcltsong.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/delcltsong.fcgi
+
+nearmusic.fcgi: nearmusic.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/nearmusic.fcgi
 
 ### 编译
 
@@ -126,6 +129,9 @@ collectsong.o:
 	
 delcltsong.o:
 	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/delcltsong/delcltsong.cc
+
+nearmusic.o:
+	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/nearmusic/nearmusic.cc
 clean:
 	-rm -f *.o
 	-rm -f $(OUTPUT_FILE)./*.fcgi
@@ -137,7 +143,7 @@ delete-temp-file:
 ######################socproc###############################################
 SOCPROC_PATH = /soc
 OTJERPROC_VERSION = /v1
-socproc:getbarragecomm.fcgi getlocation.fcgi sayhello.fcgi presentsong.fcgi
+socproc:getbarragecomm.fcgi getlocation.fcgi sayhello.fcgi presentsong.fcgi nearuser.fcgi
 
 getbarragecomm.fcgi: getbarragecomm.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/getbarragecomm.fcgi
@@ -150,6 +156,9 @@ sayhello.fcgi: sayhello.o $(POBJ)
 	
 presentsong.fcgi: presentsong.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/presentsong.fcgi
+
+nearuser.fcgi: nearuser.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/nearuser.fcgi
 ### 编译
 
 getbarragecomm.o:
@@ -163,6 +172,9 @@ sayhello.o:
 	
 presentsong.o:
 	$(COMPILE) .$(SOCPROC_PATH)$(OTJERPROC_VERSION)/presentsong/presentsong.cc
+
+nearuser.o:
+	$(COMPILE) .$(SOCPROC_PATH)$(OTJERPROC_VERSION)/nearuser/nearuser.cc
 	
 
 clean:
