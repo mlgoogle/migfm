@@ -27,6 +27,11 @@ public:
 	static void SetCollect(const int64 uid,const int64 songid,const std::string& json);
 
 	static void DelCollect(const int64 uid,const int64 songid);
+
+	static void SetHate(const int64 uid,const int64 songid, const std::string& json);
+private:
+	static void SetMusicHashInfo(const std::string& hash_name,const std::string& key,
+			const std::string& json);
 };
 
 class MemComm{

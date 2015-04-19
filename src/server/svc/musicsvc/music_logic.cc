@@ -107,7 +107,7 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	case MUSIC_GAIN_SET_COLLECT:
 		OnSetCollection(srv,socket,value);
 		break;
-	case MUSIC_GAIN_DEL_COOLECT:
+	case MUSIC_GAIN_DEL_COLLECT:
 		OnDelCollection(srv,socket,value);
 		break;
 	case MUSIC_GAIN_NEAR_MUSIC:
@@ -116,6 +116,10 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	case MUSIC_GAIN_NEAR_USER:
 		OnNearUser(srv,socket,value);
 		break;
+	case MUSIC_GAIN_SET_HATE:
+		OnHateList(srv,socket,value);
+		break;
+
 	}
     return true;
 }
@@ -236,6 +240,7 @@ bool Musiclogic::OnCollectList(struct server *srv,const int socket,netcomm_recv:
 	scoped_ptr<netcomm_send::MusicList> smusiclist(new netcomm_send::MusicList());
 	for(MUSICINFO_MAP::iterator it = music_list.begin();it!=music_list.end();){
 		base_logic::MusicInfo info = it->second;
+		info.set_like(PFE_LIKE);
 		base_logic::DictionaryValue* dict = info.Release();
 		if(dict!=NULL)
 			smusiclist->set_list(dict);
@@ -287,6 +292,22 @@ bool Musiclogic::OnDelCollection(struct server *srv,const int socket,netcomm_rec
 
 bool Musiclogic::OnHateList(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
        		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::SetHateCollect> collect(new netcomm_recv::SetHateCollect(netbase));
+	int error_code = collect->GetResult();
+	int64 group_id = 0;
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+	//设置
+	base_logic::MusicInfo musicinfo;
+	musicinfo.set_id(collect->songid());
+	musicsvc_logic::CacheManagerOp::GetWholeManager()->SetHatList(collect->uid(),musicinfo);
+
+	scoped_ptr<netcomm_send::HeadPacket> head(new netcomm_send::HeadPacket());
+	head->set_status(1);
+	send_message(socket,(netcomm_send::HeadPacket*)head.get());
 	return true;
 }
 
@@ -326,14 +347,17 @@ bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::Ne
 		return false;
 	}
 
+	int i = 0;
+
 	std::map<int64,base_logic::UserAndMusic>infomap;
 	GetNearUserAndMusic(near_user->latitude(),near_user->longitude(),infomap);
 
 	scoped_ptr<netcomm_send::NearUser> snear_user(new netcomm_send::NearUser());
-	for(std::map<int64,base_logic::UserAndMusic>::iterator it = infomap.begin();
-			it!=infomap.end();it++){
+	for(std::map<int64,base_logic::UserAndMusic>::iterator it = infomap.end();
+			it!=infomap.begin()&&i<near_user->page_size();it--,i++){
 		base_logic::UserAndMusic info = it->second;
-		snear_user->set_info(info.Release(true,near_user->latitude(),near_user->longitude()));
+		if(info.userinfo_.uid()>0)
+			snear_user->set_info(info.Release(true,near_user->latitude(),near_user->longitude()));
 	}
 	send_message(socket,(netcomm_send::HeadPacket*)snear_user.get());
 }

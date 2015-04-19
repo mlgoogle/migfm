@@ -56,6 +56,9 @@ public:
 private:
 	int64 songid_;
 };
+
+typedef DelCollect SetHateCollect;
+
 class SetCollect:public LoginHeadPacket{
 public:
 	SetCollect(NetBase* m)
@@ -231,7 +234,7 @@ public:
 		r = m_->GetBigInteger(L"page_index",&page_index_);
 		if(!r) page_index_ = 0;
 		r = m_->GetBigInteger(L"page_size",&page_size_);
-		if(!r) page_size_ = 10;
+		if(!r) page_size_ = 5;
 	}
 
 	const double longitude() const {return this->longitude_;}
@@ -287,8 +290,9 @@ public:
 	}
 
 	netcomm_send::NetBase* release(){
-		if(!list_->empty())
+		if(!list_->empty()){
 			this->base_->Set(L"nearUser",list_.release());
+		}
 		head_->Set("result",base_.release());
 		this->set_status(1);
 		return head_.release();

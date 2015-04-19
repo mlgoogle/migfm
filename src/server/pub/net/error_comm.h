@@ -47,6 +47,7 @@ enum errorcode{
 
 
 #define STRUCT_ERROR_STR                  "请求结构错误"
+#define UNKOWN_ERROR_STR                  "未知错误"
 #define TYPE_LACK_STR                     "类别不存在"
 #define PLATFORM_LACK_STR                 "平台号不存在"
 #define UID_LACK_STR                      "缺少用户ID"

@@ -13,6 +13,10 @@
 #include <map>
 namespace musicsvc_logic{
 
+enum PFE{
+	PFE_LIKE = 1,
+	PFE_HATE = 0
+};
 
 class DimensionCache{
 public:
@@ -27,14 +31,6 @@ public:
 	DimensionCache                channel_dimension_;
 	DimensionCache                mood_dimension_;
 	DimensionCache                scene_dimension_;
-	/*MULTI_DIMENSION_MAP          channel_dimension_;
-	MULTI_DIMENSION_MAP          mood_dimension_;
-	MULTI_DIMENSION_MAP          scene_dimension_;
-
-	MULTI_DIMENSION_VEC         channel_dimension_vec_;
-	MULTI_DIMENSION_VEC         mood_dimension_vec_;
-	MULTI_DIMENSION_VEC         scene_dimension_vec_;*/
-
 };
 
 class WholeManager: public base_logic::BaseWholeManager{
@@ -52,6 +48,8 @@ public:
 
 	void DelCollectSong(const int64 uid,const int64 songid);
 
+	void SetHatList(const int64 uid,base_logic::MusicInfo& music);
+
 	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,
 			const int64 num = 10);
 
@@ -64,6 +62,9 @@ private:
 
 	void GetRadomin(RADOMIN_MAP& dimension_radomin,const int32 id,
 			int32 num,std::list<int32>& list);
+
+	void SetMusicPreference(const int64 uid,base_logic::MusicInfo& music,MUSICINFONLIST_MAP& map,
+			void (*redis_set)(const int64,const int64, const std::string&));
 public:
 	void GetMusicInfo(MUSICINFO_MAP& list);
 public:

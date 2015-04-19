@@ -7,8 +7,8 @@
 //#include "client/linux/handler/exception_handler.h"
 
 // TODO: 设置请求类型
-#define GET_TYPE		MUSIC_GAIN_DEL_COLLECT
-#define POST_TYPE		MUSIC_GAIN_DEL_COLLECT
+#define GET_TYPE		MUSIC_GAIN_SET_HATE
+#define POST_TYPE		MUSIC_GAIN_SET_HATE
 
 #if defined (FCGI_STD)
 #include "fcgi_stdio.h"

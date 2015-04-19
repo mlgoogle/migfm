@@ -134,8 +134,38 @@ void WholeManager::DelCollectSong(const int64 uid,const int64 songid){
 	}
 }
 
-void WholeManager::SetCollectSong(const int64 uid,base_logic::MusicInfo& music){
+
+void WholeManager::SetMusicPreference(const int64 uid,base_logic::MusicInfo& music,MUSICINFONLIST_MAP& map,
+		void (*redis_set)(const int64,const int64, const std::string&)){
 	bool r = false;
+	std::string str_json;
+	MUSICINFO_MAP music_list;
+	//写入redis
+	music.JsonDeserialize(str_json,1);
+	redis_set(uid,music.id(),str_json);
+	{
+		base_logic::WLockGd lk(lock_);
+		//读取完整信息存入缓存
+		r = base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,
+				int64,base_logic::MusicInfo >(music_cache_->music_info_map_,music.id(),music);
+
+		//写入个人红心歌单
+		r = base::MapGet<MUSICINFONLIST_MAP,MUSICINFONLIST_MAP::iterator,
+					int64,MUSICINFO_MAP >(map,uid,music_list);
+		if(!r)
+			return;
+		r =base::MapAdd<MUSICINFO_MAP,int64,base_logic::MusicInfo>
+		(music_list,music.id(),music);
+		if(!r)
+			return;
+		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP>
+		(map,uid,music_list);
+	}
+}
+
+void WholeManager::SetCollectSong(const int64 uid,base_logic::MusicInfo& music){
+	SetMusicPreference(uid,music,music_cache_->collect_map_,musicsvc_logic::MusicDicComm::SetCollect);
+	/*bool r = false;
 	std::string str_json;
 	//写入redis
 	music.JsonDeserialize(str_json,1);
@@ -158,9 +188,39 @@ void WholeManager::SetCollectSong(const int64 uid,base_logic::MusicInfo& music){
 			return;
 		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP>
 		(music_cache_->collect_map_,uid,music_list);
-	}
+	}*/
 
 }
+
+void WholeManager::SetHatList(const int64 uid,base_logic::MusicInfo& music){
+	SetMusicPreference(uid,music,music_cache_->hate_map_,musicsvc_logic::MusicDicComm::SetHate);
+	/*bool r = false;
+	std::string str_json;
+	MUSICINFO_MAP music_list;
+	music.JsonDeserialize(str_json,1);
+	musicsvc_logic::MusicDicComm::SetHate(uid,music.id(),str_json);
+	{
+		base_logic::WLockGd lk(lock_);
+		//读取完整信息存入缓存
+		r = base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,
+				int64,base_logic::MusicInfo >(music_cache_->music_info_map_,music.id(),music);
+
+		//写入个人红心歌单
+		r = base::MapGet<MUSICINFONLIST_MAP,MUSICINFONLIST_MAP::iterator,
+					int64,MUSICINFO_MAP >(music_cache_->hate_map_,uid,music_list);
+		if(!r)
+			return;
+		r =base::MapAdd<MUSICINFO_MAP,int64,base_logic::MusicInfo>
+		(music_list,music.id(),music);
+		if(!r)
+			return;
+		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP>
+		(music_cache_->hate_map_,uid,music_list);
+	}*/
+}
+
+
+
 void WholeManager::GetCollectList(const int64 uid,MUSICINFO_MAP& music_list){
 	GetMusicListT(uid,music_cache_->collect_map_,music_list,basic_logic::PubDicComm::GetColllectList);
 	GetMusicInfo(music_list);

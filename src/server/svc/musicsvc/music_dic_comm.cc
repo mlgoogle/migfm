@@ -39,10 +39,22 @@ void MusicDicComm::SetCollect(const int64 uid,const int64 songid,const std::stri
 	std::string hash_name;
 	hash_name = "h10113clt";
 	std::string key  = base::BasicUtil::StringUtil::Int64ToString(songid);
+	SetMusicHashInfo(hash_name,key,json);
+}
+
+void MusicDicComm::SetHate(const int64 uid,const int64 songid,const std::string& json){
+	std::string hash_name;
+	//key: huid_ht
+	hash_name = "h10113ht";
+	std::string key = base::BasicUtil::StringUtil::Int64ToString(songid);
+	SetMusicHashInfo(hash_name,key,json);
+}
+
+void MusicDicComm::SetMusicHashInfo(const std::string& hash_name,const std::string& key,
+			const std::string& json){
 	base_dic::AutoDicCommEngine auto_engine;
-	base_storage::DictionaryStorageEngine* redis_engine_  = auto_engine.GetDicEngine();
-	//redis_engine_->SetValue(key.c_str(),key.length(),json.c_str(),json.length());
-	redis_engine_->SetHashElement(hash_name.c_str(),key.c_str(),
+	base_storage::DictionaryStorageEngine* redis_engine = auto_engine.GetDicEngine();
+	redis_engine->SetHashElement(hash_name.c_str(),key.c_str(),
 			key.length(),json.c_str(),json.length());
 }
 

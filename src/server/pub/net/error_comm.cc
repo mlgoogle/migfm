@@ -29,6 +29,8 @@ miyo_strerror(int error_code){
 		  return GROUP_ID_LACK_STR;
 	  case TID_LACK:
 		  return TID_LACK_STR;
+	  default:
+		  return UNKOWN_ERROR_STR;
 	}
 }
 
