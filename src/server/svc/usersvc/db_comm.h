@@ -26,7 +26,7 @@ public:
 	static bool OnQuickRegister(usersvc_logic::UserInfo& userinfo,
 				base_logic::LBSInfos* lbsinfo);
 
-	static bool OnLoginRecord(const int64 uid,base_logic::LBSInfos* lbsinfo);
+	static bool OnLoginRecord(const int64 uid,const int32 plt,base_logic::LBSInfos* lbsinfo);
 
 	static bool OnUpdateUserInfo(usersvc_logic::UserInfo& userinfo);
 };

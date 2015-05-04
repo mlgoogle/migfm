@@ -36,12 +36,16 @@ public:
 	void set_session(const std::string& session) {data_->session_ = session;}
 	void set_birthday(const std::string& birthday){data_->birthday_ = birthday;}
 	void set_token(const std::string& token){data_->token_ = token;}
+	void set_plt(const int32 plt){data_->plt_ = plt;}
+
+
 	const int64 uid() {return data_->uid_;}
 	const int32 sex() {return data_->sex_;}
 	const int32 machine() {return data_->machine_;}
 	const int64 logintime() {return data_->logintime_;}
 	const int32 type() {return data_->type_;}
 	const int32 souce() {return data_->source_;}
+	const int32 plt() {return data_->plt_;}
 	const std::string& imei() {return data_->imei_;}
 	const std::string& nickname() {return data_->nickname_;}
 	const std::string& city() {return data_->city_;}
@@ -61,7 +65,8 @@ private:
 			,machine_(0)
 			,logintime_(0)
 			,type_(0)
-			,source_(0){}
+			,source_(0)
+			,plt_(0){}
 	public:
 		int64 uid_;
 		int32 sex_;
@@ -69,6 +74,7 @@ private:
 		int64 logintime_;
 		int32 type_;
 		int32 source_;
+		int32 plt_;
 		std::string session_;
 		std::string imei_;
 		std::string nickname_;

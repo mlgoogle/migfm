@@ -249,6 +249,8 @@ base_logic::DictionaryValue* MusicInfo::Release(bool all){
 		dict->SetBigInteger(L"hot",data_->hot_);
 	if(data_->like_!=-1)
 		dict->SetInteger(L"like",data_->like_);
+	else
+		dict->SetInteger(L"like",0);
 	if(data_->class_!=-1)
 		dict->SetInteger(L"tid",data_->class_);
 	if(!data_->class_name_.empty())

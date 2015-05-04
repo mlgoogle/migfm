@@ -70,17 +70,18 @@ public:
 		bool r = false;
 		GETBIGINTTOINT(L"songid",songid_);
 		if(!r) error_code_ = MUSIC_SONG_ID_LACK;
-#if defined(__OLD_VERSION__)
+
 		GETBIGINTTOINT(L"typeid",dimemsion_id_);
-#else
-		GETBIGINTTOINT(L"sid",dimemsion_id_);
-#endif
+
+		if(!r){
+			GETBIGINTTOINT(L"sid",dimemsion_id_);
+		}
+
 		if(!r) error_code_ = MUSIC_TYPE_ID_LACK;
-#if defined(__OLD_VERSION__)
+
 		r = m_->GetString(L"modetype",&dimension_alais_);
-#else
-		r = m_->GetString(L"dimension",&dimension_alais_);
-#endif
+		if(!r)
+			r = m_->GetString(L"dimension",&dimension_alais_);
 		if(!r) error_code_ = MUSIC_TYPE_LACK;
 	}
 

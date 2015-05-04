@@ -1,5 +1,5 @@
 /*
- * user_comm_head.h
+  * user_comm_head.h
  *
  *  Created on: 2014年11月17日
  *      Author: kerry
@@ -90,6 +90,9 @@ public:
 
 		GETBIGINTTOINT(L"sex",sex_);
 
+		GETBIGINTTOINT(L"plat",plt_);
+		if(!r) plt_ = 10000;
+
 
 
 		//if(!r) error_code_ = SEX_LACK;
@@ -137,6 +140,7 @@ public:
 	const inline double& logtitude() const {return this->longitude_;}
 	const inline std::string& imei() const {return this->imei_;}
 	const inline std::string& session() const {return this->session_;}
+	const inline int32 plat() const {return this->plt_;}
 
 
 private:
@@ -144,6 +148,7 @@ private:
 	std::string nickname_;
 	int32 source_;
 	int32 sex_;
+	int32 plt_;
 	union{
 		int64        wb_session_;
 		std::string* qq_session_;
@@ -162,23 +167,19 @@ class LoginRecord:public LoginHeadPacket{
 public:
 	LoginRecord(NetBase* m)
 	:LoginHeadPacket(m){
-		//Init();
+		Init();
 	}
 
 	void Init(){
-		/*bool r = false;
-		r = m_->GetReal(L"latitude",&latitude_);
-		if(!r) latitude_ = 0;
-		r = m_->GetReal(L"longitude",&longitude_);
-		if(!r) longitude_ = 0;*/
+		bool r = false;
+		GETBIGINTTOINT(L"plat",plt_);
+		if(!r) plt_ = 10000;
 	}
-/*
-	const double latitude() const {return this->latitude_;}
-	const double longitude() const {return this->longitude_;}
+
+	const int64 plt() const {return this->plt_;}
+
 private:
-	double         latitude_;
-	double         longitude_;
-	*/
+	int64  plt_;
 };
 
 
