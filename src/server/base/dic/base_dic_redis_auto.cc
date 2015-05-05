@@ -122,31 +122,6 @@ void RedisOperation::GetBatchInfos(base_storage::DictionaryStorageEngine*engine,
 	return true;
 }*/
 
-base_storage::CommandReply* RedisOperation::_CreateReply(redisReply* reply){
-	switch (reply->type) {
-	case REDIS_REPLY_STATUS:
-		return new base_storage::ErrorReply(std::string(reply->str, reply->len));
-	case REDIS_REPLY_NIL:
-		return new base_storage::CommandReply(CommandReply::REPLY_NIL);
-	case REDIS_REPLY_STATUS:
-		return new base_storage::StatusReply(std::string(reply->str, reply->len));
-	case REDIS_REPLY_INTEGER:
-		return new base_storage::IntegerReply(reply->integer);
-	case REDIS_REPLY_STRING:
-		return new base_storage::StringReply(std::string(reply->str, reply->len));
-	case REDIS_REPLY_ARRAY: {
-		base_storage::ArrayReply *rep = new base_storage::ArrayReply();
-			for (size_t i = 0; i < reply->elements; ++i) {
-				if (base_storage::CommandReply *cr = _CreateReply(reply->element[i]))
-					rep->value.push_back(cr);
-			}
-			return rep;
-		}
-	default:
-		break;
-	}
-	return NULL;
-}
 
 
 

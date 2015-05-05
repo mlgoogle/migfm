@@ -9,12 +9,12 @@
 #define BASE_DIC_REDIS_AUTO_H_
 
 #include "storage/storage.h"
+#include "storage/redis_storage_impl.h"
 #include "basic/basictypes.h"
 #include "basic/basic_info.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
 #include "logic/logic_comm.h"
-#include "storage/storage.h"
 
 namespace base_dic{
 
@@ -43,7 +43,7 @@ public:
 	RedisOperation(){}
 	virtual ~RedisOperation(){}
 public:
-	base_storage::CommandReply* _CreateReply(redisReply* reply);
+	//base_storage::CommandReply* _CreateReply(redisReply* reply);
 
 	/*template <typename Container>
 	void GetBatchInfos(base_storage::DictionaryStorageEngine*engine,
