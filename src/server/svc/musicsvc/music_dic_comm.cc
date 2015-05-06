@@ -89,6 +89,15 @@ void MemComm::Dest(){
 	}
 }
 
+void MemComm::SetUserCurrentMusic(const int64 uid,const std::string& json){
+	//key cur+uid cur100000
+	bool r = false;
+	std::string key = "cur";
+	key.append(base::BasicUtil::StringUtil::Int64ToString(uid));
+	engine_->SetValue(key.c_str(),key.length(),
+			json.c_str(),json.length());
+}
+
 void MemComm::BatchGetCurrentSong(std::map<int64,base_logic::UserAndMusic>& map){
 	//可批处理提取
 	std::stringstream ss;

@@ -93,7 +93,7 @@ update.o:
 ######################musicproc###############################################
 MUSICPROC_PATH = /music
 OTJERPROC_VERSION = /v1
-musicproc:getcltsongs.fcgi getdimension.fcgi getdimensions.fcgi collectsong.fcgi delcltsong.fcgi nearmusic.fcgi hatesong.fcgi
+musicproc:getcltsongs.fcgi getdimension.fcgi getdimensions.fcgi collectsong.fcgi delcltsong.fcgi nearmusic.fcgi hatesong.fcgi recordcursong.fcgi
 
 getcltsongs.fcgi: getcltsongs.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/getcltsongs.fcgi
@@ -116,6 +116,9 @@ nearmusic.fcgi: nearmusic.o $(POBJ)
 hatesong.fcgi: hatesong.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/hatesong.fcgi
 
+recordcursong.fcgi: recordcursong.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/recordcursong.fcgi
+	
 ### 编译
 
 getcltsongs.o:
@@ -138,6 +141,9 @@ nearmusic.o:
 	
 hatesong.o:
 	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/hatesong/hatesong.cc
+
+recordcursong.o:
+	$(COMPILE) .$(MUSICPROC_PATH)$(OTJERPROC_VERSION)/recordcursong/recordcursong.cc
 clean:
 	-rm -f *.o
 	-rm -f $(OUTPUT_FILE)./*.fcgi

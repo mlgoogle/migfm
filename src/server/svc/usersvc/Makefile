@@ -12,11 +12,13 @@
 
 LIB_DIR = ./../../../library
 USER_DIR = ../../pub
+ROBOT_PATH = ../../robot
 SO_DIR = ../../bin/hfcrsrvV2/plugins
 
 THIRD_PATH = $(LIB_DIR)/public
 
 CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
+
 
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
@@ -39,6 +41,7 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
 				-I$(LIB_DIR)/base\
+				-I$(ROBOT_PATH)
 
 
 # House-keeping build targets.
@@ -129,6 +132,6 @@ $(PLUGIN) : user_init.o user_logic.o user_basic_info.o db_comm.o dic_comm.o\
 	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o\
 	logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a $(LIB_DIR)/lib/robot_interface.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lmemcached -lmemcachedutil -lcurl \
 	$^ -o $@

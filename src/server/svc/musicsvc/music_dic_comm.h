@@ -41,6 +41,8 @@ public:
 	static void Init(std::list<base::ConnAddr>& addrlist);
 	static void Dest();
 
+	static void SetUserCurrentMusic(const int64 uid,const std::string& json);
+
 	static void BatchGetCurrentSong(std::map<int64,base_logic::UserAndMusic>& map);
 private:
 	static base_storage::DictionaryStorageEngine* engine_;

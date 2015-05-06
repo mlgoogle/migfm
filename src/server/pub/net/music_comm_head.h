@@ -255,6 +255,64 @@ private:
 
 typedef NearMusic NearUser;
 
+
+class RecordMusic:public LoginHeadPacket{
+public:
+	RecordMusic(NetBase* m)
+	:LoginHeadPacket(m){
+		Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		std::string singer;
+		std::string music;
+
+		r = m_->GetBigInteger(L"cursong",&current_song_id_);
+		if(!r) error_code_ = MUSIC_SONG_ID_LACK;
+
+		r = m_->GetBigInteger(L"typeid",&dimension_sub_id_);
+		if(!r) error_code_ = MUSIC_TYPE_ID_LACK;
+
+		r = m_->GetString(L"mode",&dimension_name_);
+		if(!r) error_code_ = MUSIC_TYPE_LACK;
+
+		r = m_->GetBigInteger(L"lastsong",&last_song_id_);
+		if(!r) last_song_id_ = 0;
+
+		r = m_->GetBigInteger(L"state",&state_);
+		if(!r) state_ = 0;
+
+		r = m_->GetString(L"singer",&singer);
+		if(!r)
+			singer_ = "佚名";
+		else
+			base::BasicUtil::UrlDecode(singer,singer_);
+
+		r = m_->GetString(L"song",&music);
+		if(!r)
+			name_ = "未知";
+		else
+			base::BasicUtil::UrlDecode(name_,name_);
+	}
+
+	const int64 last_song_id() const {return this->last_song_id_;}
+	const int64 current_song_id() const {return this->current_song_id_;}
+	const int64 dimension_sub_id() const {return this->dimension_sub_id_;}
+	const int64 state() const {return this->state_;}
+	const std::string& singer() const {return this->singer_;}
+	const std::string& name() const {return this->name_;}
+	const std::string& dimension_name() const {return this->dimension_name_;}
+
+private:
+	int64  last_song_id_;
+	int64  current_song_id_;
+	int64  dimension_sub_id_;
+	int64  state_;
+	std::string singer_;
+	std::string name_;
+	std::string dimension_name_;
+};
 }
 
 namespace netcomm_send{

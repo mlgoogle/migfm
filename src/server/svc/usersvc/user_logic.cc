@@ -9,6 +9,7 @@
 #include "pushmsg/push_connector.h"
 #include "basic/scoped_ptr.h"
 #include "logic/logic_comm.h"
+#include "intertface/robot_interface.h"
 #include "config/config.h"
 #include "common.h"
 
@@ -27,6 +28,7 @@ Userlogic::~Userlogic(){
 	base_lbs::LocationServer::Dest();
 	base_push::PushConnectorEngine::FreePushConnectorEngine();
 	usersvc_logic::DBComm::Dest();
+	usersvc_logic::UserDicComm::Dest();
 }
 
 bool Userlogic::Init(){
@@ -120,7 +122,7 @@ bool Userlogic::OnUserClose(struct server *srv,const int socket){
 
 
 bool Userlogic::OnBroadcastConnect(struct server *srv, const int socket, const void *msg,const int len){
-
+	robot_server_socket_ = socket;
     return true;
 }
 
@@ -192,6 +194,7 @@ bool Userlogic::OnThirdLogin(struct server *srv,const int socket,netcomm_recv::N
 	usersvc_logic::UserInfo userinfo;
 	std::string token;
 	bool r = false;
+	int64 uid = 0;
 	int error_code = login->GetResult();
 	if(error_code!=0){
 		//发送错误数据
@@ -219,6 +222,7 @@ bool Userlogic::OnThirdLogin(struct server *srv,const int socket,netcomm_recv::N
 	base_logic::LogicUnit::CreateToken(userinfo.uid(),token);
 	userinfo.set_token(token);
 	scoped_ptr<netcomm_send::Login> qlogin(new netcomm_send::Login());
+	uid = userinfo.uid();
 	qlogin->set_userinfo(userinfo.Release());
 /*
 	qlogin->set_userinfo_address(userinfo.city());
@@ -228,6 +232,8 @@ bool Userlogic::OnThirdLogin(struct server *srv,const int socket,netcomm_recv::N
 	qlogin->set_userinfo_source(userinfo.type());
 	qlogin->set_useromfo_head(userinfo.head());*/
 	send_message(socket,(netcomm_send::HeadPacket*)qlogin.get());
+	//启动通知机器人上线
+	NoticeUserLogin(robot_server_socket_,10000,uid,0,0);
 	return true;
 }
 
@@ -254,6 +260,9 @@ bool Userlogic::OnLoginRecord(struct server *srv,const int socket,netcomm_recv::
 	scoped_ptr<netcomm_send::LoginRecord> qlogin(new netcomm_send::LoginRecord());
 	qlogin->set_new_msg(2);
 	send_message(socket,(netcomm_send::HeadPacket*)qlogin.get());
+
+	//启动通知机器人上线
+	NoticeUserLogin(robot_server_socket_,10000,login->uid(),0,0);
 	return true;
 }
 

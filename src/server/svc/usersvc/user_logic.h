@@ -58,6 +58,8 @@ private:
 private:
 
     bool Init();
+private:
+    int                                              robot_server_socket_;
 };
 
 

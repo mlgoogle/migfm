@@ -119,6 +119,9 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	case MUSIC_GAIN_SET_HATE:
 		OnHateList(srv,socket,value);
 		break;
+	case MUSIC_SET_CURRENT_MUSIC:
+		OnRecordMusic(srv,socket,value);
+		break;
 
 	}
     return true;
@@ -360,6 +363,36 @@ bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::Ne
 			snear_user->set_info(info.Release(true,near_user->latitude(),near_user->longitude()));
 	}
 	send_message(socket,(netcomm_send::HeadPacket*)snear_user.get());
+}
+
+bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::RecordMusic> record(new netcomm_recv::RecordMusic(netbase));
+	int error_code = record->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	bool r = false;
+	std::string json;
+	//创建音乐信息
+	base_logic::MusicInfo music;
+	music.set_id(record->current_song_id());
+	music.set_title(record->name());
+	music.set_artist(record->singer());
+	music.set_class_name(record->dimension_name());
+	music.set_class(record->dimension_sub_id());
+
+	music.JsonDeserialize(json);
+	MIG_DEBUG(USER_LEVEL,"%s",json.c_str());
+	//写入memcached
+	if(!json.empty())
+		musicsvc_logic::MemComm::SetUserCurrentMusic(record->uid(),json);
+	scoped_ptr<netcomm_send::HeadPacket> head(new netcomm_send::HeadPacket());
+	head->set_status(1);
+	send_message(socket,(netcomm_send::HeadPacket*)head.get());
 }
 
 
