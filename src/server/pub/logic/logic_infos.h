@@ -131,6 +131,12 @@ public:
 	void set_url(const std::string& url){data_->url_ = url;}
 	void set_lyric(const std::string& lyric){data_->lyric_ = lyric;}
 
+	inline bool Isvalid() const {
+		if((data_->id_!=0)&&(!data_->hq_url_.empty())&&(!data_->url_.empty()))
+			return true;
+		return false;
+	}
+
 
 	//解析JSON
 	void JsonSeralize(std::string& str);

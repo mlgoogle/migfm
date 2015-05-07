@@ -332,7 +332,8 @@ bool Musiclogic::OnNearMusic(struct server *srv,const int socket,netcomm_recv::N
 			it!=infomap.end();it++){
 		base_logic::UserAndMusic info = it->second;
 		//判断如果没有听歌不发送
-		if(info.musicinfo_.id()!=0)
+		LOG_DEBUG2("uid %lld muisc %lld",info.userinfo_.uid(),info.musicinfo_.id());
+		if(info.musicinfo_.Isvalid())
 			snear_music->set_info(info.Release(true,near_music->latitude(),near_music->longitude()));
 	}
 	send_message(socket,(netcomm_send::HeadPacket*)snear_music.get());

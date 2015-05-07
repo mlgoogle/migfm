@@ -198,7 +198,7 @@ void MusicInfo::JsonDeserialize(std::string& str,int32 dimenon){
 	if(!data_->class_name_.empty())
 		dict->SetString(L"type",data_->class_name_);
 	if(!data_->ablum_.empty())
-		dict->SetString(L"ablum",data_->ablum_);
+		dict->SetString(L"album",data_->ablum_);
 	if(!data_->artist_.empty())
 		dict->SetString(L"artist",data_->artist_);
 	if(!data_->title_.empty()){
