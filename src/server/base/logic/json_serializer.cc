@@ -714,6 +714,10 @@ bool JsonValueSerializer::Serialize(const Value& root){
 }
 
 void JsonValueSerializer::BuildJSONString(const Value* const node,int depth,bool escape){
+	if(node==NULL){//node
+		assert(0);
+		return;
+	}
 	switch (node->GetType()){
 		case Value::TYPE_NULL:
 			json_string_->append("null");

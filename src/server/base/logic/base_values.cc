@@ -309,6 +309,8 @@ void DictionaryValue::Clear(){
 }
 
 void DictionaryValue::Set(const std::string& path, Value* in_value){
+	if(in_value==NULL)
+		return;
 	std::wstring wpath = base::BasicUtil::StringConversions::UTF8ToWide(path);
 	Set(wpath,in_value);
 }
@@ -338,6 +340,8 @@ void DictionaryValue::SetString(const std::string& path, const std::wstring& in_
 }
 
 void DictionaryValue::Set(const std::wstring& path, Value* in_value){
+	if(in_value==NULL)
+		return;
 	std::wstring current_path(path);
 	DictionaryValue* current_dictionary = this;
 	//查找value 对应的MAP深度
@@ -384,6 +388,9 @@ void DictionaryValue::SetString(const std::wstring& path,
 
 void DictionaryValue::SetWithoutPathExpansion(const std::wstring& key,
                                               Value* in_value){
+
+	if(in_value==NULL)
+		return;
 	if(HasKey(key)){
 		delete dictionary_[key];
 	}
@@ -663,7 +670,7 @@ void ListValue::Clear() {
 }
 
 bool ListValue::Set(size_t index, Value* in_value) {
-  if (!in_value)
+  if (in_value==NULL)
     return false;
 
   if (index >= list_.size()) {
@@ -803,10 +810,13 @@ int ListValue::Remove(const Value& value) {
 
 
 void ListValue::Append(Value* in_value) {
-  list_.push_back(in_value);
+  if(in_value!=NULL)
+	  list_.push_back(in_value);
 }
 
 bool ListValue::AppendIfNotPresent(Value* in_value) {
+  if(in_value==NULL)
+	  return false;
   for (ValueVector::iterator i(list_.begin()); i != list_.end(); ++i) {
     if ((*i)->Equals(in_value))
       return false;
@@ -817,6 +827,8 @@ bool ListValue::AppendIfNotPresent(Value* in_value) {
 
 bool ListValue::Insert(size_t index, Value* in_value) {
 
+  if(in_value==NULL)
+	  return false;
   if (index > list_.size())
     return false;
 
