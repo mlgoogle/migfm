@@ -358,10 +358,12 @@ bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::Ne
 
 	scoped_ptr<netcomm_send::NearUser> snear_user(new netcomm_send::NearUser());
 	for(std::map<int64,base_logic::UserAndMusic>::iterator it = infomap.end();
-			it!=infomap.begin()&&i<near_user->page_size();it--,i++){
+			it!=infomap.begin()&&i<near_user->page_size();it--){
 		base_logic::UserAndMusic info = it->second;
-		if(info.userinfo_.uid()>0)
+		if(info.userinfo_.uid()>0){
 			snear_user->set_info(info.Release(true,near_user->latitude(),near_user->longitude()));
+			i++;
+		}
 	}
 	send_message(socket,(netcomm_send::HeadPacket*)snear_user.get());
 }
@@ -399,6 +401,7 @@ bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv:
 
 void Musiclogic::GetNearUserAndMusic(const double latitude,const double longitude,
 		std::map<int64,base_logic::UserAndMusic>& infomap){
+
 	//判断如果有坐标则获取周边的人 如果为0 根据登陆获取
 	if(latitude==0 || longitude==0)
 		basic_logic::PubDBComm::GetUserInfoByLoginTime(infomap);
@@ -406,6 +409,7 @@ void Musiclogic::GetNearUserAndMusic(const double latitude,const double longitud
 		basic_logic::PubDBComm::GetUserInfoByLocation(infomap);
 	//获取对应用户的音乐
 	musicsvc_logic::MemComm::BatchGetCurrentSong(infomap);
+
 }
 
 }

@@ -121,7 +121,7 @@ void MemComm::BatchGetCurrentSong(std::map<int64,base_logic::UserAndMusic>& map)
 			base_logic::UserAndMusic info = it->second;
 			info.musicinfo_.JsonSeralize(value);
 			//获取完整信息
-			infomap[info.musicinfo_.id()] = info.musicinfo_;
+			infomap[info.userinfo_.uid()] = info.musicinfo_;
 		}
 		if(data){delete [] data; data = NULL;}
 	}
