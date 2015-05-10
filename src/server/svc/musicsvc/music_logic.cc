@@ -79,7 +79,7 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	std::string http_str(packet_stream,len);
 	std::string error_str;
 	int error_code = 0;
-	LOG_MSG2("%s",packet_stream);
+	LOG_DEBUG2("%s",packet_stream);
 
 	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_HTTP,&http_str));
 

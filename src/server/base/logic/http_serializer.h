@@ -1,10 +1,12 @@
 #ifndef HTTP_SERIALIZER_H_
 #define HTTP_SERIALIZER_H_
+#include "string_escape.h"
 #include "logic/base_values.h"
 #include "logic/value_serializer.h"
 #include <string>
 
 namespace base_logic{
+
 
 //httpRest
 class HttpValueSerializer:public ValueSerializer{
@@ -18,6 +20,12 @@ public:
 
 	virtual Value* Deserialize(int* error_code,std::string* error_str);
 
+private:
+	void BuildHTTPString(const Value* const node, int depth,bool escape);
+
+	inline void IndentLine(int depth){http_string_->append(std::string(depth * 3, ' '));}
+
+	void AppendQuoteString(const std::string& str){StringEscape::HttpDoubleQuote(str,true,http_string_);}
 private:
 	Token ParseToken();
 

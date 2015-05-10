@@ -51,7 +51,7 @@ static void GetRequestMethod(const char* query){
 	int code;
 	bool r = false;
 	char* addr = getenv("REMOTE_ADDR");
-	os<<std::string(query)<<"&remote_addr="<<addr<<"&type="<<POST_TYPE<<"\n";
+	os<<std::string(query)<<"&remote_addr="<<addr<<"&type="<<GET_TYPE<<"\n";
 	content = os.str();
 	/*content.assign(query);
 	content.append("&addr=");
@@ -81,7 +81,7 @@ static void PostRequestMethod(std::string& content){
 	  return;
 #endif
   char* addr = getenv("REMOTE_ADDR");
-  os<<content<<"&remote_addr="<<addr<<"&type="<<GET_TYPE<<"\n";
+  os<<content<<"&remote_addr="<<addr<<"&type="<<POST_TYPE<<"\n";
   content = os.str();
   MIG_DEBUG(USER_LEVEL,"%s",content.c_str());
   r = net::core_get(0,content.c_str(),content.length(),

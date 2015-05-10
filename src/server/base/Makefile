@@ -41,8 +41,8 @@ LINK = $(AR)  $(OUTPUT_FILE) $?
 all: clean output delete-temp-file
 output:	basic_util.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto.o\
 	basic_lbs_info.o lbs_baidu_connector.o lbs_dic_comm.o location_server.o\
-	block_msg_queue.o  queue_dic_comm.o lbs_connector.o\
-	lbs_db_comm.o lbs_logic_unit.o logic_comm.o base_values.o \
+	block_msg_queue.o  queue_dic_comm.o lbs_connector.o string_escape.o\
+	lbs_db_comm.o lbs_logic_unit.o logic_comm.o base_values.o http_api.o\
 	base_thread_handler.o base_thread_lock.o caiyun_weather_engine.o\
 	weather_engine.o weather_logic_unit.o value_serializer.o http_serializer.o json_serializer.o\
 	basic_push_info.o push_baidu_connector.o push_connector.o push_db_comm.o push_logic_unit.o\
@@ -87,15 +87,21 @@ lbs_logic_unit.o:
 	
 location_server.o:
 	$(COMPILE) ./lbs/location_server.cc
-	
+
+http_api.o:
+	$(COMPILE) ./http/http_api.cc
+		
 logic_comm.o:
 	$(COMPILE) ./logic/logic_comm.cc
 	
 base_values.o:
 	$(COMPILE) ./logic/base_values.cc
-	
+
 value_serializer.o:
 	$(COMPILE) ./logic/value_serializer.cc
+		
+string_escape.o:
+	$(COMPILE) ./logic/string_escape.cc
 
 json_serializer.o:
 	$(COMPILE) ./logic/json_serializer.cc

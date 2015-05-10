@@ -6,6 +6,8 @@
 
 namespace base_logic{
 
+
+
 static const Token kInvalidToken(Token::INVALID_TOKEN,0,0);
 static const int kStackLimit = 100;
 
@@ -289,7 +291,85 @@ HttpValueSerializer::~HttpValueSerializer(){
 }
 
 bool HttpValueSerializer::Serialize(const Value& root){
+	BuildHTTPString(&root,0,false);
 	return true;
+}
+
+void HttpValueSerializer::BuildHTTPString(const Value* const node, int depth,bool escape){
+	switch(node->GetType()){
+	case Value::TYPE_NULL:
+		http_string_->append("null");
+		break;
+	case Value::TYPE_BOOLEAN:
+		{
+			bool value;
+			bool result = node->GetAsBoolean(&value);
+			http_string_->append(value ? "true" : "false");
+			break;
+		}
+	case Value::TYPE_INTEGER:
+		{
+			int32 value;
+			bool result = node->GetAsInteger(&value);
+			base::BasicUtil::StringUtil::StringAppendF(http_string_,"%d",value);
+			break;
+		}
+	case Value::TYPE_BIG_INTEGER:
+		{
+			int64 value;
+			bool result = node->GetAsBigInteger(&value);
+#if __LP64__
+			base::BasicUtil::StringUtil::StringAppendF(http_string_,"%ld",value);
+#else
+			base::BasicUtil::StringUtil::StringAppendF(http_string_,"%lld",value);
+#endif
+			break;
+		}
+	case Value::TYPE_REAL:
+		{
+			double value;
+			bool result = node->GetAsReal(&value);
+			std::string real = base::BasicUtil::StringUtil::DoubleToString(value);
+			if (real[0] == '.') {
+		          real.insert(0, "0");
+			} else if (real.length() > 1 && real[0] == '-' && real[1] == '.') {
+		          // "-.1" bad "-0.1" good
+		          real.insert(1, "0");
+			}
+			http_string_->append(real);
+			break;
+		}
+
+	case Value::TYPE_STRING:
+		{
+			std::string value;
+			bool result = node->GetAsString(&value);
+			if(escape){
+
+			}else{
+				StringEscape::HttpDoubleQuote(value,true,http_string_);
+			}
+		}
+		break;
+	case Value::TYPE_DICTIONARY:
+		{
+			const DictionaryValue* dict =
+					static_cast<const DictionaryValue*>(node);
+			for(DictionaryValue::key_iterator key_itr = dict->begin_keys();
+					key_itr != dict->end_keys();++key_itr){
+				if(key_itr!=dict->begin_keys())
+					http_string_->append("&");
+
+				Value* value = NULL;
+				bool result = dict->GetWithoutPathExpansion(*key_itr,&value);
+				AppendQuoteString(base::BasicUtil::StringConversions::WideToASCII(*key_itr));
+				http_string_->append("=");
+				BuildHTTPString(value,depth+1,escape);
+			}
+
+		}
+		break;
+	}
 }
 
 Value* HttpValueSerializer::Deserialize(int* error_code,std::string* error_str){

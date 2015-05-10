@@ -7,16 +7,10 @@
 
 #ifndef JSON_SERIALIZER_H_
 #define JSON_SERIALIZER_H_
+#include "string_escape.h"
 #include "value_serializer.h"
 namespace base_logic{
 
-
-class StringEscape{
-public:
-	static void JsonDoubleQuote(const std::string& str,bool put_in_quotes,
-			std::string* dst);
-	static std::string GetDoubleQuoteJson(const std::string& str);
-};
 //json
 class JsonValueSerializer:public ValueSerializer{
 public:
