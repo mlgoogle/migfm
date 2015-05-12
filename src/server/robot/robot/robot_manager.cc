@@ -5,7 +5,6 @@
 #include "dic_comm.h"
 #include "base/comm_head.h"
 #include "base/protocol.h"
-#include "base/logic_comm.h"
 #include "basic/radom_in.h"
 #include "config/config.h"
 #include "common.h"
@@ -46,7 +45,6 @@ bool RobotManager::Init(){
 
 	bool r = false;
 	std::string path = DEFAULT_CONFIG_PATH;
-	robot_logic::ThreadKey::InitThreadKey();
 	config::FileConfig* config = config::FileConfig::GetFileConfig();
 	if(config==NULL){
 		return false;
@@ -59,7 +57,7 @@ bool RobotManager::Init(){
 	robot_mgr_.reset(new robot_logic::RobotConnection());
 	robot_song_mgr_.reset(new robot_logic::RobotSongMgr());
 	robot_weather_mgr_.reset(new robot_logic::RobotWeatherMgr());
-	util_mgr_.reset(new robot_logic::UtilMgr());
+	//util_mgr_.reset(new robot_logic::UtilMgr());
 	/*chat_storage::MemComm::Init(config->mem_list_);*/
 
 	return true;
@@ -133,7 +131,7 @@ bool RobotManager::OnRobotManagerMessage(struct server *srv,
 		scheduler_mgr_.get()->OnNoticeAssistant(srv,socket,packet);
 		break;
 	case NOTICE_USER_READY_GIFT_LUCK:
-		util_mgr_.get()->OnUserReadyLuckGift(srv,socket,packet);
+		//util_mgr_.get()->OnUserReadyLuckGift(srv,socket,packet);
 		break;
 	case NOTICE_USER_ROBOT_CHAT_LOGIN:
 		//robot_mgr_.get()->OnRobotChatLogin(srv,socket,packet);
@@ -174,13 +172,13 @@ bool RobotManager::OnBroadcastClose(struct server *srv,
 
 bool RobotManager::OnIniTimer(struct server *srv){
 	//检测心跳包 发给机器人和控制器
-	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_CONNECT,20,-1);
+	/*srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_CONNECT,20,-1);
 	srv->add_time_task(srv,PLUGIN_ID,TIME_CHECK_WEATCHER,40,-1);
 	srv->add_time_task(srv,PLUGIN_ID,TIME_ROBOT_LIVE,40,-1);
 
 	srv->add_time_task(srv,PLUGIN_ID,TIME_HANDSEL_SONG,30,-1);
 
-	srv->add_time_task(srv,PLUGIN_ID,TIME_LUCK_GIFT,30,1);
+	srv->add_time_task(srv,PLUGIN_ID,TIME_LUCK_GIFT,30,1);*/
 	return true;
 }
 

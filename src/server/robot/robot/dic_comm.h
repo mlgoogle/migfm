@@ -1,6 +1,6 @@
 #ifndef _ROBOT_DIC_COMM_H__
 #define _ROBOT_DIC_COMM_H__
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 #include "storage/storage.h"
 #include "basic/basic_info.h"
 #include <hiredis.h>

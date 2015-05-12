@@ -1,7 +1,7 @@
 #include "robot_init.h"
 #include "robot_manager.h"
 #include "logic_unit.h"
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 #include "common.h"
 #include "plugins.h"
 

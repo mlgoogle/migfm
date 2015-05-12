@@ -1,5 +1,5 @@
 #include "dic_comm.h"
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 #include <sstream>
 
 namespace robot_storage{
@@ -76,7 +76,7 @@ void RedisComm::Init(std::list<base::ConnAddr>& addrlist,
 
 void RedisComm::Dest(){
 #if defined (_DIC_POOL_)
-	robot_logic::WLockGd lk(dic_pool_lock_);
+	base_logic::WLockGd lk(dic_pool_lock_);
 	while(dic_conn_pool_.size()>0){
 		base_storage::DictionaryStorageEngine* engine = dic_conn_pool_.front();
 		dic_conn_pool_.pop_front();
@@ -93,14 +93,14 @@ void RedisComm::Dest(){
 #if defined (_DIC_POOL_)
 
 void RedisComm::RedisConnectionPush(base_storage::DictionaryStorageEngine* engine){
-	robot_logic::WLockGd lk(dic_pool_lock_);
+	base_logic::WLockGd lk(dic_pool_lock_);
 	dic_conn_pool_.push_back(engine);
 }
 
 base_storage::DictionaryStorageEngine* RedisComm::RedisConnectionPop(){
 	if(dic_conn_pool_.size()<=0)
 		return NULL;
-	robot_logic::WLockGd lk(dic_pool_lock_);
+	base_logic::WLockGd lk(dic_pool_lock_);
     base_storage::DictionaryStorageEngine* engine = dic_conn_pool_.front();
     dic_conn_pool_.pop_front();
     return engine;
@@ -113,9 +113,9 @@ base_storage::DictionaryStorageEngine* RedisComm::RedisConnectionPop(){
 
 base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
 
-	try{
+	/*try{
 		base_storage::DictionaryStorageEngine* engine =
-				robot_logic::ThreadKey::GetStorageDicConn();
+				base_logic::ThreadKey::GetStorageDicConn();
 		if (engine){
 // 			if (!engine->){
 // 				LOG_ERROR("Database %s connection was broken");
@@ -138,14 +138,15 @@ base_storage::DictionaryStorageEngine* RedisComm::GetConnection(){
 		bool r =  engine->Connections(addrlist_);
 		if (!r)
 			return NULL;
-		robot_logic::ThreadKey::SetStorageDicConn(engine);
+		base_logic::ThreadKey::SetStorageDicConn(engine);
 		LOG_DEBUG("Created database connection");
 		return engine;
 	}
 	catch (...){
 		LOG_ERROR("connect error");
 		return NULL;
-	}
+	}*/
+	return NULL;
 }
 
 bool RedisComm::GetMusicInfos(const int64 songid,std::string& musicinfo) {

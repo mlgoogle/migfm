@@ -4,7 +4,8 @@
 #include "db_comm.h"
 #include "dic_comm.h"
 #include "logic_unit.h"
-#include "base/logic_comm.h"
+#include "base/utils_comm.h"
+#include "base/protocol.h"
 #include "base/comm_head.h"
 #include "basic/base64.h"
 #include <sstream>

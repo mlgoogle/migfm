@@ -1,7 +1,7 @@
 #include "protocol.h"
 #include "comm_head.h"
 #include "protocol/data_packet.h"
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 
 
 namespace robot_logic{

@@ -3,9 +3,8 @@
 #include "robot_basic_info.h"
 #include "db_comm.h"
 #include "dic_comm.h"
-//#include "http_method.h"
 #include "http/http_method.h"
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 #include "base/comm_head.h"
 #include "basic/base64.h"
 #include <sstream>

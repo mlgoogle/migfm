@@ -3,6 +3,7 @@
 
 #include "robot_basic_info.h"
 /*#include "dic_comm.h"*/
+#include "base/comm_head.h"
 #include "log/mig_log.h"
 #include "basic/basictypes.h"
 #include "basic/basic_info.h"
@@ -47,6 +48,15 @@ enum {
 	UNKONW
 };
 
+
+
+enum LUCK_PRIZE{
+	FIRST_PRIZE = 1,
+	SECOND_PRIZE = 2,
+	THIRD_PRIZE = 3
+};
+
+
 int caiyuncode(const char* status);
 const char* codotodesc(const int32 code);
 namespace robot_logic {
@@ -68,6 +78,12 @@ public:
 			double& weather_result,int& furture_time);
 
 	static int ResultWeather(const double result);
+
+public:
+	bool OnUserReadyLuckGift(struct server *srv, int socket, struct PacketHead *packet,
+	        const void *msg = NULL, int len = 0);
+public:
+	bool LuckGiftCalculation(const int32 plat,const int64 uid,const int64 songid);
 };
 /*
 class LogicUnit{

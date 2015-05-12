@@ -2,8 +2,9 @@
 #include "robot_cache_manager.h"
 #include "robot_basic_info.h"
 #include "db_comm.h"
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 #include "base/comm_head.h"
+#include "base/protocol.h"
 namespace robot_logic{
 
 RobotConnection::RobotConnection(){
@@ -45,7 +46,7 @@ bool RobotConnection::OnUserLogin(struct server *srv, int socket, struct PacketH
 		robot_info->latitude = robot_basic_info.latitude();
 		robot_info->longitude = robot_basic_info.longitude();
 		memset(&robot_info->nickname,'\0',NICKNAME_LEN);
-		robot_logic::SomeUtils::SafeStrncpy(robot_info->nickname,NICKNAME_LEN,
+		base_logic::LogicComm::SafeStrncpy(robot_info->nickname,NICKNAME_LEN,
 					robot_basic_info.nickname().c_str(),NICKNAME_LEN);
 		notice_robot_login.robot_list.push_back(robot_info);
 	}
@@ -64,6 +65,8 @@ bool RobotConnection::OnRobotLogin(struct server *srv, int socket, struct Packet
 	//获取机器人信息
 	//保存socket
 	r = CacheManagerOp::GetCacheManagerOp()->SetRobotInfo(socket,robot_info);
+	//保留机器人时间
+	robot_storage::DBComm::UpdateRobotLoginTime(robot_info.uid());
 	return r;
 }
 

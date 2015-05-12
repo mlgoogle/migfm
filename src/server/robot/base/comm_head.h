@@ -49,6 +49,7 @@ struct PacketHead{
    int64 msg_id;
    int32 reserverd;
 }; //31
+
 #define PACKET_HEAD_LENGTH (sizeof(int32) * 5 + sizeof(int16) + sizeof(int8) + sizeof(int64))
 
 

@@ -18,4 +18,12 @@ int LogicComm::SendFull(int socket, const char *buffer, size_t nbytes){
 	return (int)(amt == -1 ? amt : total);
 }
 
+char *LogicComm::SafeStrncpy (char *dest, size_t dest_size, const char *src, size_t src_size)
+{
+	size_t n = dest_size < src_size ? dest_size : src_size;
+	memset(dest,'\0',dest_size);
+	memcpy (dest, src, n);
+	return dest;
+}
+
 }

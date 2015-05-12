@@ -14,7 +14,7 @@ CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 
 ## 编译选项
 ## for debug -DROOM_DEBUG_MCACHE
-CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -DNET_WORK -D_REENTRANT -D_GNU_SOURCE
+CPP_FLAG = -g -Wall -w -fPIC -c -D_LINUX -DDEBUG -D_DEBUG -D_DB_POOL_ -D_DIC_POOL_ -DTCP_NET_WORK -D_REENTRANT -D_GNU_SOURCE
 ## for release
 ## CPP_FLAG = -O3 -Wall -s -w -fPIC -c -D_LINUX -DNDEBUG -D_DB_POOL_ -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG
 
@@ -26,7 +26,7 @@ LINK_FLAGS = -g -shared -fPIC
 
 ## 头文件
 #INCLUDE_PATHS = -I./ -I./../ -I$(LIB_DIR)/core -I$(LIB_DIR)/public/ -I$(LIB_DIR)/third_party/hiredis/ \
-	-I/usr/include/mysql -I/usr/local/include/libmemcached-1.0 \
+	-I/usr/include/mysql -I/usr/local/include/libmemcached-1.0 -I/usr/local/freetds/include/\
 	-I$(USER_DIR) -I$(CUSTOM_THIRD_PATH)/hiredis -I$(CUSTOM_THIRD_PATH)\
 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
@@ -34,6 +34,7 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(THIRD_PATH)\
 				-I/usr/local/include\
 				-I/usr/include/mysql\
+				-I/usr/local/freetds/include\
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
@@ -57,10 +58,11 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(COMPIlER) $(LINK_FLAGS) $(LINK_PATHS) $? -o $(OUTPUT_FILE) $(LINK_LIBRARYS)
 
 all: clean output delete-temp-file
-output:	robot_cache_manager.o robot_manager.o prize_rate.o robot_basic_info.o  robot_connection.o robot_song_mgr.o util_mgr.o scheduler_mgr.o protocol.o \
-		robot_init.o http_method.o robot_weather_mgr.o db_comm.o dic_comm.o basictypes.o basic_util.o logic_unit.o logic_comm.o\
+output:	robot_cache_manager.o  robot_manager.o prize_rate.o robot_basic_info.o  robot_connection.o robot_song_mgr.o\
+		scheduler_mgr.o protocol.o utils_comm.o robot_init.o http_method.o \
+		robot_weather_mgr.o db_comm.o dic_comm.o basictypes.o basic_util.o logic_unit.o\
 		radom_in.o data_packet.o constants.o mig_log.o redis_storage_impl.o mem_storage_impl.o mysql_storage_impl.o\
-		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o  base64.o
+		redis_warrper.o storage.o json_reader.o json_writer.o json_value.o config.o basic_info.o md5sum.o  base64.o 
 	$(LINK)
 
 clean:
@@ -86,9 +88,6 @@ robot_song_mgr.o:
 	
 robot_weather_mgr.o:
 	$(COMPILE) ./robot_weather_mgr.cc
-
-util_mgr.o:
-	$(COMPILE) ./util_mgr.cc
 	
 scheduler_mgr.o:
 	$(COMPILE) ./scheduler_mgr.cc
@@ -120,8 +119,8 @@ im_mgr.o:
 prize_rate.o:
 	$(COMPILE) ./prize_rate.cc
 	
-logic_comm.o:
-	$(COMPILE) ./../base/logic_comm.cc
+utils_comm.o:
+	$(COMPILE) ./../base/utils_comm.cc
 	
 logic_unit.o:
 	$(COMPILE) ./logic_unit.cc

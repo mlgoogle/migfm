@@ -1,7 +1,7 @@
 #include "scheduler_mgr.h"
 #include "robot_cache_manager.h"
 #include "robot_basic_info.h"
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 #include "base/comm_head.h"
 
 namespace robot_logic{

@@ -2,7 +2,6 @@
 #define _ROBOT_ROBOT_ENGINE_H__
 #include "music_mgr.h"
 #include "user_mgr.h"
-#include "util_mgr.h"
 #include "plugins.h"
 #include "protocol/http_packet.h"
 #include "basic/scoped_ptr.h"

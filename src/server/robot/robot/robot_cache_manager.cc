@@ -2,10 +2,10 @@
 #include "robot_basic_info.h"
 #include "db_comm.h"
 #include "dic_comm.h"
-#include "basic/base64.h"
-#include "base/logic_comm.h"
-#include "base/comm_head.h"
 #include "base/protocol.h"
+#include "base/utils_comm.h"
+#include "basic/base64.h"
+#include "logic/logic_comm.h"
 #include "basic/template.h"
 #include <sstream>
 
@@ -37,7 +37,7 @@ RobotCacheManager::~RobotCacheManager(){
 }
 
 void RobotCacheManager::SetPlatformInfo(const int64 platform_id,robot_base::PlatformInfo& platform){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc == NULL){
 		pc = new PlatformCache;
@@ -54,7 +54,7 @@ void RobotCacheManager::SetPlatformInfo(const int64 platform_id,robot_base::Plat
 
 
 bool RobotCacheManager::GetPlatformInfo(const int64 platform_id,robot_base::PlatformInfo& platform){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -87,7 +87,7 @@ void RobotCacheManager::RestMusicListRandom(PlatformCache* pc){
 
 bool RobotCacheManager::GetModeRadomSong(const int64 platform_id,const std::string& type,const int32& type_id,
 		int num,std::list<int64>& list){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -99,7 +99,7 @@ bool RobotCacheManager::GetModeRadomSong(const int64 platform_id,const std::stri
 
 bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,const double latitude,const double longitude,
 		 std::list<robot_base::RobotBasicInfo>& list){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	int i = 2;
 	bool r = false;
 	RobotInfosMap  follow_robotinfos;
@@ -133,7 +133,7 @@ bool RobotCacheManager::GetIdleRobot(const int64 platform_id,const int64 uid,con
 
 bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 robot_uid,const int socket,const int64 uid,
 		robot_base::RobotBasicInfo& robot){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	robot_base::RobotBasicInfo robot_info;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -155,7 +155,7 @@ bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 rob
 }
 
 bool RobotCacheManager::GetUserFollower(const int64 platform_id,const int64 uid,RobotInfosMap& robotinfos){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -164,7 +164,7 @@ bool RobotCacheManager::GetUserFollower(const int64 platform_id,const int64 uid,
 }
 
 bool RobotCacheManager::GetUserFollowTaskRobot(const int64 platform_id,const int64 uid,const int32 task,robot_base::RobotBasicInfo& robotinfo){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -177,7 +177,7 @@ bool RobotCacheManager::GetUserFollowTaskRobot(const int64 platform_id,const int
 }
 
 bool RobotCacheManager::GetUserFollowAllRobot(const int64 platform_id,const int64 uid,RobotInfosMap& map){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -222,7 +222,7 @@ bool RobotCacheManager::CheckUserFollowAllRobot(PlatformCache* pc,const int64 ui
 	robot_info->latitude = robot.latitude();
 	robot_info->longitude = robot.longitude();
 	memset(&robot_info->nickname,'\0',NICKNAME_LEN);
-	robot_logic::SomeUtils::SafeStrncpy(robot_info->nickname,NICKNAME_LEN,
+	base_logic::LogicComm::SafeStrncpy(robot_info->nickname,NICKNAME_LEN,
 			robot.nickname().c_str(),NICKNAME_LEN);
 	notice_robot_login.robot_list.push_back(robot_info);
 	sendmessage(scheduler_info.socket(),&notice_robot_login);
@@ -230,7 +230,7 @@ bool RobotCacheManager::CheckUserFollowAllRobot(PlatformCache* pc,const int64 ui
 }
 
 bool RobotCacheManager::GetUsedRobotInfo(const int64 platform_id,const int64 uid,robot_base::RobotBasicInfo& robotinfo){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -238,7 +238,7 @@ bool RobotCacheManager::GetUsedRobotInfo(const int64 platform_id,const int64 uid
 }
 
 bool RobotCacheManager::GetIdelRobotInfo(const int64 platform_id,const int64 uid,robot_base::RobotBasicInfo& robotinfo){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -246,7 +246,7 @@ bool RobotCacheManager::GetIdelRobotInfo(const int64 platform_id,const int64 uid
 }
 
 bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::RobotBasicInfo& robotinfo){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	std::map<int64,int64> follow_uid;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -282,7 +282,7 @@ bool RobotCacheManager::ClearRobot(const int64 platform_id,const robot_base::Rob
 }
 
 void RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,int current_weather,int future_weather,int future_time){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return ;
@@ -306,7 +306,7 @@ void RobotCacheManager::SetUserInfo(const int64 platform_id,const int64 uid,int 
 
 bool RobotCacheManager::GetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,
 		std::string& district,std::string& province,std::string& street){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
@@ -325,7 +325,7 @@ bool RobotCacheManager::GetUserAddressInfo(const int64 platform_id,const int64 u
 
 bool RobotCacheManager::SetUserAddressInfo(const int64 platform_id,const int64 uid,std::string& city,
 		std::string& district,std::string& province,std::string& street){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
@@ -341,7 +341,7 @@ bool RobotCacheManager::SetUserAddressInfo(const int64 platform_id,const int64 u
 }
 
 bool RobotCacheManager::IsPushMessageDay(const int64 platform_id,const int64 uid){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
@@ -358,7 +358,7 @@ bool RobotCacheManager::IsPushMessageDay(const int64 platform_id,const int64 uid
 }
 
 bool RobotCacheManager::SetUserPushMessageDay(const int64 platform_id,const int64 uid){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	robot_base::UserBasicInfo userinfo;
 	if(pc==NULL)
@@ -375,7 +375,7 @@ bool RobotCacheManager::SetUserPushMessageDay(const int64 platform_id,const int6
 }
 
 bool RobotCacheManager::SetUserInfoLogin(const int64 platform_id,const int64 uid){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	robot_base::UserInfo userinfo(uid);
 	if(pc==NULL)
@@ -386,7 +386,7 @@ bool RobotCacheManager::SetUserInfoLogin(const int64 platform_id,const int64 uid
 bool RobotCacheManager::SetUserListenState(const int64 platform_id,const int64 uid,const int32 type_id,
 		const std::string& mode){
 	bool r = false;
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	robot_base::UserInfo userinfo;
 	if(pc==NULL)
@@ -400,7 +400,7 @@ bool RobotCacheManager::SetUserListenState(const int64 platform_id,const int64 u
 }
 
 bool RobotCacheManager::GetIdleAssistant(const int64 platform_id,robot_base::RobotBasicInfo& assistant){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -409,7 +409,7 @@ bool RobotCacheManager::GetIdleAssistant(const int64 platform_id,robot_base::Rob
 }
 
 bool RobotCacheManager::GetAssistantInfo(const int64 platform_id,const int64& uid,robot_base::RobotBasicInfo& assistant){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -418,7 +418,7 @@ bool RobotCacheManager::GetAssistantInfo(const int64 platform_id,const int64& ui
 }
 
 bool RobotCacheManager::DeleteAssistant(const int64 platform_id,const int socket){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	bool r = false;
 	robot_base::RobotBasicInfo assistant;
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -430,7 +430,7 @@ bool RobotCacheManager::DeleteAssistant(const int64 platform_id,const int socket
 bool RobotCacheManager::SetAssistantLogin(const int64 platform_id,const int64 assistant_id,const int32 socket){
 	bool r = false;
 	robot_base::RobotBasicInfo assistant;
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -445,7 +445,7 @@ bool RobotCacheManager::SetAssistantLogin(const int64 platform_id,const int64 as
 }
 
 bool RobotCacheManager::SendAssistantHandlseSong(const int64 platform_id,std::list<struct HandleSongInfo*>& list){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	bool r = false;
 	robot_base::RobotBasicInfo assistant;
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -464,7 +464,7 @@ bool RobotCacheManager::SendAssistantHandlseSong(const int64 platform_id,std::li
 
 bool RobotCacheManager::SendAssistantLuckGift(const int64 platform_id,const int64 uid,
 		const int32 share_plat,const int32 prize,const int64 songid){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	bool r = false;
 	std::string music_str;
 	std::string b64title;
@@ -509,7 +509,7 @@ bool RobotCacheManager::SendAssistantLuckGift(const int64 platform_id,const int6
 
 
 bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	int i = 2;
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -541,7 +541,7 @@ bool RobotCacheManager::NoticeAssistantLogin(const int64 platform_id){
 
 
 bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::SchedulerInfo& scheduler_info){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -549,7 +549,7 @@ bool RobotCacheManager::SetScheduler(const int64 platform_id,robot_base::Schedul
 }
 
 bool RobotCacheManager::GetScheduler(const int64 platform_id,const int socket,robot_base::SchedulerInfo& scheduler_info){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -557,7 +557,7 @@ bool RobotCacheManager::GetScheduler(const int64 platform_id,const int socket,ro
 }
 
 bool RobotCacheManager::DeleteScheduler(const int64 platform_id,const int socket){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -565,7 +565,7 @@ bool RobotCacheManager::DeleteScheduler(const int64 platform_id,const int socket
 }
 
 bool RobotCacheManager::SchedulerSendMessage(const int64 platform_id,struct PacketHead* packet){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	robot_base::SchedulerInfo scheduler_info;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -580,7 +580,7 @@ bool RobotCacheManager::SchedulerSendMessage(const int64 platform_id,struct Pack
 
 bool RobotCacheManager::RobotHandselSong(const int64 platform_id){
 	bool r = false;
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
 		return false;
@@ -623,10 +623,12 @@ bool RobotCacheManager::RobotHandselSong(const int64 platform_id){
 			}
 		}
 	}
+
+	return true;
 }
 
 void RobotCacheManager::CheckRobotLive(const int64 platform_id){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -646,7 +648,7 @@ void RobotCacheManager::CheckRobotLive(const int64 platform_id){
 }
 
 void RobotCacheManager::CheckSchedulerConnect(const int64 platform_id){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	bool r = false;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -680,7 +682,7 @@ void RobotCacheManager::CheckSchedulerConnect(const int64 platform_id){
 }
 
 void RobotCacheManager::ChecAssistantConnect(const int64 platform_id){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	bool r = false;
 	robot_base::RobotBasicInfo assistant;
 
@@ -723,7 +725,7 @@ void RobotCacheManager::ChecAssistantConnect(const int64 platform_id){
 	}
 }
 void RobotCacheManager::CheckRobotConnect(const int64 platform_id){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	bool r = false;
 
 	PlatformCache* pc = GetPlatformCache(platform_id);
@@ -760,7 +762,7 @@ void RobotCacheManager::CheckRobotConnect(const int64 platform_id){
 }
 
 void RobotCacheManager::Dump(){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	int64 platform_id =10000;
 	PlatformCache* pc = GetPlatformCache(platform_id);
 	if(pc==NULL)
@@ -950,29 +952,29 @@ bool CacheManagerOp::SetPrize(){
 }
 
 int CacheManagerOp::GetPrize(pluck_prize prize_info,int count){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	return prize_->GetPrize(prize_info,count);
 }
 
 bool CacheManagerOp::SetRobotInfo(const int socket,const robot_base::RobotBasicInfo& robotinfo){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	return base::MapAdd<SocketRobotInfosMap,const int,const robot_base::RobotBasicInfo>(socket_robot_map_,socket,robotinfo);
 }
 
 bool CacheManagerOp::DelRobotInfo(const int socket){
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	return base::MapDel<SocketRobotInfosMap,SocketRobotInfosMap::iterator,int>(socket_robot_map_,socket);
 }
 
 bool CacheManagerOp::GetRobotInfo(const int socket,robot_base::RobotBasicInfo& robotinfo){
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	return base::MapGet<SocketRobotInfosMap,SocketRobotInfosMap::iterator,robot_base::RobotBasicInfo>(socket_robot_map_,socket,robotinfo);
 }
 
 bool CacheManagerOp::SetLuckGiftInfo(robot_base::LuckGiftInfo* luck){
 	bool r = false;
 	LuckGiftInfoPlatMap plat_map;
-	robot_logic::WLockGd lk(lock_);
+	base_logic::WLockGd lk(lock_);
 	//查找该平台是已经存在
 	r = base::MapGet<LuckGiftInfoMap,LuckGiftInfoMap::iterator,LuckGiftInfoPlatMap>(luck_gift_infos_,luck->plat(),plat_map);
 
@@ -985,7 +987,7 @@ bool CacheManagerOp::SetLuckGiftInfo(robot_base::LuckGiftInfo* luck){
 
 bool CacheManagerOp::GetLuckGiftInfo(const int plat,LuckGiftInfoPlatMap& luck_gift_map_){
 	bool r = false;
-	robot_logic::RLockGd lk(lock_);
+	base_logic::RLockGd lk(lock_);
 	return base::MapGet<LuckGiftInfoMap,LuckGiftInfoMap::iterator,LuckGiftInfoPlatMap>(luck_gift_infos_,plat,luck_gift_map_);
 
 }

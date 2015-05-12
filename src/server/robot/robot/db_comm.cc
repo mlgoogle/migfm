@@ -1,6 +1,6 @@
 #include "db_comm.h"
 #include "thread/base_thread_handler.h"
-#include "base/logic_comm.h"
+#include "logic/logic_comm.h"
 #include "basic/basictypes.h"
 #include "storage/storage.h"
 #include <mysql.h>
@@ -63,14 +63,14 @@ void DBComm::Init(std::list<base::ConnAddr>& addrlist,const int32 db_conn_num/* 
 #if defined (_DB_POOL_)
 
 void DBComm::DBConnectionPush(base_storage::DBStorageEngine* engine){
-	robot_logic::WLockGd lk(db_pool_lock_);
+	base_logic::WLockGd lk(db_pool_lock_);
 	db_conn_pool_.push_back(engine);
 }
 
 base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
 	if(db_conn_pool_.size()<=0)
 		return NULL;
-	robot_logic::WLockGd lk(db_pool_lock_);
+	base_logic::WLockGd lk(db_pool_lock_);
     base_storage::DBStorageEngine* engine = db_conn_pool_.front();
     db_conn_pool_.pop_front();
     return engine;
@@ -81,7 +81,7 @@ base_storage::DBStorageEngine* DBComm::DBConnectionPop(){
 
 void DBComm::Dest(){
 #if defined (_DB_POOL_)
-	robot_logic::WLockGd lk(db_pool_lock_);
+	base_logic::WLockGd lk(db_pool_lock_);
 	while(db_conn_pool_.size()>0){
 		base_storage::DBStorageEngine* engine = db_conn_pool_.front();
 		db_conn_pool_.pop_front();
@@ -362,6 +362,29 @@ bool DBComm::GetSceneInfos(std::list<int64> &list){
 	return false;
 }
 
+bool DBComm::UpdateRobotLoginTime(const int64 uid){
+	std::stringstream os;
+	bool r = false;
+	int num = 0;
+#if defined (_DB_POOL_)
+		AutoDBCommEngine auto_engine;
+		base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	base_storage::db_row_t* db_rows;
+	MYSQL_ROW rows = NULL;
+	os<<"call migfm.proc_V2RobotLoginTime("<<uid<<")";
+
+	std::string sql = os.str();
+	LOG_DEBUG2("[%s]", sql.c_str());
+
+	r = engine->SQLExec(sql.c_str());
+	if(!r){
+		MIG_ERROR(USER_LEVEL,"sqlexec error ");
+		return r;
+	}
+	return true;
+}
+
 bool DBComm::GetUsersLBSPos(std::list<robot_base::UserLbsInfo>& user_lbs_list,const int from,
 		int count){
 	std::stringstream os;
@@ -427,7 +450,7 @@ bool DBComm::GetLuckGiftInfo(robot_logic::CacheManagerOp* global_mgr){
 
 base_storage::DBStorageEngine* DBComm::GetConnection(){
 
-	try{
+	/*try{
 		bool r = false;
 		base_storage::DBStorageEngine* engine = robot_logic::ThreadKey::GetStorageDBConn();
 		if (engine){
@@ -457,7 +480,8 @@ base_storage::DBStorageEngine* DBComm::GetConnection(){
 	catch (...){
 		LOG_ERROR("connect error");
 		return NULL;
-	}
+	}*/
+	return NULL;
 }
 
 
