@@ -296,6 +296,8 @@ void PubDBComm::GetUserInfoByLocation(std::map<int64,base_logic::UserAndMusic>& 
 				info.userinfo_.set_birthday(rows[7]);
 			if(rows[8]!=NULL)
 				info.userinfo_.set_head(rows[8]);
+			if(rows[9]!=NULL)
+				info.userinfo_.set_logintime(atoll(rows[9]));
 			map[info.userinfo_.uid()] = info;
 		}
 	}

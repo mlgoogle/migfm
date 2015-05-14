@@ -7,6 +7,7 @@
  */
 #ifndef _BUDDHA_LOGIC_INFOS_H__
 #define _BUDDHA_LOGIC_INFOS_H__
+#include "logic/logic_comm.h"
 #include "logic/base_values.h"
 #include "basic/scoped_ptr.h"
 #include "basic/basictypes.h"
@@ -51,6 +52,7 @@ public:
 	const std::string& birthday(){return data_->birthday_;}
 	const std::string& token() {return data_->token_;}
 
+	static bool cmptime(UserInfo& t_info,UserInfo& r_info);
 
 private:
 	class Data{
@@ -58,7 +60,7 @@ private:
 		Data()
 			:refcount_(1)
 			,uid_(0)
-			,sex_(0)
+			,sex_(-1)
 			,machine_(0)
 			,logintime_(0)
 			,type_(0)
@@ -339,6 +341,13 @@ public:
 	UserAndMusic& operator = (const UserAndMusic& user_music);
 	base_logic::DictionaryValue* Release(bool all =true,double latitude = 0.0,
 			double longitude = 0.0);
+
+	static bool cmptime(UserAndMusic& t_info,UserAndMusic& r_info){
+		LOG_DEBUG2("t_info uid:%lld time:%lld------r_info uid:%lld time:%lld",
+				t_info.userinfo_.uid(),t_info.userinfo_.logintime(),
+				r_info.userinfo_.uid(),t_info.userinfo_.logintime());
+		return t_info.userinfo_.logintime()<r_info.userinfo_.logintime();
+	}
 public:
 	UserInfo      userinfo_;
 	MusicInfo     musicinfo_;

@@ -69,7 +69,7 @@ private:
 private:
 
     void GetNearUserAndMusic(const double latitude,const double longitude,
-    		std::map<int64,base_logic::UserAndMusic>& infomap);
+    		std::list<base_logic::UserAndMusic>& infolist);
 
     bool Init();
 };

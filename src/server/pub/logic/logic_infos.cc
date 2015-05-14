@@ -35,6 +35,10 @@ UserInfo& UserInfo::operator =(const UserInfo& userinfo){
 	return (*this);
 }
 
+bool UserInfo::cmptime(UserInfo& t_info,UserInfo& r_info){
+	return t_info.logintime()<r_info.logintime();
+}
+
 base_logic::DictionaryValue* UserInfo::Release(){
 	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
 	if(data_->uid_!=0)
@@ -42,7 +46,7 @@ base_logic::DictionaryValue* UserInfo::Release(){
 #if defined(__OLD_VERSION__)
 		dict->SetString(L"userid",base::BasicUtil::StringUtil::Int64ToString(data_->uid_));
 #endif
-	if(data_->sex_!=0){
+	if(data_->sex_!=-1){
 #if defined(__OLD_VERSION__)
 		int64 i64sex = data_->sex_;
 		dict->SetString(L"sex",base::BasicUtil::StringUtil::Int64ToString(i64sex));

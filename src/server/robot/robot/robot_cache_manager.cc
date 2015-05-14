@@ -141,7 +141,10 @@ bool RobotCacheManager::RobotLoginSucess(const int64 platform_id,const int64 rob
 	//删除临时表机器人，放入正式表
 	bool r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->temp_robot_infos_,robot_uid,robot_info);
 	if(!r)
+		r = base::MapGet<RobotInfosMap,RobotInfosMap::iterator,robot_base::RobotBasicInfo>(pc->used_robot_infos_,robot_uid,robot_info);
+	if(!r)
 		return false;
+	//亦有可能已经在使用表中，同一个用户已经分配过陪伴机器人，但还没有超出离开时间，并未回收
 	robot_info.set_socket(socket);
 	robot_info.set_follow_uid(uid);
 	robot_info.set_recv_last_time(time(NULL));
