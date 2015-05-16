@@ -14,6 +14,7 @@ private:
 	static bool ParamSerialization(base_logic::DictionaryValue* info,std::string* content);
 public:
 	static base_logic::Value*  ResponseJsonSerialization(std::string* content);
+	static base_logic::Value*  ResponseXmlSerializetion(std::string* content);
 };
 
 }

@@ -244,6 +244,9 @@ void PubDBComm::GetUserInfoByLoginTime(std::map<int64,base_logic::UserAndMusic>&
 				info.userinfo_.set_birthday(rows[5]);
 			if(rows[6]!=NULL)
 				info.userinfo_.set_head(rows[6]);
+			if(rows[7]!=NULL)
+				info.userinfo_.set_logintime(atoll(rows[7]));
+
 			map[info.userinfo_.uid()] = info;
 		}
 	}

@@ -77,6 +77,13 @@ base_logic::Value* HttpAPI::ResponseJsonSerialization(std::string* content){
 	return engine->Deserialize(&error_code,&error_str);
 }
 
+base_logic::Value* ResponseXmlSerializetion(std::string* content){
+	std::string error_str;
+	int error_code = 0;
+	base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(base_logic::IMPL_XML,content);
+	return engine->Deserialize(&error_code,&error_str);
+}
+
 }
 
 
