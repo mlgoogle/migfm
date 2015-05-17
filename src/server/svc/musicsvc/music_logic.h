@@ -5,6 +5,11 @@
 #include "common.h"
 
 #define DEFAULT_CONFIG_PATH     "./plugins/musicsvc/musicsvc_config.xml"
+
+enum GETMUSICUSER{
+	MUSIC_FRI = 0,
+	MUSIC_NEAR = 1
+};
 namespace musicsvc_logic{
 
 class Musiclogic{
@@ -66,12 +71,21 @@ private:
     bool OnRecordMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
+    bool OnMyMusicFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg = NULL,const int len = 0);
+
 private:
 
-    void GetNearUserAndMusic(const double latitude,const double longitude,
+    void GetNearUserAndMusic(const int64 uid,
+    		const int32 cat,const double latitude,
+    		const double longitude,
+    		const int32 from,const int32 count,
     		std::list<base_logic::UserAndMusic>& infolist);
 
     bool Init();
+private:
+private:
+    int                                              robot_server_socket_;
 };
 
 

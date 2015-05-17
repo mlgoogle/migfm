@@ -65,6 +65,31 @@ public:
 	:LoginHeadPacket(m){}
 };
 
+
+//获取好友
+class MyFriend:public LoginHeadPacket{
+public:
+	MyFriend(NetBase* m)
+	:LoginHeadPacket(m){
+
+		Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		GETBIGINTTOINT(L"from",from_);
+		if(!r) from_ = 0;
+		GETBIGINTTOINT(L"count",count_);
+		if(!r) count_ = 5;
+	}
+
+	const int64 from() const {return this->from_;}
+	const int64 count() const {return this->count_;}
+private:
+	int64 from_;
+	int64 count_;
+};
+
 //打招呼
 class SayHello:public LoginHeadPacket{
 public:
@@ -228,6 +253,32 @@ public:
 		this->set_status(1);
 		return head_.release();
 	}
+};
+
+
+//我的好友
+class MyFriend:public HeadPacket{
+public:
+	MyFriend(){
+		base_.reset(new netcomm_send::NetBase());
+		list_.reset(new base_logic::ListValue());
+	}
+
+	netcomm_send::NetBase* release(){
+		if(!list_->empty())
+			base_->Set(L"list",list_.release());
+
+		head_->Set("result",base_.release());
+		this->set_status(1);
+		return head_.release();
+	}
+
+	void set_unit(base_logic::Value* info){
+		list_->Append(info);
+	}
+private:
+	scoped_ptr<netcomm_send::NetBase>         base_;
+	scoped_ptr<base_logic::ListValue>         list_;
 };
 }
 

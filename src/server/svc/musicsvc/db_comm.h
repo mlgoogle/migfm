@@ -20,6 +20,10 @@ public:
 	static void Dest();
 public:
 	static bool GetAllDimension(std::list<base_logic::Dimension>& list);
+	static bool GetMyFriend(const int64 uid,const int64 from,const int64 count,
+			std::map<int64,base_logic::UserAndMusic>& map);
+
+	static bool RecordMusicHistory(const int64 uid,const int64 songid);
 };
 
 }

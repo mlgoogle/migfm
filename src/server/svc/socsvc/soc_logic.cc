@@ -5,6 +5,7 @@
 #include "logic/pub_db_comm.h"
 #include "logic/logic_unit.h"
 #include "logic/logic_comm.h"
+#include "logic/logic_infos.h"
 #include "weather/weather_engine.h"
 #include "lbs/lbs_connector.h"
 #include "common.h"
@@ -113,6 +114,10 @@ bool Soclogic::OnSocMessage(struct server *srv, const int socket, const void *ms
 	 case SOC_GAIN_GIVE_SONG:
 		 OnGivingSong(srv,socket,value);
 		 break;
+	// case SOC_GAIN_MY_FRIEND:
+		// OnMyFriend(srv,socket,value);
+		// break;
+
 	}
     return true;
 }
@@ -151,6 +156,33 @@ bool Soclogic::OnTimeout(struct server *srv, char *id, int opcode, int time){
 
     return true;
 }
+
+bool Soclogic::OnMyFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+   		const void* msg,const int len){
+
+	scoped_ptr<netcomm_recv::MyFriend> owen_freind(new netcomm_recv::MyFriend(netbase));
+	int error_code = owen_freind->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	std::list<base_logic::UserAndMusic> list;
+	//获取好友
+	socsvc_logic::DBComm::GetMyFriend(10149,owen_freind->from(),owen_freind->count(),list);
+	scoped_ptr<netcomm_send::MyFriend> send_freind(new netcomm_send::MyFriend());
+	while(list.size()>0){
+		base_logic::UserAndMusic info = list.front();
+		list.pop_front();
+		send_freind->set_unit(info.Release());
+	}
+
+	//发送
+	send_message(socket,(netcomm_send::HeadPacket*)send_freind.get());
+	return true;
+}
+
 
 bool Soclogic::OnGainBarrageComm(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
        		const void* msg,const int len){

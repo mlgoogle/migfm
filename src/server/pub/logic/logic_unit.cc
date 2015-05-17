@@ -14,6 +14,8 @@
 #include "basic/basic_util.h"
 #include "basic/md5sum.h"
 #include "basic/radom_in.h"
+#include "file/file_path.h"
+#include "file/file_util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -129,6 +131,28 @@ void LogicUnit::SendErrorMsg(const int32 error_code,const int socket){
 	packet->set_msg(error_msg);
 	packet->set_status(0);
 	SendMessage(socket,packet.get());
+}
+
+void LogicUnit::RecordBehavior(const int32 cat,const int64 uid,const std::string& str){
+	std::string path = "./behavior";
+	if(cat==LISTEN_MUSIC_BEH)
+		path.append("/music");
+
+	time_t current_time = time(NULL);
+	std::stringstream os;
+	struct tm* local_time = localtime(&current_time);
+	os<<path<<"/"<<(local_time->tm_year+1900)
+			<<(local_time->tm_mon+1)<<(local_time->tm_mday);
+	std::string current_dir = os.str();
+	LOG_DEBUG2("%s",current_dir.c_str());
+	file::FilePath current_dir_path(current_dir);
+	if (!file::DirectoryExists(current_dir_path)){
+		file::CreateDirectory(current_dir_path);
+	}
+
+	file::FilePath file_path(current_dir+"/"+base::BasicUtil::StringUtil::Int64ToString(uid));
+	LOG_DEBUG2("%s",str.c_str());
+	file::WriteFile(file_path,str.c_str(),str.length());
 }
 
 

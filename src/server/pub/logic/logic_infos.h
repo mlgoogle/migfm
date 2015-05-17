@@ -54,6 +54,13 @@ public:
 
 	static bool cmptime(UserInfo& t_info,UserInfo& r_info);
 
+
+	inline bool Isvalid() const {
+		if((data_->uid_!=0)&&(!data_->nickname_.empty()))
+			return true;
+		return false;
+	}
+
 private:
 	class Data{
 	public:

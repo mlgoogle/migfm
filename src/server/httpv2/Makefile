@@ -155,7 +155,7 @@ delete-temp-file:
 ######################socproc###############################################
 SOCPROC_PATH = /soc
 OTJERPROC_VERSION = /v1
-socproc:getbarragecomm.fcgi getlocation.fcgi sayhello.fcgi presentsong.fcgi nearuser.fcgi
+socproc:getbarragecomm.fcgi getlocation.fcgi sayhello.fcgi presentsong.fcgi nearuser.fcgi getmusicuser.fcgi
 
 getbarragecomm.fcgi: getbarragecomm.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/getbarragecomm.fcgi
@@ -171,6 +171,9 @@ presentsong.fcgi: presentsong.o $(POBJ)
 
 nearuser.fcgi: nearuser.o $(POBJ)
 	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/nearuser.fcgi
+
+getmusicuser.fcgi: getmusicuser.o $(POBJ)
+	$(LINKALL) -o $(OUTPUT_FILE)$(SOCPROC_PATH)$(OTJERPROC_VERSION)/getmusicuser.fcgi
 ### 编译
 
 getbarragecomm.o:
@@ -187,6 +190,9 @@ presentsong.o:
 
 nearuser.o:
 	$(COMPILE) .$(SOCPROC_PATH)$(OTJERPROC_VERSION)/nearuser/nearuser.cc
+
+getmusicuser.o:
+	$(COMPILE) .$(SOCPROC_PATH)$(OTJERPROC_VERSION)/getmusicuser/getmusicuser.cc
 	
 
 clean:

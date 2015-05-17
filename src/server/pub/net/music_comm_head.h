@@ -255,6 +255,29 @@ private:
 
 typedef NearMusic NearUser;
 
+//获取好友
+class MyMusicFriend:public LoginHeadPacket{
+public:
+	MyMusicFriend(NetBase* m)
+	:LoginHeadPacket(m){
+
+		Init();
+	}
+
+	inline void Init(){
+		bool r = false;
+		GETBIGINTTOINT(L"from",from_);
+		if(!r) from_ = 0;
+		GETBIGINTTOINT(L"count",count_);
+		if(!r) count_ = 5;
+	}
+
+	const int64 from() const {return this->from_;}
+	const int64 count() const {return this->count_;}
+private:
+	int64 from_;
+	int64 count_;
+};
 
 class RecordMusic:public LoginHeadPacket{
 public:
@@ -267,6 +290,7 @@ public:
 		bool r = false;
 		std::string singer;
 		std::string music;
+		std::string dimension_name;
 
 		r = m_->GetBigInteger(L"cursong",&current_song_id_);
 		if(!r) error_code_ = MUSIC_SONG_ID_LACK;
@@ -274,8 +298,13 @@ public:
 		r = m_->GetBigInteger(L"typeid",&dimension_sub_id_);
 		if(!r) error_code_ = MUSIC_TYPE_ID_LACK;
 
-		r = m_->GetString(L"mode",&dimension_name_);
-		if(!r) error_code_ = MUSIC_TYPE_LACK;
+		r = m_->GetString(L"mode",&dimension_name);
+		if(!r){
+			error_code_ = MUSIC_TYPE_LACK;
+		}else{
+			r = base::BasicUtil::UrlDecode(dimension_name,dimension_name_);
+			if(!r) dimension_name_= dimension_name;
+		}
 
 		r = m_->GetBigInteger(L"lastsong",&last_song_id_);
 		if(!r) last_song_id_ = 0;
@@ -366,6 +395,32 @@ private:
 };
 
 typedef NearMusic NearUser;
+
+
+//我的好友
+class MyMusicFriend:public HeadPacket{
+public:
+	MyMusicFriend(){
+		base_.reset(new netcomm_send::NetBase());
+		list_.reset(new base_logic::ListValue());
+	}
+
+	netcomm_send::NetBase* release(){
+		if(!list_->empty())
+			base_->Set(L"list",list_.release());
+
+		head_->Set("result",base_.release());
+		this->set_status(1);
+		return head_.release();
+	}
+
+	void set_unit(base_logic::Value* info){
+		list_->Append(info);
+	}
+private:
+	scoped_ptr<netcomm_send::NetBase>         base_;
+	scoped_ptr<base_logic::ListValue>         list_;
+};
 
 }
 

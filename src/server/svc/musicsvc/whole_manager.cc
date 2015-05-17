@@ -219,12 +219,25 @@ void WholeManager::SetHatList(const int64 uid,base_logic::MusicInfo& music){
 	}*/
 }
 
+void WholeManager::CheckIsCollectSong(const int64 uid,std::list<base_logic::UserAndMusic>& infolist){
+	MUSICINFO_MAP music_list;
+	GetCollectList(uid,music_list);
+
+	//遍历
+	for(std::list<base_logic::UserAndMusic>:: iterator it = infolist.begin();
+			it!=infolist.end();++it){
+		base_logic::UserAndMusic info = (*it);
+		base_logic::MusicInfo musicinfo;
+		if(base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,
+				int64,base_logic::MusicInfo >(music_list,info.musicinfo_.id(),musicinfo))
+			info.musicinfo_.set_like(1);
+	}
+}
 
 
 void WholeManager::GetCollectList(const int64 uid,MUSICINFO_MAP& music_list){
 	GetMusicListT(uid,music_cache_->collect_map_,music_list,basic_logic::PubDicComm::GetColllectList);
 	GetMusicInfo(music_list);
-
 }
 
 void WholeManager::GetMusicInfo(MUSICINFO_MAP& list){
@@ -308,6 +321,7 @@ void WholeManager::CreateRadomin(DimensionCache& dimension_cache){
 		dimension_cache.dimension_radomin_[it->first] = radomV2;
 	}
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CacheManagerOp::FetchDicMusicBasic(){

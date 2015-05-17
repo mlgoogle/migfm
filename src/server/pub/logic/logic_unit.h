@@ -32,6 +32,7 @@
 
 #define RADOMIN_MAP           std::map<int,base::MigRadomInV2*>
 
+
 namespace base_logic{
 
 class LogicUnit{
@@ -48,6 +49,8 @@ public:
 	static void SendMessage(const int socket,netcomm_send::HeadPacket* packet);
 
 	static void SendErrorMsg(const int32 error_code,const int socket);
+
+	static void RecordBehavior(const int32 cat,const int64 uid,const std::string& str);
 };
 
 }

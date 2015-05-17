@@ -7,6 +7,7 @@
 #include "logic/logic_unit.h"
 #include "logic/logic_comm.h"
 #include "config/config.h"
+#include "intertface/robot_interface.h"
 #include "common.h"
 
 namespace musicsvc_logic{
@@ -122,6 +123,9 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	case MUSIC_SET_CURRENT_MUSIC:
 		OnRecordMusic(srv,socket,value);
 		break;
+	case MUSIC_GAIN_MY_MUSIC_FRIEND:
+		OnMyMusicFriend(srv,socket,value);
+		break;
 
 	}
     return true;
@@ -135,7 +139,7 @@ bool Musiclogic::OnMusicClose(struct server *srv,const int socket){
 
 
 bool Musiclogic::OnBroadcastConnect(struct server *srv, const int socket, const void *msg,const int len){
-
+	robot_server_socket_ = socket;
     return true;
 }
 
@@ -326,7 +330,8 @@ bool Musiclogic::OnNearMusic(struct server *srv,const int socket,netcomm_recv::N
 
 	//std::map<int64,base_logic::UserAndMusic>infomap;
 	std::list<base_logic::UserAndMusic> list;
-	GetNearUserAndMusic(near_music->latitude(),near_music->longitude(),list);
+	GetNearUserAndMusic(near_music->uid(),MUSIC_NEAR,near_music->latitude(),
+			near_music->longitude(),0,0,list);
 
 	scoped_ptr<netcomm_send::NearMusic> snear_music(new netcomm_send::NearMusic());
 	while(list.size()>0){
@@ -363,7 +368,7 @@ bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::Ne
 
 	//std::map<int64,base_logic::UserAndMusic>infomap;
 	std::list<base_logic::UserAndMusic> list;
-	GetNearUserAndMusic(near_user->latitude(),near_user->longitude(),list);
+	GetNearUserAndMusic(near_user->uid(),MUSIC_NEAR,near_user->latitude(),near_user->longitude(),0,0,list);
 
 	scoped_ptr<netcomm_send::NearUser> snear_user(new netcomm_send::NearUser());
 	while(list.size()>0){
@@ -381,6 +386,34 @@ bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::Ne
 		}
 	}*/
 	send_message(socket,(netcomm_send::HeadPacket*)snear_user.get());
+}
+
+bool Musiclogic::OnMyMusicFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+   		const void* msg,const int len){
+
+	scoped_ptr<netcomm_recv::MyMusicFriend> owen_freind(new netcomm_recv::MyMusicFriend(netbase));
+	int error_code = owen_freind->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+
+	std::list<base_logic::UserAndMusic> list;
+	GetNearUserAndMusic(owen_freind->uid(),MUSIC_FRI,
+			owen_freind->latitude(),owen_freind->longitude(),
+			owen_freind->from(),owen_freind->count(),list);
+	scoped_ptr<netcomm_send::MyMusicFriend> send_freind(new netcomm_send::MyMusicFriend());
+	while(list.size()>0){
+		base_logic::UserAndMusic info = list.back();
+		list.pop_back();
+		if(info.userinfo_.Isvalid()&&info.userinfo_.uid()!=owen_freind->uid())
+			send_freind->set_unit(info.Release(true,owen_freind->latitude(),owen_freind->longitude()));
+	}
+
+	//发送
+	send_message(socket,(netcomm_send::HeadPacket*)send_freind.get());
+	return true;
 }
 
 bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
@@ -405,24 +438,42 @@ bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv:
 
 	music.JsonDeserialize(json);
 	MIG_DEBUG(USER_LEVEL,"%s",json.c_str());
-	//写入memcached
-	if(!json.empty())
-		musicsvc_logic::MemComm::SetUserCurrentMusic(record->uid(),json);
+
 	scoped_ptr<netcomm_send::HeadPacket> head(new netcomm_send::HeadPacket());
 	head->set_status(1);
 	send_message(socket,(netcomm_send::HeadPacket*)head.get());
+	//通知用户听歌发生变化
+	NoticeUserCurrentSong(robot_server_socket_,10000,record->uid(),
+			record->current_song_id(),record->dimension_sub_id(),record->dimension_name().c_str());
+	//写入memcached
+	if(!json.empty()){
+		musicsvc_logic::MemComm::SetUserCurrentMusic(record->uid(),json);
+		//历史记录
+		musicsvc_logic::DBComm::RecordMusicHistory(record->uid(),record->current_song_id());
+		//行为分析
+		//日期/uid.txt
+		base_logic::LogicUnit::RecordBehavior(LISTEN_MUSIC_BEH,record->uid(),json);
+	}
+
+	return true;
 }
 
 
-void Musiclogic::GetNearUserAndMusic(const double latitude,const double longitude,
+void Musiclogic::GetNearUserAndMusic(const int64 uid,
+		const int32 cat,const double latitude,const double longitude,
+		const int32 from,const int32 count,
 		std::list<base_logic::UserAndMusic>& infolist){
 
 	//判断如果有坐标则获取周边的人 如果为0 根据登陆获取
 	std::map<int64,base_logic::UserAndMusic> infomap;
-	if(latitude==0 || longitude==0)
-		basic_logic::PubDBComm::GetUserInfoByLoginTime(infomap);
-	else
-		basic_logic::PubDBComm::GetUserInfoByLocation(infomap);
+	if(cat==0){
+		musicsvc_logic::DBComm::GetMyFriend(uid,from,count,infomap);
+	}else{
+		if(latitude==0 || longitude==0)
+			basic_logic::PubDBComm::GetUserInfoByLoginTime(infomap);
+		else
+			basic_logic::PubDBComm::GetUserInfoByLocation(infomap);
+	}
 	//获取对应用户的音乐
 	musicsvc_logic::MemComm::BatchGetCurrentSong(infomap);
 	for(std::map<int64,base_logic::UserAndMusic>::iterator it = infomap.end();
@@ -431,6 +482,9 @@ void Musiclogic::GetNearUserAndMusic(const double latitude,const double longitud
 		infolist.push_back(info);
 	}
 
+	//是否当前用户的红心歌单
+
+	musicsvc_logic::CacheManagerOp::GetWholeManager()->CheckIsCollectSong(uid,infolist);
 	infolist.sort(base_logic::UserAndMusic::cmptime);
 
 }

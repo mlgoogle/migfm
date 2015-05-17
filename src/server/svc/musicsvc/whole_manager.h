@@ -50,6 +50,8 @@ public:
 
 	void SetHatList(const int64 uid,base_logic::MusicInfo& music);
 
+	void CheckIsCollectSong(const int64 uid,std::list<base_logic::UserAndMusic>& infolist);
+
 	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,
 			const int64 num = 10);
 

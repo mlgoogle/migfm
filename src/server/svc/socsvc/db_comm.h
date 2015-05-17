@@ -25,6 +25,9 @@ public:
 			const int64 count,std::list<socsvc_logic::BarrageInfos>& list);
 
 	static double GetDistance(const int64 uid,const int64 tid);
+
+	static bool GetMyFriend(const int64 uid,const int64 from,const int64 count,
+			std::list<base_logic::UserAndMusic>& list);
 };
 
 }

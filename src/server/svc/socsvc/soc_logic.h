@@ -47,6 +47,9 @@ private:
 
     bool OnGivingSong(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
+
+    bool OnMyFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg = NULL,const int len = 0);
 public:
     void AddMoreGivingSongBlockMessage(int64 uid,int64 tid,std::string& json_str);
 
