@@ -422,6 +422,46 @@ private:
 	scoped_ptr<base_logic::ListValue>         list_;
 };
 
+//
+class DimensionInfo:public HeadPacket{
+public:
+	DimensionInfo(){
+		base_.reset(new netcomm_send::NetBase());
+		channel_list_.reset(new base_logic::ListValue());
+		mood_list_.reset(new base_logic::ListValue());
+		scens_list_.reset(new base_logic::ListValue());
+	}
+
+	netcomm_send::NetBase* release(){
+		if(!channel_list_->empty())
+			base_->Set(L"chl",channel_list_.release());
+		if(!mood_list_->empty())
+			base_->Set(L"mm",mood_list_.release());
+		if(!scens_list_->empty())
+			base_->Set(L"ms",scens_list_.release());
+		head_->Set("result",base_.release());
+		this->set_status(1);
+		return head_.release();
+	}
+
+	void set_channel(base_logic::Value* info){
+		channel_list_->Append(info);
+	}
+
+	void set_mood(base_logic::Value* info){
+		mood_list_->Append(info);
+	}
+
+	void set_scens(base_logic::Value* info){
+		scens_list_->Append(info);
+	}
+
+private:
+	scoped_ptr<netcomm_send::NetBase>         base_;
+	scoped_ptr<base_logic::ListValue>         channel_list_;
+	scoped_ptr<base_logic::ListValue>         mood_list_;
+	scoped_ptr<base_logic::ListValue>         scens_list_;
+};
 }
 
 

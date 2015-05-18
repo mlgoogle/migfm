@@ -270,6 +270,8 @@ public:
 	void set_name(const std::string& name){data_->name_ = name;}
 	void set_class_name(const std::string& class_name){data_->class_name_ = class_name;}
 	void set_description(const std::string& description){data_->description_ = description;}
+
+	base_logic::DictionaryValue* Release();
 	class Data{
 	public:
 		Data()
@@ -307,6 +309,8 @@ public:
 		data_->dimensions_map_[id] = dimension;
 	}
 
+
+	void swap(std::map<int64,base_logic::Dimension>& map){map = data_->dimensions_map_;}
 	const int64 id() const {return data_->id_;}
 	const std::string& name() const {return data_->name_;}
 	const std::string& alias() const {return data_->alias_;}

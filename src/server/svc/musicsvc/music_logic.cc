@@ -126,7 +126,9 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 	case MUSIC_GAIN_MY_MUSIC_FRIEND:
 		OnMyMusicFriend(srv,socket,value);
 		break;
-
+	case MUSIC_GAIN_DIMENSION_INFO:
+		OnDimensionInfo(srv,socket,value);
+		break;
 	}
     return true;
 }
@@ -416,6 +418,22 @@ bool Musiclogic::OnMyMusicFriend(struct server* srv,const int socket,netcomm_rec
 	return true;
 }
 
+bool Musiclogic::OnDimensionInfo(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg,const int len){
+	scoped_ptr<netcomm_recv::LoginHeadPacket> login(new netcomm_recv::LoginHeadPacket(netbase));
+	int error_code = login->GetResult();
+	if(error_code!=0){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
+	//获取信息
+	scoped_ptr<netcomm_send::DimensionInfo> dimension(new netcomm_send::DimensionInfo());
+	musicsvc_logic::CacheManagerOp::GetWholeManager()->GetDimensionInfo(dimension.get());
+	send_message(socket,(netcomm_send::HeadPacket*)dimension.get());
+	return true;
+}
+
 bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg,const int len){
 	scoped_ptr<netcomm_recv::RecordMusic> record(new netcomm_recv::RecordMusic(netbase));
@@ -452,12 +470,11 @@ bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv:
 		musicsvc_logic::DBComm::RecordMusicHistory(record->uid(),record->current_song_id());
 		//行为分析
 		//日期/uid.txt
-		base_logic::LogicUnit::RecordBehavior(LISTEN_MUSIC_BEH,record->uid(),json);
+		//base_logic::LogicUnit::RecordBehavior(LISTEN_MUSIC_BEH,record->uid(),json);
 	}
 
 	return true;
 }
-
 
 void Musiclogic::GetNearUserAndMusic(const int64 uid,
 		const int32 cat,const double latitude,const double longitude,
@@ -483,7 +500,6 @@ void Musiclogic::GetNearUserAndMusic(const int64 uid,
 	}
 
 	//是否当前用户的红心歌单
-
 	musicsvc_logic::CacheManagerOp::GetWholeManager()->CheckIsCollectSong(uid,infolist);
 	infolist.sort(base_logic::UserAndMusic::cmptime);
 

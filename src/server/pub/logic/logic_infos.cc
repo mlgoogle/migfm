@@ -366,6 +366,20 @@ Dimension& Dimension::operator =(const Dimension& dimension_info){
 	return (*this);
 }
 
+base_logic::DictionaryValue* Dimension::Release(){
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(!data_->class_name_.empty())
+		dict->SetString(L"class_name",data_->class_name_);
+	if(!data_->description_.empty())
+		dict->SetString(L"desc",data_->description_);
+	if(data_->id_!=0)
+		dict->SetBigInteger(L"id",data_->id_);
+	if(!data_->name_.empty())
+		dict->SetString(L"name",data_->name_);
+
+	return dict.release();
+}
+
 Dimensions::Dimensions(){
 	data_ = new Data();
 }
@@ -401,6 +415,8 @@ void Dimensions::dimension_name(const int64 id,std::string& name){
 	else
 		name = UNKONW_DIMENSIONS;
 }
+
+
 
 
 ////组合////
