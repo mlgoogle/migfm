@@ -66,6 +66,7 @@ static void GetRequestMethod(const char* query){
 		printf("Content-type: text/html\r\n"
 		"\r\n"
 		"%s",respone.c_str());
+	respone.clear();
 }
 
 static void PostRequestMethod(std::string& content){
