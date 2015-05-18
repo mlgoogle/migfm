@@ -74,6 +74,9 @@ private:
     bool OnMyMusicFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
+    bool OnDimensionInfo(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg = NULL,const int len = 0);
+
 private:
 
     void GetNearUserAndMusic(const int64 uid,

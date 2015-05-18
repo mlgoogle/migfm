@@ -31,6 +31,16 @@ WholeManager::~WholeManager(){
 
 void WholeManager::Init(){
 	base_logic::BaseWholeManager::Init();
+	CreateDimensions(10000,"ms",MOOD_NAME);
+	CreateDimensions(20000,"mm",SCENE_NAME);
+	CreateDimensions(30000,"chl",CHANNEL_NAME);
+}
+
+void  WholeManager::CreateDimensions(const int64 id,
+		const std::string& type,const std::string& name){
+	base_logic::Dimensions dimensions(id,name,type);
+	basic_logic::PubDBComm::GetDimensions(type,dimensions);
+	music_cache_->dimensions_[type] = dimensions;
 }
 
 void WholeManager::CreateRadomin(){
@@ -38,6 +48,38 @@ void WholeManager::CreateRadomin(){
 	CreateRadomin(music_cache_->mood_dimension_);
 	CreateRadomin(music_cache_->scene_dimension_);
 }
+
+
+void WholeManager::GetDimensionInfo(netcomm_send::DimensionInfo* net_dimension){
+	GetDimensionInfos("ms",net_dimension);
+	GetDimensionInfos("mm",net_dimension);
+	GetDimensionInfos("chl",net_dimension);
+}
+
+void WholeManager::GetDimensionInfos(const std::string& type,
+		netcomm_send::DimensionInfo* net_dimension){
+	base_logic::Dimensions dimensions = music_cache_->dimensions_[type];
+	std::map<int64,base_logic::Dimension> dimension;
+	dimensions.swap(dimension);
+	GetDimensionInfoUnit(type,dimension,net_dimension);
+}
+
+void WholeManager::GetDimensionInfoUnit(const std::string& type,
+		std::map<int64,base_logic::Dimension>& map,
+		netcomm_send::DimensionInfo* net_dimension){
+
+	std::map<int64,base_logic::Dimension>::iterator it =map.begin();
+	for(;it!=map.end();it++){
+		base_logic::Dimension info = it->second;
+		if(type=="chl")
+			net_dimension->set_channel(info.Release());
+		else if(type=="ms")
+			net_dimension->set_scens(info.Release());
+		else if(type=="mm")
+			net_dimension->set_mood(info.Release());
+	}
+}
+
 
 void WholeManager::GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,const int64 num
 		){

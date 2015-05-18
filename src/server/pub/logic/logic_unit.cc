@@ -135,8 +135,8 @@ void LogicUnit::SendErrorMsg(const int32 error_code,const int socket){
 
 void LogicUnit::RecordBehavior(const int32 cat,const int64 uid,const std::string& str){
 	std::string path = "./behavior";
-	if(cat==LISTEN_MUSIC_BEH)
-		path.append("/music");
+	//if(cat==LISTEN_MUSIC_BEH)
+		//path.append("/music");
 
 	time_t current_time = time(NULL);
 	std::stringstream os;

@@ -9,6 +9,8 @@
 #define MUSIC_CACHE_MANAGER_H_
 #include "logic/base_cache_manager.h"
 #include "logic/logic_unit.h"
+#include "net/music_comm_head.h"
+#include "logic/base_values.h"
 #include <list>
 #include <map>
 namespace musicsvc_logic{
@@ -31,6 +33,8 @@ public:
 	DimensionCache                channel_dimension_;
 	DimensionCache                mood_dimension_;
 	DimensionCache                scene_dimension_;
+
+	std::map<std::string,base_logic::Dimensions>   dimensions_;
 };
 
 class WholeManager: public base_logic::BaseWholeManager{
@@ -55,6 +59,14 @@ public:
 	void GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,
 			const int64 num = 10);
 
+	void GetDimensionInfo(netcomm_send::DimensionInfo* dimension);
+
+	void GetDimensionInfos(const std::string& type,
+			netcomm_send::DimensionInfo* net_dimension);
+
+	void GetDimensionInfoUnit(const std::string& type,
+			std::map<int64,base_logic::Dimension>& map,
+			netcomm_send::DimensionInfo* net_dimension);
 
 private:
 	void GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
@@ -69,6 +81,8 @@ private:
 			void (*redis_set)(const int64,const int64, const std::string&));
 public:
 	void GetMusicInfo(MUSICINFO_MAP& list);
+
+	void CreateDimensions(const int64 id,const std::string& type,const std::string& name);
 public:
 	MusicCache* GetFindCache(){return this->music_cache_;}
 private:
