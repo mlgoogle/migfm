@@ -32,6 +32,8 @@
 
 #define RADOMIN_MAP           std::map<int,base::MigRadomInV2*>
 
+#define USER_INFO_MAP         std::map<int64,base_logic::UserInfo> /*ID----用户信息*/
+
 
 namespace base_logic{
 
@@ -51,6 +53,14 @@ public:
 	static void SendErrorMsg(const int32 error_code,const int socket);
 
 	static void RecordBehavior(const int32 cat,const int64 uid,const std::string& str);
+};
+
+//批量获取
+class GetBatchData{
+public:
+	//先从memcached 批量获取 没有的数据从数据库获取再写入memcached
+	bool BatchGetUserinfo(std::vector<int64>& vec,
+			std::map<int64,base_logic::UserInfo>& info);
 };
 
 }
