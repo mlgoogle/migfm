@@ -2,14 +2,16 @@
 #include<stdlib.h>
 #include<string.h>
 #include"native_library.h"
+#include "log/mig_log.h"
 
 namespace basic{
 libhandle load_native_library(const char* library_path){
     
     libhandle dl = dlopen(library_path,RTLD_LAZY);
     if(!dl){
-        printf("dlopen failed where trying to open error: %s (on [%d] line"
-               " in [%s]file)\n",dlerror(),__LINE__,__FILE__);
+        //printf("dlopen failed where trying to open error: %s (on [%d] line"
+          //     " in [%s]file)\n",dlerror(),__LINE__,__FILE__);
+    	MIG_ERROR(USER_LEVEL,"dlopen failed where trying to open error: %s (on [%d] line in [%s]file)\n",dlerror(),__LINE__,__FILE__);
         return NULL;
     }
     

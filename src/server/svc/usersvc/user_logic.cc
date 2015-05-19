@@ -2,16 +2,19 @@
 #include "user_basic_info.h"
 #include "db_comm.h"
 #include "dic_comm.h"
+#include "data_cache_manager.h"
 #include "logic/logic_unit.h"
 #include "logic/logic_infos.h"
 #include "lbs/location_server.h"
 #include "pushmsg/basic_push_info.h"
 #include "pushmsg/push_connector.h"
 #include "basic/scoped_ptr.h"
+#include "basic/native_library.h"
 #include "logic/logic_comm.h"
 #include "intertface/robot_interface.h"
 #include "config/config.h"
 #include "common.h"
+#include<dlfcn.h>
 
 namespace usersvc_logic{
 
@@ -45,6 +48,19 @@ bool Userlogic::Init(){
 	usersvc_logic::UserDicComm::Init(config->redis_list_);
 	base_push::PushConnectorEngine::Create(base_push::IMPL_BAIDU);
 	base_push::PushConnectorEngine::GetPushConnectorEngine()->Init(config->mysql_db_list_);
+
+
+	basic::libhandle  handle_lancher = NULL;
+	handle_lancher = basic::load_native_library("./data.so");
+	if (handle_lancher==NULL){
+		MIG_ERROR(USER_LEVEL,"Can't load path data.so\n");
+	}
+
+
+	base_logic::DataWholeManager* (*pGetDataWholeManager)(void);
+	pGetDataWholeManager =  (base_logic::DataWholeManager *(*)(void))basic::get_function_pointer(handle_lancher, "GetWholeManager");
+	base_logic::DataWholeManager *pWhole = (*pGetDataWholeManager)();
+	pWhole->DelUserInfo(10149);
     return true;
 }
 

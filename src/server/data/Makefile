@@ -10,28 +10,25 @@
 
 # Where to find user code.
 
-LIB_DIR = ./../../../library
-USER_DIR = ../../pub
-DATA_DIR = ../../data
-ROBOT_PATH = ../../robot
-SO_DIR = ../../bin/hfcrsrvV2/plugins
+LIB_DIR = ./../../library
+USER_DIR = ./../pub
+SO_DIR = ./../bin/hfcrsrvV2/
 
 THIRD_PATH = $(LIB_DIR)/public
 
 CUSTOM_THIRD_PATH = $(LIB_DIR)/third_party
 
-
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG
+CPPFLAGS += -isystem -shared -fPIC -D_DB_POOL_ -D_DEBUG -DUSR_LOG_MSG -D_DIC_POOL_ -D_REENTRANT -D_GNU_SOURCE -DUSR_LOG_ERROR -DUSR_LOG_MSG -DPROCESS_WORK
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g  -Wextra -pthread -shared -fPIC
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-PLUGIN = $(SO_DIR)/usersvc/user.so
+PLUGIN = $(SO_DIR)/data.so
                 
 INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(LIB_DIR)/core \
@@ -39,11 +36,9 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
-				-I$(DATA_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
 				-I$(LIB_DIR)/base\
-				-I$(ROBOT_PATH)
 
 
 # House-keeping build targets.
@@ -82,47 +77,33 @@ clean :
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-user_init.o : ./user_init.cc ./user_init.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./user_init.cc $(INCLUDE_PATHS) 
 
-user_logic.o : ./user_logic.cc ./user_logic.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./user_logic.cc $(INCLUDE_PATHS)
-	
-db_comm.o : ./db_comm.cc ./db_comm.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./db_comm.cc $(INCLUDE_PATHS)
-	
-dic_comm.o : ./dic_comm.cc ./dic_comm.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./dic_comm.cc $(INCLUDE_PATHS)
-	
-user_basic_info.o : ./user_basic_info.cc ./user_basic_info.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./user_basic_info.cc $(INCLUDE_PATHS)
+data_cache_manager.o : ./data_cache_manager.cc ./data_cache_manager.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./data_cache_manager.cc $(INCLUDE_PATHS)
 
-comm_impl.o :  $(USER_DIR)/net/comm_impl.cc $(USER_DIR)/net/user_comm_head.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/comm_impl.cc $(INCLUDE_PATHS)
-
-error_comm.o :  $(USER_DIR)/net/error_comm.cc $(USER_DIR)/net/error_comm.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/error_comm.cc $(INCLUDE_PATHS)
-	
 logic_infos.o :  $(USER_DIR)/logic/logic_infos.cc $(USER_DIR)/logic/logic_infos.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_infos.cc $(INCLUDE_PATHS)
 
 logic_unit.o :  $(USER_DIR)/logic/logic_unit.cc $(USER_DIR)/logic/logic_unit.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_unit.cc $(INCLUDE_PATHS)
 	
-http_packet.o: $(THIRD_PATH)/protocol/http_packet.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/protocol/http_packet.cc $(INCLUDE_PATHS)
+pub_db_comm.o :  $(USER_DIR)/logic/pub_db_comm.cc $(USER_DIR)/logic/pub_db_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/pub_db_comm.cc $(INCLUDE_PATHS)
 	
 mig_log.o: $(THIRD_PATH)/log/mig_log.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/log/mig_log.cc $(INCLUDE_PATHS)
+	
+comm_impl.o :  $(USER_DIR)/net/comm_impl.cc $(USER_DIR)/net/comm_head.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/comm_impl.cc $(INCLUDE_PATHS)
+
+error_comm.o :  $(USER_DIR)/net/error_comm.cc $(USER_DIR)/net/error_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/error_comm.cc $(INCLUDE_PATHS)
 	
 basictypes.o: $(THIRD_PATH)/basic/basictypes.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/basictypes.cc $(INCLUDE_PATHS)
 	
 basic_util.o: $(THIRD_PATH)/basic/basic_util.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/basic_util.cc $(INCLUDE_PATHS)
-	
-native_library.o: $(THIRD_PATH)/basic/native_library.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/native_library.cc $(INCLUDE_PATHS)
 	
 config.o: $(THIRD_PATH)/config/config.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/config/config.cc $(INCLUDE_PATHS)
@@ -133,10 +114,9 @@ md5sum.o:$(THIRD_PATH)/basic/md5sum.cc
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : user_init.o user_logic.o user_basic_info.o db_comm.o dic_comm.o\
-	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o\
-	logic_infos.o logic_unit.o basic_util.o config.o native_library.o\
+$(PLUGIN) : data_cache_manager.o  basictypes.o comm_impl.o error_comm.o\
+	logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \
-	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a $(LIB_DIR)/lib/robot_interface.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lmemcached -lmemcachedutil -lcurl \
+	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl -lmemcached -lmemcachedutil \
 	$^ -o $@
