@@ -149,6 +149,59 @@ bool DBComm::GetMyFriend(const int64 uid,const int64 from,const int64 count,
 			map[info.userinfo_.uid()] = info;
 		}
 	}
-	return 0;
+	return true;
+}
+
+bool DBComm::GetPushMessage(const int64 uid,const int32 from,const int32 count,
+		std::map<int64,base_logic::PersonalMessage>& map){
+	bool r = false;
+#if defined (_DB_POOL_)
+	base_db::AutoMysqlCommEngine auto_engine;
+	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
+#endif
+	std::stringstream os;
+	MYSQL_ROW rows;
+
+	if (engine==NULL){
+		LOG_ERROR("GetConnection Error");
+		return 0;
+	}
+
+    //call proc_GetMessageList(10108,0,10);
+	os<<"call proc_GetMessageList("<<10108<<","<<from<<","<<count<<")";
+	std::string sql = os.str();
+	LOG_MSG2("[%s]", sql.c_str());
+	r = engine->SQLExec(sql.c_str());
+
+	if (!r) {
+		LOG_ERROR("exec sql error");
+		return 0;
+	}
+
+
+	int num = engine->RecordCount();
+	if(num>0){
+		while(rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)){
+			base_logic::PersonalMessage info;
+			if(rows[0]!=NULL)
+				info.detail_message_.set_id(atoll(rows[0]));
+			if(rows[1]!=NULL)
+				info.detail_message_.set_type(atol(rows[1]));
+			if(rows[2]!=NULL)
+				info.lbsinfo_.set_latitude(atof(rows[2]));
+			if(rows[3]!=NULL)
+				info.lbsinfo_.set_longitude(atof(rows[3]));
+			if(rows[4]!=NULL)
+				info.detail_message_.set_send_id(atoll(rows[4]));
+			if(rows[5]!=NULL)
+				info.detail_message_.set_recv_id(atoll(rows[5]));
+			if(rows[6]!=NULL)
+				info.musicinfo_.set_id(atoll(rows[6]));
+			if(rows[7]!=NULL)
+				info.detail_message_.set_message(rows[7]);
+			map[info.detail_message_.id()] = info;
+		}
+	}
+	return true;
 }
 }

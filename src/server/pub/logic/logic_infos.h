@@ -344,6 +344,55 @@ public:
 };
 
 
+class DetailMessage{
+public:
+	explicit DetailMessage();
+	DetailMessage(const DetailMessage& message);
+	DetailMessage& operator = (const DetailMessage& message);
+
+	const int64 id() const {return data_->id_;}
+	const int32 type() const {return data_->type_;}
+	const int64 send_id() const {return data_->send_id_;}
+	const int64 recv_id() const {return data_->recv_id_;}
+	const int64 msg_time() const {return data_->msg_time_;}
+	const std::string message() const {return data_->message_;}
+
+	void set_id(const int64 id){data_->id_ = id;}
+	void set_type(const int64 type){data_->type_ = type;}
+	void set_send_id(const int64 send_id){data_->send_id_ = send_id;}
+	void set_recv_id(const int64 recv_id){data_->recv_id_ = recv_id;}
+	void set_msg_time(const int64 msg_time){data_->msg_time_ = msg_time;}
+	void set_message(const std::string& messgae){data_->message_ = messgae;}
+
+	base_logic::DictionaryValue* Release();
+
+public:
+	class Data{
+	public:
+		Data()
+		:refcount_(1)
+		,id_(0)
+		,type_(0)
+		,send_id_(0)
+		,recv_id_(0)
+		,msg_time_(0){}
+	public:
+		void AddRef(){refcount_ ++;}
+		void Release(){if (!--refcount_)delete this;}
+	public:
+		int64 id_;
+		int32 type_;
+		int64 send_id_;
+		int64 recv_id_;
+		int64 msg_time_;
+		std::string message_;
+	private:
+		int refcount_;
+	};
+
+	Data*     data_;
+};
+
 ///组合模块
 class UserAndMusic{
 public:
@@ -354,9 +403,6 @@ public:
 			double longitude = 0.0);
 
 	static bool cmptime(UserAndMusic& t_info,UserAndMusic& r_info){
-		LOG_DEBUG2("t_info uid:%lld time:%lld------r_info uid:%lld time:%lld",
-				t_info.userinfo_.uid(),t_info.userinfo_.logintime(),
-				r_info.userinfo_.uid(),t_info.userinfo_.logintime());
 		return t_info.userinfo_.logintime()<r_info.userinfo_.logintime();
 	}
 public:
@@ -364,6 +410,29 @@ public:
 	MusicInfo     musicinfo_;
 	LBSInfos      lbsinfo_;
 
+};
+
+//组合模块
+class PersonalMessage{
+public:
+	explicit PersonalMessage();
+	PersonalMessage(const PersonalMessage& personal);
+
+	PersonalMessage& operator = (const PersonalMessage& personal);
+
+	base_logic::DictionaryValue* Release(double latitude = 0.0,
+			double longitude = 0.0);
+
+	static bool cmptime(PersonalMessage& t_info,PersonalMessage& r_info){
+		return t_info.detail_message_.msg_time()<r_info.detail_message_.msg_time();
+	}
+
+public:
+	UserInfo  userinfo_;
+	MusicInfo musicinfo_;
+	MusicInfo listen_musicinfo_;
+	LBSInfos  lbsinfo_;
+	DetailMessage  detail_message_;
 };
 }
 

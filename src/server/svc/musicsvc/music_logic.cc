@@ -115,7 +115,7 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 		OnNearMusic(srv,socket,value);
 		break;
 	case MUSIC_GAIN_NEAR_USER:
-		OnNearUser(srv,socket,value);
+		OnSocNearUser(srv,socket,value);
 		break;
 	case MUSIC_GAIN_SET_HATE:
 		OnHateList(srv,socket,value);
@@ -124,7 +124,7 @@ bool Musiclogic::OnMusicMessage(struct server *srv, const int socket, const void
 		OnRecordMusic(srv,socket,value);
 		break;
 	case MUSIC_GAIN_MY_MUSIC_FRIEND:
-		OnMyMusicFriend(srv,socket,value);
+		OnSocMyMusicFriend(srv,socket,value);
 		break;
 	case MUSIC_GAIN_DIMENSION_INFO:
 		OnDimensionInfo(srv,socket,value);
@@ -356,7 +356,7 @@ bool Musiclogic::OnNearMusic(struct server *srv,const int socket,netcomm_recv::N
 	return true;
 }
 
-bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+bool Musiclogic::OnSocNearUser(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg,const int len){
 	scoped_ptr<netcomm_recv::NearUser> near_user(new netcomm_recv::NearUser(netbase));
 	int error_code = near_user->GetResult();
@@ -390,7 +390,7 @@ bool Musiclogic::OnNearUser(struct server *srv,const int socket,netcomm_recv::Ne
 	send_message(socket,(netcomm_send::HeadPacket*)snear_user.get());
 }
 
-bool Musiclogic::OnMyMusicFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+bool Musiclogic::OnSocMyMusicFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
    		const void* msg,const int len){
 
 	scoped_ptr<netcomm_recv::MyMusicFriend> owen_freind(new netcomm_recv::MyMusicFriend(netbase));
@@ -474,6 +474,11 @@ bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv:
 	}
 
 	return true;
+}
+
+bool Musiclogic::OnSocGetPushMessage(struct server* srv,const int socket,
+		netcomm_recv::NetBase* netbase,const void* msg,const int len){
+
 }
 
 void Musiclogic::GetNearUserAndMusic(const int64 uid,

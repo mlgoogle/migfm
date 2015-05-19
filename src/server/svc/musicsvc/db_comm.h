@@ -24,6 +24,9 @@ public:
 			std::map<int64,base_logic::UserAndMusic>& map);
 
 	static bool RecordMusicHistory(const int64 uid,const int64 songid);
+
+	static bool GetPushMessage(const int64 uid,const int32 from,const int32 count,
+			std::map<int64,base_logic::PersonalMessage>& map);
 };
 
 }

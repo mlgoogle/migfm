@@ -417,7 +417,42 @@ void Dimensions::dimension_name(const int64 id,std::string& name){
 }
 
 
+DetailMessage::DetailMessage(){
+	data_ = new Data();
+}
 
+DetailMessage::DetailMessage(const DetailMessage& message)
+:data_(message.data_){
+}
+
+DetailMessage& DetailMessage::operator =(const DetailMessage& message){
+	if(message.data_!=NULL){
+		message.data_->AddRef();
+	}
+	if(data_!=NULL){
+		data_->Release();
+	}
+	data_ = message.data_;
+	return (*this);
+}
+
+base_logic::DictionaryValue* DetailMessage::Release(){
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(data_->id_!=0)
+		dict->SetBigInteger(L"id",data_->id_);
+	if(data_->type_!=0)
+		dict->SetBigInteger(L"type",data_->type_);
+	if(data_->send_id_!=0)
+		dict->SetBigInteger(L"send_id",data_->send_id_);
+	if(data_->recv_id_!=0)
+		dict->SetBigInteger(L"recv_id",data_->recv_id_);
+	if(data_->msg_time_!=0)
+		dict->SetBigInteger(L"msg_time",data_->msg_time_);
+	if(!data_->message_.empty())
+		dict->SetString(L"msg",data_->message_);
+
+	return dict.release();
+}
 
 ////组合////
 UserAndMusic::UserAndMusic(){
@@ -451,6 +486,41 @@ base_logic::DictionaryValue* UserAndMusic::Release(bool all,double latitude,
 }
 
 
+PersonalMessage::PersonalMessage(){
+
+}
+
+PersonalMessage::PersonalMessage(const PersonalMessage& personal){
+	this->userinfo_ = personal.userinfo_;
+	this->musicinfo_ = personal.musicinfo_;
+	this->listen_musicinfo_ = personal.listen_musicinfo_;
+	this->lbsinfo_ = personal.lbsinfo_;
+	this->detail_message_ = personal.detail_message_;
+}
+
+PersonalMessage& PersonalMessage::operator =(const PersonalMessage& personal){
+	this->userinfo_ = personal.userinfo_;
+	this->musicinfo_ = personal.musicinfo_;
+	this->listen_musicinfo_ = personal.listen_musicinfo_;
+	this->lbsinfo_ = personal.lbsinfo_;
+	this->detail_message_ = personal.detail_message_;
+	return (*this);
+}
+
+base_logic::DictionaryValue* PersonalMessage::Release(double latitude,double longitude){
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(musicinfo_.Isvalid())
+		dict->Set(L"music",musicinfo_.Release());
+	if(listen_musicinfo_.Isvalid())
+		dict->Set(L"listen",listen_musicinfo_.Release());
+	if(userinfo_.Isvalid())
+		dict->Set(L"userinfo",userinfo_.Release());
+	if(lbsinfo_.latitude()!=0.0&lbsinfo_.longitude()!=0.0)
+		dict->Set(L"poi",lbsinfo_.Release(latitude,longitude));
+	if(!detail_message_.message().empty())
+		dict->Set(L"detail",detail_message_.Release());
+	return dict.release();
+}
 
 }
 

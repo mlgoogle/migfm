@@ -7,7 +7,7 @@
 #include "logic/logic_comm.h"
 #include "logic/logic_infos.h"
 #include "weather/weather_engine.h"
-#include "lbs/lbs_connector.h"
+#include "lbs/location_server.h"
 #include "common.h"
 
 namespace socsvc_logic{
@@ -23,7 +23,8 @@ Soclogic::Soclogic(){
 Soclogic::~Soclogic(){
 	socsvc_logic::DBComm::Dest();
 	basic_logic::PubDBComm::Dest();
-	base_lbs::LbsConnectorEngine::FreeLbsConnectorEngine();
+	//base_lbs::LbsConnectorEngine::FreeLbsConnectorEngine();
+	base_lbs::LocationServer::Dest();
 	base_weather::WeatherConnectorEngine::FreeWeatherConnectorEngine();
 	base_logic::WholeManager::FreeWholeManager();
 }
@@ -41,9 +42,10 @@ bool Soclogic::Init(){
 	//初始化全局存储
 	base_logic::WholeManager::GetWholeManager()->Init(config->redis_list_);
 
-	base_lbs::LbsConnectorEngine::Create(base_lbs::IMPL_BAIDU);
+	/*base_lbs::LbsConnectorEngine::Create(base_lbs::IMPL_BAIDU);
 	base_lbs::LbsConnector* engine = base_lbs::LbsConnectorEngine::GetLbsConnectorEngine();
-	engine->Init(config->mysql_db_list_);
+	engine->Init(config->mysql_db_list_);*/
+	base_lbs::LocationServer::Init(config->mysql_db_list_,config->mem_list_);
 
 	base_weather::WeatherConnectorEngine::Create(base_weather::IMPL_CAIYUN);
 	base_weather::WeatherConnector* weather_engine = base_weather::WeatherConnectorEngine::GetWeatherConnectorEngine();

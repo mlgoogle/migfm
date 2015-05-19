@@ -65,16 +65,19 @@ private:
     bool OnNearMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
-    bool OnNearUser(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
+    bool OnSocNearUser(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
     bool OnRecordMusic(struct server *srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
-    bool OnMyMusicFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+    bool OnSocMyMusicFriend(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
     bool OnDimensionInfo(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
+    		const void* msg = NULL,const int len = 0);
+
+    bool OnSocGetPushMessage(struct server* srv,const int socket,netcomm_recv::NetBase* netbase,
     		const void* msg = NULL,const int len = 0);
 
 private:
