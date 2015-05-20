@@ -12,6 +12,7 @@
 
 LIB_DIR = ./../../../library
 USER_DIR = ../../pub
+DATA_DIR = ../../data
 ROBOT_PATH = ../../robot
 SO_DIR = ../../bin/hfcrsrvV2/plugins
 
@@ -37,6 +38,7 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I/usr/local/include\
 				-I/usr/include/mysql\
 				-I$(USER_DIR)\
+				-I$(DATA_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
 				-I$(LIB_DIR)/base\
@@ -106,6 +108,9 @@ logic_infos.o :  $(USER_DIR)/logic/logic_infos.cc $(USER_DIR)/logic/logic_infos.
 logic_unit.o :  $(USER_DIR)/logic/logic_unit.cc $(USER_DIR)/logic/logic_unit.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_unit.cc $(INCLUDE_PATHS)
 	
+native_library.o: $(THIRD_PATH)/basic/native_library.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/native_library.cc $(INCLUDE_PATHS)
+	
 pub_db_comm.o :  $(USER_DIR)/logic/pub_db_comm.cc $(USER_DIR)/logic/pub_db_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/pub_db_comm.cc $(INCLUDE_PATHS)
 	
@@ -149,7 +154,7 @@ file_util.o:$(THIRD_PATH)/file/file_util.cc
 
 $(PLUGIN) : music_init.o music_logic.o whole_manager.o db_comm.o music_dic_comm.o\
 	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o\
-	base_cache_manager.o pub_db_comm.o pub_dic_comm.o\
+	base_cache_manager.o pub_db_comm.o pub_dic_comm.o native_library.o\
 	logic_infos.o logic_unit.o basic_util.o config.o file_path.o file_util.o\
 	md5sum.o radom_in.o base64.o\
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a $(LIB_DIR)/lib/robot_interface.a

@@ -56,11 +56,19 @@ bool Userlogic::Init(){
 		MIG_ERROR(USER_LEVEL,"Can't load path data.so\n");
 	}
 
+	base_logic::DataEngine* (*pengine) (void);
+	pengine = (base_logic::DataEngine *(*)(void))basic::get_function_pointer(handle_lancher, "GetDateEngine");
+	if(pengine==NULL){
+		MIG_ERROR(USER_LEVEL,"Can't find GetDateEngine\n");
+	}
+	base_logic::DataEngine* engine = (*pengine)();
 
-	base_logic::DataWholeManager* (*pGetDataWholeManager)(void);
-	pGetDataWholeManager =  (base_logic::DataWholeManager *(*)(void))basic::get_function_pointer(handle_lancher, "GetWholeManager");
-	base_logic::DataWholeManager *pWhole = (*pGetDataWholeManager)();
-	pWhole->DelUserInfo(10149);
+	base_logic::UserInfo info;
+	info.set_uid(10149);
+	info.set_nickname("kerry");
+	info.set_city("杭州");
+	//engine->DelUserInfo(10149);
+	engine->SetUserInfo(10149,info);
     return true;
 }
 

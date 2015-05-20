@@ -10,11 +10,21 @@
 #include "basic/template.h"
 #include <list>
 
-base_logic::DataWholeManager *GetWholeManager(void){
-	return base_logic::DataCacheEngine::GetWholeManager();
+base_logic::DataEngine *GetDateEngine(void){
+	return new base_logic::DateEngineImpl();
 }
 
+
 namespace base_logic{
+
+
+bool DateEngineImpl::SetUserInfo(const int64 uid,base_logic::UserInfo& info){
+	return DataCacheEngine::GetWholeManager()->SetUserInfo(uid,info);
+}
+
+bool DateEngineImpl::DelUserInfo(const int64 uid){
+	return DataCacheEngine::GetWholeManager()->DelUserInfo(uid);
+}
 
 
 DataWholeManager* DataCacheEngine::whole_mgr_ = NULL;
@@ -46,6 +56,7 @@ bool DataWholeManager::SetUserInfo(const int64 uid,base_logic::UserInfo& info){
 
 bool DataWholeManager::DelUserInfo(const int64 uid){
 	base_logic::WLockGd lk(lock_);
+	LOG_DEBUG("HAHAHAHAHAHAHAHAHAHA");
 	return base::MapDel<USER_INFO_MAP,USER_INFO_MAP::iterator,int64>(data_cache_->userinfo_map_,uid);
 }
 

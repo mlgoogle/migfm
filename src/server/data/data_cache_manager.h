@@ -18,6 +18,24 @@
 #include "config/config.h"
 namespace base_logic{
 
+
+
+class DataEngine{
+public:
+	virtual bool SetUserInfo(const int64 uid,base_logic::UserInfo& info) = 0;
+
+	virtual bool DelUserInfo(const int64 uid) = 0;
+};
+
+
+class DateEngineImpl:public DataEngine{
+public:
+	bool SetUserInfo(const int64 uid,base_logic::UserInfo& info);
+
+	bool DelUserInfo(const int64 uid);
+};
+
+
 class DataCache{
 //用户数据
 public:
@@ -50,7 +68,8 @@ private:
 	DataCache*                    data_cache_;
 };
 
-__attribute__((visibility("default")))
+
+
 class DataCacheEngine{
 private:
 	static DataWholeManager              *whole_mgr_;
@@ -79,7 +98,7 @@ public:
 }
 
 
-extern "C" base_logic::DataWholeManager *GetWholeManager(void);
+extern "C" base_logic::DataEngine *GetDateEngine(void);
 
 
 
