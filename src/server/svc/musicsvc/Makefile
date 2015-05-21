@@ -96,6 +96,9 @@ db_comm.o : ./db_comm.cc ./db_comm.h
 music_dic_comm.o : ./music_dic_comm.cc ./music_dic_comm.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./music_dic_comm.cc $(INCLUDE_PATHS)
 
+behavior.o :  $(USER_DIR)/logic/behavior.cc $(USER_DIR)/logic/behavior.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/behavior.cc $(INCLUDE_PATHS)
+	
 comm_impl.o :  $(USER_DIR)/net/comm_impl.cc $(USER_DIR)/net/comm_head.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/net/comm_impl.cc $(INCLUDE_PATHS)
 
@@ -154,7 +157,7 @@ file_util.o:$(THIRD_PATH)/file/file_util.cc
 
 $(PLUGIN) : music_init.o music_logic.o whole_manager.o db_comm.o music_dic_comm.o\
 	http_packet.o mig_log.o basictypes.o comm_impl.o error_comm.o\
-	base_cache_manager.o pub_db_comm.o pub_dic_comm.o native_library.o\
+	base_cache_manager.o pub_db_comm.o pub_dic_comm.o native_library.o behavior.o\
 	logic_infos.o logic_unit.o basic_util.o config.o file_path.o file_util.o\
 	md5sum.o radom_in.o base64.o\
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a $(LIB_DIR)/lib/robot_interface.a

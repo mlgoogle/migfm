@@ -7,6 +7,7 @@
 #include "logic/pub_dic_comm.h"
 #include "logic/logic_unit.h"
 #include "logic/logic_comm.h"
+#include "logic/behavior.h"
 #include "config/config.h"
 #include "basic/native_library.h"
 #include "intertface/robot_interface.h"
@@ -489,6 +490,7 @@ bool Musiclogic::OnRecordMusic(struct server *srv,const int socket,netcomm_recv:
 		musicsvc_logic::DBComm::RecordMusicHistory(record->uid(),record->current_song_id());
 		//行为分析
 		//日期/uid.txt
+		base_logic::BehaviorEngine::Instance()->RecordUserListenBehavior(record->uid(),record->current_song_id(),record->dimension_sub_id(),record->dimension_name().c_str());
 		//base_logic::LogicUnit::RecordBehavior(LISTEN_MUSIC_BEH,record->uid(),json);
 	}
 
