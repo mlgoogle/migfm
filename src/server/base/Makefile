@@ -47,7 +47,7 @@ output:	basic_util.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto.o\
 	weather_engine.o weather_logic_unit.o value_serializer.o http_serializer.o json_serializer.o\
 	basic_push_info.o push_baidu_connector.o push_connector.o push_db_comm.o push_logic_unit.o\
 	storage.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
-	redis_warrper.o http_method.o http_method.o\
+	redis_warrper.o http_method.o http_method.o mig_log.o\
 	json_reader.o json_writer.o json_value.o\
 	constants.o basic_info.o basictypes.o 
 	$(LINK)

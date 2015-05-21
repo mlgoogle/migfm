@@ -5,6 +5,7 @@
  *      Author: pro
  */
 #include "http_api.h"
+#include "logic/logic_comm.h"
 #include "logic/http_serializer.h"
 #include "http/http_method.h"
 
@@ -17,7 +18,8 @@ bool HttpAPI::RequestGetMethod(const std::string& url,base_logic::DictionaryValu
 	bool r = ParamSerialization(info,&content);
 	if(!r)
 		return false;
-	http::HttpMethodGet http(url);
+	std::string query = url+std::string("?")+content;
+	http::HttpMethodGet http(query);
 	int32 i = 0;
 	do{
 		r = http.Get();
