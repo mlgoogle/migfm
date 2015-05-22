@@ -112,7 +112,14 @@ public:
 		if(!r) error_code_ = SESSION_LACK;
 
 		r = m_->GetString(L"birthday",&birthday_);
-		r = m_->GetString(L"location",&location_);
+
+		std::string location;
+		r = m_->GetString(L"location",&location);
+		if(r)
+			base::BasicUtil::UrlDecode(location,location_);
+		else
+			location_ = location;
+
 		//URLCODE 解码
 		std::string head;
 		r = m_->GetString(L"head",&head);
