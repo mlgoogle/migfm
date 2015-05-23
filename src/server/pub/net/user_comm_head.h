@@ -128,6 +128,7 @@ public:
 		else
 			head_ = head;
 
+		r = m_->GetBigInteger(L"channel",&channel_);
 		r = m_->GetReal(L"latitude",&latitude_);
 		r = m_->GetReal(L"longitude",&longitude_);
 		r = m_->GetString(L"imei",&imei_);
@@ -148,6 +149,7 @@ public:
 	const inline std::string& imei() const {return this->imei_;}
 	const inline std::string& session() const {return this->session_;}
 	const inline int32 plat() const {return this->plt_;}
+	const inline int64 channel() const {return this->channel_;}
 
 
 private:
@@ -156,6 +158,7 @@ private:
 	int32 source_;
 	int32 sex_;
 	int32 plt_;
+	int64 channel_;
 	union{
 		int64        wb_session_;
 		std::string* qq_session_;

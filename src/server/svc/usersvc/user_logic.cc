@@ -241,6 +241,7 @@ bool Userlogic::OnThirdLogin(struct server *srv,const int socket,netcomm_recv::N
 	userinfo.set_source(login->source());
 	userinfo.set_birthday(login->birthday());
 	userinfo.set_plt(login->plat());
+	userinfo.set_channel(login->channel());
 	//存储用户信息
 	usersvc_logic::DBComm::OnThirdLogin(userinfo,lbs_info.get());
 	base_logic::LogicUnit::CreateToken(userinfo.uid(),token);
@@ -275,7 +276,8 @@ bool Userlogic::OnLoginRecord(struct server *srv,const int socket,netcomm_recv::
 	lbs_info.reset(base_logic::LogicUnit::GetGeocderAndAddress((netcomm_recv::HeadPacket*)login.get()));
 
 	//记录用户登陆时间和登陆位置及坐标
-	usersvc_logic::DBComm::OnLoginRecord(login->uid(),login->plt(),lbs_info.get());
+	usersvc_logic::DBComm::OnLoginRecord(login->uid(),login->plt(),login->login_machine(),
+			lbs_info.get());
 
 	int32 new_num = 0;
 	//返回用户新增消息

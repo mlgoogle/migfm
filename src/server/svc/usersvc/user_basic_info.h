@@ -37,6 +37,7 @@ public:
 	void set_birthday(const std::string& birthday){data_->birthday_ = birthday;}
 	void set_token(const std::string& token){data_->token_ = token;}
 	void set_plt(const int32 plt){data_->plt_ = plt;}
+	void set_channel(const int32 channel){data_->channel_ = channel;}
 
 
 	const int64 uid() {return data_->uid_;}
@@ -46,6 +47,7 @@ public:
 	const int32 type() {return data_->type_;}
 	const int32 souce() {return data_->source_;}
 	const int32 plt() {return data_->plt_;}
+	const int32 channel() {return data_->channel_;}
 	const std::string& imei() {return data_->imei_;}
 	const std::string& nickname() {return data_->nickname_;}
 	const std::string& city() {return data_->city_;}
@@ -75,6 +77,7 @@ private:
 		int32 type_;
 		int32 source_;
 		int32 plt_;
+		int32 channel_;
 		std::string session_;
 		std::string imei_;
 		std::string nickname_;

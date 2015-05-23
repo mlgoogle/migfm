@@ -63,6 +63,8 @@ public:
 
 	const inline double longitude() const {return this->longitude_;}
 
+	const inline int32 login_machine() const {return this->login_machine_;}
+
 	void set_latitude(double latitude){m_->SetReal("latitude",latitude);}
 
 	void set_longitude(double longitude){m_->SetReal("longitude",longitude);}
@@ -81,6 +83,7 @@ public:
 		r = m_->GetString(L"remote_addr",&remote_addr_);
 		r = m_->GetReal(L"latitude",&latitude_);
 		r = m_->GetReal(L"longitude",&longitude_);
+		r = m_->GetBigInteger(L"login_machine",&login_machine_);
 	}
 
 public:
@@ -89,6 +92,7 @@ public:
 public:
 	NetBase* m_;
 	int32       error_code_;
+	int64       login_machine_;
 	double      latitude_;
 	double      longitude_;
 };

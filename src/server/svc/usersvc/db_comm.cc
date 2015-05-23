@@ -42,7 +42,7 @@ bool DBComm::OnThirdLogin(usersvc_logic::UserInfo& userinfo,
 	os<<"call proc_V2ThirdLogin(\'"<<userinfo.imei()<<"\',"<<userinfo.machine()
 			<<","<<userinfo.type()<<",\'"<<userinfo.city()<<"\',\'"<<userinfo.nickname()
 			<<"\',\'"<<userinfo.session()<<"\',"<<userinfo.sex()<<",\'"<<userinfo.birthday()
-			<<"\',\'"<<userinfo.head()<<"\',"<<userinfo.plt()<<");";
+			<<"\',\'"<<userinfo.head()<<"\',"<<userinfo.plt()<<","<<userinfo.channel()<<");";
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());
 	r = engine->SQLExec(sql.c_str());
@@ -132,7 +132,7 @@ bool DBComm::OnQuickRegister(usersvc_logic::UserInfo& userinfo,
 	return false;
 }
 
-bool DBComm::OnLoginRecord(const int64 uid,const int32 plt,base_logic::LBSInfos* lbsinfo){
+bool DBComm::OnLoginRecord(const int64 uid,const int32 plt,const int32 machine,base_logic::LBSInfos* lbsinfo){
 	bool r = false;
 #if defined (_DB_POOL_)
 	base_db::AutoMysqlCommEngine auto_engine;
@@ -148,7 +148,7 @@ bool DBComm::OnLoginRecord(const int64 uid,const int32 plt,base_logic::LBSInfos*
 
     //call migfm.proc_V2LoginRecord(10300,'杭州','120.143000','30.286500')
 	os<<"call proc_V2LoginRecord("<<uid<<",\'"<<lbsinfo->city()<<"\',\'"<<lbsinfo->latitude()<<"\',\'"
-			<<lbsinfo->longitude()<<"\',"<<plt<<")";
+			<<lbsinfo->longitude()<<"\',"<<plt<<","<<machine<<")";
 
 	std::string sql = os.str();
 	LOG_MSG2("[%s]", sql.c_str());
