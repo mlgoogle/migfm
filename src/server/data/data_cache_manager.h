@@ -55,7 +55,7 @@ public:
 	void Init(std::list<base::ConnAddr>& addrlist);
 public:
 	bool SetUserInfo(const int64 uid,base_logic::UserInfo& info);
-
+	bool GetUserInfo(const int64 uid,base_logic::UserInfo& info);
 	bool DelUserInfo(const int64 uid);
 private:
 	void Init();

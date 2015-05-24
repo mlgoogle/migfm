@@ -54,6 +54,19 @@ bool DataWholeManager::SetUserInfo(const int64 uid,base_logic::UserInfo& info){
 	return base::MapAdd<USER_INFO_MAP,int64,base_logic::UserInfo>(data_cache_->userinfo_map_,uid,info);
 }
 
+bool DataWholeManager::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
+	bool r = false;
+	{
+		base_logic::RLockGd lk(lock_);
+		r = base::MapGet<USER_INFO_MAP,USER_INFO_MAP::iterator,int64,base_logic::UserInfo>
+		(data_cache_->userinfo_map_,uid,info);
+	}
+	if(r)
+		return r;
+	//从memcached 读取
+	//从数据库里读取
+}
+
 bool DataWholeManager::DelUserInfo(const int64 uid){
 	base_logic::WLockGd lk(lock_);
 	LOG_DEBUG("HAHAHAHAHAHAHAHAHAHA");
