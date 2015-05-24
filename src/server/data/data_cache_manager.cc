@@ -65,6 +65,7 @@ bool DataWholeManager::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
 		return r;
 	//从memcached 读取
 	//从数据库里读取
+	return true;
 }
 
 bool DataWholeManager::DelUserInfo(const int64 uid){

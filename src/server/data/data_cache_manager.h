@@ -12,8 +12,6 @@
 #include "logic/logic_unit.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
-
-
 //用于存储各个插件所需要的共享数据
 #include "config/config.h"
 namespace base_logic{

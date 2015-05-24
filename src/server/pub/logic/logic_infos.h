@@ -54,6 +54,9 @@ public:
 
 	static bool cmptime(UserInfo& t_info,UserInfo& r_info);
 
+	static bool JsonDeSerialization(std::string& info);
+
+	static bool JsonSerialization(std::string& info);
 
 	inline bool Isvalid() const {
 		if((data_->uid_!=0)&&(!data_->nickname_.empty()))

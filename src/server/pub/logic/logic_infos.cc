@@ -39,6 +39,35 @@ bool UserInfo::cmptime(UserInfo& t_info,UserInfo& r_info){
 	return t_info.logintime()<r_info.logintime();
 }
 
+bool UserInfo::JsonDeSerialization(std::string& info){
+	bool r  = false;
+	int error_code;
+	std::string error_str;
+	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&str));
+	base_logic::DictionaryValue* dic =  (base_logic::DictionaryValue*)(serializer->Deserialize(&error_code,&error_str));
+	int64 uid;
+	r = dic->GetBigInteger(L"uid",&data_->uid_);
+	r = dic->GetInteger(L"sex",&data_->sex_);
+	r = dic->GetInteger(L"machine",&data_->machine_);
+	r = dic->GetBigInteger(L"loginttime",&data_->logintime_);
+	r = dic->GetInteger(L"type",&data_->type_);
+	r = dic->GetInteger(L"source",&data_->source_);
+
+	r = dic->GetString(L"session",&data_->session_);
+	r = dic->GetString(L"imei",&data_->imei_);
+	r = dic->GetString(L"nickname",&data_->nickname_);
+	r = dic->GetString(L"city",&data_->city_);
+	r = dic->GetString(L"head",&data_->head_);
+	r = dic->GetString(L"birthday",&data_->birthday_);
+	r = dic->GetString(L"location",&data_->location_);
+	r = dic->GetString(L"token",&data_->token_);
+	return true;
+}
+
+bool UserInfo::JsonSerialization(std::string& info){
+	return true;
+}
+
 base_logic::DictionaryValue* UserInfo::Release(){
 	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
 	if(data_->uid_!=0)
