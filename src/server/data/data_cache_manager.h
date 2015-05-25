@@ -22,6 +22,8 @@ class DataEngine{
 public:
 	virtual bool SetUserInfo(const int64 uid,base_logic::UserInfo& info) = 0;
 
+	virtual bool GetUserInfo(const int64 uid,base_logic::UserInfo& info) = 0;
+
 	virtual bool DelUserInfo(const int64 uid) = 0;
 };
 
@@ -30,10 +32,26 @@ class DateEngineImpl:public DataEngine{
 public:
 	bool SetUserInfo(const int64 uid,base_logic::UserInfo& info);
 
+	bool GetUserInfo(const int64 uid,base_logic::UserInfo& info);
+
 	bool DelUserInfo(const int64 uid);
 };
 
+class GetInfoMapTraits{
+public:
+	typedef std::map<int64,base_logic::UserInfo&> Container;
+	static void BatchGetUsers(std::list<int64>& uid_list,USER_INFO_MAP& usermap,struct threadrw_t* lock,
+			Container& container);
+};
 
+class GetInfoListTraits{
+public:
+	typedef std::list<base_logic::UserInfo&> Container;
+	static void BatchGetUsers(std::list<int64>& uid_list,USER_INFO_MAP& usermap,struct threadrw_t* lock,
+			Container& container);
+};
+
+/////
 class DataCache{
 //用户数据
 public:
@@ -55,6 +73,7 @@ public:
 	bool SetUserInfo(const int64 uid,base_logic::UserInfo& info);
 	bool GetUserInfo(const int64 uid,base_logic::UserInfo& info);
 	bool DelUserInfo(const int64 uid);
+
 private:
 	void Init();
 

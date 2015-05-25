@@ -2,7 +2,6 @@
 #include "user_basic_info.h"
 #include "db_comm.h"
 #include "dic_comm.h"
-#include "data_cache_manager.h"
 #include "logic/logic_unit.h"
 #include "logic/logic_infos.h"
 #include "lbs/location_server.h"
@@ -61,14 +60,18 @@ bool Userlogic::Init(){
 	if(pengine==NULL){
 		MIG_ERROR(USER_LEVEL,"Can't find GetDateEngine\n");
 	}
-	base_logic::DataEngine* engine = (*pengine)();
 
+	data_engine_ = (*pengine)();
 	base_logic::UserInfo info;
+	int64 uid = 10149;
+	data_engine_->GetUserInfo(uid,info);
+
+	/*base_logic::UserInfo info;
 	info.set_uid(10149);
 	info.set_nickname("kerry");
 	info.set_city("杭州");
 	//engine->DelUserInfo(10149);
-	engine->SetUserInfo(10149,info);
+	engine->SetUserInfo(10149,info);*/
     return true;
 }
 
@@ -244,18 +247,13 @@ bool Userlogic::OnThirdLogin(struct server *srv,const int socket,netcomm_recv::N
 	userinfo.set_channel(login->channel());
 	//存储用户信息
 	usersvc_logic::DBComm::OnThirdLogin(userinfo,lbs_info.get());
+	//存入缓存
+	//data_engine_->SetUserInfo(userinfo.uid(),userinfo);
 	base_logic::LogicUnit::CreateToken(userinfo.uid(),token);
 	userinfo.set_token(token);
 	scoped_ptr<netcomm_send::Login> qlogin(new netcomm_send::Login());
 	uid = userinfo.uid();
 	qlogin->set_userinfo(userinfo.Release());
-/*
-	qlogin->set_userinfo_address(userinfo.city());
-	qlogin->set_userinfo_token(token);
-	qlogin->set_userinfo_uid(userinfo.uid());
-	qlogin->set_userinfo_nickname(userinfo.nickname());
-	qlogin->set_userinfo_source(userinfo.type());
-	qlogin->set_useromfo_head(userinfo.head());*/
 	send_message(socket,(netcomm_send::HeadPacket*)qlogin.get());
 	//启动通知机器人上线
 	NoticeUserLogin(robot_server_socket_,10000,uid,0,0);

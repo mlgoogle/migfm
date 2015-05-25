@@ -1,5 +1,6 @@
 #ifndef __USERSVC__USER_LOGIC___
 #define __USERSVC__USER_LOGIC___
+#include "data_cache_manager.h"
 #include "net/user_comm_head.h"
 #include "net/operator_code.h"
 #include "net/error_comm.h"
@@ -60,6 +61,8 @@ private:
     bool Init();
 private:
     int                                              robot_server_socket_;
+    base_logic::DataEngine*                          data_engine_;
+
 };
 
 

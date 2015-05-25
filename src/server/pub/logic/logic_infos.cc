@@ -43,7 +43,7 @@ bool UserInfo::JsonDeSerialization(std::string& info){
 	bool r  = false;
 	int error_code;
 	std::string error_str;
-	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&str));
+	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&info));
 	base_logic::DictionaryValue* dic =  (base_logic::DictionaryValue*)(serializer->Deserialize(&error_code,&error_str));
 	int64 uid;
 	r = dic->GetBigInteger(L"uid",&data_->uid_);
@@ -65,7 +65,38 @@ bool UserInfo::JsonDeSerialization(std::string& info){
 }
 
 bool UserInfo::JsonSerialization(std::string& info){
-	return true;
+	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&info));
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	if(data_->uid_!=0)
+		dict->SetBigInteger(L"uid",data_->uid_);
+	if(data_->sex_!=0)
+		dict->SetInteger(L"sex",data_->sex_);
+	if(data_->machine_!=-1)
+		dict->SetInteger(L"machine",data_->machine_);
+	if(data_->logintime_!=0)
+		dict->SetBigInteger(L"logintime",data_->logintime_);
+	if(data_->type_!=0)
+		dict->SetInteger(L"type",data_->type_);
+	if(data_->source_!=0)
+		dict->SetInteger(L"source",data_->source_);
+
+	if(!data_->session_.empty())
+		dict->SetString(L"session",data_->session_);
+	if(!data_->imei_.empty())
+		dict->SetString(L"imei",data_->imei_);
+	if(!data_->nickname_.empty())
+		dict->SetString(L"nickname",data_->nickname_);
+	if(!data_->city_.empty())
+		dict->SetString(L"city",data_->city_);
+	if(!data_->head_.empty())
+		dict->SetString(L"head",data_->head_);
+	if(!data_->birthday_.empty())
+		dict->SetString(L"birthday",data_->birthday_);
+	if(!data_->location_.empty())
+		dict->SetString(L"location",data_->location_);
+
+	base_logic::Value* value = (base_logic::Value*)dict.get();
+	return serializer->Serialize(*value);;
 }
 
 base_logic::DictionaryValue* UserInfo::Release(){

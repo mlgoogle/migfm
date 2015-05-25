@@ -80,7 +80,16 @@ clean :
 
 data_cache_manager.o : ./data_cache_manager.cc ./data_cache_manager.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./data_cache_manager.cc $(INCLUDE_PATHS)
+	
+storage_operation.o : ./storage_operation.cc ./storage_operation.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./storage_operation.cc $(INCLUDE_PATHS)
+	
+dict_comm.o : ./dict_comm.cc ./dict_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./dict_comm.cc $(INCLUDE_PATHS)
 
+data_db_comm.o : ./data_db_comm.cc ./data_db_comm.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./data_db_comm.cc $(INCLUDE_PATHS)
+	
 logic_infos.o :  $(USER_DIR)/logic/logic_infos.cc $(USER_DIR)/logic/logic_infos.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_infos.cc $(INCLUDE_PATHS)
 
@@ -114,8 +123,8 @@ md5sum.o:$(THIRD_PATH)/basic/md5sum.cc
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : data_cache_manager.o  basictypes.o comm_impl.o error_comm.o\
-	logic_infos.o logic_unit.o basic_util.o config.o \
+$(PLUGIN) : data_cache_manager.o storage_operation.o dict_comm.o data_db_comm.o\
+	basictypes.o comm_impl.o error_comm.o logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl -lmemcached -lmemcachedutil \

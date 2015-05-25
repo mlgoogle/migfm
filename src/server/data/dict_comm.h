@@ -9,6 +9,7 @@
 #define DATA_DICT_COMM_H_
 
 #include "logic/logic_infos.h"
+#include "storage/storage.h"
 
 namespace base_logic{
 
@@ -24,7 +25,7 @@ public:
 	virtual ~BaseMemComm(){}
 	static void Init(std::list<base::ConnAddr>& addrlist);
 	static void Dest();
-private:
+public:
 	static base_storage::DictionaryStorageEngine* engine_;
 };
 
@@ -36,6 +37,7 @@ public:
 	static void Dest();
 public:
 	static bool GetUserInfo(const int64 uid,base_logic::UserInfo& info);
+	static bool SetUserInfo(const int64 uid,base_logic::UserInfo& info);
 };
 
 

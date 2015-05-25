@@ -5,6 +5,8 @@
  *      Author: Administrator
  */
 #include "dict_comm.h"
+#include "dic/base_dic_redis_auto.h"
+#include <string>
 
 
 static const char *USER_INFO = "userinfo:%lld";
@@ -47,17 +49,29 @@ bool UserMemComm::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
 	char key[256] = {0};
 	char* value = NULL;
 	size_t value_len = 0;
-	std::string info;
+	std::string json;
 	snprintf(key, arraysize(key), USER_INFO, uid);
-	base_dic::AutoDicCommEngine auto_engine;
-	base_storage::DictionaryStorageEngine* redis_engine  = auto_engine.GetDicEngine();
-	bool r = redis_engine->GetValue(key,strlen(key),&value,&value_len);
+	r = engine_->GetValue(key,strlen(key),&value,&value_len);
 	if(!r||value==NULL||value_len<=0)
 		return false;
-	info.assign(value,value_len);
-	return info.DeSerialization(info);
+	json.assign(value,value_len);
+	if(value){
+		delete [] value;
+		value = NULL;
+	}
+	return info.JsonDeSerialization(json);
 }
 
+bool UserMemComm::SetUserInfo(const int64 uid,base_logic::UserInfo& info){
+	bool r = false;
+	char key[256] = {0};
+	snprintf(key, arraysize(key), USER_INFO, uid);
+	std::string json;
+	r = info.JsonSerialization(json);
+	if(!r)
+		return r;
+	return engine_->SetValue(key,strlen(key),json.c_str(),json.length());
+}
 
 }
 
