@@ -9,6 +9,7 @@
  *  Instruction：从存储介质中获取用户信息
  */
 #include "storage_operation.h"
+#include "storage_base_engine.h"
 #include "data_db_comm.h"
 #include "dict_comm.h"
 namespace base_logic{
@@ -32,13 +33,14 @@ StorageOperation* StorageOperation::Instance(){
 }
 
 void StorageOperation::Init(config::FileConfig* config){
-	base_logic::UserMemComm::Init(config->mem_list_);
-	base_logic::DataDBComm::Init(config->mysql_db_list_);
+	base_logic::DataStorageBaseEngine::Init(config);
+	//base_logic::UserMemComm::Init(config->mem_list_);
+	//base_logic::DataDBComm::Init(config->mysql_db_list_);
 }
 
 
 bool StorageOperation::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
-	bool r = base_logic::UserMemComm::GetUserInfo(uid,info);
+	/*bool r = base_logic::UserMemComm::GetUserInfo(uid,info);
 	if(r)
 		return r;
 	//数据库读取
@@ -46,7 +48,7 @@ bool StorageOperation::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
 	if(!r)
 		return r;
 	//写入memcached
-	r = base_logic::UserMemComm::SetUserInfo(uid,info);
+	r = base_logic::UserMemComm::SetUserInfo(uid,info);*/
 	return true;
 }
 

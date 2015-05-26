@@ -58,6 +58,8 @@ public:
 
 	bool JsonSerialization(std::string& info);
 
+	bool ValueSerialization(base_logic::DictionaryValue* dict);
+
 	inline bool Isvalid() const {
 		if((data_->uid_!=0)&&(!data_->nickname_.empty()))
 			return true;

@@ -64,6 +64,27 @@ bool UserInfo::JsonDeSerialization(std::string& info){
 	return true;
 }
 
+bool UserInfo::ValueSerialization(base_logic::DictionaryValue* dict){
+	bool r = false;
+	r = dict->GetBigInteger(L"uid",&data_->uid_);
+	r = dict->GetInteger(L"sex",&data_->sex_);
+	r = dict->GetInteger(L"machine",&data_->machine_);
+	r = dict->GetBigInteger(L"loginttime",&data_->logintime_);
+	r = dict->GetInteger(L"type",&data_->type_);
+	r = dict->GetInteger(L"source",&data_->source_);
+
+	r = dict->GetString(L"session",&data_->session_);
+	r = dict->GetString(L"imei",&data_->imei_);
+	r = dict->GetString(L"nickname",&data_->nickname_);
+	r = dict->GetString(L"city",&data_->city_);
+	r = dict->GetString(L"head",&data_->head_);
+	r = dict->GetString(L"birthday",&data_->birthday_);
+	r = dict->GetString(L"location",&data_->location_);
+	r = dict->GetString(L"token",&data_->token_);
+
+	return true;
+}
+
 bool UserInfo::JsonSerialization(std::string& info){
 	scoped_ptr<base_logic::ValueSerializer> serializer(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,&info));
 	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
