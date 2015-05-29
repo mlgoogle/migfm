@@ -1,6 +1,12 @@
 #ifndef MIG_FM_PUBLIC_BASIC_UNZIP_H___
 #define MIG_FM_PUBLIC_BASIC_UNZIP_H___
 #include "zlib.h"
+#include "basic/basictypes.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef unsigned char       BYTE;
+
 class MUnZip
 {
 public:

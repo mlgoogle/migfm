@@ -3,9 +3,13 @@
 // Minimum zlib rectangle size in bytes.  Anything smaller will
 // not compress well due to overhead.
 #define ENCODE_ZLIB_MIN_COMP_SIZE (17)
+typedef unsigned char       BYTE;
 #include "zlib.h"
+#include "basic/basictypes.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 enum
 {
 	ZIP_TYPE_NONE = 0,

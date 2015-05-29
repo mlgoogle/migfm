@@ -3,7 +3,7 @@
 MZip::MZip(void)
 : zlibStream_(NULL)
 , ulTotalZipLen_(0)
-, bCompress_(false)
+, bCompress_(true)
 {
 }
 
