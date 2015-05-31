@@ -62,9 +62,20 @@ bool Userlogic::Init(){
 	}
 
 	data_engine_ = (*pengine)();
-	base_logic::UserInfo info;
+	int32 batch_uid_size = 4;
+	int64* batch_uid = new int64[batch_uid_size];
+	batch_uid[0] = 10283;
+	batch_uid[1] = 10284;
+	batch_uid[2] = 10285;
+	batch_uid[3] = 10286;
+	base_logic::UserInfo* info  = new base_logic::UserInfo[batch_uid_size];
+	int32 out_batch_uid_size =0;
+	data_engine_->BatchGetUserInfo(batch_uid,&batch_uid_size,info,&out_batch_uid_size);
+
+	/*base_logic::UserInfo info;
 	int64 uid = 10149;
-	data_engine_->GetUserInfo(uid,info);
+	data_engine_->GetUserInfo(uid,info);*/
+
 
 	/*base_logic::UserInfo info;
 	info.set_uid(10149);

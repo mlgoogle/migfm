@@ -22,10 +22,12 @@ public:
 	MysqlDataStorage(){}
 	virtual ~MysqlDataStorage(){}
 public:
+
+	void InitParam(std::list<base::ConnAddr>& addrlist);
 	void Release();
 public:
-	bool ReadData(const std::string& sql,base_logic::Value* value,
-			void (*storage_get)(void*,base_logic::Value*));
+	bool ReadData(const int32 type,base_logic::Value* value,
+				void (*storage_get)(void*,base_logic::Value*));
 
 	bool WriteData(const int32 type,base_logic::Value* value);
 

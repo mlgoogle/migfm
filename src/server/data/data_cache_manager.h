@@ -24,6 +24,9 @@ public:
 
 	virtual bool GetUserInfo(const int64 uid,base_logic::UserInfo& info) = 0;
 
+	virtual bool BatchGetUserInfo(int64* batch_uid,int32* uid_count,base_logic::UserInfo* map_user_info,
+			int32* userinfo_count) = 0;
+
 	virtual bool DelUserInfo(const int64 uid) = 0;
 };
 
@@ -34,20 +37,23 @@ public:
 
 	bool GetUserInfo(const int64 uid,base_logic::UserInfo& info);
 
+	bool BatchGetUserInfo(int64* batch_uid,int32* uid_count,base_logic::UserInfo* map_user_info,
+				int32* userinfo_count);
+
 	bool DelUserInfo(const int64 uid);
 };
 
 class GetInfoMapTraits{
 public:
-	typedef std::map<int64,base_logic::UserInfo&> Container;
-	static void BatchGetUsers(std::list<int64>& uid_list,USER_INFO_MAP& usermap,struct threadrw_t* lock,
+	typedef std::map<int64,base_logic::UserInfo> Container;
+	static bool BatchGetUsers(std::vector<int64>& uid_list,USER_INFO_MAP& usermap,struct threadrw_t* lock,
 			Container& container);
 };
 
 class GetInfoListTraits{
 public:
-	typedef std::list<base_logic::UserInfo&> Container;
-	static void BatchGetUsers(std::list<int64>& uid_list,USER_INFO_MAP& usermap,struct threadrw_t* lock,
+	typedef std::list<base_logic::UserInfo> Container;
+	static bool BatchGetUsers(std::vector<int64>& uid_list,USER_INFO_MAP& usermap,struct threadrw_t* lock,
 			Container& container);
 };
 
@@ -72,6 +78,15 @@ public:
 public:
 	bool SetUserInfo(const int64 uid,base_logic::UserInfo& info);
 	bool GetUserInfo(const int64 uid,base_logic::UserInfo& info);
+	bool BatchGetUserInfo(int64* batch_uid,int32* uid_count,base_logic::UserInfo* users_info,
+			int32* userinfo_count);
+	/*如果处理了stl类型, 很容易会导致程序异常,这个和stl内部的静态内存池有关
+	 *另一个动态库调用base动态库里面的导出函竖,然后每个动态库内部维护一个stl内存池
+	 *你另一个动态库调用base动态库的函数操作了某些stl类型
+	 *很可能使用的是另一个动态库的stl内存池分配的内存
+	 *然后释放的时候却是自动在base动态库释放了
+	 *这就会导致异常
+	 */
 	bool DelUserInfo(const int64 uid);
 
 private:

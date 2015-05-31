@@ -7,6 +7,7 @@
 #include "storage_base_engine.h"
 #include "redis_data_storage.h"、
 #include "mysql_data_storage.h"
+#include "mem_data_storage.h"
 #include "dic/base_dic_redis_auto.h"
 #include "db/base_db_mysql_auto.h"
 
@@ -20,6 +21,9 @@ DataStorageBaseEngine* DataStorageBaseEngine::Create(int32 type){
 		break;
 	case MYSQL_TYPE:
 		engine = new MysqlDataStorage();
+		break;
+	case MEM_TYPE:
+		engine = new MemDatalStorage();
 		break;
 	default:
 		break;

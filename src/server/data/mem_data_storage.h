@@ -18,19 +18,25 @@
 
 namespace base_logic{
 
+
 class MemDatalStorage:public DataStorageBaseEngine{
 public:
-	MemDatalStorage(){}
+	MemDatalStorage();
 	virtual ~MemDatalStorage(){}
 public:
+	void InitParam(std::list<base::ConnAddr>& addrlist);
 	void Release();//释放
 public:
 	bool WriteData(const int32 type,base_logic::Value* value) ;
 
-	bool ReadData(const std::string& sql,base_logic::Value* value,
-			void (*storage_get)(void*,base_logic::Value*)){return true;}
+	bool ReadData(const int32 type,base_logic::Value* value,
+			void (*storage_get)(void*,base_logic::Value*));
 private:
 	bool WriteKeyValueData(base_logic::Value* value);
+	bool ReadKeyValueData(base_logic::Value* value);
+	bool ReadBatchKeyValue(base_logic::Value* value);
+private:
+	base_storage::DictionaryStorageEngine* engine_;
 };
 }
 

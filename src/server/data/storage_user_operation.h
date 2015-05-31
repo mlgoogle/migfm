@@ -11,23 +11,29 @@
 
 #ifndef STORAGE_OPERATION_H_
 #define STORAGE_OPERATION_H_
-
+#include "data_mem_engine.h"
+#include "data_mysql_engine.h"
+#include "basic/scoped_ptr.h"
 #include "config/config.h"
 #include "logic/logic_infos.h"
 namespace base_logic{
 
-class StorageOperation{
+class StorageUserOperation{
 public:
-	StorageOperation();
-	virtual ~StorageOperation();
+	StorageUserOperation();
+	virtual ~StorageUserOperation();
 public:
-	static StorageOperation* Instance();
+	static StorageUserOperation* Instance();
 	static void FreeInstance();
-	static StorageOperation* instance_;
+	static StorageUserOperation* instance_;
 public:
 	void Init(config::FileConfig* config);
 public:
 	bool GetUserInfo(const int64 uid,base_logic::UserInfo& info);
+	bool BatchGetUserInfo(std::vector<int64>& uid_list,std::map<int64,base_logic::UserInfo>& userinfo);
+private:
+	scoped_ptr<base_logic::DataMysqlEngne>    user_engine_;
+	scoped_ptr<base_logic::DataUserMemEngine > mem_engine_;
 };
 }
 

@@ -10,6 +10,10 @@
 namespace base_logic{
 
 
+void MysqlDataStorage::InitParam(std::list<base::ConnAddr>& addrlist){
+
+}
+
 void MysqlDataStorage::Release(){
 
 }
@@ -20,9 +24,14 @@ bool MysqlDataStorage::WriteData(const int32 type,base_logic::Value* value){
 }
 
 
-bool MysqlDataStorage::ReadData(const std::string& sql,base_logic::Value* value,
+bool MysqlDataStorage::ReadData(const int32 type,base_logic::Value* value,
 		void (*storage_get)(void*,base_logic::Value*)){
 	bool r = false;
+	std::string sql;
+	base_logic::DictionaryValue* dict =(base_logic::DictionaryValue*)(value);
+	r = dict->GetString(L"sql",&sql);
+	if(!r)
+		return r;
 	base_db::AutoMysqlCommEngine auto_engine;
 	base_storage::DBStorageEngine* engine  = auto_engine.GetDBEngine();
 	if (engine==NULL){

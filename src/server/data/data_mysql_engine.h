@@ -21,14 +21,16 @@
 namespace base_logic{
 
 
-class DataDBComm{
+class DataMysqlEngne{
 public:
-	DataDBComm();
-	virtual ~DataDBComm();
+	DataMysqlEngne();
+	virtual ~DataMysqlEngne();
 public:
 	bool ReadUserInfo(const int64 uid,base_logic::UserInfo& info);
+	bool BatchReadUserInfos(std::vector<int64>& uid_list,std::map<int64,base_logic::UserInfo>& usrinfo);
 public:
 	static void CallBackReadUserInfo(void* param,base_logic::Value* value);
+	static void CallBackBatchReadUserInfo(void* param,base_logic::Value* value);
 private:
 	scoped_ptr<base_logic::DataStorageBaseEngine> mysql_engine_;
 };
