@@ -239,6 +239,23 @@ void MusicInfo::set_title(const std::string& title){
 #endif
 }
 
+bool MusicInfo::ValueSerialization(base_logic::DictionaryValue* dict){
+	bool r = false;
+	r = dict->GetBigInteger(L"id",&data_->id_);
+	r = dict->GetBigInteger(L"hot",&data_->hot_);
+	r = dict->GetBigInteger(L"clt",&data_->clt_);
+	r = dict->GetBigInteger(L"cmt",&data_->cmt_);
+	r = dict->GetString(L"title",&data_->title_);
+	r = dict->GetString(L"album",&data_->ablum_);
+	r = dict->GetString(L"pubtime",&data_->pubtime_);
+	r = dict->GetString(L"artist",&data_->artist_);
+	r = dict->GetString(L"url",&data_->url_);
+	r = dict->GetString(L"hqurl",&data_->hq_url_);
+	r = dict->GetString(L"pic",&data_->pic_);
+	r = dict->GetString(L"lyric",&data_->lyric_);
+	return true;
+}
+
 
 void MusicInfo::JsonSeralize(std::string& str){
 	bool r  = false;
@@ -445,6 +462,15 @@ Dimension& Dimension::operator =(const Dimension& dimension_info){
 	}
 	data_ = dimension_info.data_;
 	return (*this);
+}
+
+bool Dimension::ValueSerialization(base_logic::DictionaryValue* dict){
+	bool r = false;
+	r = dict->GetString(L"class_name",&data_->class_name_);
+	r = dict->GetString(L"desc",&data_->description_);
+	r = dict->GetBigInteger(L"id",&data_->id_);
+	r = dict->GetString(L"name",&data_->name_);
+	return true;
 }
 
 base_logic::DictionaryValue* Dimension::Release(){

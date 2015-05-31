@@ -81,8 +81,8 @@ clean :
 data_cache_manager.o : ./data_cache_manager.cc ./data_cache_manager.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./data_cache_manager.cc $(INCLUDE_PATHS)
 	
-storage_user_operation.o : ./storage_user_operation.cc ./storage_user_operation.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./storage_user_operation.cc $(INCLUDE_PATHS)
+storage_operation.o : ./storage_operation.cc ./storage_operation.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./storage_operation.cc $(INCLUDE_PATHS)
 	
 mysql_data_storage.o : ./mysql_data_storage.cc ./mysql_data_storage.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./mysql_data_storage.cc $(INCLUDE_PATHS)
@@ -101,6 +101,9 @@ data_mem_engine.o : ./data_mem_engine.cc ./data_mem_engine.h
 
 data_mysql_engine.o : ./data_mysql_engine.cc ./data_mysql_engine.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./data_mysql_engine.cc $(INCLUDE_PATHS)
+	
+data_redis_engine.o : ./data_redis_engine.cc ./data_redis_engine.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./data_redis_engine.cc $(INCLUDE_PATHS)
 	
 logic_infos.o :  $(USER_DIR)/logic/logic_infos.cc $(USER_DIR)/logic/logic_infos.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/logic_infos.cc $(INCLUDE_PATHS)
@@ -135,8 +138,8 @@ md5sum.o:$(THIRD_PATH)/basic/md5sum.cc
 radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
-$(PLUGIN) : data_cache_manager.o storage_user_operation.o data_mem_engine.o data_mysql_engine.o mysql_data_storage.o\
-	redis_data_storage.o mem_data_storage.o storage_base_engine.o basictypes.o comm_impl.o error_comm.o logic_infos.o logic_unit.o basic_util.o config.o \
+$(PLUGIN) : data_cache_manager.o storage_operation.o data_mem_engine.o data_mysql_engine.o data_redis_engine.o\
+	mysql_data_storage.o redis_data_storage.o mem_data_storage.o storage_base_engine.o basictypes.o comm_impl.o error_comm.o logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl -lmemcached -lmemcachedutil \

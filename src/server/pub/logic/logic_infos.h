@@ -157,6 +157,8 @@ public:
 	//组装json
 	void JsonDeserialize(std::string& str,int32 dimenon = 0);
 
+	bool ValueSerialization(base_logic::DictionaryValue* dict);
+
 private:
 	class Data{
 	public:
@@ -275,6 +277,8 @@ public:
 	void set_name(const std::string& name){data_->name_ = name;}
 	void set_class_name(const std::string& class_name){data_->class_name_ = class_name;}
 	void set_description(const std::string& description){data_->description_ = description;}
+
+	bool ValueSerialization(base_logic::DictionaryValue* dict);
 
 	base_logic::DictionaryValue* Release();
 	class Data{

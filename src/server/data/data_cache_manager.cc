@@ -5,7 +5,7 @@
  *      Author: pro
  */
 #include "data_cache_manager.h"
-#include "storage_user_operation.h"
+#include "storage_operation.h"
 #include "logic/logic_unit.h"
 #include "logic/logic_comm.h"
 #include "basic/template.h"
@@ -23,7 +23,7 @@ namespace base_logic{
 bool GetInfoMapTraits::BatchGetUsers(std::vector<int64>& uid_list,USER_INFO_MAP& usermap,struct threadrw_t* lock,
 		Container& container){
 	//memcache 批量获取
-	base_logic::StorageUserOperation::Instance()->BatchGetUserInfo(uid_list,container);
+	base_logic::StorageOperation::Instance()->BatchGetUserInfo(uid_list,container);
 	return true;
 
 }
@@ -90,9 +90,16 @@ void DataWholeManager::Init(){
 	}
 	r = config->LoadConfig(path);
 
-	base_logic::StorageUserOperation::Instance()->Init(config);
-}
+	base_logic::StorageOperation::Instance()->Init(config);
+	//读取音乐信息
+	base_logic::StorageOperation::Instance()->GetAvailableMusicInfo(data_cache_->musicinfo_map_);
+	CreateDimensions(10000,"ms",MOOD_NAME);
+	CreateDimensions(20000,"mm",SCENE_NAME);
+	CreateDimensions(30000,"chl",CHANNEL_NAME);
+	CreateRadomin();//创建随机数
+	InitDimensionsMusic();//初始化各个音乐维度
 
+}
 
 
 bool DataWholeManager::SetUserInfo(const int64 uid,base_logic::UserInfo& info){
@@ -112,7 +119,7 @@ bool DataWholeManager::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
 	if(r)
 		return r;
 
-	base_logic::StorageUserOperation::Instance()->GetUserInfo(uid,info);
+	base_logic::StorageOperation::Instance()->GetUserInfo(uid,info);
 
 	{
 		base_logic::WLockGd lk(lock_);
@@ -163,10 +170,66 @@ bool DataWholeManager::DelUserInfo(const int64 uid){
 }
 
 
+//////以下是音乐相关//////////////////////////////////////////////////////
+
+void DataWholeManager::CreateRadomin(){
+	CreateRadomin(data_cache_->channel_dimension_);
+	CreateRadomin(data_cache_->mood_dimension_);
+	CreateRadomin(data_cache_->scene_dimension_);
+}
+
+void DataWholeManager::CreateRadomin(DimensionCache& dimension_cache){
+
+	//遍历MAP
+	MULTI_DIMENSION_MAP multl_dimension_map = dimension_cache.dimension_map_;
+	for(MULTI_DIMENSION_MAP::iterator it = multl_dimension_map.begin();
+			it!=multl_dimension_map.end();it++){
+		DIMENSION_MAP dimenson_map = it->second;
+		base::MigRadomInV2* radomV2 = new base::MigRadomInV2((dimenson_map.size()));
+		dimension_cache.dimension_radomin_[it->first] = radomV2;
+	}
+}
+void DataWholeManager::CreateDimensions(const int64 id,
+		const std::string& type,const std::string& name){
+	base_logic::Dimensions dimensions(id,name,type);
+	base_logic::StorageOperation::Instance()->GetDimensions(type,dimensions);
+	data_cache_->dimensions_[type] = dimensions;
+}
 
 
+void DataWholeManager::InitDimensionsMusic(){
+	std::list<base_logic::Dimension> list;
+	base_logic::StorageOperation::Instance()->GetAllDimension(list);
+	//读取每个维度的歌曲
+	while(list.size()>0){
+		base_logic::Dimension dimension = list.front();
+		list.pop_front();
+		InitDimensionMusic(dimension);
+	}
+}
 
 
+void DataWholeManager::InitDimensionMusic(base_logic::Dimension& dimension){
+	DIMENSION_MAP dimension_map;
+	DIMENSION_VEC dimension_vec;
+	bool r = base_logic::StorageOperation::Instance()->GetDimensionMusic(dimension.class_name(),dimension.id(),
+			dimension_map,dimension_vec);
+	if(!r)
+		return;
+	//根据维度添加缓存
+	if(dimension.class_name()=="chl"){
+		data_cache_->channel_dimension_.dimension_map_[dimension.id()] = dimension_map;
+		data_cache_->channel_dimension_.dimension_vec_[dimension.id()] = dimension_vec;
+	}
+	else if(dimension.class_name()=="mm"){
+		data_cache_->mood_dimension_.dimension_map_[dimension.id()] = dimension_map;
+		data_cache_->mood_dimension_.dimension_vec_[dimension.id()] = dimension_vec;
+	}
+	else if(dimension.class_name()=="ms"){
+		data_cache_->scene_dimension_.dimension_map_[dimension.id()] = dimension_map;
+		data_cache_->scene_dimension_.dimension_vec_[dimension.id()] = dimension_vec;
+	}
+}
 }
 
 

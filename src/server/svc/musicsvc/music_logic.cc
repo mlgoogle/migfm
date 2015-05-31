@@ -333,23 +333,6 @@ bool Musiclogic::OnNearMusic(struct server *srv,const int socket,netcomm_recv::N
 		return false;
 	}
 
-	//测试删除
-	///////////////////////
-	basic::libhandle  handle_lancher = NULL;
-	handle_lancher = basic::load_native_library("./data.so");
-	if (handle_lancher==NULL){
-		MIG_ERROR(USER_LEVEL,"Can't load path data.so\n");
-	}
-
-	base_logic::DataEngine* (*pengine) (void);
-	pengine = (base_logic::DataEngine *(*)(void))basic::get_function_pointer(handle_lancher, "GetDateEngine");
-	if(pengine==NULL){
-		MIG_ERROR(USER_LEVEL,"Can't find GetDateEngine\n");
-	}
-	base_logic::DataEngine* engine = (*pengine)();;
-	engine->DelUserInfo(10149);
-	//////////////////////
-
 	//std::map<int64,base_logic::UserAndMusic>infomap;
 	std::list<base_logic::UserAndMusic> list;
 	GetNearUserAndMusic(near_music->uid(),MUSIC_NEAR,near_music->latitude(),

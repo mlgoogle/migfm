@@ -21,10 +21,13 @@ public:
 	void Release();//释放
 	void InitParam(std::list<base::ConnAddr>& addrlist){}
 public:
-	bool WriteData(const int32 type,base_logic::Value* value) ;
+	bool WriteData(const int32 type,base_logic::Value* value);
 
 	bool ReadData(const int32 type,base_logic::Value* value,
-				void (*storage_get)(void*,base_logic::Value*)){return true;};
+				void (*storage_get)(void*,base_logic::Value*));
+private:
+	bool ReadHashData(base_logic::Value* value,
+			void (*storage_get)(void*,base_logic::Value*));
 };
 }
 

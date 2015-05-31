@@ -62,7 +62,7 @@ bool Userlogic::Init(){
 	}
 
 	data_engine_ = (*pengine)();
-	int32 batch_uid_size = 4;
+	/*int32 batch_uid_size = 4;
 	int64* batch_uid = new int64[batch_uid_size];
 	batch_uid[0] = 10283;
 	batch_uid[1] = 10284;
@@ -71,6 +71,7 @@ bool Userlogic::Init(){
 	base_logic::UserInfo* info  = new base_logic::UserInfo[batch_uid_size];
 	int32 out_batch_uid_size =0;
 	data_engine_->BatchGetUserInfo(batch_uid,&batch_uid_size,info,&out_batch_uid_size);
+	*/
 
 	/*base_logic::UserInfo info;
 	int64 uid = 10149;
@@ -259,7 +260,7 @@ bool Userlogic::OnThirdLogin(struct server *srv,const int socket,netcomm_recv::N
 	//存储用户信息
 	usersvc_logic::DBComm::OnThirdLogin(userinfo,lbs_info.get());
 	//存入缓存
-	//data_engine_->SetUserInfo(userinfo.uid(),userinfo);
+	data_engine_->SetUserInfo(userinfo.uid(),userinfo);
 	base_logic::LogicUnit::CreateToken(userinfo.uid(),token);
 	userinfo.set_token(token);
 	scoped_ptr<netcomm_send::Login> qlogin(new netcomm_send::Login());

@@ -28,9 +28,20 @@ public:
 public:
 	bool ReadUserInfo(const int64 uid,base_logic::UserInfo& info);
 	bool BatchReadUserInfos(std::vector<int64>& uid_list,std::map<int64,base_logic::UserInfo>& usrinfo);
+
+	bool GetDimensions(const std::string& type,base_logic::Dimensions& dimensions);
+	bool GetAvailableMusicInfo(std::map<int64,base_logic::MusicInfo>& map);
+	bool GetAllDimension(std::list<base_logic::Dimension>& list);
+
+
 public:
 	static void CallBackReadUserInfo(void* param,base_logic::Value* value);
 	static void CallBackBatchReadUserInfo(void* param,base_logic::Value* value);
+
+
+	static void CallBackGetDimensions(void* param,base_logic::Value* value);
+	static void CallBackGetAvailableMusicInfo(void* param,base_logic::Value* value);
+	static void CallBackGetAllDimension(void* param,base_logic::Value* value);
 private:
 	scoped_ptr<base_logic::DataStorageBaseEngine> mysql_engine_;
 };

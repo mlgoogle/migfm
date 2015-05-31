@@ -8,7 +8,7 @@
  *  Year: 2015
  *  Instruction：从存储介质中获取用户信息
  */
-#include "storage_user_operation.h"
+#include "storage_operation.h"
 #include "storage_base_engine.h"
 #include "data_mem_engine.h"
 #include "data_mysql_engine.h"
@@ -18,27 +18,28 @@
 namespace base_logic{
 
 
-StorageUserOperation* StorageUserOperation::instance_ = NULL;
-StorageUserOperation::StorageUserOperation(){
+StorageOperation* StorageOperation::instance_ = NULL;
+StorageOperation::StorageOperation(){
 
-	user_engine_.reset(new base_logic::DataMysqlEngne());
+	mysql_engine_.reset(new base_logic::DataMysqlEngne());
 	mem_engine_.reset(new base_logic::DataUserMemEngine());
+	redis_engine_.reset(new base_logic::DataMusicReidsEngine());
 
 }
 
-StorageUserOperation::~StorageUserOperation(){
+StorageOperation::~StorageOperation(){
 
 }
 
-StorageUserOperation* StorageUserOperation::Instance(){
+StorageOperation* StorageOperation::Instance(){
 	if(instance_==NULL){
-		instance_ = new StorageUserOperation();
+		instance_ = new StorageOperation();
 	}
 
 	return instance_;
 }
 
-void StorageUserOperation::Init(config::FileConfig* config){
+void StorageOperation::Init(config::FileConfig* config){
 	base_logic::DataStorageBaseEngine::Init(config);
 	mem_engine_->Init(config->mem_list_);
 
@@ -47,12 +48,12 @@ void StorageUserOperation::Init(config::FileConfig* config){
 }
 
 
-bool StorageUserOperation::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
+bool StorageOperation::GetUserInfo(const int64 uid,base_logic::UserInfo& info){
 	bool r = mem_engine_->GetUserInfo(uid,info);
 	if(r)
 		return r;
 
-	r = user_engine_->ReadUserInfo(uid,info);
+	r = mysql_engine_->ReadUserInfo(uid,info);
 	if(!r)
 		return r;
 	r = mem_engine_->SetUserInfo(uid,info);
@@ -68,7 +69,7 @@ bool StorageUserOperation::GetUserInfo(const int64 uid,base_logic::UserInfo& inf
 	return true;
 }
 
-bool StorageUserOperation::BatchGetUserInfo(std::vector<int64>& uid_list,
+bool StorageOperation::BatchGetUserInfo(std::vector<int64>& uid_list,
 		std::map<int64,base_logic::UserInfo>& userinfo){
 	bool r = mem_engine_->BatchGetUserInfo(uid_list,userinfo);
 	std::vector<int64> surplus_list;
@@ -81,7 +82,7 @@ bool StorageUserOperation::BatchGetUserInfo(std::vector<int64>& uid_list,
 		i++;
 	}
 	if(surplus_list.size()>0)
-		user_engine_->BatchReadUserInfos(surplus_list,userinfo);
+		mysql_engine_->BatchReadUserInfos(surplus_list,userinfo);
 
 	//批量写入 //libmemcached 暂无批量写入接口
 	i = 0;
@@ -92,6 +93,23 @@ bool StorageUserOperation::BatchGetUserInfo(std::vector<int64>& uid_list,
 		i++;
 	}
 	return true;
+}
+
+bool StorageOperation::GetDimensions(const std::string& type,base_logic::Dimensions& dimensions){
+	return mysql_engine_->GetDimensions(type,dimensions);
+}
+
+bool StorageOperation::GetAvailableMusicInfo(std::map<int64,base_logic::MusicInfo>& map){
+	return mysql_engine_->GetAvailableMusicInfo(map);
+}
+
+bool StorageOperation::GetAllDimension(std::list<base_logic::Dimension>& list){
+	return mysql_engine_->GetAllDimension(list);
+}
+
+bool StorageOperation::GetDimensionMusic(const std::string& class_name,const int64 id,
+		DIMENSION_MAP& map,DIMENSION_VEC& vec){
+	return redis_engine_->GetDimensionMusic(class_name,id,map,vec);
 }
 
 }

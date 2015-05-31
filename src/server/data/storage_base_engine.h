@@ -25,6 +25,10 @@ enum MEMCACHE_TYPE{
 	BATCH_KEY_VALUE = 1,
 };
 
+enum REDIS_TYPE{
+	HASH_VALUE = 0,
+};
+
 
 namespace base_logic{
 
