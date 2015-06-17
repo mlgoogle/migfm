@@ -288,7 +288,7 @@ bool HttpMethodGet::GetHeader(const std::string& key,std::string& value){
 bool HttpMethodGet::Get(const int port,bool on_error ){
 
     CURL* curl = curl_easy_init();
-    CURLcode curl_code;
+    CURLcode curl_code = CURLE_FAILED_INIT;
     char* ct;
     char curl_error[CURL_ERROR_SIZE];
     bool result = false;

@@ -41,6 +41,10 @@ public:
 	bool GetAvailableMusicInfo(std::map<int64,base_logic::MusicInfo>& map);
 	bool GetDimensionMusic(const std::string& class_name,const int64 id,
 			DIMENSION_MAP& map,DIMENSION_VEC& vec);
+	bool GetCollectList(const int64 uid,std::list<std::string>& list);
+
+public:
+	static void GetCollectListS(const int64 uid,std::list<std::string>& list);
 private:
 	scoped_ptr<base_logic::DataMysqlEngne>    mysql_engine_;
 	scoped_ptr<base_logic::DataUserMemEngine > mem_engine_;

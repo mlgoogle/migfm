@@ -5,8 +5,8 @@
  *      Author: Administrator
  */
 
-#ifndef PLUGINS_DATA_STORAGE_STORAGE_BASE_ENGINE_H_
-#define PLUGINS_DATA_STORAGE_STORAGE_BASE_ENGINE_H_
+#ifndef PLUGINS_DATA_STORAGE_STORAGE_CONTROLLER_ENGINE_H_
+#define PLUGINS_DATA_STORAGE_STORAGE_CONTROLLER_ENGINE_H_
 #include "basic/basictypes.h"
 #include "logic/base_values.h"
 #include "config/config.h"
@@ -27,17 +27,18 @@ enum MEMCACHE_TYPE{
 
 enum REDIS_TYPE{
 	HASH_VALUE = 0,
+	KEY_VALUE = 1,
 };
 
 
 namespace base_logic{
 
-class DataStorageBaseEngine{
+class DataControllerEngine{
 public:
-	static DataStorageBaseEngine* Create(int32 type);
+	static DataControllerEngine* Create(int32 type);
 	static void Init(config::FileConfig* config); //初始化
 	static void Dest();
-	virtual ~DataStorageBaseEngine(){};
+	virtual ~DataControllerEngine(){};
 public:
 	virtual void Release() = 0;//释放
 	virtual void InitParam(std::list<base::ConnAddr>& addrlist) = 0;

@@ -61,6 +61,8 @@ public:
 	virtual bool Serialize(const Value& root);
 
 	virtual Value* Deserialize(int* error_code, std::string* error_str);
+
+	virtual void FreeValue(base_logic::Value* value){}
 private:
 	std::string*     xml_string_;
 

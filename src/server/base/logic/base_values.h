@@ -340,6 +340,8 @@ public:
   virtual bool Serialize(const Value& root) = 0;
 
   virtual Value* Deserialize(int* error_code, std::string* error_str) = 0;
+
+  virtual void FreeValue(base_logic::Value* value) = 0;
 };
 
 }

@@ -8,6 +8,7 @@
 #include "logic/logic_comm.h"
 #include "logic/http_serializer.h"
 #include "http/http_method.h"
+#include "basic/scoped_ptr.h"
 
 namespace base_http{
 
@@ -67,7 +68,7 @@ bool HttpAPI::RequestPostMethod(const std::string& url,base_logic::DictionaryVal
 }
 
 bool HttpAPI::ParamSerialization(base_logic::DictionaryValue* info,std::string* content){
-	 base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(base_logic::IMPL_HTTP,content);
+	 scoped_ptr<base_logic::ValueSerializer> engine(base_logic::ValueSerializer::Create(base_logic::IMPL_HTTP,content));
 	 base_logic::Value* value = (base_logic::Value*)info;
 	 return engine->Serialize(*value);
 }
@@ -75,14 +76,14 @@ bool HttpAPI::ParamSerialization(base_logic::DictionaryValue* info,std::string* 
 base_logic::Value* HttpAPI::ResponseJsonSerialization(std::string* content){
 	std::string error_str;
 	int error_code = 0;
-	base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,content);
+	scoped_ptr<base_logic::ValueSerializer>engine(base_logic::ValueSerializer::Create(base_logic::IMPL_JSON,content));
 	return engine->Deserialize(&error_code,&error_str);
 }
 
 base_logic::Value* ResponseXmlSerializetion(std::string* content){
 	std::string error_str;
 	int error_code = 0;
-	base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(base_logic::IMPL_XML,content);
+	scoped_ptr<base_logic::ValueSerializer> engine(base_logic::ValueSerializer::Create(base_logic::IMPL_XML,content));
 	return engine->Deserialize(&error_code,&error_str);
 }
 

@@ -10,6 +10,7 @@
 
 #include "logic/logic_infos.h"
 #include "logic/logic_unit.h"
+#include "net/music_comm_head.h"
 #include "thread/base_thread_handler.h"
 #include "thread/base_thread_lock.h"
 //用于存储各个插件所需要的共享数据
@@ -114,7 +115,7 @@ public:
 
 	void InitDimensionMusic(base_logic::Dimension& dimension);
 
-	/*void GetMusicInfo(MUSICINFO_MAP& list);
+	void GetMusicInfo(MUSICINFO_MAP& list);
 
 public:
 	void GetCollectList(const int64 uid,MUSICINFO_MAP& music_list);
@@ -143,14 +144,12 @@ private:
 	void GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
 			MUSICINFO_MAP& music_list,void (*redis_get)(const int64,std::list<std::string>&));
 
-	void CreateRadomin(DimensionCache& dimension_cache);
 
 	void GetRadomin(RADOMIN_MAP& dimension_radomin,const int32 id,
 			int32 num,std::list<int32>& list);
 
 	void SetMusicPreference(const int64 uid,base_logic::MusicInfo& music,MUSICINFONLIST_MAP& map,
 			void (*redis_set)(const int64,const int64, const std::string&));
-*/
 
 private:
 	void Init();

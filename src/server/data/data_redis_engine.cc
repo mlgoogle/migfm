@@ -9,7 +9,7 @@
 namespace base_logic{
 
 DataMusicReidsEngine::DataMusicReidsEngine(){
-	redis_engine_.reset(base_logic::DataStorageBaseEngine::Create(REIDS_TYPE));
+	redis_engine_.reset(base_logic::DataControllerEngine::Create(REIDS_TYPE));
 }
 
 DataMusicReidsEngine::~DataMusicReidsEngine(){
@@ -23,9 +23,12 @@ bool DataMusicReidsEngine::GetDimensionMusic(const std::string& class_name,const
 	bool r = false;
 	base_logic::ListValue* list;
 	keymap = class_name+std::string("_r")+base::BasicUtil::BasicUtil::StringUtil::Int64ToString(id);
-	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue());
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue);
 	dict->SetString(L"redismap",keymap);
 	r = redis_engine_->ReadData(HASH_VALUE,(base_logic::Value*)(dict.get()),NULL);
+	if(!r)
+		return r;
+	r = dict->GetList(L"resultvalue",&list);
 	if(!r)
 		return r;
 	while(list->GetSize()>0){
@@ -44,6 +47,35 @@ bool DataMusicReidsEngine::GetDimensionMusic(const std::string& class_name,const
 	}
 	return true;
 }
+
+
+bool DataMusicReidsEngine::GetCollectList(const int64 uid,std::list<std::string>& list){
+	std::string keymap;
+	bool r = false;
+	base_logic::ListValue* list;
+	keymap = "h"+base::BasicUtil::StringUtil::Int64ToString(uid)+"clt";
+	scoped_ptr<base_logic::DictionaryValue> dict(new base_logic::DictionaryValue);
+	dict->SetString(L"redismap",keymap);
+	r = redis_engine_->ReadData(HASH_VALUE,(base_logic::Value*)(dict.get()),NULL);
+	if(!r)
+		return r;
+	r = dict->GetList(L"resultvalue",&list);
+	if(!r)
+		return r;
+	while(list->GetSize()>0){
+		std::string str;
+		base_logic::Value* result_value;
+		list->Remove(0,&result_value);
+		r = result_value->GetAsString(&str);
+		if(!r)
+			continue;
+		list.push_back(str);
+	}
+	return true;
+}
+
+
+
 }
 
 

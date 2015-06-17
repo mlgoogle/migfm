@@ -21,6 +21,8 @@ public:
 	virtual bool Serialize(const Value& root);
 
 	virtual Value* Deserialize(int* error_code, std::string* error_str);
+
+	virtual void FreeValue(base_logic::Value* value);
 private:
 	void BuildJSONString(const Value* const node,int depth,bool escape);
 

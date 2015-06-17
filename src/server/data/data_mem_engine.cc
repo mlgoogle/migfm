@@ -16,7 +16,7 @@ namespace base_logic{
 //base_storage::DictionaryStorageEngine* BaseMemComm::engine_ = NULL;
 
 void DataBaseMemEngine::Init(std::list<base::ConnAddr>& addrlist){
-	mem_engine_.reset(base_logic::DataStorageBaseEngine::Create(MEM_TYPE));
+	mem_engine_.reset(base_logic::DataControllerEngine::Create(MEM_TYPE));
 	mem_engine_->InitParam(addrlist);
 	//engine_ = base_storage::DictionaryStorageEngine::Create(base_storage::IMPL_MEM);
 	//engine_->Connections(addrlist);

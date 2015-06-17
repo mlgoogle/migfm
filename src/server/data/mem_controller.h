@@ -9,20 +9,20 @@
  *  Instruction：
  */
 
-#ifndef MEM_DATA_STORAGE_H_
-#define MEM_DATA_STORAGE_H_
+#ifndef PLUGINS_DATA_MEM_CONTROLLER_
+#define PLUGINS_DATA_MEM_CONTROLLER_
 
-#include "storage_base_engine.h"
+#include "storage_controller_engine.h"
 #include "logic/base_values.h"
 #include <list>
 
 namespace base_logic{
 
 
-class MemDatalStorage:public DataStorageBaseEngine{
+class MemController:public DataControllerEngine{
 public:
-	MemDatalStorage();
-	virtual ~MemDatalStorage(){}
+	MemController();
+	virtual ~MemController(){}
 public:
 	void InitParam(std::list<base::ConnAddr>& addrlist);
 	void Release();//释放

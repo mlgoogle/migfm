@@ -1,30 +1,30 @@
 /*
- * mysql_crawl_wdj_storage.cc
+ * mysql_controller.cc
  *
  *  Created on: 2015年5月25日
  *      Author: Administrator
  */
-#include "mysql_data_storage.h"
+#include "mysql_controller.h"
 #include "db/base_db_mysql_auto.h"
 
 namespace base_logic{
 
 
-void MysqlDataStorage::InitParam(std::list<base::ConnAddr>& addrlist){
+void MysqlController::InitParam(std::list<base::ConnAddr>& addrlist){
 
 }
 
-void MysqlDataStorage::Release(){
+void MysqlController::Release(){
 
 }
 
 
-bool MysqlDataStorage::WriteData(const int32 type,base_logic::Value* value){
+bool MysqlController::WriteData(const int32 type,base_logic::Value* value){
 	return true;
 }
 
 
-bool MysqlDataStorage::ReadData(const int32 type,base_logic::Value* value,
+bool MysqlController::ReadData(const int32 type,base_logic::Value* value,
 		void (*storage_get)(void*,base_logic::Value*)){
 	bool r = false;
 	std::string sql;

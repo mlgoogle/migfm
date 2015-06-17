@@ -258,7 +258,12 @@ bool Userlogic::OnThirdLogin(struct server *srv,const int socket,netcomm_recv::N
 	userinfo.set_plt(login->plat());
 	userinfo.set_channel(login->channel());
 	//存储用户信息
-	usersvc_logic::DBComm::OnThirdLogin(userinfo,lbs_info.get());
+	r = usersvc_logic::DBComm::OnThirdLogin(userinfo,lbs_info.get());
+	if(!r){
+		//发送错误数据
+		send_error(error_code,socket);
+		return false;
+	}
 	//存入缓存
 	data_engine_->SetUserInfo(userinfo.uid(),userinfo);
 	base_logic::LogicUnit::CreateToken(userinfo.uid(),token);

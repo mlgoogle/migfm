@@ -12,6 +12,7 @@
 #include <math.h>
 
 namespace base_logic{
+
 static const Token kInvalidToken(Token::INVALID_TOKEN,0,0);
 static const int kStackLimit = 100;
 
@@ -210,10 +211,44 @@ bool JsonValueSerializer::EatComment() {
   return true;
 }
 
-
+void JsonValueSerializer::FreeValue(base_logic::Value* value){
+	//类别识别
+	if(value->GetType()==base_logic::Value::TYPE_DICTIONARY){
+		base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)(value);
+		if(dict!=NULL){delete value;value=NULL;}
+	}
+	//if(value!=NULL){delete value;value=NULL;}
+}
 
 Value* JsonValueSerializer::Deserialize(int* error_code,std::string* error_str){
-	std::wstring json_wide(base::BasicUtil::StringConversions::UTF8ToWide(*json_string_));
+	base_logic::DictionaryValue* value = new base_logic::DictionaryValue;
+	value->SetBigInteger(L"AGE",1321321);
+	value->SetString(L"name","TTTTRRRR");
+	value->SetBigInteger(L"AGE1",1321321);
+	value->SetString(L"name1","TTTTRRRR");
+
+	value->SetBigInteger(L"AGE2",1321321);
+	value->SetString(L"name2","TTTTRRRR");
+
+	value->SetBigInteger(L"AGE3",1321321);
+	value->SetString(L"name3","TTTTRRRR");
+
+	value->SetBigInteger(L"AGE4",1321321);
+	value->SetString(L"name4","TTTTRRRR");
+
+	value->SetBigInteger(L"AGE5",1321321);
+	value->SetString(L"name5","TTTTRRRR");
+
+	value->SetBigInteger(L"AGE6",1321321);
+	value->SetString(L"name6","TTTTRRRR");
+	for(int i =0;i<10000;i++){
+		value->SetInteger(base::BasicUtil::StringConversions::ASCIIToWide(base::BasicUtil::StringUtil::Int64ToString(i)),i);
+	}
+
+
+	return NULL;
+
+	/*std::wstring json_wide(base::BasicUtil::StringConversions::UTF8ToWide(*json_string_));
 	start_pos_ = json_wide.c_str();
 
 	if(!json_wide.empty() && start_pos_[0] == 0xFEFF)
@@ -237,7 +272,7 @@ Value* JsonValueSerializer::Deserialize(int* error_code,std::string* error_str){
 	if(error_code == 0)
 		SetErrorCode(SYNTAX_ERROR,json_pos_);
 
-	return root.release();
+	return root.release();*/
 }
 
 
@@ -775,10 +810,7 @@ void JsonValueSerializer::BuildJSONString(const Value* const node,int depth,bool
 	}
 }
 
-
-
-
-
-
 }
+
+
 

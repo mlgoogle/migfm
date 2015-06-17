@@ -110,7 +110,7 @@ void BehaviorEngine::RecordBehaviorFile(const std::string& path,const int64 uid,
 	if (!file::DirectoryExists(current_dir_path)){
 		file::CreateDirectory(current_dir_path);
 	}
-	file::FilePath file_path(current_dir+"/"+base::BasicUtil::StringUtil::Int64ToString(uid));
+	file::FilePath file_path(current_dir+"/"+base::BasicUtil::StringUtil::Int64ToString(uid)+".beh");
 	file::WriteFile(file_path,str,length);
 
 }

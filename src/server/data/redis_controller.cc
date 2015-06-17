@@ -1,22 +1,22 @@
 /*
- * redis_crawl_storage.cc
+ * redis_controller.cc
  *
  *  Created on: 2015年5月21日
  *      Author: Administrator
  */
-#include "redis_data_storage.h"
+#include "redis_controller.h"
 #include "dic/base_dic_redis_auto.h"
 
 namespace base_logic{
 
 
 
-void RedisDatalStorage::Release(){
+void RedisController::Release(){
 
 }
 
 
-bool RedisDatalStorage::WriteData(const int32 type,base_logic::Value* value){
+bool RedisController::WriteData(const int32 type,base_logic::Value* value){
 
 	switch(type){
 	default:
@@ -25,7 +25,7 @@ bool RedisDatalStorage::WriteData(const int32 type,base_logic::Value* value){
 	return true;
 }
 
-bool RedisDatalStorage::ReadData(const int32 type,base_logic::Value* value,
+bool RedisController::ReadData(const int32 type,base_logic::Value* value,
 		void (*storage_get)(void*,base_logic::Value*)){
 	switch(type){
 	case HASH_VALUE:
@@ -37,7 +37,22 @@ bool RedisDatalStorage::ReadData(const int32 type,base_logic::Value* value,
 	return true;
 }
 
-bool RedisDatalStorage::ReadHashData(base_logic::Value* value,
+
+bool RedisController::ReadKeyValueData(base_logic::Value* value,
+		void (*storage_get)(void*,base_logic::Value*)){
+	bool r = false;
+	std::string key;
+	base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)(value);
+	r = dict->GetString(L"rediskey",&key);
+	if(!r)
+		return r;
+	base_dic::AutoDicCommEngine auto_engine;
+	base_storage::DictionaryStorageEngine* redis_engine = auto_engine.GetDicEngine();
+	//r = redis_engine->GetAllHash()
+	return true;
+}
+
+bool RedisController::ReadHashData(base_logic::Value* value,
 			void (*storage_get)(void*,base_logic::Value*)){
 	bool r = false;
 	std::list<std::string> list;

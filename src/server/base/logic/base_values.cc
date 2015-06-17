@@ -3,6 +3,8 @@
 #include "logic/json_serializer.h"
 #include "logic/http_serializer.h"
 #include "basic/basic_util.h"
+#include "check/newmacro.h"
+
 namespace base_logic{
 
 Value* CopyWithoutEmptyChildren(Value* node) {

@@ -333,21 +333,6 @@ private:
 
 };
 
-TEST(ValuesDeseralizeTest,NetBase){
-	std::string error_str;
-	int error_code;
-	std::string http_str = "adddress=192.168.1.1&imei=AO44294967295&latitude=120.1614&longitude=30.2936&machine=1";
-	base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(2,&http_str);
-	base_logic::Value*  value = engine->Deserialize(&error_code,&error_str);
-
-	/*NetBase* dict = (NetBase*)  value;
-*/
-	base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)value;
-	QucikLogin* login = new QucikLogin(dict);
-	std::string imei = login->timei();
-	std::string address = login->address();
-	MIG_INFO(USER_LEVEL,"\n\n");
-}
 // This is a Value object that allows us to tell if it's been
 // properly deleted by modifying the value of external flag on destruction.
 /*class DeletionTestValue : public Value {

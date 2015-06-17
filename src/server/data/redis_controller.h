@@ -1,22 +1,22 @@
 /*
- * redis_crawl_storage.h
+ * redis_controller.h
  *
  *  Created on: 2015年5月21日
  *      Author: Administrator
  */
 
-#ifndef PLUGINS_CRAWLERSVC_STORAGE_REDIS_DATA_STORAGE_H_
-#define PLUGINS_CRAWLERSVC_STORAGE_REDIS_DATA_STORAGE_H_
-#include "storage_base_engine.h"
+#ifndef PLUGINS_DATA_REDIS_CONTROLLER_
+#define PLUGINS_DATA_REDIS_CONTROLLER_
+#include "storage_controller_engine.h"
 #include "logic/base_values.h"
 #include <list>
 
 namespace base_logic{
 
-class RedisDatalStorage:public DataStorageBaseEngine{
+class RedisController:public DataControllerEngine{
 public:
-	RedisDatalStorage(){}
-	virtual ~RedisDatalStorage(){}
+	RedisController(){}
+	virtual ~RedisController(){}
 public:
 	void Release();//释放
 	void InitParam(std::list<base::ConnAddr>& addrlist){}
@@ -27,6 +27,9 @@ public:
 				void (*storage_get)(void*,base_logic::Value*));
 private:
 	bool ReadHashData(base_logic::Value* value,
+			void (*storage_get)(void*,base_logic::Value*));
+
+	bool ReadKeyValueData(base_logic::Value* value,
 			void (*storage_get)(void*,base_logic::Value*));
 };
 }

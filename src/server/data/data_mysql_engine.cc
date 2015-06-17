@@ -19,7 +19,7 @@ namespace base_logic{
 
 
 DataMysqlEngne::DataMysqlEngne(){
-	mysql_engine_.reset(base_logic::DataStorageBaseEngine::Create(MYSQL_TYPE));
+	mysql_engine_.reset(base_logic::DataControllerEngine::Create(MYSQL_TYPE));
 }
 
 DataMysqlEngne::~DataMysqlEngne(){

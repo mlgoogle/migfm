@@ -12,7 +12,7 @@
 #ifndef DATA_DB_COMM_H_
 #define DATA_DB_COMM_H_
 
-#include "storage_base_engine.h"
+#include "storage_controller_engine.h"
 #include "logic/base_values.h"
 #include "basic/scoped_ptr.h"
 #include "logic/logic_infos.h"
@@ -43,7 +43,7 @@ public:
 	static void CallBackGetAvailableMusicInfo(void* param,base_logic::Value* value);
 	static void CallBackGetAllDimension(void* param,base_logic::Value* value);
 private:
-	scoped_ptr<base_logic::DataStorageBaseEngine> mysql_engine_;
+	scoped_ptr<base_logic::DataControllerEngine> mysql_engine_;
 };
 /*
 class DataDBComm{

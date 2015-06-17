@@ -1,7 +1,8 @@
 #ifndef SCOPED_PTR_H__
 #define SCOPED_PTR_H__
-#include<assert.h>
+#include <assert.h>
 #include "basictypes.h"
+#include "check/newmacro.h"
 
 template<class C>
 class scoped_ptr{

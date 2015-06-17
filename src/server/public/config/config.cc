@@ -215,7 +215,7 @@ bool FileConfig::LoadConfig(std::string& path){
 					XML_ErrorString(XML_GetErrorCode(parser)),
 					XML_GetCurrentLineNumber(parser));
 		XML_ParserFree(parser);
-    if(xml){delete xml;xml=NULL;}
+		if(xml){delete[] xml;xml=NULL;}
 		return false;
 	}
 	XML_ParserFree(parser);

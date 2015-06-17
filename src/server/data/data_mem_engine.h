@@ -8,7 +8,7 @@
 #ifndef DATA_DICT_COMM_H_
 #define DATA_DICT_COMM_H_
 
-#include "storage_base_engine.h"
+#include "storage_controller_engine.h"
 #include "logic/logic_infos.h"
 #include "storage/storage.h"
 #include "basic/scoped_ptr.h"
@@ -29,7 +29,7 @@ public:
 	void Dest();
 public:
 	//static base_storage::DictionaryStorageEngine* engine_;
-	scoped_ptr<base_logic::DataStorageBaseEngine> mem_engine_;
+	scoped_ptr<base_logic::DataControllerEngine> mem_engine_;
 };
 
 class DataUserMemEngine:public DataBaseMemEngine{

@@ -1,5 +1,5 @@
 /*
- * mem_data_storage.cc
+ * mem_controller.cc
  *
  *  Created on: 2015年5月26日
  *      Author: kerry
@@ -8,27 +8,27 @@
  *  Year: 2015
  *  Instruction：
  */
-#include "mem_data_storage.h"
+#include "mem_controller.h"
 #include "dic/base_dic_redis_auto.h"
 #include <libmemcached/memcached.h>
 #include <libmemcachedutil-1.0/pool.h>
 
 namespace base_logic{
 
-MemDatalStorage::MemDatalStorage(){
+MemController::MemController(){
 	engine_ = base_storage::DictionaryStorageEngine::Create(base_storage::IMPL_MEM);
 
 }
 
-void MemDatalStorage::Release(){
+void MemController::Release(){
 
 }
 
-void MemDatalStorage::InitParam(std::list<base::ConnAddr>& addrlist){
+void MemController::InitParam(std::list<base::ConnAddr>& addrlist){
 	engine_->Connections(addrlist);
 }
 
-bool MemDatalStorage::ReadData(const int32 type,base_logic::Value* value,
+bool MemController::ReadData(const int32 type,base_logic::Value* value,
 			void (*storage_get)(void*,base_logic::Value*)){
 	bool r = false;
 	switch(type){
@@ -44,7 +44,7 @@ bool MemDatalStorage::ReadData(const int32 type,base_logic::Value* value,
 	return r;
 }
 
-bool MemDatalStorage::WriteData(const int32 type,base_logic::Value* value){
+bool MemController::WriteData(const int32 type,base_logic::Value* value){
 	bool r = false;
 	switch(type){
 	case KEY_VALUE:
@@ -56,7 +56,7 @@ bool MemDatalStorage::WriteData(const int32 type,base_logic::Value* value){
 	return r;
 }
 
-bool MemDatalStorage::WriteKeyValueData(base_logic::Value* value){
+bool MemController::WriteKeyValueData(base_logic::Value* value){
 	bool r = false;
 	base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)(value);
 	base_logic::BinaryValue* binary = NULL;
@@ -73,7 +73,7 @@ bool MemDatalStorage::WriteKeyValueData(base_logic::Value* value){
 	return r;
 }
 
-bool MemDatalStorage::ReadKeyValueData(base_logic::Value* value){
+bool MemController::ReadKeyValueData(base_logic::Value* value){
 	base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)(value);
 	base_logic::BinaryValue* binary = NULL;
 	std::string key;
@@ -90,7 +90,7 @@ bool MemDatalStorage::ReadKeyValueData(base_logic::Value* value){
 	return true;
 }
 
-bool MemDatalStorage::ReadBatchKeyValue(base_logic::Value* value){
+bool MemController::ReadBatchKeyValue(base_logic::Value* value){
 	bool r = false;
 	base_logic::DictionaryValue* dict = (base_logic::DictionaryValue*)(value);
 	base_logic::BinaryValue* keys_binary = NULL;

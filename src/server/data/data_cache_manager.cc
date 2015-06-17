@@ -230,6 +230,232 @@ void DataWholeManager::InitDimensionMusic(base_logic::Dimension& dimension){
 		data_cache_->scene_dimension_.dimension_vec_[dimension.id()] = dimension_vec;
 	}
 }
+
+
+void DataWholeManager::GetMusicInfo(MUSICINFO_MAP& list){
+	base_logic::RLockGd lk(lock_);
+	bool r = false;
+	MUSICINFO_MAP::iterator it = list.begin();
+	for(;it!=list.end();it++){
+		base_logic::MusicInfo tmusicinfo = it->second;
+		base_logic::MusicInfo rmusicinfo;
+		//读取信息
+		r = base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,int64,base_logic::MusicInfo>
+		(data_cache_->musicinfo_map_,tmusicinfo.id(),rmusicinfo);
+		if(r)
+			tmusicinfo.BaseCopy(rmusicinfo);
+	}
+}
+
+void DataWholeManager::GetCollectList(const int64 uid,MUSICINFO_MAP& music_list){
+	GetMusicListT(uid,data_cache_->collect_map_,music_list,base_logic::StorageOperation::GetCollectListS);
+	GetMusicInfo(music_list);
+}
+
+void DataWholeManager::SetCollectSong(const int64 uid,base_logic::MusicInfo& music){
+	//SetMusicPreference(uid,music,data_cache_->collect_map_,musicsvc_logic::MusicDicComm::SetCollect);
+}
+
+void DataWholeManager::DelCollectSong(const int64 uid,const int64 songid){
+	//musicsvc_logic::MusicDicComm::DelCollect(uid,songid);
+	bool r = false;
+	MUSICINFO_MAP music_list;
+	//删除缓存
+	{
+		base_logic::WLockGd lk(lock_);
+			//写入个人红心歌单
+		r = base::MapGet<MUSICINFONLIST_MAP,MUSICINFONLIST_MAP::iterator,
+						int64,MUSICINFO_MAP >(data_cache_->collect_map_,uid,music_list);
+		if(!r)
+			return;
+		r = base::MapDel<MUSICINFO_MAP,MUSICINFO_MAP::iterator,int64>(music_list,songid);
+		if(!r)
+			return;
+		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP>
+		(data_cache_->collect_map_,uid,music_list);
+	}
+}
+
+void DataWholeManager::SetHatList(const int64 uid,base_logic::MusicInfo& music){
+	//SetMusicPreference(uid,music,data_cache_->hate_map_,musicsvc_logic::MusicDicComm::SetHate);
+}
+
+void DataWholeManager::CheckIsCollectSong(const int64 uid,std::list<base_logic::UserAndMusic>& infolist){
+	MUSICINFO_MAP music_list;
+	GetCollectList(uid,music_list);
+
+	//遍历
+	for(std::list<base_logic::UserAndMusic>:: iterator it = infolist.begin();
+			it!=infolist.end();++it){
+		base_logic::UserAndMusic info = (*it);
+		base_logic::MusicInfo musicinfo;
+		if(base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,
+				int64,base_logic::MusicInfo >(music_list,info.musicinfo_.id(),musicinfo))
+			info.musicinfo_.set_like(1);
+	}
+}
+
+void DataWholeManager::GetDimensionList(const std::string& name,const int64 id,MUSICINFO_MAP& music_list,const int64 num){
+	//
+	bool r = false;
+
+	MULTI_DIMENSION_VEC  multi_dimension_vec;
+	RADOMIN_MAP   dimension_radomin;
+	std::list<int32>  radom_list;
+	{
+		base_logic::RLockGd lk(lock_);
+		if(name=="chl"){
+			multi_dimension_vec = data_cache_->channel_dimension_.dimension_vec_;
+			dimension_radomin = data_cache_->channel_dimension_.dimension_radomin_;
+		}
+		else if(name=="ms"){
+			multi_dimension_vec = data_cache_->scene_dimension_.dimension_vec_;
+			dimension_radomin = data_cache_->scene_dimension_.dimension_radomin_;
+		}
+		else if(name=="mm"){
+			multi_dimension_vec = data_cache_->mood_dimension_.dimension_vec_;
+			dimension_radomin = data_cache_->mood_dimension_.dimension_radomin_;
+		}
+	}
+	//获取随机数
+	GetRadomin(dimension_radomin,id,num,radom_list);
+
+	{
+
+		base_logic::RLockGd lk(lock_);
+		DIMENSION_VEC dimension_vec;
+		r = base::MapGet<MULTI_DIMENSION_VEC,MULTI_DIMENSION_VEC::iterator,int64,DIMENSION_VEC>
+		(multi_dimension_vec,id,dimension_vec);
+
+		int i = 0;
+		while(radom_list.size()>0){
+			int32 radom = radom_list.front();
+			radom_list.pop_front();
+			base_logic::MusicInfo info;
+			if(radom<=dimension_vec.size()){
+				info = dimension_vec[radom];
+				music_list[info.id()] = info;
+			}
+		}
+
+	}
+	GetMusicInfo(music_list);
+}
+
+void DataWholeManager::GetDimensionInfo(netcomm_send::DimensionInfo* net_dimension){
+	GetDimensionInfos("ms",net_dimension);
+	GetDimensionInfos("mm",net_dimension);
+	GetDimensionInfos("chl",net_dimension);
+}
+
+void DataWholeManager::GetDimensionInfos(const std::string& type,
+		netcomm_send::DimensionInfo* net_dimension){
+	base_logic::Dimensions dimensions = data_cache_->dimensions_[type];
+	std::map<int64,base_logic::Dimension> dimension;
+	dimensions.swap(dimension);
+	GetDimensionInfoUnit(type,dimension,net_dimension);
+}
+
+void DataWholeManager::GetDimensionInfoUnit(const std::string& type,
+		std::map<int64,base_logic::Dimension>& map,
+		netcomm_send::DimensionInfo* net_dimension){
+
+	std::map<int64,base_logic::Dimension>::iterator it =map.begin();
+	for(;it!=map.end();it++){
+		base_logic::Dimension info = it->second;
+		if(type=="chl")
+			net_dimension->set_channel(info.Release());
+		else if(type=="ms")
+			net_dimension->set_scens(info.Release());
+		else if(type=="mm")
+			net_dimension->set_mood(info.Release());
+	}
+}
+
+void DataWholeManager::GetMusicListT(const int64 uid,MUSICINFONLIST_MAP& container,
+		MUSICINFO_MAP& music_list,void (*redis_get)(const int64,std::list<std::string>&)){
+	bool r = false;
+	std::list<std::string> list;
+	{
+		base_logic::RLockGd lk(lock_);
+		//加锁
+		r = base::MapGet<MUSICINFONLIST_MAP,MUSICINFONLIST_MAP::iterator,
+				int64,MUSICINFO_MAP >
+		(container,uid,music_list);
+	}
+
+	if(!r||music_list.size()==0)//读取
+		redis_get(uid,list);
+	if(list.size()<=0)//
+			return ;
+		//写入存储
+	while(list.size()>0){//
+		std::string str = list.front();
+		list.pop_front();
+		base_logic::MusicInfo info;
+		info.JsonSeralize(str);
+		music_list[info.id()] = info;
+	}
+	{
+		base_logic::WLockGd lk(lock_);
+		//加锁
+		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP >
+		(container,uid,music_list);
+	}
+}
+
+void DataWholeManager::GetRadomin(RADOMIN_MAP& dimension_radomin,const int32 id,
+		int32 num,std::list<int32>& list){
+	//
+	base::MigRadomInV2* radomin;
+	int i = 0;
+	int32* rands = new int32[num];
+	bool r = base::MapGet<RADOMIN_MAP,RADOMIN_MAP::iterator,
+				int32,base::MigRadomInV2* >(dimension_radomin,id,radomin);
+	if(!r)
+		return;
+	radomin->GetPrize(rands,num);
+	while(i<=num){
+		list.push_back(rands[i]);
+		i++;
+	}
+
+	if (rands){
+		delete[] rands;
+		rands = NULL;
+	}
+}
+
+void DataWholeManager::SetMusicPreference(const int64 uid,base_logic::MusicInfo& music,MUSICINFONLIST_MAP& map,
+		void (*redis_set)(const int64,const int64, const std::string&)){
+	bool r = false;
+	std::string str_json;
+	MUSICINFO_MAP music_list;
+	//写入redis
+	music.JsonDeserialize(str_json,1);
+	redis_set(uid,music.id(),str_json);
+	{
+		base_logic::WLockGd lk(lock_);
+		//读取完整信息存入缓存
+		r = base::MapGet<MUSICINFO_MAP,MUSICINFO_MAP::iterator,
+				int64,base_logic::MusicInfo >(data_cache_->musicinfo_map_,music.id(),music);
+
+		//写入个人红心歌单
+		r = base::MapGet<MUSICINFONLIST_MAP,MUSICINFONLIST_MAP::iterator,
+					int64,MUSICINFO_MAP >(map,uid,music_list);
+		if(!r)
+			return;
+		r =base::MapAdd<MUSICINFO_MAP,int64,base_logic::MusicInfo>
+		(music_list,music.id(),music);
+		if(!r)
+			return;
+		r = base::MapAdd<MUSICINFONLIST_MAP,int64,MUSICINFO_MAP>
+		(map,uid,music_list);
+	}
+}
+
+
+
 }
 
 

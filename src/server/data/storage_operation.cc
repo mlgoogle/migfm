@@ -9,7 +9,7 @@
  *  Instruction：从存储介质中获取用户信息
  */
 #include "storage_operation.h"
-#include "storage_base_engine.h"
+#include "storage_controller_engine.h"
 #include "data_mem_engine.h"
 #include "data_mysql_engine.h"
 #include "logic/logic_unit.h"
@@ -40,7 +40,7 @@ StorageOperation* StorageOperation::Instance(){
 }
 
 void StorageOperation::Init(config::FileConfig* config){
-	base_logic::DataStorageBaseEngine::Init(config);
+	base_logic::DataControllerEngine::Init(config);
 	mem_engine_->Init(config->mem_list_);
 
 	//base_logic::UserMemComm::Init(config->mem_list_);
@@ -112,6 +112,17 @@ bool StorageOperation::GetDimensionMusic(const std::string& class_name,const int
 	return redis_engine_->GetDimensionMusic(class_name,id,map,vec);
 }
 
+bool StorageOperation::GetCollectList(const int64 uid,std::list<std::string>& list){
+	return redis_engine_->GetCollectList(uid,list);
+}
+
+
+
+
+///static////
+void StorageOperation::GetCollectListS(const int64 uid,std::list<std::string>& list){
+	StorageOperation::Instance()->GetCollectList(uid,list);
+}
 }
 
 

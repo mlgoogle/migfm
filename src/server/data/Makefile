@@ -84,17 +84,17 @@ data_cache_manager.o : ./data_cache_manager.cc ./data_cache_manager.h
 storage_operation.o : ./storage_operation.cc ./storage_operation.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./storage_operation.cc $(INCLUDE_PATHS)
 	
-mysql_data_storage.o : ./mysql_data_storage.cc ./mysql_data_storage.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./mysql_data_storage.cc $(INCLUDE_PATHS)
+mysql_controller.o : ./mysql_controller.cc ./mysql_controller.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./mysql_controller.cc $(INCLUDE_PATHS)
 	
-mem_data_storage.o : ./mem_data_storage.cc ./mem_data_storage.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./mem_data_storage.cc $(INCLUDE_PATHS)
+mem_controller.o : ./mem_controller.cc ./mem_controller.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./mem_controller.cc $(INCLUDE_PATHS)
 	
-redis_data_storage.o : ./redis_data_storage.cc ./redis_data_storage.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./redis_data_storage.cc $(INCLUDE_PATHS)
+redis_controller.o : ./redis_controller.cc ./redis_controller.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./redis_controller.cc $(INCLUDE_PATHS)
 	
-storage_base_engine.o : ./storage_base_engine.cc ./storage_base_engine.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./storage_base_engine.cc $(INCLUDE_PATHS)
+storage_controller_engine.o : ./storage_controller_engine.cc ./storage_controller_engine.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./storage_controller_engine.cc $(INCLUDE_PATHS)
 	
 data_mem_engine.o : ./data_mem_engine.cc ./data_mem_engine.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./data_mem_engine.cc $(INCLUDE_PATHS)
@@ -139,7 +139,7 @@ radom_in.o:$(THIRD_PATH)/basic/radom_in.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/radom_in.cc $(INCLUDE_PATHS)
 
 $(PLUGIN) : data_cache_manager.o storage_operation.o data_mem_engine.o data_mysql_engine.o data_redis_engine.o\
-	mysql_data_storage.o redis_data_storage.o mem_data_storage.o storage_base_engine.o basictypes.o comm_impl.o error_comm.o logic_infos.o logic_unit.o basic_util.o config.o \
+	mysql_controller.o redis_controller.o mem_controller.o storage_controller_engine.o basictypes.o comm_impl.o error_comm.o logic_infos.o logic_unit.o basic_util.o config.o \
 	md5sum.o radom_in.o \
 	$(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a $(LIB_DIR)/base/lib/mybase.a $(LIB_DIR)/lib/libhiredis.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lexpat -lrt -lpthread -ldl -liconv -lmysqlclient -lcurl -lmemcached -lmemcachedutil \
