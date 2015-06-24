@@ -14,14 +14,14 @@
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = ../../../third_party/gtest
+GTEST_DIR = ../../../library/third_party/gtest
 
 # Where to find user code.
-USER_DIR = ../../base
+USER_DIR = ../../../library/base
 
-THIRD_PATH = ../../public
+THIRD_PATH = ../../../library/public
 
-CUSTOM_THIRD_PATH = ./../../../third_party
+CUSTOM_THIRD_PATH = ./../../../library/third_party
 
 LINK_PATHS = -L./ -L/usr/local/libmemcached-1.0.7/lib/  -L/usr/lib64/mysql
 
@@ -35,7 +35,7 @@ CXXFLAGS += -g  -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = serializer_unittest
+TESTS = xmlserializer_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -55,6 +55,7 @@ INCLUDE_PATHS = -I/usr/local/libmemcached-1.0.7/include \
 				-I$(USER_DIR)\
 				-I$(CUSTOM_THIRD_PATH)/hiredis\
 				-I$(CUSTOM_THIRD_PATH)\
+				-I/usr/local/freetds/include/\
 
 
 # House-keeping build targets.
@@ -99,6 +100,18 @@ base_values.o : $(USER_DIR)/logic/base_values.cc $(USER_DIR)/logic/base_values.h
 value_serializer.o : $(USER_DIR)/logic/value_serializer.cc $(USER_DIR)/logic/value_serializer.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/value_serializer.cc $(INCLUDE_PATHS) 
 
+json_serializer.o : $(USER_DIR)/logic/json_serializer.cc $(USER_DIR)/logic/json_serializer.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/json_serializer.cc $(INCLUDE_PATHS) 
+	
+xml_serializer.o : $(USER_DIR)/logic/xml_serializer.cc $(USER_DIR)/logic/xml_serializer.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/xml_serializer.cc $(INCLUDE_PATHS) 
+	
+string_escape.o : $(USER_DIR)/logic/string_escape.cc $(USER_DIR)/logic/string_escape.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/string_escape.cc $(INCLUDE_PATHS) 
+	
+http_serializer.o : $(USER_DIR)/logic/http_serializer.cc $(USER_DIR)/logic/http_serializer.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/logic/http_serializer.cc $(INCLUDE_PATHS) 
+	
 basic_util.o : $(THIRD_PATH)/basic/basic_util.cc $(THIRD_PATH)/basic/basic_util.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(THIRD_PATH)/basic/basic_util.cc $(INCLUDE_PATHS)
 	
@@ -173,13 +186,14 @@ mig_log.o:$(THIRD_PATH)/log/mig_log.cc $(THIRD_PATH)/log/mig_log.h $(GTEST_HEADE
 	
 
 
-serializer_unittest.o : ./serializer_unittest.cc $(USER_DIR)/logic/value_serializer.h  $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./serializer_unittest.cc $(INCLUDE_PATHS)
+xmlserializer_unittest.o : ./xmlserializer_unittest.cc $(USER_DIR)/logic/value_serializer.h  $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ./xmlserializer_unittest.cc $(INCLUDE_PATHS)
 
-serializer_unittest : base_values.o value_serializer.o mig_log.o http_method.o basic_util.o\
-	 http_method.o http_packet.o mem_storage_impl.o dic_storage.o db_storage.o\
-	mysql_storage_impl.o redis_storage_impl.o redis_warrper.o basic_info.o\
-	 json_writer.o md5sum.o radom_in.o constants.o base64.o dic_serialization.o icu_utf.o\
-	json_value.o json_reader.o storage.o serializer_unittest.o gtest_main.a ../../lib/libhiredis.a $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a
+xmlserializer_unittest : base_values.o value_serializer.o mig_log.o http_method.o basic_util.o\
+	http_serializer.o xml_serializer.o json_serializer.o string_escape.o\
+	http_method.o http_packet.o mem_storage_impl.o mssql_storage_impl.o dic_storage.o db_storage.o\
+	mysql_storage_impl.o redis_storage_impl.o  redis_warrper.o basic_info.o\
+	json_writer.o md5sum.o radom_in.o constants.o base64.o dic_serialization.o icu_utf.o\
+	json_value.o json_reader.o storage.o xmlserializer_unittest.o gtest_main.a ../../lib/libhiredis.a $(CUSTOM_THIRD_PATH)/dmg_fp/lib/dmg_fp.a /usr/local/freetds/lib/libsybdb.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LINK_PATHS) -lpthread -lcurl -liconv -lmemcached -lmemcachedutil\
 	 -lmysqlclient $^ -o $@

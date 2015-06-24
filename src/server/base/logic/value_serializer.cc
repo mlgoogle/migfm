@@ -10,6 +10,7 @@ namespace base_logic{
 
 
 //xml
+/*
 XmlValueSerializer::XmlValueSerializer()
 :pretty_print_(false)
 ,xml_string_(NULL){
@@ -34,7 +35,7 @@ Value* XmlValueSerializer::Deserialize(int* error_code, std::string* error_str){
 	Value*  value = NULL;
 
 	return value;
-}
+}*/
 
 
 

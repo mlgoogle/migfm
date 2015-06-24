@@ -50,7 +50,7 @@ public:
 	}
 };
 
-
+/*
 //xml
 class XmlValueSerializer:public ValueSerializer{
 public:
@@ -67,7 +67,7 @@ private:
 	std::string*     xml_string_;
 
 	bool             pretty_print_;
-};
+};*/
 
 
 }

@@ -105,6 +105,29 @@ void JsonDoubleQuoteT(const STR& str,
     dst->push_back('"');
 }
 
+template <class STR>
+void XMLDoubleQuoteT(const STR& str,
+					bool put_in_quotes,
+					std::string* dst){
+	//if(put_in_quotes)
+		//dst->push_back('"');
+	for(typename STR::const_iterator it = str.begin(); it!= str.end();++it){
+		typename base::BasicUtil::ToUnsigned<typename STR::value_type>::Unsigned c = *it;
+		if(!SingleEscapeChar(c,dst)){
+			if(c < 32 || c > 126 || c=='<' || c == '>'){
+				unsigned char as_uint = static_cast<unsigned char>(c);
+				//base::BasicUtil::StringUtil::StringAppendF(dst, "\\u%04X", as_uint);
+				dst->push_back(as_uint);
+			}else{
+				unsigned char ascii = static_cast<unsigned char>(*it);
+				dst->push_back(ascii);
+			}
+		}
+	}
+	//if (put_in_quotes)
+	  //  dst->push_back('"');
+}
+
 void StringEscape::JsonDoubleQuote(const std::string& str,bool put_in_quotes,
 			std::string* dst){
 	JsonDoubleQuoteT(str,put_in_quotes,dst);
@@ -124,6 +147,16 @@ void StringEscape::HttpDoubleQuote(const std::string& str,bool put_in_quotes,
 std::string StringEscape::GetDoubleQuoteHttp(const std::string& str){
 	std::string dst;
 	HttpDoubleQuote(str,true,&dst);
+	return dst;
+}
+
+void StringEscape::XMLDoubleQuote(const std::string& str,bool put_in_quotes,
+			std::string* dst){
+	XMLDoubleQuoteT(str,put_in_quotes,dst);
+}
+
+std::string StringEscape::GetDoubleQuoteXML(const std::string& str){
+	std::string dst;
 	return dst;
 }
 

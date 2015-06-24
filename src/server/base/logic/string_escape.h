@@ -21,6 +21,11 @@ public:
 			std::string* dst);
 
 	static std::string GetDoubleQuoteHttp(const std::string& str);
+
+	static void XMLDoubleQuote(const std::string& str,bool put_in_quotes,
+			std::string* dst);
+
+	static std::string GetDoubleQuoteXML(const std::string& str);
 };
 
 

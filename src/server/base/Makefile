@@ -109,6 +109,9 @@ json_serializer.o:
 http_serializer.o:
 	$(COMPILE) ./logic/http_serializer.cc
 	
+xml_serializer.o:
+	$(COMPILE) ./logic/xml_serializer.cc
+	
 base_thread_handler.o:
 	$(COMPILE) ./thread/base_thread_handler.cc
 

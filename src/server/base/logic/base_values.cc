@@ -1,5 +1,6 @@
 #include "base_values.h"
 #include "logic/value_serializer.h"
+#include "logic/xml_serializer.h"
 #include "logic/json_serializer.h"
 #include "logic/http_serializer.h"
 #include "basic/basic_util.h"
@@ -876,7 +877,7 @@ ValueSerializer* ValueSerializer::Create(int32 type,std::string* str){
 		engine = new base_logic::JsonValueSerializer(str);
 		break;
 	case IMPL_XML:
-		engine = new base_logic::XmlValueSerializer(str);
+		engine = new base_logic::XMLValueSerializer(str);
 		break;
 	case IMPL_HTTP:
 		engine = new base_logic::HttpValueSerializer(str);
