@@ -251,6 +251,7 @@ XMLValueSerializer::~XMLValueSerializer(){
 }
 
 bool XMLValueSerializer::Serialize(const Value& root){
+	key_map_.clear();
 	BuildXMLString(&root,0,false);
 	return true;
 }
@@ -319,6 +320,21 @@ void XMLValueSerializer::BuildXMLString(const Value* const node,int depth,bool e
 		break;
 	}
 
+	case Value::TYPE_LIST:
+	{
+		const ListValue* list = static_cast<const ListValue*>(node);
+		for(size_t i = 0; i< list->GetSize(); ++i){
+			if(i != 0){
+				if (pretty_print_)
+					xml_string_->append("\n");
+			}
+			Value* value = NULL;
+			bool result = list->Get(i, &value);
+			BuildXMLString(value,depth,escape);
+		}
+		break;
+	}
+
 	case Value::TYPE_DICTIONARY:
 	{
 		const DictionaryValue* dict =
@@ -332,7 +348,6 @@ void XMLValueSerializer::BuildXMLString(const Value* const node,int depth,bool e
 				key_itr!=dict->end_keys();++key_itr){//操作属性值
 				Value* value = NULL;
 				bool result = dict->GetWithoutPathExpansion(*key_itr,&value);
-				MIG_INFO(USER_LEVEL,"key %s  depth %d",base::BasicUtil::StringConversions::WideToASCII((*key_itr)).c_str(),depth);
 				if((*key_itr)[0]==L'-'){
 					std::wstring key = (*key_itr).substr(1,(*key_itr).length());
 					xml_string_->append(" ");
@@ -346,39 +361,35 @@ void XMLValueSerializer::BuildXMLString(const Value* const node,int depth,bool e
 							key_itr!=dict->end_keys();++key_itr){
 				Value* value = NULL;
 				bool result = dict->GetWithoutPathExpansion(*key_itr,&value);
-				MIG_INFO(USER_LEVEL,"key %s  depth %d",base::BasicUtil::StringConversions::WideToASCII((*key_itr)).c_str(),depth);
+				key_map_[depth] = (*key_itr);
 				if((*key_itr)==L"#xmltype"||(*key_itr)[0]==L'-')
 					continue;
 				if((*key_itr)!=L"#text"){
 					xml_string_->append("<");
 					AppendQuoteString(base::BasicUtil::StringConversions::WideToASCII(*key_itr));
+					xml_string_->append(">");
 				}
 				BuildXMLString(value,depth+1,escape);
 			}
 			xml_string_->append("</");
-			AppendQuoteString(base::BasicUtil::StringConversions::WideToASCII(pair_key_));
+			std::wstring pair_key = key_map_[depth-1];
+			AppendQuoteString(base::BasicUtil::StringConversions::WideToASCII(pair_key));
 			xml_string_->append(">");
+			key_map_.erase(key_map_.find(depth));
 		}else{
 			for(DictionaryValue::key_iterator key_itr = dict->begin_keys();
 							key_itr!=dict->end_keys();++key_itr){
 				Value* value = NULL;
 				bool result = dict->GetWithoutPathExpansion(*key_itr,&value);
-				MIG_INFO(USER_LEVEL,"key %s  depth %d",base::BasicUtil::StringConversions::WideToASCII((*key_itr)).c_str(),depth);
 				if((*key_itr)==L"#xmltype")
 					continue;
 				if((*key_itr)!=L"#text"){
 					xml_string_->append("<");
 					AppendQuoteString(base::BasicUtil::StringConversions::WideToASCII(*key_itr));
-					pair_key_ = *key_itr;
+					key_map_[depth] = *key_itr;
 					xml_string_->append(">");
 				}
-				parent_key_ = (*key_itr);
 				BuildXMLString(value,depth+1,escape);
-			}
-			if(depth!=0){
-				xml_string_->append("</");
-				AppendQuoteString(base::BasicUtil::StringConversions::WideToASCII(pair_key_));
-				xml_string_->append(">");
 			}
 		}
 		break;

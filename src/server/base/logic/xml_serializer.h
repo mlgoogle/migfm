@@ -82,9 +82,10 @@ private:
 	int error_line_;
 	int error_col_;
 
+	std::map<int,std::wstring>  key_map_;
 
-	std::wstring 	pair_key_;
-	std::wstring    parent_key_;
+	//std::wstring 	pair_key_;
+	//std::wstring    parent_key_;
 
 };
 }
